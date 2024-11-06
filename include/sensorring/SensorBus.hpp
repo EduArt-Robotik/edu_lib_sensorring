@@ -1,0 +1,75 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <memory>
+
+#include "SensorBoard.hpp"
+#include "can/SocketCANFD.hpp"
+
+namespace SensorBus{
+
+struct SensorBusParams{
+    std::string interface_name;
+    std::shared_ptr<edu::SocketCANFD> can_interface;
+    canid_t canid_tof_status;
+    canid_t canid_tof_request;
+    canid_t canid_thermal_status;
+    canid_t canid_thermal_request;
+    canid_t canid_light;
+    canid_t canid_broadcast;
+
+    std::vector<Sensor::SensorBoardParams> board_param_vec;
+};
+
+class SensorBus : public edu::SocketCANFDObserver{
+    public:
+        SensorBus(SensorBusParams params);
+        ~SensorBus();
+
+        const std::string getInterfaceName() const;
+        std::vector<const Sensor::SensorBoard*> getSensorBoards() const;
+        bool isTofEnabled(int idx) const;
+        bool isThermalEnabled(int idx) const;
+        size_t getSensorCount() const;
+        size_t getEnumerationCount() const;
+
+        bool allTofMeasurementsReady() const;
+        bool allTofMeasurementsReady(int &ready_sensors_count) const;
+        bool allThermalMeasurementsReady() const;
+        bool allThermalMeasurementsReady(int &ready_sensors_count) const;
+        bool allTofDataTransmissionsComplete() const;
+        bool allTofDataTransmissionsComplete(int &ready_sensors_count) const;
+        bool allThermalDataTransmissionsComplete() const;
+        bool allThermalDataTransmissionsComplete(int &ready_sensors_count) const;
+        bool allEEPROMTransmissionsComplete() const;
+
+        void resetDevices();
+        int enumerateDevices();
+        void syncLights();
+        void setLights(int mode, unsigned char red, unsigned char green, unsigned char blue);
+        void requestEEPROM();
+        void requestTofMeasurement();
+        void fetchTofData();
+        void requestThermalMeasurement();
+        void fetchThermalData();
+
+        bool stopThermalCalibration();
+		bool startThermaltCalibration(size_t window);
+        
+        void notify(const canfd_frame& frame);
+
+    private:
+        SensorBusParams _params;
+        std::vector<std::unique_ptr<Sensor::SensorBoard>> _sensor_board_vec;
+        
+        volatile bool _enumerate_flag;
+        volatile size_t _enumerate_count;
+
+        size_t _active_tof_sensors;
+        size_t _active_thermal_sensors;
+        size_t _tof_measurement_count;
+        size_t _thermal_measurement_count;
+};
+
+};
