@@ -1,43 +1,42 @@
-#ifndef _SOCKETCANFDOBSERVER_H_
-#define _SOCKETCANFDOBSERVER_H_
+#pragma once
 
-#include <linux/can.h>
 #include <vector>
 #include <memory>
+#include "Endpoints.hpp"
 
-namespace edu
+namespace com
 {
 
 /**
- * @class SocketCANFDObserver
- * @brief Abstract observer class. Derived classes get notified according their CAN bus identifiers.
- * @author Stefan May, Hannes Duske
- * @date 13.05.2018 (modified 09.08.2024)
+ * @class ComObserver
+ * @brief Abstract communication observer class. Derived classes get notified when new messages arrive.
+ * @author Hannes Duske
+ * @date 11.11.2024
  */
-class SocketCANFDObserver
+class ComObserver
 {
 public:
   /**
    * Constructor
    */
-  SocketCANFDObserver();
+  ComObserver();
 
   /**
    * Destructor
    */
-  virtual ~SocketCANFDObserver();
+  virtual ~ComObserver();
 
   /**
    * Set CAN bus identifier
    * @param[in] id CAN ID
    */
-  void addCANId(const canid_t id);
+  void addEndpoint(const Endpoint target);
 
   /**
    * Get CAN bus identifier
    * @return CAN ID
    */
-  const std::vector<canid_t>& getCANIds() const;
+  const std::vector<Endpoint>& getEndpoints() const;
 
   /**
    * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific timeout.
@@ -50,17 +49,17 @@ public:
    * Distribute new can frame to all registered observers
    * @param[in] frame CANFD Frame that will be distributed
    */
-  void forwardNotification(const canfd_frame& frame);
+  void forwardNotification(const Endpoint source, const std::vector<uint8_t>& data);
   
   /**
    * Interface declaration for implementation through inherited classes.
    * @params[in] frame CAN frame
    */
-  virtual void notify(const canfd_frame& frame) = 0;
+  virtual void notify(const Endpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
 
-  std::vector<canid_t> _canids;
+  std::vector<Endpoint> _canids;
 
   long _seconds;
   
@@ -68,5 +67,3 @@ private:
 };
 
 } // namespace
-
-#endif // _SocketCANFDOBSERVER_H_

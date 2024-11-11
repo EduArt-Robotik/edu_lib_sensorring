@@ -5,12 +5,12 @@
 #include "can/canprotocol.hpp"
 
 
-namespace SensorRing{
+namespace sensorring{
 
 SensorRing::SensorRing(SensorRingParams params){
 	
 	for(auto bus_params : params.bus_param_vec){
-		_sensor_bus_vec.push_back(std::make_unique<SensorBus::SensorBus>(bus_params));
+		_sensor_bus_vec.push_back(std::make_unique<sensorbus::SensorBus>(bus_params));
 	}
 };
 
@@ -18,9 +18,9 @@ SensorRing::~SensorRing(){
 
 };
 
-std::vector<const SensorBus::SensorBus*> SensorRing::getInterfaces() const{
+std::vector<const sensorbus::SensorBus*> SensorRing::getInterfaces() const{
 	
-	std::vector<const SensorBus::SensorBus*> ref_vec;
+	std::vector<const sensorbus::SensorBus*> ref_vec;
     for(const auto& sensor_bus : _sensor_bus_vec){
         ref_vec.push_back(sensor_bus.get());
     }

@@ -5,12 +5,9 @@
 #include <memory>
 
 #include "SensorBus.hpp"
+#include "Parameters.hpp"
 
-namespace SensorRing{
-
-struct SensorRingParams{
-    std::vector<SensorBus::SensorBusParams> bus_param_vec;
-};
+namespace sensorring{
 
 class SensorRing{
 
@@ -18,7 +15,7 @@ public:
     SensorRing(SensorRingParams params);
     ~SensorRing();
     
-    std::vector<const SensorBus::SensorBus*> getInterfaces() const;
+    std::vector<const sensorbus::SensorBus*> getInterfaces() const;
 
     void syncLight();
     void resetDevices();
@@ -38,7 +35,7 @@ public:
 
 private:
 
-    std::vector<std::unique_ptr<SensorBus::SensorBus>> _sensor_bus_vec;
+    std::vector<std::unique_ptr<sensorbus::SensorBus>> _sensor_bus_vec;
     //SensorBus::SensorBus _testbus;
 };
 

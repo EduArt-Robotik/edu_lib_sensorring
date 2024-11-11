@@ -4,10 +4,29 @@
 #include <algorithm>
 #include <sstream>
 
-namespace MeasurementManager{
+namespace measurementmanager{
 
-MeasurementManager::MeasurementManager(MeasurementManagerParams params, std::unique_ptr<SensorRing::SensorRing> sensor_ring) :
-_params(params), _sensor_ring(std::move(sensor_ring)){
+enum class MeasurementState{
+    init,
+    reset_sensors,
+    enumerate_sensors,
+    sync_lights,
+    get_eeprom,
+    pre_loop_init,
+    request_tof_measurement,
+    fetch_tof_data,
+    request_thermal_measurement,
+    fetch_thermal_data,
+    wait_for_data,
+    throttle_measurement,
+    error_handler,
+    shutdown
+};
+
+MeasurementManager::MeasurementManager(MeasurementManagerParams params) :
+_params(params){
+
+	_sensor_ring = std::make_unique<sensorring::SensorRing>(params.ring_params);
 
 	_is_tof_throttled = _params.frequency_tof_hz > 0.0;
     _is_thermal_throttled = _params.frequency_thermal_hz > 0.0;
@@ -65,31 +84,31 @@ std::string MeasurementManager::printTopology(){
 			std::string thermal_sensor	= "";
 			std::string led_count		= "";
 			switch (sensor_board->getType()){
-				case Sensor::SensorBoardType::headlight:
+				case sensor::SensorBoardType::headlight:
 					board_type		= "Headlight";
 					tof_sensor		= "VL53L8CX";
 					thermal_sensor	= "HTPA32";
 					led_count		= "11";
 					break;
-				case Sensor::SensorBoardType::taillight:
+				case sensor::SensorBoardType::taillight:
 					board_type		= "Taillight";
 					tof_sensor		= "VL53L8CX";
 					thermal_sensor	= "none";
 					led_count		= "8";
 					break;
-				case Sensor::SensorBoardType::sidepanel:
+				case sensor::SensorBoardType::sidepanel:
 					board_type		= "Sidepanel";
 					tof_sensor		= "VL53L8CX";
 					thermal_sensor	= "none";
 					led_count		= "2";
 					break;
-				case Sensor::SensorBoardType::minipanel:
+				case sensor::SensorBoardType::minipanel:
 					board_type		= "Minipanel";
 					tof_sensor		= "VL53L8CX";
 					thermal_sensor	= "none";
 					led_count		= "none";
 					break;
-				case Sensor::SensorBoardType::unknown:
+				case sensor::SensorBoardType::unknown:
 				default:
 					board_type		= "unknown";
 					tof_sensor		= "n.a.";
@@ -98,7 +117,7 @@ std::string MeasurementManager::printTopology(){
 					break;
 			}
 
-			ss << "Sensor " << sensor_board->getTof()->getParams().idx << " is a " << board_type;
+			ss << "sensor " << sensor_board->getTof()->getParams().idx << " is a " << board_type;
 			ss << "		ToF sensor: "		<< tof_sensor;
 			ss << "		Thermal sensor: "	<< thermal_sensor;
 			ss << "		Nr of LEDs: "		<< led_count;
@@ -111,15 +130,15 @@ std::string MeasurementManager::printTopology(){
 
 int MeasurementManager::publishToFData(){
 	int error_frames = 0;
-	Sensor::SensorState error = Sensor::SensorState::SensorOK;
-	std::vector<const Measurement::TofSensorMeasurement*> measurement_vec;
+	sensor::SensorState error = sensor::SensorState::SensorOK;
+	std::vector<const measurement::TofSensorMeasurement*> measurement_vec;
 
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
 		for(auto sensor_board : sensor_bus->getSensorBoards()){
 			if(sensor_board->getTof()->isEnabled()){
 
 				auto tof_measurement = sensor_board->getTof()->getLatestMeasurement(error);
-				if(error == Sensor::SensorState::SensorOK){
+				if(error == sensor::SensorState::SensorOK){
 					measurement_vec.push_back(tof_measurement);
 				}else{
 					error_frames++;
@@ -128,12 +147,12 @@ int MeasurementManager::publishToFData(){
 		}
 	}
 
-	auto combined_measurement = Sensor::TofSensor::combineTofMeasurements(measurement_vec);
+	auto combined_measurement = sensor::TofSensor::combineTofMeasurements(measurement_vec);
 	
 	if(combined_measurement.length > 0){
 
 		for(auto observer : _tof_observer_vec){
-			if(observer) observer->onTofMeasurement(&combined_measurement);
+			if(observer) observer->onTofMeasurement(combined_measurement);
 		}
 		
 		return error_frames;
@@ -144,7 +163,7 @@ int MeasurementManager::publishToFData(){
 
 int MeasurementManager::publishThermalData(){
 	int error_frames = 0;
-	Sensor::SensorState error = Sensor::SensorState::SensorOK;
+	sensor::SensorState error = sensor::SensorState::SensorOK;
 
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
 		for(auto sensor_board : sensor_bus->getSensorBoards()){
@@ -152,10 +171,10 @@ int MeasurementManager::publishThermalData(){
 
 				auto measurement  = sensor_board->getThermal()->getLatestMeasurement(error);
 
-				if(error == Sensor::SensorState::SensorOK){
+				if(error == sensor::SensorState::SensorOK){
 
 					for(auto observer : _thermal_observer_vec){
-						if(observer) observer->onThermalMeasurement(measurement);
+						if(observer) observer->onThermalMeasurement(*measurement);
 					}
 				}
 

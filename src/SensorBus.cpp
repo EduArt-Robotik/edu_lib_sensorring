@@ -3,14 +3,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "can/canprotocol.hpp"
+#include "canprotocol.hpp"
+#include "SocketCANFDManager.hpp"
 
-namespace SensorBus{
+namespace sensorbus{
 
 SensorBus::SensorBus(SensorBusParams params) : _params(params){
 
     for(auto board_params : params.board_param_vec){
-        _sensor_board_vec.push_back(std::make_unique<Sensor::SensorBoard>(board_params));
+        _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params));
     }
 
     _enumerate_flag = false;
@@ -25,7 +26,7 @@ SensorBus::SensorBus(SensorBusParams params) : _params(params){
     addCANId(_params.canid_broadcast);
     addCANId(_params.canid_tof_status);
     addCANId(_params.canid_thermal_status);
-    _params.can_interface->registerObserver(this);
+    _can_interface = com::SocketCANFDManager::getInstance()->getInterface(_params.interface_name);
 };
 
 SensorBus::~SensorBus(){
@@ -36,9 +37,9 @@ const std::string SensorBus::getInterfaceName() const{
     return _params.interface_name;
 };
 
-std::vector<const Sensor::SensorBoard*> SensorBus::getSensorBoards() const{
+std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const{
 
-    std::vector<const Sensor::SensorBoard*> ref_vec;
+    std::vector<const sensor::SensorBoard*> ref_vec;
     for(const auto& sensor : _sensor_board_vec){
         ref_vec.push_back(sensor.get());
     }
@@ -71,18 +72,18 @@ size_t SensorBus::getEnumerationCount() const{
 void SensorBus::syncLights(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};
-    _params.can_interface->send(_params.canid_light, tx_buf);
+    _can_interface->send(_params.canid_light, tx_buf);
 };
 
 void SensorBus::setLights(int mode, unsigned char red, unsigned char green, unsigned char blue){
 
     std::vector<uint8_t> tx_buf = {(uint8_t )mode, red, green, blue};
-    _params.can_interface->send(_params.canid_light, tx_buf);
+    _can_interface->send(_params.canid_light, tx_buf);
 };
 
 void SensorBus::resetDevices(){
     std::vector<uint8_t> tx_buf = {CMD_HARD_RESET};
-    _params.can_interface->send(_params.canid_broadcast, tx_buf);
+    _can_interface->send(_params.canid_broadcast, tx_buf);
 };
 
 int SensorBus::enumerateDevices(){
@@ -90,7 +91,7 @@ int SensorBus::enumerateDevices(){
     _enumerate_count = 0;
 
     std::vector<uint8_t> tx_buf = {CMD_ACTIVE_DEVICE_QUERY};
-    _params.can_interface->send(_params.canid_broadcast, tx_buf);
+    _can_interface->send(_params.canid_broadcast, tx_buf);
 
     // wait until all sensors sent their response. 100 ms timeout
     unsigned int watchdog = 0;
@@ -118,7 +119,7 @@ void SensorBus::requestEEPROM(){
         uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
         uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
         std::vector<uint8_t> tx_buf = {CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low};
-        _params.can_interface->send(_params.canid_thermal_request, tx_buf);
+        _can_interface->send(_params.canid_thermal_request, tx_buf);
     }
 };
 
@@ -150,7 +151,7 @@ void SensorBus::requestTofMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _params.can_interface->send(_params.canid_tof_request, tx_buf);
+    _can_interface->send(_params.canid_tof_request, tx_buf);
 };
 
 void SensorBus::fetchTofData(){
@@ -164,7 +165,7 @@ void SensorBus::fetchTofData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {sensor_select_high, sensor_select_low};
-    _params.can_interface->send(_params.canid_tof_request, tx_buf);
+    _can_interface->send(_params.canid_tof_request, tx_buf);
 };
 
 void SensorBus::requestThermalMeasurement(){
@@ -183,7 +184,7 @@ void SensorBus::requestThermalMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _params.can_interface->send(_params.canid_thermal_request, tx_buf);
+    _can_interface->send(_params.canid_thermal_request, tx_buf);
 };
 
 void SensorBus::fetchThermalData(){
@@ -197,7 +198,7 @@ void SensorBus::fetchThermalData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low};
-    _params.can_interface->send(_params.canid_thermal_request, tx_buf);
+    _can_interface->send(_params.canid_thermal_request, tx_buf);
 };
 
 bool SensorBus::allTofMeasurementsReady() const{
@@ -294,10 +295,10 @@ void SensorBus::notify(const canfd_frame& frame){
 
             size_t idx = frame.data[1] - 1;
             if(idx < getSensorCount()){
-                if(frame.data[2] == 0) _sensor_board_vec[idx]->setType(Sensor::SensorBoardType::sidepanel);
-                if(frame.data[2] == 1) _sensor_board_vec[idx]->setType(Sensor::SensorBoardType::headlight);
-                if(frame.data[2] == 2) _sensor_board_vec[idx]->setType(Sensor::SensorBoardType::taillight);
-                if(frame.data[2] == 3) _sensor_board_vec[idx]->setType(Sensor::SensorBoardType::minipanel);
+                if(frame.data[2] == 0) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::sidepanel);
+                if(frame.data[2] == 1) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::headlight);
+                if(frame.data[2] == 2) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::taillight);
+                if(frame.data[2] == 3) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::minipanel);
             }
         }
         
@@ -315,4 +316,4 @@ void SensorBus::notify(const canfd_frame& frame){
     }
 };
 
-}; //namespace Sensor
+}; //namespace sensor

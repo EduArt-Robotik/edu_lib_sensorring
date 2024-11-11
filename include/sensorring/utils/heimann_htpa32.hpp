@@ -1,6 +1,46 @@
 #pragma once
+#include <cstdint>
 
 namespace HeimannSensor{
+
+// Needs to be packed because µC memory is directly copied in this struct
+struct __attribute__((__packed__)) HTPA32Eeprom{
+	float		pixc_min;
+	float		pixc_max;
+	uint8_t		grad_scale;
+	uint16_t	tablenumber;
+	uint8_t		epsilon;
+	uint8_t		mbit_calib;
+	uint8_t		bias_calib;
+	uint8_t		clk_calib;
+	uint8_t		bpa_calib;
+	uint8_t		pu_calib;
+	uint8_t		arraytype;
+	uint16_t	vddth1;
+	uint16_t	vddth2;
+	float		ptat_gradient;
+	float		ptat_offset;
+	uint16_t	ptat_th1;
+	uint16_t	ptat_th2;
+	uint8_t		vddsc_gradient;
+	uint8_t		vddsc_offset;
+	uint8_t		global_offset;
+	uint16_t	global_gain;
+	uint8_t		mbit_user;
+	uint8_t		bias_user;
+	uint8_t		clk_user;
+	uint8_t		bpa_user;
+	uint8_t		pu_user;
+	uint32_t	device_id;
+	uint8_t		norof_deadpix;
+	uint16_t	deadpix_addr[24];
+	uint16_t	deadpix_mask[12];
+	int16_t		vddcomp_gradient[256];
+	int16_t		vddcomp_offset[256];
+	int16_t		th_gradient[1024];
+	int16_t		th_offset[1024];
+	uint16_t	p[1024];
+};
 
 // DEVICE ADRESS
 #define  SENSOR_ADDRESS          0x1A
@@ -146,14 +186,14 @@ namespace HeimannSensor{
 #define EEPROM_SIZE 0x2000 // total number of EEPROM bytes
 
 const unsigned char LUTshape[8][8] = {
-  {0,0,0,0,0,0,0,0},
-  {1,1,1,1,0,0,0,1},
-  {0,1,0,0,0,0,0,1},
-  {0,1,0,1,0,1,0,1},
-  {0,1,0,1,0,1,0,1},
-  {0,1,0,1,1,1,0,1},
-  {0,1,0,0,0,0,0,1},
-  {0,1,0,1,1,1,1,1},
+	{0,0,0,0,0,0,0,0},
+	{1,1,1,1,0,0,0,1},
+	{0,1,0,0,0,0,0,1},
+	{0,1,0,1,0,1,0,1},
+	{0,1,0,1,0,1,0,1},
+	{0,1,0,1,1,1,0,1},
+	{0,1,0,0,0,0,0,1},
+	{0,1,0,1,1,1,1,1},
 };
 
 

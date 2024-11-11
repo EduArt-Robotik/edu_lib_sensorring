@@ -9,7 +9,7 @@ class TofObserver{
         TofObserver() = default;
         virtual ~TofObserver();
 
-        virtual void onTofMeasurement(const Measurement::TofSensorMeasurement* measurement) = 0;
+        virtual void onTofMeasurement(const measurement::TofSensorMeasurement measurement) = 0;
 
 
     private:
@@ -23,7 +23,7 @@ class ThermalObserver{
         ThermalObserver() = default;
         virtual ~ThermalObserver();
 
-        virtual void onThermalMeasurement(const Measurement::ThermalSensorMeasurement* measurement) = 0;
+        virtual void onThermalMeasurement(const measurement::ThermalSensorMeasurement measurement) = 0;
 
     private:
 

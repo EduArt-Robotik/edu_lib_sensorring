@@ -12,7 +12,7 @@
 namespace edu
 {
 
-SocketCANFD::SocketCANFD(std::string devFile)
+SocketCANFD::SocketCANFD(std::string devFile) : _devFile(devFile)
 {
 	std::vector<SocketCANFDObserver*> _observers;
 	
@@ -28,6 +28,11 @@ SocketCANFD::~SocketCANFD()
 {
 	if(!_listenerIsRunning) stopListener();
 	closePort();
+}
+
+std::string SocketCANFD::getInterfaceName()
+{
+	return _devFile;
 }
 
 bool SocketCANFD::registerObserver(SocketCANFDObserver* observer)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Parameters.hpp"
 #include "CustomTypes.hpp"
 #include "MeasurementObservers.hpp"
 
@@ -12,43 +13,21 @@
 
 
 // Forward declaration
-namespace SensorRing{
+namespace sensorring{
     class SensorRing;
 };
 
-namespace MeasurementManager{
 
-struct MeasurementManagerParams{
-    bool print_topology;
-    double frequency_tof_hz;
-    double frequency_thermal_hz;
-    std::string tf_name;
-};
+namespace measurementmanager{
 
-enum class MeasurementState{
-    init,
-    reset_sensors,
-    enumerate_sensors,
-    sync_lights,
-    get_eeprom,
-    pre_loop_init,
-    request_tof_measurement,
-    fetch_tof_data,
-    request_thermal_measurement,
-    fetch_thermal_data,
-    wait_for_data,
-    throttle_measurement,
-    error_handler,
-    shutdown
-};
+// Forward declaration
+enum class MeasurementState;
 
 class MeasurementManager{
 public:
-    MeasurementManager(MeasurementManagerParams params, std::unique_ptr<SensorRing::SensorRing> sensor_ring);
+    MeasurementManager(MeasurementManagerParams params);
     ~MeasurementManager();
-
-    void enableTofMeasurement(bool state);
-    void enableThermalMeasurement(bool state);
+    
     int measureSome();
     int startMeasuring();
     int stopMeasuring();
@@ -57,22 +36,24 @@ public:
     void registerTofObserver(TofObserver* observer);
     void registerThermalObserver(ThermalObserver* observer);
 
-private:
-    int publishToFData();
-    int publishThermalData();
     std::string printTopology();
-    void StateMachineWorker();
-    void StateMachine();
-
+    void enableTofMeasurement(bool state);
+    void enableThermalMeasurement(bool state);
     void stopThermalCalibration();
     void startThermalCalibration(std::size_t window);
 
+private:
+    int publishToFData();
+    int publishThermalData();
+    void StateMachine();
+    void StateMachineWorker();
+    
     void log(const LogVerbosity verbosity, const std::string msg);
     void log(const LogVerbosity verbosity, const std::stringstream msg);
     
     MeasurementState _state;
     MeasurementManagerParams _params;
-    std::unique_ptr<SensorRing::SensorRing> _sensor_ring;
+    std::unique_ptr<sensorring::SensorRing> _sensor_ring;
 
     int _error;
     bool _tof_enabled;

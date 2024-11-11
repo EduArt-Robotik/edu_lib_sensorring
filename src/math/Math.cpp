@@ -1,49 +1,50 @@
 #pragma once
 
 #include <array>
-#include <math.h>
+#include <cmath>
+#include "MiniMath.hpp"
 
+namespace math{ // MiniMath
 
-namespace mm{ // MiniMath
+//===============================
+// Vector3
+//===============================
 
-
-struct Vector3 {
-    std::array<double, 3> data;
-
-    double& x() { return data[0]; }
-    const double& x() const { return data[0]; }
+    double& Vector3::x() { return data[0]; }
+    const double& Vector3::x() const { return data[0]; }
     
-    double& y() { return data[1]; }
-    const double& y() const { return data[1]; }
+    double& Vector3::y() { return data[1]; }
+    const double& Vector3::y() const { return data[1]; }
     
-    double& z() { return data[2]; }
-    const double& z() const { return data[2]; }
+    double& Vector3::z() { return data[2]; }
+    const double& Vector3::z() const { return data[2]; }
 
-    double& operator[](std::size_t idx) { return data[idx]; }
-    const double& operator[](std::size_t idx) const { return data[idx]; }
+    double& Vector3::operator[](std::size_t idx) { return data[idx]; }
+    const double& Vector3::operator[](std::size_t idx) const { return data[idx]; }
 
-    Vector3 operator+(const Vector3& other) const {
+    Vector3 Vector3::operator+(const Vector3& other) const {
         Vector3 result{};
         for (int i = 0; i < 3; ++i) {
             result[i] = data[i] + other[i];
         }
         return result;
     }
-};
 
-struct Matrix3 {
-    std::array<Vector3, 3> data;
 
-    Vector3& operator[](std::size_t idx) {
+//===============================
+// Matrix3
+//===============================
+
+    Vector3& Matrix3::operator[](std::size_t idx) {
         return data[idx];
     }
 
-    const Vector3& operator[](std::size_t idx) const {
+    const Vector3& Matrix3::operator[](std::size_t idx) const {
         return data[idx];
     }
 
     // Matrix multiplication: Matrix3 * Matrix3 -> Matrix3
-    Matrix3 operator*(const Matrix3& other) const {
+    Matrix3 Matrix3::operator*(const Matrix3& other) const {
         Matrix3 result{};
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
@@ -57,7 +58,7 @@ struct Matrix3 {
     }
 
     // Matrix-vector multiplication: Matrix3 * Vector3 -> Vector3
-    Vector3 operator*(const Vector3& vec) const {
+    Vector3 Matrix3::operator*(const Vector3& vec) const {
         Vector3 result{};
         for (int i = 0; i < 3; ++i) {
             result[i] = 0.0f;
@@ -67,11 +68,13 @@ struct Matrix3 {
         }
         return result;
     }
-};
 
-class MiniMath{
-public:
-    static const Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
+
+//===============================
+// MiniMath (helper functions)
+//===============================
+
+    const MiniMath::Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
         double x_rad = rotation_deg[0] * M_PI / 180.0F;
         double y_rad = rotation_deg[1] * M_PI / 180.0F;
         double z_rad = rotation_deg[2] * M_PI / 180.0F;
@@ -95,6 +98,5 @@ public:
         
         return r;
     }
-};
 
 } // Namespace mm

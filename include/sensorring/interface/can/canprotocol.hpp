@@ -5,13 +5,12 @@
  *      Author: Stefan May
  */
 
-#ifndef CANIDS_H_
-#define CANIDS_H_
+#pragma once
 
 #include <stdint.h>
 #include <linux/can.h>
 
-namespace edu
+namespace com
 {
 
 #define INPUTBIT          0b0
@@ -132,6 +131,3 @@ namespace edu
 void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
 
 } // namespace
-
-#endif /* CANIDS_H_ */
-

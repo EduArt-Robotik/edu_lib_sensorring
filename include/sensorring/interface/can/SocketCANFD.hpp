@@ -1,5 +1,4 @@
-#ifndef _SOCKETCAN_H_
-#define _SOCKETCAN_H_
+#pragma once
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
@@ -11,7 +10,7 @@
 
 #include "SocketCANFDObserver.hpp"
 
-namespace edu
+namespace com
 {
 
 /**
@@ -33,6 +32,13 @@ public:
    * Destructor
    */
   ~SocketCANFD();
+
+  /**
+   * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
+   * @param[in] observer Observer instance, which should be notified when data is available.
+   * @return success==true
+   */
+  std::string getInterfaceName();
 
   /**
    * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
@@ -97,8 +103,8 @@ private:
   std::unique_ptr<std::thread> _thread;
 
   std::mutex _mutex;
+
+  std::string _devFile;
 };
 
 } // namespace
-
-#endif //_SOCKETCAN_H_

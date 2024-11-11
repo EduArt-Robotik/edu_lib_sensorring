@@ -2,25 +2,15 @@
 
 #include <memory>
 #include <array>
-#include "can/SocketCANFD.hpp"
-#include "utils/heimann_htpa32.hpp"
+#include "SocketCANFD.hpp"
+#include "heimann_htpa32.hpp"
+#include "CustomTypes.hpp"
 
-namespace Sensor{
+namespace sensor{
 
-enum class SensorOrientation{
-    left,
-    right,
-    none
-};
-
-enum class SensorState{
-    SensorOK,
-    ReceiveError
-};
-
-class BaseSensor : public edu::SocketCANFDObserver{
+class BaseSensor : public com::SocketCANFDObserver{
     public:
-        BaseSensor(std::shared_ptr<edu::SocketCANFD> can_interface, canid_t canid, bool enable);
+        BaseSensor(std::shared_ptr<com::SocketCANFD> can_interface, canid_t canid, bool enable);
         ~BaseSensor();
 
         //void enableCallback();
@@ -46,7 +36,7 @@ class BaseSensor : public edu::SocketCANFDObserver{
         bool _enable_flag;
 
         canid_t  _canid_data;
-        std::shared_ptr<edu::SocketCANFD> _can_interface;
+        std::shared_ptr<com::SocketCANFD> _can_interface;
 };
 
 }; // namespace sensor

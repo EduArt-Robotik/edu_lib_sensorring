@@ -1,14 +1,9 @@
 #pragma once
 
 #include "BaseSensor.hpp"
+#include "Parameters.hpp"
 
-namespace Sensor{
-
-struct LedLightParams{
-    int can_id = 0;
-    int nr_of_leds = 0;
-    SensorOrientation orientation = SensorOrientation::none;
-};
+namespace sensor{
 
 class LedLight{
     public:

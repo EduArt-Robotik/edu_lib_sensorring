@@ -1,0 +1,188 @@
+<diagram program="umletino" version="15.1"><zoom_level>8</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>1376</x><y>240</y><w>376</w><h>160</h></coordinates><panel_attributes>SensorRing
+--
+sensor_bus_vec : SensorBus [ ]
+
+--
++ SensorRing (node_name : string)
++ ~SensorRing ()
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1336</x><y>808</y><w>464</w><h>128</h></coordinates><panel_attributes>SensorBoard
+--
+- tof : TofSensor
+- thermal : ThermalSensor
+- leds : LedLight
+
+--
+
+
+bg=white
+fg=black
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1448</x><y>1016</y><w>248</w><h>128</h></coordinates><panel_attributes>ThermalSensor
+--
+- params : ThermalSensorParams
+- eeprom : HTPA32Eeprom
+
+--
++ ThermalSensor (ThermalSensorParams params)
++ ~ThermalSensor ()
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1168</x><y>1016</y><w>248</w><h>128</h></coordinates><panel_attributes>LedLight
+--
+- params : LedPanelParams
+
+
+--
++ LedLight( params : LedPanelParams)
++ ~ LedLight ()
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1720</x><y>1016</y><w>248</w><h>128</h></coordinates><panel_attributes>TofSensor
+--
+- params : TofSensorParams
+
+
+--
++ TofSensor (params : TofSensorParams)
++ ~TofSensor ()
+
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1584</x><y>1208</y><w>256</w><h>152</h></coordinates><panel_attributes>BaseSensor
+--
+- canid_data : int
+- can_interface : SocketCANFD
+
+--
++ BaseSensor ()
++ ~BaseSensor ()
+
+- notify ()
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1384</x><y>928</y><w>32</w><h>104</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1736</x><y>928</y><w>32</w><h>104</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1568</x><y>928</y><w>32</w><h>104</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1560</x><y>680</y><w>32</w><h>144</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>Relation</id><coordinates><x>1640</x><y>1136</y><w>24</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1768</x><y>1136</y><w>24</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1976</x><y>160</y><w>208</w><h>104</h></coordinates><panel_attributes>rclcpp::Node
+--
+
+
+--
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1744</x><y>40</y><w>352</w><h>136</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;10;420;10;420;150</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1376</x><y>520</y><w>384</w><h>168</h></coordinates><panel_attributes>SensorBus
+--
+can_interface : SocketCANFD
+sensor_board_vec : SensorBoard[]
+        
+--
+SensorBus();
+~SensorBus();
+
+- notify()
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1560</x><y>392</y><w>32</w><h>144</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>960</x><y>752</y><w>1048</w><h>664</h></coordinates><panel_attributes>PCB Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>960</x><y>472</y><w>832</w><h>248</h></coordinates><panel_attributes>CAN Bus Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>960</x><y>192</y><w>832</w><h>248</h></coordinates><panel_attributes>System Level Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1752</x><y>560</y><w>528</w><h>1040</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>640;1280;640;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>992</x><y>808</y><w>216</w><h>120</h></coordinates><panel_attributes>The SensorBoard corresponds to the
+physical circuit board. As one circuit board
+may have multiple sensors it aggregates
+the individual lower sensor abstraction classes.
+
+The individual sensor abstractions implement
+the SockerCan interface and directly receive
+the can data from their corresponding sensor.
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2112</x><y>1584</y><w>208</w><h>104</h></coordinates><panel_attributes>edu::SockerCANFDObserver
+--
+
+--
+/+ notify(canfd_frame) = 0/
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1704</x><y>1352</y><w>472</w><h>248</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>570;290;570;160;10;160;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>984</x><y>512</y><w>216</w><h>120</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
+CAN interface. It holds all information
+corresponding to that interface including
+a vector of all connected sensors.
+
+The SensorBus also handles broadcast
+messaging including messages that are sent
+once and received by multiple sensor boards.
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>984</x><y>232</y><w>216</w><h>120</h></coordinates><panel_attributes>The SensorRing is the highest layer
+abstraction and describes the whole
+sensor system. The sensor system
+includes sensors on multiple interfaces.
+
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1368</x><y>0</y><w>384</w><h>168</h></coordinates><panel_attributes>MeasurementManager
+--
+state : MeasurementState
+params : MeasurementManagerParams
+sensor_ring : SensorRing
+
+--
++ MeasurementManager(node_name : string)
++ ~MeasurementManager()
+    
++ run (params : MeasurementManagerParams, sensor_ring : SensorRing ) : int
+
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>984</x><y>0</y><w>216</w><h>120</h></coordinates><panel_attributes>The MeasurementManager manages a
+SensorRing object. The main component
+is a state machine which handles the timing
+of the measurements. In addition it handels
+the ROS communication.
+
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1552</x><y>160</y><w>32</w><h>96</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element></diagram>

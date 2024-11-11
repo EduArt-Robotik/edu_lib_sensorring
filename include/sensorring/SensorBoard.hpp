@@ -2,13 +2,14 @@
 
 #include <memory>
 
-#include "can/SocketCANFD.hpp"
+#include "SocketCANFD.hpp"
 
-#include "sensors/TofSensor.hpp"
-#include "sensors/ThermalSensor.hpp"
-#include "sensors/LedLight.hpp"
+#include "Parameters.hpp"
+#include "TofSensor.hpp"
+#include "ThermalSensor.hpp"
+#include "LedLight.hpp"
 
-namespace Sensor{
+namespace sensor{
 
 enum class SensorBoardType{
     headlight,
@@ -16,19 +17,6 @@ enum class SensorBoardType{
     sidepanel,
     minipanel,
     unknown
-};
-
-struct SensorBoardParams{
-    std::shared_ptr<edu::SocketCANFD> can_interface;
-    canid_t canid_tof;
-    canid_t canid_thermal;
-
-    bool enable_tof;
-    bool enable_thermal;
-
-    TofSensorParams tof_params;
-    ThermalSensorParams thermal_params;
-    LedLightParams led_params;
 };
 
 class SensorBoard /*: public edu::SocketCANFDObserver*/{
