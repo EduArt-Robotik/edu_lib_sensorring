@@ -1,4 +1,5 @@
-#include "can/SocketCANFD.hpp"
+#include "SocketCANFD.hpp"
+#include "canprotocol.hpp"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -9,49 +10,17 @@
 #include <sys/time.h>
 #include <algorithm>
 
-namespace edu
+namespace com
 {
 
-SocketCANFD::SocketCANFD(std::string devFile) : _devFile(devFile)
-{
+SocketCANFD::SocketCANFD(std::string devFile) : ComInterface(devFile){
 	std::vector<SocketCANFDObserver*> _observers;
-	
+	fillMap();
+
 	_soc = 0;
-	_listenerIsRunning = false;
-	_shutDownListener  = false;
-
-	if(!openPort(devFile.c_str()))
-		std::cout << "WARNING: Cannot open CAN device interface: " << devFile << std::endl;
 }
 
-SocketCANFD::~SocketCANFD()
-{
-	if(!_listenerIsRunning) stopListener();
-	closePort();
-}
-
-std::string SocketCANFD::getInterfaceName()
-{
-	return _devFile;
-}
-
-bool SocketCANFD::registerObserver(SocketCANFDObserver* observer)
-{
-	_mutex.lock();
-	if(observer) _observers.push_back(observer);
-	_mutex.unlock();
-
-	return true;
-}
-
-void SocketCANFD::clearObservers()
-{
-	_mutex.lock();
-	_observers.clear();
-	_mutex.unlock();
-}
-
-bool SocketCANFD::openPort(const char *port)
+bool SocketCANFD::openInterface(std::string interface_name)
 {
 	ifreq ifr;
 	sockaddr_can addr;
@@ -69,7 +38,7 @@ bool SocketCANFD::openPort(const char *port)
 		}
 
 	addr.can_family = AF_CAN;
-	strcpy(ifr.ifr_name, port);
+	strcpy(ifr.ifr_name, interface_name.c_str());
 
 	if (ioctl(_soc, SIOCGIFINDEX, &ifr) < 0)
 	{
@@ -86,6 +55,12 @@ bool SocketCANFD::openPort(const char *port)
 	}
 
 	return true;
+}
+
+bool SocketCANFD::send(Endpoint target, const std::vector<uint8_t>& data){
+
+	canid_t id = mapEndpointToId(target);
+	return send(id, data);
 }
 
 bool SocketCANFD::send(canid_t canid, const std::vector<uint8_t>& tx_buf){
@@ -130,18 +105,6 @@ bool SocketCANFD::send(const canfd_frame* frame)
 	else{
 		return false;
 	}
-}
-
-bool SocketCANFD::startListener()
-{
-	if(_listenerIsRunning) return false;
-
-	_thread = std::make_unique<std::thread>(&SocketCANFD::listener, this);
-
-	while(!_listenerIsRunning)
-		usleep(100);
-
-	return true;
 }
 
 bool SocketCANFD::listener()
@@ -193,16 +156,7 @@ bool SocketCANFD::listener()
 	return true;
 }
 
-void SocketCANFD::stopListener()
-{
-	_shutDownListener = true;
-
-	_thread->join();
-
-	_thread.release();
-}
-
-bool SocketCANFD::closePort()
+bool SocketCANFD::closeInterface()
 {
 	bool retval = false;
 	if(_soc)
@@ -211,5 +165,34 @@ bool SocketCANFD::closePort()
 	}
 	return retval;
 }
+
+void SocketCANFD::fillMap(){
+	canid_t canid_tof_status, canid_tof_request, canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+	makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status,  canid_tof_request,  canid_broadcast);
+	makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
+
+	canid_t canid_thermal_status, canid_thermal_request, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+	makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status,  canid_thermal_request,  canid_thermal_broadcast);
+	makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA,   canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
+
+	canid_t canid_light_in, canid_light_out, canid_light;
+	makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
+
+	_id_map[Endpoint::tof_status] 		= canid_tof_status;
+    _id_map[Endpoint::tof_request]		= canid_tof_request;
+    _id_map[Endpoint::thermal_status]	= canid_thermal_status;
+    _id_map[Endpoint::thermal_request]	= canid_thermal_request;
+    _id_map[Endpoint::light]			= canid_light;
+    _id_map[Endpoint::broadcast]		= canid_broadcast;
+}
+
+canid_t SocketCANFD::mapEndpointToId(Endpoint endpoint){
+	canid_t id = _id_map[endpoint];
+	return id;
+};
+  
+Endpoint SocketCANFD::mapIdToEndpoint(canid_t id){
+
+};
 
 } // namespace

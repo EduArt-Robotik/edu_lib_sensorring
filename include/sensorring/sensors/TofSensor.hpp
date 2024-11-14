@@ -15,14 +15,14 @@ static const double lut_tan_y[] = {0.3578, 0.3578, 0.3578, 0.3578, 0.3578, 0.357
 
 class TofSensor : public BaseSensor{
     public:
-        TofSensor(TofSensorParams params, std::shared_ptr<com::SocketCANFD> can_interface, canid_t canid, bool enable);
+        TofSensor(TofSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable);
         ~TofSensor();
         
         const TofSensorParams& getParams() const;
         const measurement::TofSensorMeasurement* getLatestMeasurement() const;
         const measurement::TofSensorMeasurement* getLatestMeasurement(SensorState &error) const;
 
-        void canCallback(const canfd_frame& frame) override;
+        void canCallback(const com::Endpoint source, const std::vector<uint8_t>& data) override;
         void onClearDataFlag() override;
 
         static std::vector<math::Vector3> transformPointCloud(const std::vector<math::Vector3>& point_data, const math::Matrix3 rotation, const math::Vector3 translation);

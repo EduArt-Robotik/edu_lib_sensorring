@@ -1,19 +1,19 @@
 #include "sensors/BaseSensor.hpp"
 
-namespace Sensor{
+namespace sensor{
 
-BaseSensor::BaseSensor(std::shared_ptr<edu::SocketCANFD> can_interface, canid_t canid, bool enable){
+BaseSensor::BaseSensor(std::shared_ptr<com::ComInterface> interface, com::Endpoint target, bool enable){
     _enable_flag = enable;
 
     _new_data_available_flag = false;
     _new_data_in_buffer_flag = false;
     _new_measurement_ready_flag = false;
 
-    _canid_data = canid;
-    addCANId(_canid_data);
+    _target = target;
+    addEndpoint(target);
     
-    _can_interface = can_interface;
-    _can_interface->registerObserver(this);
+    _interface = interface;
+    _interface->registerObserver(this);
 };
 
 BaseSensor::~BaseSensor(){
@@ -47,8 +47,8 @@ void BaseSensor::clearDataFlag(){
     onClearDataFlag();
 };
 
-void BaseSensor::notify(const canfd_frame& frame){
-    canCallback(frame);
+void BaseSensor::notify(const com::Endpoint source, const std::vector<uint8_t>& data){
+    canCallback(source, data);
 };
 
 };

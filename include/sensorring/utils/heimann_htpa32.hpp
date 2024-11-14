@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace HeimannSensor{
+namespace heimannsensor{
 
 // Needs to be packed because µC memory is directly copied in this struct
 struct __attribute__((__packed__)) HTPA32Eeprom{

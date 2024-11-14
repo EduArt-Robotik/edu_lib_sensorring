@@ -1,6 +1,6 @@
 #include "LedLight.hpp"
 
-namespace Sensor{
+namespace sensor{
 
 LedLight::LedLight(LedLightParams params){
     _params = params;

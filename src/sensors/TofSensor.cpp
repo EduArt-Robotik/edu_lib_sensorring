@@ -2,11 +2,11 @@
 #include <cstring>
 #include <algorithm>
 
-namespace Sensor{
+namespace sensor{
 
-TofSensor::TofSensor(TofSensorParams params, std::shared_ptr<edu::SocketCANFD> can_interface, canid_t canid, bool enable) :
-    BaseSensor(can_interface, canid, enable),
-    _rot_m(mm::MiniMath::rotation_matrix_from_euler_degrees(params.rotation)),
+TofSensor::TofSensor(TofSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable) :
+    BaseSensor(interface, com::Endpoint::tof_status, enable),
+    _rot_m(math::MiniMath::rotation_matrix_from_euler_degrees(params.rotation)),
     _params(params){
 
     _rx_buffer_offset = 0;
@@ -21,11 +21,11 @@ const TofSensorParams& TofSensor::getParams() const{
     return _params;
 }
 
-const Measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement() const{
+const measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement() const{
     return &_latest_measurement;
 }
 
-const Measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement(SensorState &error) const{
+const measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement(SensorState &error) const{
     error = _error;
     return &_latest_measurement;
 }
@@ -35,12 +35,14 @@ void TofSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 }
 
-void TofSensor::canCallback(const canfd_frame& frame){
+void TofSensor::canCallback(const com::Endpoint source, const std::vector<uint8_t>& data){
+    std::size_t msg_size = data.size();
+
     // point data msg
-    if(frame.len == 48){
-        if((_rx_buffer_offset + frame.len) <= (int) sizeof(_rx_buffer)){
-            std::copy_n(frame.data, frame.len, (uint8_t*)&_rx_buffer + _rx_buffer_offset); //ToDO: Check _rx_buffer_offset -> Source of error !!!
-            _rx_buffer_offset += frame.len;
+    if(msg_size == 48){
+        if((_rx_buffer_offset + msg_size) <= (int) sizeof(_rx_buffer)){
+            std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset); //ToDO: Check _rx_buffer_offset -> Source of error !!!
+            _rx_buffer_offset += msg_size;
             //_new_data_in_buffer_flag = true;
             _new_data_available_flag = false;
 
@@ -53,21 +55,21 @@ void TofSensor::canCallback(const canfd_frame& frame){
         }
     
     // transmission complete message
-    } else if(frame.len == 2){
+    } else if(msg_size == 2){
         if(_new_data_in_buffer_flag){
-            _latest_measurement = processMeasurement(frame.data[1], _rx_buffer, TOF_RESOLUTION);
+            _latest_measurement = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
             _new_data_in_buffer_flag = false;
             _new_measurement_ready_flag = true;
         }
         
     // data available message
-    } else if(frame.len==1){
+    } else if(msg_size==1){
         _new_data_available_flag = true;
     }
 }
 
-const Measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
-    Measurement::TofSensorMeasurement measurement;
+const measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
+    measurement::TofSensorMeasurement measurement;
     measurement.reserve(TOF_RESOLUTION);
     measurement.frame_id = frame_id;
 
@@ -86,7 +88,7 @@ const Measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_
             point_distance  = (float)distance_raw  /  4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
             point_sigma     = (float)sigma_raw     / 128.0 / 1000.0F; // Factor 128 for fixed point conversion, Factor 1000 from mm to m
 
-            mm::Vector3 point;
+            math::Vector3 point;
             point.x() = point_distance * lut_tan_x[i] * (-1.0);
             point.y() = point_distance * lut_tan_y[i];
             point.z() = point_distance;
@@ -104,22 +106,22 @@ const Measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_
     return measurement;
 }
 
-std::vector<mm::Vector3> TofSensor::transformPointCloud(const Measurement::PointCloud& point_data, const mm::Matrix3 rotation, const mm::Vector3 translation){
+std::vector<math::Vector3> TofSensor::transformPointCloud(const measurement::PointCloud& point_data, const math::Matrix3 rotation, const math::Vector3 translation){
     const unsigned int size = point_data.size();
 
-    std::vector<mm::Vector3> point_data_transformed;
+    std::vector<math::Vector3> point_data_transformed;
     point_data_transformed.reserve(size);
 
     for(unsigned int i = 0; i<size; i++){
-        mm::Vector3 transformed_point = (rotation * point_data[i]) + translation;
+        math::Vector3 transformed_point = (rotation * point_data[i]) + translation;
         point_data_transformed.push_back(transformed_point);
     }
     
     return point_data_transformed;
 }
 
-Measurement::TofSensorMeasurement TofSensor::combineTofMeasurements(const std::vector<const Measurement::TofSensorMeasurement*>& measurements_vec){
-    Measurement::TofSensorMeasurement combined_measurement;
+measurement::TofSensorMeasurement TofSensor::combineTofMeasurements(const std::vector<const measurement::TofSensorMeasurement*>& measurements_vec){
+    measurement::TofSensorMeasurement combined_measurement;
 
     unsigned int size = 0;
     for(auto measurement : measurements_vec){

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <filesystem>
 
-namespace FileManager{
+namespace filemanager{
 
 //==================================================
 // VectorHandler

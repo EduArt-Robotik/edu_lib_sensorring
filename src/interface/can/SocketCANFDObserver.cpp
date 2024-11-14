@@ -1,7 +1,7 @@
 #include "SocketCANFDObserver.hpp"
 #include <sys/time.h>
 
-namespace edu
+namespace com
 {
 
 SocketCANFDObserver::SocketCANFDObserver()

@@ -5,10 +5,10 @@
 #include <cmath>
 #include <algorithm>
 
-namespace Sensor{
+namespace sensor{
 
-ThermalSensor::ThermalSensor(ThermalSensorParams params, std::shared_ptr<edu::SocketCANFD> can_interface, canid_t canid, bool enable) :
-    BaseSensor(can_interface, canid, enable),
+ThermalSensor::ThermalSensor(ThermalSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable) :
+    BaseSensor(interface, com::Endpoint::thermal_status, enable),
     _params(params){
 
     _rx_buffer_offset = 0;
@@ -28,11 +28,11 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, std::shared_ptr<edu::So
     _calibration_filename   = "sensor" + std::to_string(_params.idx) + "_hpta32_calibration.txt";
     
     if(_params.use_eeprom_file){
-        _got_eeprom = FileManager::StructHandler<HeimannSensor::HTPA32Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+        _got_eeprom = filemanager::StructHandler<heimannsensor::HTPA32Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
     }
     
     if(_params.use_calibration_file){
-        _got_calibration = FileManager::ArrayHandler<double, NUMBER_OF_PIXEL>::readArrayFromFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
+        _got_calibration = filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::readArrayFromFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
         _calibration_average = _calibration_image.avg();
     }
 };
@@ -45,29 +45,29 @@ const ThermalSensorParams& ThermalSensor::getParams() const{
     return _params;
 };
 
-const Measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage() const{    
+const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage() const{    
     return &_latest_grayscale_image;
 }
 
-const Measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage(SensorState &error) const{    
+const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage(SensorState &error) const{    
     error = _error;
     return &_latest_grayscale_image;
 }
 
-const Measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage() const{    
+const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage() const{    
     return &_latest_falsecolor_image;
 }
 
-const Measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage(SensorState &error) const{   
+const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage(SensorState &error) const{   
     error = _error; 
     return &_latest_falsecolor_image;
 }
 
-const Measurement::ThermalSensorMeasurement* ThermalSensor::getLatestMeasurement() const{
+const measurement::ThermalSensorMeasurement* ThermalSensor::getLatestMeasurement() const{
     return &_latest_measurement;
 }
 
-const Measurement::ThermalSensorMeasurement* ThermalSensor::getLatestMeasurement(SensorState &error) const{
+const measurement::ThermalSensorMeasurement* ThermalSensor::getLatestMeasurement(SensorState &error) const{
     error = _error;
     return &_latest_measurement;
 }
@@ -105,37 +105,39 @@ void ThermalSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 };
 
-void ThermalSensor::canCallback(const canfd_frame& frame){
+void ThermalSensor::canCallback(const com::Endpoint source, const std::vector<uint8_t>& data){
+    std::size_t msg_size = data.size();
+
     if(!_got_eeprom){
         
         // check if there is still data to be written
-        if((_rx_buffer_offset + frame.len) < (int) sizeof(HeimannSensor::HTPA32Eeprom) + CANFD_MAX_DLEN){
+        if((_rx_buffer_offset + msg_size) < (int) sizeof(heimannsensor::HTPA32Eeprom) + CANFD_MAX_DLEN){
 
             // have to account fot last few values of the eeprom because sizeof(ETPA32Eeprom) is not dividable by 64 ( = canfd msg length)
-            int len = (int) sizeof(HeimannSensor::HTPA32Eeprom) - _rx_buffer_offset;
-            if(len > frame.len) len = frame.len;
+            std::size_t len = (int) sizeof(heimannsensor::HTPA32Eeprom) - _rx_buffer_offset;
+            if(len > msg_size) len = msg_size;
             
-            std::copy_n((uint8_t*)&frame.data , len, (uint8_t*)&_eeprom + _rx_buffer_offset);
+            std::copy_n(data.begin() , len, (uint8_t*)&_eeprom + _rx_buffer_offset);
             _rx_buffer_offset += len;
             
-            if(_rx_buffer_offset >= (int) sizeof(HeimannSensor::HTPA32Eeprom)){
+            if(_rx_buffer_offset >= (int) sizeof(heimannsensor::HTPA32Eeprom)){
                 _got_eeprom = true;
-                FileManager::StructHandler<HeimannSensor::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+                filemanager::StructHandler<heimannsensor::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
             }
         }
 
     }else{
         if(!_new_measurement_ready_flag){
             // vdd and ptat  message
-            if(frame.len == 4){
-                _vdd  = (uint16_t) (frame.data[0] << 0 | frame.data[1] << 8);
-                _ptat = (uint16_t) (frame.data[2] << 0 | frame.data[3] << 8);
+            if(msg_size == 4){
+                _vdd  = (uint16_t) (data[0] << 0 | data[1] << 8);
+                _ptat = (uint16_t) (data[2] << 0 | data[3] << 8);
 
             // data message
-            }else if(frame.len == CANFD_MAX_DLEN){
-                if((_rx_buffer_offset + frame.len) <= (int) sizeof(_rx_buffer)){
-                    std::copy_n((uint8_t*)&frame.data, frame.len, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
-                    _rx_buffer_offset += frame.len;
+            }else if(msg_size == CANFD_MAX_DLEN){
+                if((_rx_buffer_offset + msg_size) <= (int) sizeof(_rx_buffer)){
+                    std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
+                    _rx_buffer_offset += msg_size;
 
                     if(_rx_buffer_offset >= sizeof(_rx_buffer)){
                         _latest_measurement = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
@@ -153,7 +155,7 @@ void ThermalSensor::canCallback(const canfd_frame& frame){
                                 _got_calibration = true;
 
                                 if(_params.use_calibration_file){
-                                    FileManager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
+                                    filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
                                 }
                             }
                         }
@@ -182,13 +184,13 @@ void ThermalSensor::canCallback(const canfd_frame& frame){
     }
 };
 
-const Measurement::ThermalSensorMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const HeimannSensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
+const measurement::ThermalSensorMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
     uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
     uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
     std::vector<double> buffer(len);
     
-    Measurement::ThermalSensorMeasurement result;
+    measurement::ThermalSensorMeasurement result;
     result.frame_id = frame_id;
     result.min_deg_c = 1e6;
 
@@ -220,7 +222,7 @@ const Measurement::ThermalSensorMeasurement ThermalSensor::processMeasurement(co
         // look-up table and bilinear interpolation
         unsigned int table_col = 0;
         for (int j = 0; j < NROFTAELEMENTS; j++) {
-            if (t_ambient > HeimannSensor::XTATemps[j]) {
+            if (t_ambient > heimannsensor::XTATemps[j]) {
             table_col = j;
             }
         }
@@ -228,11 +230,11 @@ const Measurement::ThermalSensorMeasurement ThermalSensor::processMeasurement(co
         unsigned int table_row = buffer[i] + TABLEOFFSET;
         table_row = table_row >> ADEXPBITS;
 
-        int dta = t_ambient - HeimannSensor::XTATemps[table_col];
+        int dta = t_ambient - heimannsensor::XTATemps[table_col];
         
-        double vx = ((((int32_t)HeimannSensor::TempTable[table_row][table_col + 1] - (int32_t)HeimannSensor::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)HeimannSensor::TempTable[table_row][table_col];
-        double vy = ((((int32_t)HeimannSensor::TempTable[table_row + 1][table_col + 1] - (int32_t)HeimannSensor::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)HeimannSensor::TempTable[table_row + 1][table_col];
-        buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)HeimannSensor::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
+        double vx = ((((int32_t)heimannsensor::TempTable[table_row][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row][table_col];
+        double vy = ((((int32_t)heimannsensor::TempTable[table_row + 1][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row + 1][table_col];
+        buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)heimannsensor::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
 
         // apply global offset
         //buffer[i] += _eeprom.global_offset;
@@ -247,8 +249,8 @@ const Measurement::ThermalSensorMeasurement ThermalSensor::processMeasurement(co
     return result;
 };
 
-const Measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const Measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const {
-    Measurement::GrayscaleImage result;
+const measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const {
+    measurement::GrayscaleImage result;
 
     // pixel data with min - max scaling
     double delta_t = (t_max_deg_c - t_min_deg_c);
@@ -272,8 +274,8 @@ const Measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const M
     return result;
 };
 
-const Measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const Measurement::GrayscaleImage& image) const{
-    Measurement::FalseColorImage color_image;
+const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const measurement::GrayscaleImage& image) const{
+    measurement::FalseColorImage color_image;
 
     // convert latest measurement to false color image
     for(size_t i=0; i<NUMBER_OF_PIXEL; i++){
@@ -285,8 +287,8 @@ const Measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
     return color_image;
 };
 
-void ThermalSensor::rotateLeftImage(Measurement::GrayscaleImage& image) const{
-    if(_params.orientation == Sensor::SensorOrientation::left){
+void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const{
+    if(_params.orientation == sensor::SensorOrientation::left){
        std::reverse(image.data.begin(), image.data.end());
     }
 }

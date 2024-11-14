@@ -12,7 +12,7 @@ namespace sensor{
 
 class ThermalSensor : public BaseSensor{
     public:
-        ThermalSensor(ThermalSensorParams params, std::shared_ptr<com::SocketCANFD> can_interface, canid_t canid, bool enable);
+        ThermalSensor(ThermalSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable);
         ~ThermalSensor();
         
 		void readEEPROM();
@@ -29,17 +29,17 @@ class ThermalSensor : public BaseSensor{
 		const measurement::ThermalSensorMeasurement* getLatestMeasurement(SensorState &error) const;
 		
 
-        void canCallback(const canfd_frame& frame) override;
+        void canCallback(const com::Endpoint source, const std::vector<uint8_t>& data) override;
 		void onClearDataFlag() override;
 
     private:
 		void rotateLeftImage(measurement::GrayscaleImage &image) const;
 		const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
 		const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;
-		const measurement::ThermalSensorMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const HeimannSensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
+		const measurement::ThermalSensorMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
 
         const ThermalSensorParams _params;
-        HeimannSensor::HTPA32Eeprom _eeprom;
+        heimannsensor::HTPA32Eeprom _eeprom;
 
 		uint16_t _vdd;
 		uint16_t _ptat;

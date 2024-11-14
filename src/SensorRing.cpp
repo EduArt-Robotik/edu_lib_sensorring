@@ -8,7 +8,7 @@
 namespace sensorring{
 
 SensorRing::SensorRing(SensorRingParams params){
-	
+
 	for(auto bus_params : params.bus_param_vec){
 		_sensor_bus_vec.push_back(std::make_unique<sensorbus::SensorBus>(bus_params));
 	}

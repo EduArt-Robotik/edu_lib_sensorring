@@ -1,8 +1,8 @@
 #include "CustomTypes.hpp"
-#include "MiniMath.hpp"
+#include "Math.hpp"
 
 
-namespace Measurement{
+namespace measurement{
 
 template<typename T, std::size_t RESOLUTION>
 double GenericGrayscaleImage<T, RESOLUTION>::avg (){

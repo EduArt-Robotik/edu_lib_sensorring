@@ -1,18 +1,26 @@
 #include "ComInterface.hpp"
+#include <iostream>
 
 namespace com{
 
 ComInterface::ComInterface(std::string interface_name) : _interface_name(interface_name){
-
+    
+	_listenerIsRunning = false;
+	_shutDownListener = false;
+	
+	if(!openInterface(interface_name)){
+		std::cout << "WARNING: Cannot open interface: " << interface_name << std::endl;
+	}
 }
 
 ComInterface::~ComInterface(){
     if(!_listenerIsRunning) stopListener();
+	closeInterface();
 }
 
 std::string ComInterface::getInterfaceName()
 {
-	return _devFile;
+	return _interface_name;
 }
 
 bool ComInterface::registerObserver(ComObserver* observer)
@@ -38,7 +46,7 @@ bool ComInterface::startListener()
 	_thread = std::make_unique<std::thread>(&ComInterface::listener, this);
 
 	while(!_listenerIsRunning)
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	return true;
 }

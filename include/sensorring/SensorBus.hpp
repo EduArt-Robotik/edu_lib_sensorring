@@ -6,7 +6,6 @@
 
 #include "SensorBoard.hpp"
 #include "Parameters.hpp"
-#include "SocketCANFD.hpp"
 
 namespace sensorbus{
 
@@ -60,7 +59,7 @@ class SensorBus : public com::SocketCANFDObserver{
         size_t _tof_measurement_count;
         size_t _thermal_measurement_count;
 
-        std::shared_ptr<com::SocketCANFD> _can_interface;
+        std::shared_ptr<com::ComInterface> _can_interface;
 };
 
 };

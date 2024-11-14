@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <memory>
-#include "Endpoints.hpp"
+#include <chrono>
+#include "ComEndpoints.hpp"
 
 namespace com
 {
@@ -59,11 +60,9 @@ public:
 
 private:
 
-  std::vector<Endpoint> _canids;
+  std::vector<Endpoint> _endpoints;
 
-  long _seconds;
-  
-  long _usec;
+  std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };
 
 } // namespace

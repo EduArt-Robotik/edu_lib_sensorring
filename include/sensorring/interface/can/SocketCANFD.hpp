@@ -7,7 +7,9 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <map>
 
+#include "ComInterface.hpp"
 #include "SocketCANFDObserver.hpp"
 
 namespace com
@@ -19,7 +21,7 @@ namespace com
  * @author Stefan May, Hannes Duske
  * @date 13.05.2018 (modified 09.08.2024)
  */
-class SocketCANFD
+class SocketCANFD : public ComInterface
 {
 public:
   /**
@@ -34,30 +36,17 @@ public:
   ~SocketCANFD();
 
   /**
-   * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
-   * @param[in] observer Observer instance, which should be notified when data is available.
-   * @return success==true
-   */
-  std::string getInterfaceName();
-
-  /**
-   * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
-   * @param[in] observer Observer instance, which should be notified when data is available.
-   * @return success==true
-   */
-  bool registerObserver(SocketCANFDObserver* observer);
-
-  /**
-   * Remove all registered observers
-   */
-  void clearObservers();
-
-  /**
    * Open CAN interface.
    * @param[in] port CAN interface name specified with slcand.
    * @return success==true
    */
-  bool openPort(const char* port);
+  bool openInterface(std::string interface_name) override;
+
+  /**
+   * Send CAN frame.
+   * @param[in] frame CAN frame
+   */
+  bool send(Endpoint target, const std::vector<uint8_t>& data) override;
 
   /**
    * Send CAN frame.
@@ -72,39 +61,26 @@ public:
   bool send(const canfd_frame* frame);
 
   /**
-   * Start listener thread.
-   * @return success==true, failure==false (e.g. when listener is already running)
-   */
-  bool startListener();
-
-  /**
-   * Terminate listener thread
-   */
-  void stopListener();
-
-  /**
    * Close device file link.
    * @return success==true
    */
-  bool closePort();
+  bool closeInterface() override;
 
 private:
 
-  bool listener();
+  void fillMap();
+
+  canid_t mapEndpointToId(Endpoint endpoint);
+  
+  Endpoint mapIdToEndpoint(canid_t id);
+
+  std::map<Endpoint, canid_t> _id_map;
+
+  bool listener() override;
 
   int _soc;
 
-  bool _listenerIsRunning;
-
-  bool _shutDownListener;
-
   std::vector<SocketCANFDObserver*> _observers;
-
-  std::unique_ptr<std::thread> _thread;
-
-  std::mutex _mutex;
-
-  std::string _devFile;
 };
 
 } // namespace

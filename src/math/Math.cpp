@@ -1,10 +1,8 @@
-#pragma once
-
 #include <array>
 #include <cmath>
-#include "MiniMath.hpp"
+#include "Math.hpp"
 
-namespace math{ // MiniMath
+namespace math{
 
 //===============================
 // Vector3
@@ -74,7 +72,7 @@ namespace math{ // MiniMath
 // MiniMath (helper functions)
 //===============================
 
-    const MiniMath::Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
+    const Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
         double x_rad = rotation_deg[0] * M_PI / 180.0F;
         double y_rad = rotation_deg[1] * M_PI / 180.0F;
         double z_rad = rotation_deg[2] * M_PI / 180.0F;
@@ -99,4 +97,4 @@ namespace math{ // MiniMath
         return r;
     }
 
-} // Namespace mm
+} // namespace

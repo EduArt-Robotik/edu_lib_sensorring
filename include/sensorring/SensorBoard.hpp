@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "SocketCANFD.hpp"
+#include "ComInterface.hpp"
 
 #include "Parameters.hpp"
 #include "TofSensor.hpp"
@@ -21,7 +21,7 @@ enum class SensorBoardType{
 
 class SensorBoard /*: public edu::SocketCANFDObserver*/{
     public:
-        SensorBoard(SensorBoardParams params);
+        SensorBoard(SensorBoardParams params, std::shared_ptr<com::ComInterface>interface);
         ~SensorBoard();
 
         SensorBoardType getType() const;

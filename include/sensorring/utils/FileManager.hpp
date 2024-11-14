@@ -5,8 +5,9 @@
 #include <vector>
 
 #include "CustomTypes.hpp"
+#include "heimann_htpa32.hpp"
 
-namespace FileManager{
+namespace filemanager{
 
 template <typename T>
 class VectorHandler{
@@ -42,7 +43,7 @@ class StructHandler{
 };
 
 // concrete types that are used in the program
-template class FileManager::ArrayHandler<double, THERMAL_RESOLUTION>;
-template class FileManager::StructHandler<HeimannSensor::HTPA32Eeprom>;
+template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
+template class filemanager::StructHandler<heimannsensor::HTPA32Eeprom>;
 
-}; // namespace FileManager
+}; // namespace filemanager

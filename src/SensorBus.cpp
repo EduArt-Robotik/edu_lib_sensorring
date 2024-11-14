@@ -2,16 +2,18 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <chrono>
 
 #include "canprotocol.hpp"
-#include "SocketCANFDManager.hpp"
+#include "ComManager.hpp"
 
 namespace sensorbus{
 
 SensorBus::SensorBus(SensorBusParams params) : _params(params){
 
     for(auto board_params : params.board_param_vec){
-        _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params));
+        auto interface = com::ComManager::getInstance()->getInterface(board_params.interface_name);
+        _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface));
     }
 
     _enumerate_flag = false;
@@ -26,7 +28,7 @@ SensorBus::SensorBus(SensorBusParams params) : _params(params){
     addCANId(_params.canid_broadcast);
     addCANId(_params.canid_tof_status);
     addCANId(_params.canid_thermal_status);
-    _can_interface = com::SocketCANFDManager::getInstance()->getInterface(_params.interface_name);
+    _can_interface = com::ComManager::getInstance()->getInterface(_params.interface_name);
 };
 
 SensorBus::~SensorBus(){
@@ -72,18 +74,18 @@ size_t SensorBus::getEnumerationCount() const{
 void SensorBus::syncLights(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};
-    _can_interface->send(_params.canid_light, tx_buf);
+    _can_interface->send(com::Endpoint::light, tx_buf);
 };
 
 void SensorBus::setLights(int mode, unsigned char red, unsigned char green, unsigned char blue){
 
     std::vector<uint8_t> tx_buf = {(uint8_t )mode, red, green, blue};
-    _can_interface->send(_params.canid_light, tx_buf);
+    _can_interface->send(com::Endpoint::light, tx_buf);
 };
 
 void SensorBus::resetDevices(){
     std::vector<uint8_t> tx_buf = {CMD_HARD_RESET};
-    _can_interface->send(_params.canid_broadcast, tx_buf);
+    _can_interface->send(com::Endpoint::broadcast, tx_buf);
 };
 
 int SensorBus::enumerateDevices(){
@@ -91,13 +93,13 @@ int SensorBus::enumerateDevices(){
     _enumerate_count = 0;
 
     std::vector<uint8_t> tx_buf = {CMD_ACTIVE_DEVICE_QUERY};
-    _can_interface->send(_params.canid_broadcast, tx_buf);
+    _can_interface->send(com::Endpoint::broadcast, tx_buf);
 
     // wait until all sensors sent their response. 100 ms timeout
     unsigned int watchdog = 0;
-    while(_enumerate_count < getSensorCount() && watchdog < 100e3){
-        watchdog += 100;
-        usleep(100);
+    while(_enumerate_count < getSensorCount() && watchdog < 1e3){
+        watchdog += 1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
     // wait a little longer in case there are more sensors than specified
@@ -119,7 +121,7 @@ void SensorBus::requestEEPROM(){
         uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
         uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
         std::vector<uint8_t> tx_buf = {CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low};
-        _can_interface->send(_params.canid_thermal_request, tx_buf);
+        _can_interface->send(com::Endpoint::thermal_request, tx_buf);
     }
 };
 
@@ -151,7 +153,7 @@ void SensorBus::requestTofMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(_params.canid_tof_request, tx_buf);
+    _can_interface->send(com::Endpoint::tof_request, tx_buf);
 };
 
 void SensorBus::fetchTofData(){
@@ -165,7 +167,7 @@ void SensorBus::fetchTofData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {sensor_select_high, sensor_select_low};
-    _can_interface->send(_params.canid_tof_request, tx_buf);
+    _can_interface->send(com::Endpoint::tof_request, tx_buf);
 };
 
 void SensorBus::requestThermalMeasurement(){
@@ -184,7 +186,7 @@ void SensorBus::requestThermalMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(_params.canid_thermal_request, tx_buf);
+    _can_interface->send(com::Endpoint::thermal_request, tx_buf);
 };
 
 void SensorBus::fetchThermalData(){
@@ -198,7 +200,7 @@ void SensorBus::fetchThermalData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(_params.canid_thermal_request, tx_buf);
+    _can_interface->send(com::Endpoint::thermal_request, tx_buf);
 };
 
 bool SensorBus::allTofMeasurementsReady() const{
