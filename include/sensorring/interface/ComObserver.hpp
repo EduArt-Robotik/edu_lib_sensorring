@@ -31,13 +31,13 @@ public:
    * Set CAN bus identifier
    * @param[in] id CAN ID
    */
-  void addEndpoint(const Endpoint target);
+  void addEndpoint(const ComEndpoint target);
 
   /**
    * Get CAN bus identifier
    * @return CAN ID
    */
-  const std::vector<Endpoint>& getEndpoints() const;
+  const std::vector<ComEndpoint>& getEndpoints() const;
 
   /**
    * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific timeout.
@@ -50,17 +50,17 @@ public:
    * Distribute new can frame to all registered observers
    * @param[in] frame CANFD Frame that will be distributed
    */
-  void forwardNotification(const Endpoint source, const std::vector<uint8_t>& data);
+  void forwardNotification(const ComEndpoint source, const std::vector<uint8_t>& data);
   
   /**
    * Interface declaration for implementation through inherited classes.
    * @params[in] frame CAN frame
    */
-  virtual void notify(const Endpoint source, const std::vector<uint8_t>& data) = 0;
+  virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
 
-  std::vector<Endpoint> _endpoints;
+  std::vector<ComEndpoint> _endpoints;
 
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };

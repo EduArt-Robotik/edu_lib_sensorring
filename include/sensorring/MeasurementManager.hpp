@@ -39,8 +39,8 @@ public:
     std::string printTopology();
     void enableTofMeasurement(bool state);
     void enableThermalMeasurement(bool state);
-    void stopThermalCalibration();
-    void startThermalCalibration(std::size_t window);
+    bool stopThermalCalibration();
+    bool startThermalCalibration(std::size_t window);
 
 private:
     int publishToFData();

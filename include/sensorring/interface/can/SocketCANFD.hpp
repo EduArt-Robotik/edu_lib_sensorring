@@ -10,7 +10,7 @@
 #include <map>
 
 #include "ComInterface.hpp"
-#include "SocketCANFDObserver.hpp"
+#include "ComObserver.hpp"
 
 namespace com
 {
@@ -28,7 +28,7 @@ public:
    * Constructor
    * @param[in] devFile device file link to CAN interface
    */
-  SocketCANFD(std::string devFile);
+  SocketCANFD(std::string interface_name, std::size_t sensor_count);
 
   /**
    * Destructor
@@ -46,7 +46,7 @@ public:
    * Send CAN frame.
    * @param[in] frame CAN frame
    */
-  bool send(Endpoint target, const std::vector<uint8_t>& data) override;
+  bool send(ComEndpoint target, const std::vector<uint8_t>& data) override;
 
   /**
    * Send CAN frame.
@@ -70,17 +70,15 @@ private:
 
   void fillMap();
 
-  canid_t mapEndpointToId(Endpoint endpoint);
+  canid_t mapEndpointToId(ComEndpoint endpoint);
   
-  Endpoint mapIdToEndpoint(canid_t id);
+  //ComEndpoint mapIdToEndpoint(canid_t id);
 
-  std::map<Endpoint, canid_t> _id_map;
+  std::map<ComEndpoint, canid_t> _id_map;
 
   bool listener() override;
 
   int _soc;
-
-  std::vector<SocketCANFDObserver*> _observers;
 };
 
 } // namespace

@@ -1,9 +1,9 @@
-#include "can/canprotocol.hpp"
+#include "canprotocol.hpp"
 
-namespace edu
+namespace com
 {
 
-void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress)
+void CanProtocol::makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress)
 {
 	canid_t sID  =    sysID << 8;
 	canid_t iBit =    INPUTBIT  << 7;

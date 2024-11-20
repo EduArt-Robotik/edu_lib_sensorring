@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <array>
+#include "ComInterface.hpp"
 #include "BaseSensor.hpp"
 #include "Math.hpp"
 #include "heimann_htpa32.hpp"
@@ -12,7 +13,7 @@ namespace sensor{
 
 class ThermalSensor : public BaseSensor{
     public:
-        ThermalSensor(ThermalSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable);
+        ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, bool enable);
         ~ThermalSensor();
         
 		void readEEPROM();
@@ -29,7 +30,7 @@ class ThermalSensor : public BaseSensor{
 		const measurement::ThermalSensorMeasurement* getLatestMeasurement(SensorState &error) const;
 		
 
-        void canCallback(const com::Endpoint source, const std::vector<uint8_t>& data) override;
+        void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 		void onClearDataFlag() override;
 
     private:

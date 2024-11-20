@@ -72,7 +72,7 @@ namespace math{
 // MiniMath (helper functions)
 //===============================
 
-    const Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
+    const Matrix3 MiniMath::rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
         double x_rad = rotation_deg[0] * M_PI / 180.0F;
         double y_rad = rotation_deg[1] * M_PI / 180.0F;
         double z_rad = rotation_deg[2] * M_PI / 180.0F;

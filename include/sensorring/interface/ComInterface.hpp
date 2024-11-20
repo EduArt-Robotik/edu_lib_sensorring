@@ -60,7 +60,7 @@ public:
 	 * Send CAN frame.
 	 * @param[in] frame CAN frame
 	 */
-	virtual bool send(Endpoint target, const std::vector<std::uint8_t>& data) = 0;
+	virtual bool send(ComEndpoint target, const std::vector<std::uint8_t>& data) = 0;
 
 	/**
 	 * Close device file link.
@@ -74,6 +74,8 @@ public:
 	 */
   	virtual bool closeInterface() = 0;
 
+	const std::vector<ComEndpoint>& getEndpoints();
+
 protected:
 	virtual bool listener() = 0;
 
@@ -85,9 +87,11 @@ protected:
 
 	std::mutex _mutex;
 
-private:
+	std::vector<ComEndpoint> _endpoints;
 
 	std::vector<ComObserver*> _observers;
+
+private:
 
 	std::unique_ptr<std::thread> _thread;
 

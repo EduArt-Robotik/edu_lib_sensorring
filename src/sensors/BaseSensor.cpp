@@ -2,17 +2,15 @@
 
 namespace sensor{
 
-BaseSensor::BaseSensor(std::shared_ptr<com::ComInterface> interface, com::Endpoint target, bool enable){
-    _enable_flag = enable;
-
-    _new_data_available_flag = false;
-    _new_data_in_buffer_flag = false;
-    _new_measurement_ready_flag = false;
-
-    _target = target;
-    addEndpoint(target);
-    
-    _interface = interface;
+BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, bool enable) : ComObserver(),
+    _new_data_available_flag(false),
+    _new_data_in_buffer_flag(false),
+    _new_measurement_ready_flag(false),
+    _enable_flag(enable),
+    _target(target),
+    _interface(interface)
+{
+    addEndpoint(target);    
     _interface->registerObserver(this);
 };
 
@@ -47,7 +45,7 @@ void BaseSensor::clearDataFlag(){
     onClearDataFlag();
 };
 
-void BaseSensor::notify(const com::Endpoint source, const std::vector<uint8_t>& data){
+void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     canCallback(source, data);
 };
 

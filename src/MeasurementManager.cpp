@@ -184,11 +184,11 @@ int MeasurementManager::publishThermalData(){
 	return error_frames;
 };
 
-void MeasurementManager::stopThermalCalibration(){
+bool MeasurementManager::stopThermalCalibration(){
 	_sensor_ring->stopThermalCalibration();
 };
 
-void MeasurementManager::startThermalCalibration(std::size_t window){
+bool MeasurementManager::startThermalCalibration(std::size_t window){
 	_sensor_ring->startThermalCalibration(window);
 };
 

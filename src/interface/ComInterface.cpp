@@ -7,15 +7,10 @@ ComInterface::ComInterface(std::string interface_name) : _interface_name(interfa
     
 	_listenerIsRunning = false;
 	_shutDownListener = false;
-	
-	if(!openInterface(interface_name)){
-		std::cout << "WARNING: Cannot open interface: " << interface_name << std::endl;
-	}
 }
 
 ComInterface::~ComInterface(){
     if(!_listenerIsRunning) stopListener();
-	closeInterface();
 }
 
 std::string ComInterface::getInterfaceName()
@@ -44,7 +39,7 @@ bool ComInterface::startListener()
 	if(_listenerIsRunning) return false;
 
 	_thread = std::make_unique<std::thread>(&ComInterface::listener, this);
-
+	
 	while(!_listenerIsRunning)
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
@@ -53,11 +48,15 @@ bool ComInterface::startListener()
 
 void ComInterface::stopListener()
 {
-	_shutDownListener = true;
-
-	_thread->join();
-
-	_thread.release();
+	if(_listenerIsRunning){
+		_shutDownListener = true;
+		_thread->join();
+		_thread.release();
+	}
 }
+
+const std::vector<ComEndpoint>& ComInterface::getEndpoints(){
+	return _endpoints;
+};
 
 }; // namespace

@@ -7,6 +7,7 @@
 #include "Math.hpp"
 
 #define THERMAL_RESOLUTION 1024
+#define MAX_MSG_LENGTH 64
 
 namespace sensor{
 	enum class SensorOrientation{

@@ -2,7 +2,7 @@
 
 namespace sensor{
 
-SensorBoard::SensorBoard(SensorBoardParams params, std::shared_ptr<com::ComInterface> interface){
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface){
 	_tof        = std::make_unique<TofSensor>(params.tof_params, interface, params.enable_tof);
 	_thermal    = std::make_unique<ThermalSensor>(params.thermal_params, interface, params.enable_thermal);
 	_leds       = std::make_unique<LedLight>(params.led_params);

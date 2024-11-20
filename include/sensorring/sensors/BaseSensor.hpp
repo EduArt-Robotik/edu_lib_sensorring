@@ -3,6 +3,7 @@
 #include <memory>
 #include <array>
 #include "ComInterface.hpp"
+#include "ComEndpoints.hpp"
 #include "heimann_htpa32.hpp"
 #include "CustomTypes.hpp"
 
@@ -10,7 +11,7 @@ namespace sensor{
 
 class BaseSensor : public com::ComObserver{
     public:
-        BaseSensor(std::shared_ptr<com::ComInterface> interface, com::Endpoint target, bool enable);
+        BaseSensor(com::ComInterface* interface, com::ComEndpoint target, bool enable);
         ~BaseSensor();
 
         //void enableCallback();
@@ -21,9 +22,9 @@ class BaseSensor : public com::ComObserver{
         //void setEnable(bool enable);
         void clearDataFlag();
         
-        void notify(const com::Endpoint source, const std::vector<uint8_t>& data) override;
+        void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-        virtual void canCallback(const com::Endpoint source, const std::vector<uint8_t>& data) = 0;
+        virtual void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
         virtual void onClearDataFlag() = 0;
 
     protected:
@@ -35,8 +36,8 @@ class BaseSensor : public com::ComObserver{
     private:
         bool _enable_flag;
 
-        com::Endpoint _target;
-        std::shared_ptr<com::ComInterface> _interface;
+        com::ComEndpoint _target;
+        com::ComInterface* _interface;
 };
 
 }; // namespace sensor

@@ -1,11 +1,11 @@
-#include "sensors/TofSensor.hpp"
+#include "TofSensor.hpp"
 #include <cstring>
 #include <algorithm>
 
 namespace sensor{
 
-TofSensor::TofSensor(TofSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable) :
-    BaseSensor(interface, com::Endpoint::tof_status, enable),
+TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, bool enable) :
+    BaseSensor(interface, com::ComEndpoint("tof_status"), enable),
     _rot_m(math::MiniMath::rotation_matrix_from_euler_degrees(params.rotation)),
     _params(params){
 
@@ -35,7 +35,7 @@ void TofSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 }
 
-void TofSensor::canCallback(const com::Endpoint source, const std::vector<uint8_t>& data){
+void TofSensor::canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
 
     // point data msg

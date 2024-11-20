@@ -4,8 +4,6 @@
 #include <vector>
 #include "CustomTypes.hpp"
 
-#include "SocketCANFD.hpp"
-
 namespace sensor{
     struct LedLightParams{
 //        int can_id = 0;
@@ -42,10 +40,11 @@ namespace sensor{
     };
 
     struct SensorBoardParams{
-        std::string interface_name;
+        int idx = 0;
+        //std::string interface_name;
         //std::shared_ptr<com::SocketCANFD> can_interface;
-        canid_t canid_tof;
-        canid_t canid_thermal;
+        // canid_t canid_tof;
+        // canid_t canid_thermal;
 
         bool enable_tof;
         bool enable_thermal;
@@ -62,12 +61,12 @@ namespace sensorbus{
     struct SensorBusParams{
         std::string interface_name;
        //std::shared_ptr<com::SocketCANFD> can_interface;
-       canid_t canid_tof_status;
-       canid_t canid_tof_request;
-       canid_t canid_thermal_status;
-       canid_t canid_thermal_request;
-       canid_t canid_light;
-       canid_t canid_broadcast;
+    //    canid_t canid_tof_status;
+    //    canid_t canid_tof_request;
+    //    canid_t canid_thermal_status;
+    //    canid_t canid_thermal_request;
+    //    canid_t canid_light;
+    //    canid_t canid_broadcast;
 
         std::vector<sensor::SensorBoardParams> board_param_vec;
     };

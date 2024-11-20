@@ -13,11 +13,18 @@
 namespace com
 {
 
-SocketCANFD::SocketCANFD(std::string devFile) : ComInterface(devFile){
-	std::vector<SocketCANFDObserver*> _observers;
+SocketCANFD::SocketCANFD(std::string interface_name, std::size_t sensor_count) : ComInterface(interface_name), _soc(0){
 	fillMap();
 
-	_soc = 0;
+	if(!openInterface(interface_name)){
+		std::cout << "WARNING: Cannot open interface: " << interface_name << std::endl;
+	}else{
+		_endpoints = ComEndpoint::createEndpoints(sensor_count);
+	}
+}
+
+SocketCANFD::~SocketCANFD(){
+	closeInterface();
 }
 
 bool SocketCANFD::openInterface(std::string interface_name)
@@ -57,7 +64,7 @@ bool SocketCANFD::openInterface(std::string interface_name)
 	return true;
 }
 
-bool SocketCANFD::send(Endpoint target, const std::vector<uint8_t>& data){
+bool SocketCANFD::send(ComEndpoint target, const std::vector<uint8_t>& data){
 
 	canid_t id = mapEndpointToId(target);
 	return send(id, data);
@@ -137,9 +144,10 @@ bool SocketCANFD::listener()
 					{
 						if (observer)
 						{
-							for(auto canid : observer->getCANIds()){ // Why error??? -> getCANIds return uninitialized vector :(
+							for(auto endpoint : observer->getEndpoints()){ // Why error??? -> getCANIds return uninitialized vector :(
+								canid_t canid = mapEndpointToId(endpoint);
 								if(canid == frame_rd.can_id)
-								observer->forwardNotification(frame_rd);
+								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
 							}
 						}
 					}
@@ -168,31 +176,39 @@ bool SocketCANFD::closeInterface()
 
 void SocketCANFD::fillMap(){
 	canid_t canid_tof_status, canid_tof_request, canid_tof_data_in, canid_tof_data_out, canid_broadcast;
-	makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status,  canid_tof_request,  canid_broadcast);
-	makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
+	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status,  canid_tof_request,  canid_broadcast);
+	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
 	canid_t canid_thermal_status, canid_thermal_request, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
-	makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status,  canid_thermal_request,  canid_thermal_broadcast);
-	makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA,   canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
+	CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status,  canid_thermal_request,  canid_thermal_broadcast);
+	CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA,   canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
 	canid_t canid_light_in, canid_light_out, canid_light;
-	makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
+	CanProtocol::makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
 
-	_id_map[Endpoint::tof_status] 		= canid_tof_status;
-    _id_map[Endpoint::tof_request]		= canid_tof_request;
-    _id_map[Endpoint::thermal_status]	= canid_thermal_status;
-    _id_map[Endpoint::thermal_request]	= canid_thermal_request;
-    _id_map[Endpoint::light]			= canid_light;
-    _id_map[Endpoint::broadcast]		= canid_broadcast;
+	_id_map[ComEndpoint("tof_status")] 		= canid_tof_status;
+    _id_map[ComEndpoint("tof_request")]		= canid_tof_request;
+    _id_map[ComEndpoint("thermal_status")]	= canid_thermal_status;
+    _id_map[ComEndpoint("thermal_request")]	= canid_thermal_request;
+    _id_map[ComEndpoint("light")]			= canid_light;
+    _id_map[ComEndpoint("broadcast")]		= canid_broadcast;
+
+	for(std::size_t i=6; i<_endpoints.size(); i++){
+		unsigned long idx = i - 6;
+
+		_id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + canid_tof_status;
+		_id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + canid_tof_status;
+
+	}
 }
 
-canid_t SocketCANFD::mapEndpointToId(Endpoint endpoint){
+canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint){
 	canid_t id = _id_map[endpoint];
 	return id;
 };
   
-Endpoint SocketCANFD::mapIdToEndpoint(canid_t id){
+// ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id){
 
-};
+// };
 
 } // namespace

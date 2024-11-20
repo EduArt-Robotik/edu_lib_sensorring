@@ -3,23 +3,35 @@
 
 namespace com{
 
+ComInterface* ComManager::createInterface(std::string interface_name, std::size_t sensor_count){
 
-std::shared_ptr<ComInterface> ComManager::getInterface(std::string interface_name){
+    ComInterface* requested_interface = nullptr;
 
-    std::shared_ptr<ComInterface> requested_interface;
-
-    for(auto interface : _interfaces){
+    for(const auto& interface : _interfaces){
         if(interface->getInterfaceName() == interface_name){
-            requested_interface = interface;
+            requested_interface = interface.get();
         }
     }
 
     if(!requested_interface){
-        requested_interface = std::make_shared<SocketCANFD>(interface_name); // ToDo: Incorporate different Interface types
-        _interfaces.push_back(requested_interface);
+        _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count)); // ToDo: Incorporate different Interface types
+        requested_interface = _interfaces.back().get();
     }
 
     return requested_interface;
-};
+}
+
+ComInterface* ComManager::getInterface(std::string interface_name){
+
+    ComInterface* requested_interface = nullptr;
+
+    for(const auto& interface : _interfaces){
+        if(interface->getInterfaceName() == interface_name){
+            requested_interface = interface.get();
+        }
+    }
+
+    return requested_interface;
+}
 
 }; // namespace edu

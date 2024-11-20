@@ -21,12 +21,11 @@ add_library(sensorring SHARED
   src/sensors/ThermalSensor.cpp
   src/sensors/LedLight.cpp
   src/sensors/BaseSensor.cpp
-  src/interface/ComManager.cpp
   src/interface/ComInterface.cpp
+  src/interface/ComManager.cpp
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
   src/interface/can/SocketCANFD.cpp
-  src/interface/can/SocketCANFDObserver.cpp
   src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
   src/math/Math.cpp
@@ -58,6 +57,7 @@ install(FILES
   include/${PROJECT_NAME}/MeasurementObservers.hpp
   include/${PROJECT_NAME}/utils/CustomTypes.hpp
   include/${PROJECT_NAME}/utils/Parameters.hpp
+  include/${PROJECT_NAME}/math/Math.hpp
   DESTINATION include/${PROJECT_NAME}
 )
 

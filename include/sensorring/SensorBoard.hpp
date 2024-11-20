@@ -21,7 +21,7 @@ enum class SensorBoardType{
 
 class SensorBoard /*: public edu::SocketCANFDObserver*/{
     public:
-        SensorBoard(SensorBoardParams params, std::shared_ptr<com::ComInterface>interface);
+        SensorBoard(SensorBoardParams params, com::ComInterface* interface);
         ~SensorBoard();
 
         SensorBoardType getType() const;

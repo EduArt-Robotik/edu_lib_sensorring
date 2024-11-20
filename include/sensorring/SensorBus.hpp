@@ -4,13 +4,14 @@
 #include <vector>
 #include <memory>
 
+#include "ComObserver.hpp"
 #include "SensorBoard.hpp"
 #include "Parameters.hpp"
 
 namespace sensorbus{
 
 
-class SensorBus : public com::SocketCANFDObserver{
+class SensorBus : public com::ComObserver{
     public:
         SensorBus(SensorBusParams params);
         ~SensorBus();
@@ -45,7 +46,7 @@ class SensorBus : public com::SocketCANFDObserver{
         bool stopThermalCalibration();
 		bool startThermaltCalibration(size_t window);
         
-        void notify(const canfd_frame& frame);
+        void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
     private:
         SensorBusParams _params;
@@ -59,7 +60,7 @@ class SensorBus : public com::SocketCANFDObserver{
         size_t _tof_measurement_count;
         size_t _thermal_measurement_count;
 
-        std::shared_ptr<com::ComInterface> _can_interface;
+        com::ComInterface* _can_interface;
 };
 
 };

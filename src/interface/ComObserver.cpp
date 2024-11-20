@@ -12,17 +12,17 @@ ComObserver::~ComObserver()
 
 }
 
-void ComObserver::addEndpoint(const Endpoint canid)
+void ComObserver::addEndpoint(const ComEndpoint canid)
 {
   _endpoints.push_back(canid);
 }
 
-const std::vector<Endpoint>& ComObserver::getEndpoints() const
+const std::vector<ComEndpoint>& ComObserver::getEndpoints() const
 {
   return _endpoints;
 }
 
-void ComObserver::forwardNotification(const Endpoint source, const std::vector<uint8_t>& data)
+void ComObserver::forwardNotification(const ComEndpoint source, const std::vector<uint8_t>& data)
 {
     // Take time stamp
     _timestamp = std::chrono::steady_clock::now();

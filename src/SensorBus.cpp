@@ -11,8 +11,10 @@ namespace sensorbus{
 
 SensorBus::SensorBus(SensorBusParams params) : _params(params){
 
-    for(auto board_params : params.board_param_vec){
-        auto interface = com::ComManager::getInstance()->getInterface(board_params.interface_name);
+    auto interface = com::ComManager::getInstance()->createInterface(params.interface_name, params.board_param_vec.size());
+    //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
+
+    for(auto board_params : params.board_param_vec){    
         _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface));
     }
 
@@ -25,9 +27,9 @@ SensorBus::SensorBus(SensorBusParams params) : _params(params){
     _thermal_measurement_count = 0;
 
     // add my own callback
-    addCANId(_params.canid_broadcast);
-    addCANId(_params.canid_tof_status);
-    addCANId(_params.canid_thermal_status);
+    addEndpoint(com::ComEndpoint("broadcast"));
+    addEndpoint(com::ComEndpoint("tof_status"));
+    addEndpoint(com::ComEndpoint("thermal_status"));
     _can_interface = com::ComManager::getInstance()->getInterface(_params.interface_name);
 };
 
@@ -74,18 +76,18 @@ size_t SensorBus::getEnumerationCount() const{
 void SensorBus::syncLights(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};
-    _can_interface->send(com::Endpoint::light, tx_buf);
+    _can_interface->send(com::ComEndpoint("light"), tx_buf);
 };
 
 void SensorBus::setLights(int mode, unsigned char red, unsigned char green, unsigned char blue){
 
     std::vector<uint8_t> tx_buf = {(uint8_t )mode, red, green, blue};
-    _can_interface->send(com::Endpoint::light, tx_buf);
+    _can_interface->send(com::ComEndpoint("light"), tx_buf);
 };
 
 void SensorBus::resetDevices(){
     std::vector<uint8_t> tx_buf = {CMD_HARD_RESET};
-    _can_interface->send(com::Endpoint::broadcast, tx_buf);
+    _can_interface->send(com::ComEndpoint("broadcast"), tx_buf);
 };
 
 int SensorBus::enumerateDevices(){
@@ -93,7 +95,7 @@ int SensorBus::enumerateDevices(){
     _enumerate_count = 0;
 
     std::vector<uint8_t> tx_buf = {CMD_ACTIVE_DEVICE_QUERY};
-    _can_interface->send(com::Endpoint::broadcast, tx_buf);
+    _can_interface->send(com::ComEndpoint("broadcast"), tx_buf);
 
     // wait until all sensors sent their response. 100 ms timeout
     unsigned int watchdog = 0;
@@ -121,7 +123,7 @@ void SensorBus::requestEEPROM(){
         uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
         uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
         std::vector<uint8_t> tx_buf = {CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low};
-        _can_interface->send(com::Endpoint::thermal_request, tx_buf);
+        _can_interface->send(com::ComEndpoint("thermal_request"), tx_buf);
     }
 };
 
@@ -153,7 +155,7 @@ void SensorBus::requestTofMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(com::Endpoint::tof_request, tx_buf);
+    _can_interface->send(com::ComEndpoint("tof_request"), tx_buf);
 };
 
 void SensorBus::fetchTofData(){
@@ -167,7 +169,7 @@ void SensorBus::fetchTofData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {sensor_select_high, sensor_select_low};
-    _can_interface->send(com::Endpoint::tof_request, tx_buf);
+    _can_interface->send(com::ComEndpoint("tof_request"), tx_buf);
 };
 
 void SensorBus::requestThermalMeasurement(){
@@ -186,7 +188,7 @@ void SensorBus::requestThermalMeasurement(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(com::Endpoint::thermal_request, tx_buf);
+    _can_interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 };
 
 void SensorBus::fetchThermalData(){
@@ -200,7 +202,7 @@ void SensorBus::fetchThermalData(){
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low};
-    _can_interface->send(com::Endpoint::thermal_request, tx_buf);
+    _can_interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 };
 
 bool SensorBus::allTofMeasurementsReady() const{
@@ -288,32 +290,32 @@ bool SensorBus::startThermaltCalibration(size_t window){
     return success;
 };
 
-void SensorBus::notify(const canfd_frame& frame){
+void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     // general sensor board status
-    if(frame.can_id == _params.canid_broadcast){
+    if(source == com::ComEndpoint("braodcast")){
         // enumeration message
-        if(frame.data[0] == CMD_ACTIVE_DEVICE_RESPONSE && frame.len == 3 && _enumerate_flag){
+        if(data[0] == CMD_ACTIVE_DEVICE_RESPONSE && data.size() == 3 && _enumerate_flag){
             _enumerate_count++;
 
-            size_t idx = frame.data[1] - 1;
+            size_t idx = data[1] - 1;
             if(idx < getSensorCount()){
-                if(frame.data[2] == 0) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::sidepanel);
-                if(frame.data[2] == 1) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::headlight);
-                if(frame.data[2] == 2) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::taillight);
-                if(frame.data[2] == 3) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::minipanel);
+                if(data[2] == 0) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::sidepanel);
+                if(data[2] == 1) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::headlight);
+                if(data[2] == 2) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::taillight);
+                if(data[2] == 3) _sensor_board_vec[idx]->setType(sensor::SensorBoardType::minipanel);
             }
         }
         
     // tof sensor status
-    }else if(frame.can_id == _params.canid_tof_status){
+    }else if(source == com::ComEndpoint("tof_status")){
         // tof measurement finished
-        //if(frame.len == 1){
+        //if(data.size() == 1){
         //    _tof_measurement_count ++;
         //}
     
 
     // thermal sensor status
-    }else if(frame.can_id == _params.canid_thermal_status){
+    }else if(source == com::ComEndpoint("thermal_status")){
     
     }
 };

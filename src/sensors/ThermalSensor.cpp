@@ -1,14 +1,15 @@
-#include "sensors/ThermalSensor.hpp"
-#include "utils/FileManager.hpp"
-#include "utils/Iron.hpp"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
 
+#include "ThermalSensor.hpp"
+#include "FileManager.hpp"
+#include "Iron.hpp"
+
 namespace sensor{
 
-ThermalSensor::ThermalSensor(ThermalSensorParams params, std::shared_ptr<com::ComInterface> interface, bool enable) :
-    BaseSensor(interface, com::Endpoint::thermal_status, enable),
+ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, bool enable) :
+    BaseSensor(interface, com::ComEndpoint("thermal_status"), enable),
     _params(params){
 
     _rx_buffer_offset = 0;
@@ -105,13 +106,13 @@ void ThermalSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 };
 
-void ThermalSensor::canCallback(const com::Endpoint source, const std::vector<uint8_t>& data){
+void ThermalSensor::canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
 
     if(!_got_eeprom){
         
         // check if there is still data to be written
-        if((_rx_buffer_offset + msg_size) < (int) sizeof(heimannsensor::HTPA32Eeprom) + CANFD_MAX_DLEN){
+        if((_rx_buffer_offset + msg_size) < (int) sizeof(heimannsensor::HTPA32Eeprom) + MAX_MSG_LENGTH){
 
             // have to account fot last few values of the eeprom because sizeof(ETPA32Eeprom) is not dividable by 64 ( = canfd msg length)
             std::size_t len = (int) sizeof(heimannsensor::HTPA32Eeprom) - _rx_buffer_offset;
@@ -134,7 +135,7 @@ void ThermalSensor::canCallback(const com::Endpoint source, const std::vector<ui
                 _ptat = (uint16_t) (data[2] << 0 | data[3] << 8);
 
             // data message
-            }else if(msg_size == CANFD_MAX_DLEN){
+            }else if(msg_size == MAX_MSG_LENGTH){
                 if((_rx_buffer_offset + msg_size) <= (int) sizeof(_rx_buffer)){
                     std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
                     _rx_buffer_offset += msg_size;

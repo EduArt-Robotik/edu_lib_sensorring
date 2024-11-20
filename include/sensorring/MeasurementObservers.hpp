@@ -7,7 +7,7 @@
 class TofObserver{
     public:
         TofObserver() = default;
-        virtual ~TofObserver();
+        ~TofObserver() = default;
 
         virtual void onTofMeasurement(const measurement::TofSensorMeasurement measurement) = 0;
 
@@ -21,7 +21,7 @@ class TofObserver{
 class ThermalObserver{
     public:
         ThermalObserver() = default;
-        virtual ~ThermalObserver();
+        ~ThermalObserver() = default;
 
         virtual void onThermalMeasurement(const measurement::ThermalSensorMeasurement measurement) = 0;
 
@@ -40,7 +40,7 @@ enum class LogVerbosity{
 class LogObserver{
     public:
         LogObserver() = default;
-        virtual ~LogObserver();
+        ~LogObserver() = default;
 
         virtual void onOutputLog(const LogVerbosity verbosity, const std::string msg) = 0;
 

@@ -128,6 +128,10 @@ namespace com
 #define CMD_THERMAL_DATA_REQUEST    0x02
 
 
-void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
+class CanProtocol{
+public:
+    CanProtocol() = delete;
+    static void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
+};
 
 } // namespace
