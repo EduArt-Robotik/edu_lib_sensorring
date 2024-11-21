@@ -26,6 +26,7 @@ add_library(sensorring SHARED
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
   src/interface/can/SocketCANFD.cpp
+  src/utils/Logger.cpp
   src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
   src/math/Math.cpp
@@ -54,7 +55,7 @@ install(TARGETS sensorring
 
 install(FILES
   include/${PROJECT_NAME}/MeasurementManager.hpp
-  include/${PROJECT_NAME}/MeasurementObservers.hpp
+  include/${PROJECT_NAME}/utils/ObserverInterface.hpp
   include/${PROJECT_NAME}/utils/CustomTypes.hpp
   include/${PROJECT_NAME}/utils/Parameters.hpp
   include/${PROJECT_NAME}/math/Math.hpp

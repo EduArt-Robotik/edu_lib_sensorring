@@ -2,7 +2,7 @@
 
 #include "Parameters.hpp"
 #include "CustomTypes.hpp"
-#include "MeasurementObservers.hpp"
+#include "ObserverInterface.hpp"
 
 #include <vector>
 #include <string>
@@ -50,9 +50,6 @@ private:
     int  notifyToFData();
     int  notifyThermalData();
     void notifyState(const WorkerState state);
-    
-    void log(const LogVerbosity verbosity, const std::string msg);
-    void log(const LogVerbosity verbosity, const std::stringstream msg);
     
     WorkerState _manager_state;
     MeasurementState _measurement_state;
