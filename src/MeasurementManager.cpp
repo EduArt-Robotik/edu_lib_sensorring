@@ -69,6 +69,10 @@ void MeasurementManager::enableThermalMeasurement(bool state){
 	_thermal_enabled = state;
 };
 
+MeasurementManagerParams MeasurementManager::getParams() const{
+	return _params;
+};
+
 std::string MeasurementManager::printTopology() const{
 	std::stringstream ss;
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
@@ -164,7 +168,7 @@ int MeasurementManager::notifyToFData(){
 
 	auto combined_measurement = sensor::TofSensor::combineTofMeasurements(measurement_vec);
 	
-	if(combined_measurement.length > 0){
+	if(combined_measurement.size > 0){
 
 		for(auto observer : _observer_vec){
 			if(observer) observer->onTofMeasurement(combined_measurement);
@@ -178,6 +182,7 @@ int MeasurementManager::notifyToFData(){
 
 int MeasurementManager::notifyThermalData(){
 	int error_frames = 0;
+	std::size_t idx = 0;
 	sensor::SensorState error = sensor::SensorState::SensorOK;
 
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
@@ -189,10 +194,11 @@ int MeasurementManager::notifyThermalData(){
 				if(error == sensor::SensorState::SensorOK){
 
 					for(auto observer : _observer_vec){
-						if(observer) observer->onThermalMeasurement(*measurement);
+						if(observer) observer->onThermalMeasurement(idx, *measurement);
 					}
 				}
 
+				idx++;
 			}
 		}
 	}
