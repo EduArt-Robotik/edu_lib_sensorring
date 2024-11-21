@@ -28,7 +28,22 @@ enum class MeasurementState{
 MeasurementManager::MeasurementManager(MeasurementManagerParams params) :
 _params(params){
 
-	_sensor_ring = std::make_unique<sensorring::SensorRing>(params.ring_params);
+	init();
+};
+
+MeasurementManager::MeasurementManager(MeasurementManagerParams params, MeasurementObserver* observer) :
+_params(params){
+
+	registerObserver(observer);
+	init();
+};
+
+MeasurementManager::~MeasurementManager(){
+	stopMeasuring();
+};
+
+void MeasurementManager::init(){
+	_sensor_ring = std::make_unique<sensorring::SensorRing>(_params.ring_params);
 
 	_is_tof_throttled = _params.frequency_tof_hz > 0.0;
     _is_thermal_throttled = _params.frequency_thermal_hz > 0.0;
@@ -57,10 +72,6 @@ _params(params){
 	// prepare state machine
 	notifyState(WorkerState::Initialized);
 	_measurement_state = MeasurementState::init;
-};
-    
-MeasurementManager::~MeasurementManager(){
-	stopMeasuring();
 };
 
 void MeasurementManager::enableTofMeasurement(bool state){

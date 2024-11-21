@@ -26,6 +26,7 @@ enum class MeasurementState;
 class MeasurementManager{
 public:
     MeasurementManager(MeasurementManagerParams params);
+    MeasurementManager(MeasurementManagerParams params, MeasurementObserver* observer);
     ~MeasurementManager();
     
     int measureSome();
@@ -44,6 +45,7 @@ public:
     bool startThermalCalibration(std::size_t window);
 
 private:
+    void init();
     void StateMachine();
     void StateMachineWorker();
     
