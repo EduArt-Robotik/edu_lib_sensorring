@@ -9,21 +9,24 @@
 #include <string.h>
 #include <sys/time.h>
 #include <algorithm>
+#include <chrono>
 
 namespace com
 {
 
 SocketCANFD::SocketCANFD(std::string interface_name, std::size_t sensor_count) : ComInterface(interface_name), _soc(0){
-	fillMap();
 
 	if(!openInterface(interface_name)){
 		std::cout << "WARNING: Cannot open interface: " << interface_name << std::endl;
-	}else{
-		_endpoints = ComEndpoint::createEndpoints(sensor_count);
 	}
+
+	_endpoints = ComEndpoint::createEndpoints(sensor_count);
+	fillMap(sensor_count);
+	startListener();
 }
 
 SocketCANFD::~SocketCANFD(){
+	stopListener();
 	closeInterface();
 }
 
@@ -140,11 +143,11 @@ bool SocketCANFD::listener()
 				recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
 				if(recvbytes)
 				{
-					for(auto observer : _observers) // check all observers
+					for(auto observer : _observers)
 					{
 						if (observer)
 						{
-							for(auto endpoint : observer->getEndpoints()){ // Why error??? -> getCANIds return uninitialized vector :(
+							for(auto endpoint : observer->getEndpoints()){
 								canid_t canid = mapEndpointToId(endpoint);
 								if(canid == frame_rd.can_id)
 								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
@@ -156,7 +159,7 @@ bool SocketCANFD::listener()
 		}
 		_mutex.unlock();
 
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	std::cout << "# Listener stop" << std::endl;
 
@@ -174,7 +177,7 @@ bool SocketCANFD::closeInterface()
 	return retval;
 }
 
-void SocketCANFD::fillMap(){
+void SocketCANFD::fillMap(std::size_t sensor_count){
 	canid_t canid_tof_status, canid_tof_request, canid_tof_data_in, canid_tof_data_out, canid_broadcast;
 	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status,  canid_tof_request,  canid_broadcast);
 	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
@@ -193,17 +196,15 @@ void SocketCANFD::fillMap(){
     _id_map[ComEndpoint("light")]			= canid_light;
     _id_map[ComEndpoint("broadcast")]		= canid_broadcast;
 
-	for(std::size_t i=6; i<_endpoints.size(); i++){
-		unsigned long idx = i - 6;
-
-		_id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + canid_tof_status;
-		_id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + canid_tof_status;
+	for(std::size_t idx=0; idx<sensor_count; idx++){
+		_id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + idx;
+		_id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + idx;
 
 	}
 }
 
 canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint){
-	canid_t id = _id_map[endpoint];
+	canid_t id = _id_map.at(endpoint); // may throw out_of_range exception
 	return id;
 };
   

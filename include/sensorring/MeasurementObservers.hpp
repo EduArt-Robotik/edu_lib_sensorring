@@ -4,32 +4,6 @@
 #include "CustomTypes.hpp"
 
 
-class TofObserver{
-    public:
-        TofObserver() = default;
-        ~TofObserver() = default;
-
-        virtual void onTofMeasurement(const measurement::TofSensorMeasurement measurement) = 0;
-
-
-    private:
-
-
-}; // class TofObserver
-
-
-class ThermalObserver{
-    public:
-        ThermalObserver() = default;
-        ~ThermalObserver() = default;
-
-        virtual void onThermalMeasurement(const measurement::ThermalSensorMeasurement measurement) = 0;
-
-    private:
-
-
-}; // class ThermalObserver
-
 enum class LogVerbosity{
     Debug,
     Info,
@@ -37,14 +11,20 @@ enum class LogVerbosity{
     Error
 };
 
-class LogObserver{
+enum class WorkerState{
+    Initialized,
+    Running,
+    Shutdown,
+    Error
+};
+
+class MeasurementObserver{
     public:
-        LogObserver() = default;
-        ~LogObserver() = default;
+        MeasurementObserver() = default;
+        ~MeasurementObserver() = default;
 
-        virtual void onOutputLog(const LogVerbosity verbosity, const std::string msg) = 0;
-
-    private:
-
-
-}; // class ThermalObserver
+        virtual void onStateChange(__attribute_maybe_unused__ const WorkerState status) {};
+        virtual void onOutputLog(__attribute_maybe_unused__ const LogVerbosity verbosity, __attribute_maybe_unused__ const std::string msg) {};
+        virtual void onTofMeasurement(__attribute_maybe_unused__ const measurement::TofSensorMeasurement measurement) {};
+        virtual void onThermalMeasurement(__attribute_maybe_unused__ const measurement::ThermalSensorMeasurement measurement) {};
+};

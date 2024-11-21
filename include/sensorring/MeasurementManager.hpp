@@ -32,30 +32,32 @@ public:
     int startMeasuring();
     int stopMeasuring();
 
-    void registerLogObserver(LogObserver* observer);
-    void registerTofObserver(TofObserver* observer);
-    void registerThermalObserver(ThermalObserver* observer);
-
-    std::string printTopology();
+    void registerObserver(MeasurementObserver* observer);
+    
+    WorkerState getWorkerState() const;
+    std::string printTopology() const;
+    
     void enableTofMeasurement(bool state);
     void enableThermalMeasurement(bool state);
     bool stopThermalCalibration();
     bool startThermalCalibration(std::size_t window);
 
 private:
-    int publishToFData();
-    int publishThermalData();
     void StateMachine();
     void StateMachineWorker();
+    
+    int  notifyToFData();
+    int  notifyThermalData();
+    void notifyState(const WorkerState state);
     
     void log(const LogVerbosity verbosity, const std::string msg);
     void log(const LogVerbosity verbosity, const std::stringstream msg);
     
-    MeasurementState _state;
+    WorkerState _manager_state;
+    MeasurementState _measurement_state;
     MeasurementManagerParams _params;
     std::unique_ptr<sensorring::SensorRing> _sensor_ring;
 
-    int _error;
     bool _tof_enabled;
     bool _thermal_enabled;
     bool _first_measurement;
@@ -66,9 +68,7 @@ private:
     bool _is_thermal_throttled;
     bool _thermal_measurement_flag;
 
-    std::vector<LogObserver*> _log_observer_vec;
-    std::vector<TofObserver*> _tof_observer_vec;
-    std::vector<ThermalObserver*> _thermal_observer_vec;
+    std::vector<MeasurementObserver*> _observer_vec;
 
     std::atomic<bool> _is_running;
     std::thread _worker_thread;

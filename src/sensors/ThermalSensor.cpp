@@ -9,7 +9,7 @@
 namespace sensor{
 
 ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, bool enable) :
-    BaseSensor(interface, com::ComEndpoint("thermal_status"), enable),
+    BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(params.idx) + "_data"), enable),
     _params(params){
 
     _rx_buffer_offset = 0;
@@ -106,7 +106,7 @@ void ThermalSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 };
 
-void ThermalSensor::canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data){
+void ThermalSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
 
     if(!_got_eeprom){

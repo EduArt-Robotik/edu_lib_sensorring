@@ -25,6 +25,7 @@ GenericGrayscaleImage<T, RESOLUTION>& GenericGrayscaleImage<T, RESOLUTION>::roun
 	for(auto& element : data){
 		element = std::round(element);
 	}
+	return *this;
 }
 
 template<typename T, std::size_t RESOLUTION>

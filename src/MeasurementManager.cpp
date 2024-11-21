@@ -45,17 +45,16 @@ _params(params){
     _first_measurement = true;
 	_thermal_measurement_flag = false;
     
-	_error = 0;
 	_last_tof_measurement_timestamp_s 		= std::chrono::steady_clock::now();;
 	_last_thermal_measurement_timestamp_s	= std::chrono::steady_clock::now();;
-
 
 	if(_params.print_topology){
 		log(LogVerbosity::Info, printTopology());
 	}
 
 	// prepare state machine
-	_state = MeasurementState::init;
+	notifyState(WorkerState::Initialized);
+	_measurement_state = MeasurementState::init;
 };
     
 MeasurementManager::~MeasurementManager(){
@@ -70,7 +69,7 @@ void MeasurementManager::enableThermalMeasurement(bool state){
 	_thermal_enabled = state;
 };
 
-std::string MeasurementManager::printTopology(){
+std::string MeasurementManager::printTopology() const{
 	std::stringstream ss;
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
 		ss << "";
@@ -128,7 +127,23 @@ std::string MeasurementManager::printTopology(){
 	return ss.str();
 };
 
-int MeasurementManager::publishToFData(){
+bool MeasurementManager::stopThermalCalibration(){
+	return _sensor_ring->stopThermalCalibration();
+};
+
+bool MeasurementManager::startThermalCalibration(std::size_t window){
+	return _sensor_ring->startThermalCalibration(window);
+};
+
+/* ==========================================================================================
+	Handle observers
+========================================================================================== */
+
+void MeasurementManager::registerObserver(MeasurementObserver* observer){
+	if(observer) _observer_vec.push_back(observer);
+};
+
+int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
 	sensor::SensorState error = sensor::SensorState::SensorOK;
 	std::vector<const measurement::TofSensorMeasurement*> measurement_vec;
@@ -151,7 +166,7 @@ int MeasurementManager::publishToFData(){
 	
 	if(combined_measurement.length > 0){
 
-		for(auto observer : _tof_observer_vec){
+		for(auto observer : _observer_vec){
 			if(observer) observer->onTofMeasurement(combined_measurement);
 		}
 		
@@ -161,7 +176,7 @@ int MeasurementManager::publishToFData(){
 	return -1;
 };
 
-int MeasurementManager::publishThermalData(){
+int MeasurementManager::notifyThermalData(){
 	int error_frames = 0;
 	sensor::SensorState error = sensor::SensorState::SensorOK;
 
@@ -173,7 +188,7 @@ int MeasurementManager::publishThermalData(){
 
 				if(error == sensor::SensorState::SensorOK){
 
-					for(auto observer : _thermal_observer_vec){
+					for(auto observer : _observer_vec){
 						if(observer) observer->onThermalMeasurement(*measurement);
 					}
 				}
@@ -184,32 +199,21 @@ int MeasurementManager::publishThermalData(){
 	return error_frames;
 };
 
-bool MeasurementManager::stopThermalCalibration(){
-	_sensor_ring->stopThermalCalibration();
+void MeasurementManager::notifyState(const WorkerState state){
+	_manager_state = state;
+
+	for(auto observer : _observer_vec){
+		if(observer) observer->onStateChange(state);
+	}
 };
 
-bool MeasurementManager::startThermalCalibration(std::size_t window){
-	_sensor_ring->startThermalCalibration(window);
-};
-
-/* ==========================================================================================
-	Handle observers
-========================================================================================== */
-
-void MeasurementManager::registerLogObserver(LogObserver* observer){
-	if(observer) _log_observer_vec.push_back(observer);
-};
-
-void MeasurementManager::registerTofObserver(TofObserver* observer){
-	if(observer) _tof_observer_vec.push_back(observer);
-};
-
-void MeasurementManager::registerThermalObserver(ThermalObserver* observer){
-	if(observer) _thermal_observer_vec.push_back(observer);
+WorkerState MeasurementManager::getWorkerState() const
+{
+	return _manager_state;
 };
 
 void MeasurementManager::log(const LogVerbosity verbosity, const std::string msg){
-	for(auto observer : _log_observer_vec){
+	for(auto observer : _observer_vec){
 		if(observer) observer->onOutputLog(verbosity, msg);
 	}
 };
@@ -227,6 +231,7 @@ int MeasurementManager::measureSome(){
 
 	if(!_is_running){
 		if(_tof_enabled || _thermal_enabled){
+			notifyState(WorkerState::Running);
 			StateMachine();
 			error = 0;
 		}
@@ -243,10 +248,11 @@ int MeasurementManager::startMeasuring(){
 			// begin state machine operation
 			_is_running = true;
 			_worker_thread = std::thread(&MeasurementManager::StateMachineWorker, this);
+			notifyState(WorkerState::Running);
 			error = 0;
 		}
 	}
-
+	
 	return error;
 };
 
@@ -257,6 +263,7 @@ int MeasurementManager::stopMeasuring(){
 		_is_running = false;
 		if(_worker_thread.joinable()){
 			_worker_thread.join();
+			notifyState(WorkerState::Shutdown);
 			error = 0;
 		}
 	}
@@ -279,7 +286,7 @@ void MeasurementManager::StateMachineWorker(){
 
 void MeasurementManager::StateMachine(){
 	bool success = true;
-	switch (_state){
+	switch (_measurement_state){
 
 		/* =============================================
 			Initialization part of the state machine
@@ -290,7 +297,7 @@ void MeasurementManager::StateMachine(){
 			log(LogVerbosity::Info, "Initializing MeasurementManager state machine");
 			
 			// state transition
-			_state = MeasurementState::reset_sensors;
+			_measurement_state = MeasurementState::reset_sensors;
 			break;
 
 		case MeasurementState::reset_sensors:
@@ -299,7 +306,7 @@ void MeasurementManager::StateMachine(){
 			std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors!
 			
 			// state transition
-			_state = MeasurementState::sync_lights;
+			_measurement_state = MeasurementState::sync_lights;
 			break;
 
 		case MeasurementState::sync_lights:
@@ -307,7 +314,7 @@ void MeasurementManager::StateMachine(){
 			_sensor_ring->syncLight();
 
 			// state transition
-			_state = MeasurementState::enumerate_sensors;
+			_measurement_state = MeasurementState::enumerate_sensors;
 			break;
 
 		case MeasurementState::enumerate_sensors:
@@ -326,10 +333,10 @@ void MeasurementManager::StateMachine(){
 
 			// state transition
 			if(success){
-				_state = MeasurementState::get_eeprom;
+				_measurement_state = MeasurementState::get_eeprom;
 			}else{
 				log(LogVerbosity::Error, "Failed to enumerate sensors.");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -341,10 +348,10 @@ void MeasurementManager::StateMachine(){
 
 			// state transition
 			if(success){
-				_state = MeasurementState::pre_loop_init;        
+				_measurement_state = MeasurementState::pre_loop_init;        
 			}else{
 				log(LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor->");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -355,7 +362,7 @@ void MeasurementManager::StateMachine(){
 			std::this_thread::sleep_for(std::chrono::seconds(1)); // sleep 1 second
 			
 			// state transition
-			_state = MeasurementState::request_tof_measurement;
+			_measurement_state = MeasurementState::request_tof_measurement;
 			break;
 
 		/* =============================================
@@ -368,7 +375,7 @@ void MeasurementManager::StateMachine(){
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 
 			// state transition
-			_state = MeasurementState::request_thermal_measurement;
+			_measurement_state = MeasurementState::request_thermal_measurement;
 			break;
 
 		case MeasurementState::request_thermal_measurement:
@@ -392,7 +399,7 @@ void MeasurementManager::StateMachine(){
 			}
 
 			// state transition
-			_state = MeasurementState::wait_for_data;
+			_measurement_state = MeasurementState::wait_for_data;
 			break;
 
 		case MeasurementState::wait_for_data:
@@ -405,14 +412,14 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				if(_first_measurement){ 
 					_first_measurement = false;
-					_state = MeasurementState::request_tof_measurement;
+					_measurement_state = MeasurementState::request_tof_measurement;
 					break;
 				}else{
-					_state = MeasurementState::fetch_tof_data; 
+					_measurement_state = MeasurementState::fetch_tof_data; 
 				}
 			}else{
 				log(LogVerbosity::Error, "Timeout occured while waiting for completion of measurements.");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -422,17 +429,17 @@ void MeasurementManager::StateMachine(){
 				_sensor_ring->fetchTofData();
 				success = _sensor_ring->waitForAllTofDataTransmissionsComplete();
 				if(success){
-					int error = publishToFData();
-					log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing tof measurements from " << error << " sensor(s)");
+					int error = notifyToFData();
+					if (error != 0) log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing tof measurements from " << error << " sensor(s)");
 				}
 			}
 
 			// state transition
 			if(success){
-				_state = MeasurementState::fetch_thermal_data;
+				_measurement_state = MeasurementState::fetch_thermal_data;
 			}else{
 				log(LogVerbosity::Error, "Timeout occured while fetching tof measurements.");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -442,7 +449,7 @@ void MeasurementManager::StateMachine(){
 				_sensor_ring->fetchThermalData();
 				success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
 				if(success){
-					int error = publishThermalData();
+					int error = notifyThermalData();
 					if(error != 0) log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing thermal measurements from " << error << " sensor(s)");
 				} 
 				_thermal_measurement_flag = false;
@@ -450,10 +457,10 @@ void MeasurementManager::StateMachine(){
 
 			// state transition
 			if(success){
-				_state = MeasurementState::throttle_measurement;
+				_measurement_state = MeasurementState::throttle_measurement;
 			}else{
 				log(LogVerbosity::Error, "Timeout occured while fetching thermal measurements.");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -472,10 +479,10 @@ void MeasurementManager::StateMachine(){
 			
 			// state transition
 			if(success){
-				_state = MeasurementState::request_tof_measurement;
+				_measurement_state = MeasurementState::request_tof_measurement;
 			}else{
 				log(LogVerbosity::Error, "Timeout occured while taking tof measurements.");
-				_state = MeasurementState::error_handler;
+				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
@@ -485,7 +492,8 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::error_handler:
 			log(LogVerbosity::Error, "Error handler called.");
-			_state = MeasurementState::shutdown;
+			notifyState(WorkerState::Error);
+			_measurement_state = MeasurementState::shutdown;
 			break;
 
 		/* =============================================
@@ -494,6 +502,7 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::shutdown:
 			log(LogVerbosity::Error, "Shutting down state machine.");
+			notifyState(WorkerState::Shutdown);
 			_is_running = false;
 			break;
 	};

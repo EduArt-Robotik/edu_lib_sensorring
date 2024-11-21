@@ -68,7 +68,7 @@ public:
 
 private:
 
-  void fillMap();
+  void fillMap(std::size_t sensor_count);
 
   canid_t mapEndpointToId(ComEndpoint endpoint);
   

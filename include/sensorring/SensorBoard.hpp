@@ -19,7 +19,7 @@ enum class SensorBoardType{
     unknown
 };
 
-class SensorBoard /*: public edu::SocketCANFDObserver*/{
+class SensorBoard{
     public:
         SensorBoard(SensorBoardParams params, com::ComInterface* interface);
         ~SensorBoard();
@@ -38,8 +38,6 @@ class SensorBoard /*: public edu::SocketCANFDObserver*/{
         const TofSensor* getTof() const;
         const ThermalSensor* getThermal() const;
         const LedLight* getLed() const;
-
-        //void notify(struct canfd_frame* frame) override;
     
     private:
         SensorBoardType _sensor_type;

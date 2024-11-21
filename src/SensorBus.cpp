@@ -31,6 +31,7 @@ SensorBus::SensorBus(SensorBusParams params) : _params(params){
     addEndpoint(com::ComEndpoint("tof_status"));
     addEndpoint(com::ComEndpoint("thermal_status"));
     _can_interface = com::ComManager::getInstance()->getInterface(_params.interface_name);
+    _can_interface->registerObserver(this);
 };
 
 SensorBus::~SensorBus(){
@@ -292,7 +293,7 @@ bool SensorBus::startThermaltCalibration(size_t window){
 
 void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     // general sensor board status
-    if(source == com::ComEndpoint("braodcast")){
+    if(source == com::ComEndpoint("broadcast")){
         // enumeration message
         if(data[0] == CMD_ACTIVE_DEVICE_RESPONSE && data.size() == 3 && _enumerate_flag){
             _enumerate_count++;
