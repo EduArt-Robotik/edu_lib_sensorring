@@ -54,7 +54,6 @@ using GrayscaleImage	= GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 using TemperatureImage	= GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 using FalseColorImage	= GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 
-
 struct TofSensorMeasurement {
     int frame_id = 0;
     unsigned int size = 0;
