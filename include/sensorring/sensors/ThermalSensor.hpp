@@ -44,8 +44,6 @@ class ThermalSensor : public BaseSensor{
 
 		uint16_t _vdd;
 		uint16_t _ptat;
-		measurement::GrayscaleImage _latest_grayscale_image;
-		measurement::FalseColorImage _latest_falsecolor_image;
 		measurement::ThermalSensorMeasurement _latest_measurement;
 
 		uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2];

@@ -47,21 +47,21 @@ const ThermalSensorParams& ThermalSensor::getParams() const{
 };
 
 const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage() const{    
-    return &_latest_grayscale_image;
+    return &_latest_measurement.grayscale_img;
 }
 
 const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage(SensorState &error) const{    
     error = _error;
-    return &_latest_grayscale_image;
+    return &_latest_measurement.grayscale_img;
 }
 
 const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage() const{    
-    return &_latest_falsecolor_image;
+    return &_latest_measurement.falsecolor_img;
 }
 
 const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage(SensorState &error) const{   
     error = _error; 
-    return &_latest_falsecolor_image;
+    return &_latest_measurement.falsecolor_img;
 }
 
 const measurement::ThermalSensorMeasurement* ThermalSensor::getLatestMeasurement() const{
@@ -168,13 +168,13 @@ void ThermalSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoin
                         }
 
                         if(_params.auto_min_max){
-                            _latest_grayscale_image = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+                            _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
                         }else{
-                            _latest_grayscale_image = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min, _params.t_max);
+                            _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min, _params.t_max);
                         }
 
-                        rotateLeftImage(_latest_grayscale_image);
-                        _latest_falsecolor_image = convertToFalseColorImage(_latest_grayscale_image);
+                        rotateLeftImage(_latest_measurement.grayscale_img);
+                        _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
                         _new_measurement_ready_flag = true;
                     }
                 }else{
