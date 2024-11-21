@@ -75,6 +75,7 @@ namespace sensorbus{
 
 namespace sensorring{
     struct SensorRingParams{
+        std::string tf_name;
         std::vector<sensorbus::SensorBusParams> bus_param_vec;
     };
 }; // namespace SensorRing

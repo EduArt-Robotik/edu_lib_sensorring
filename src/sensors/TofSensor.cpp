@@ -100,7 +100,7 @@ const measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_
         }
     }
 
-    measurement.length = point_idx;
+    measurement.size = point_idx;
     measurement.point_data_transformed = transformPointCloud(measurement.point_data, _rot_m, _params.translation);
 
     return measurement;
@@ -125,11 +125,11 @@ measurement::TofSensorMeasurement TofSensor::combineTofMeasurements(const std::v
 
     unsigned int size = 0;
     for(auto measurement : measurements_vec){
-        size += measurement->length;
+        size += measurement->size;
     }
 
     // preallocate memory
-    combined_measurement.length = size;
+    combined_measurement.size = size;
     combined_measurement.point_distance.reserve(size);
     combined_measurement.point_sigma.reserve(size);
     combined_measurement.point_data.reserve(size);

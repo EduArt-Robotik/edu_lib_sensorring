@@ -34,9 +34,10 @@ public:
 
     void registerObserver(MeasurementObserver* observer);
     
-    WorkerState getWorkerState() const;
     std::string printTopology() const;
-    
+    WorkerState getWorkerState() const;
+    MeasurementManagerParams getParams() const;
+
     void enableTofMeasurement(bool state);
     void enableThermalMeasurement(bool state);
     bool stopThermalCalibration();
