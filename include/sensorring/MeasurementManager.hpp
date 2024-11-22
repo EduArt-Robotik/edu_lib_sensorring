@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Parameters.hpp"
-#include "CustomTypes.hpp"
-#include "ObserverInterface.hpp"
+#include "MeasurementObserver.hpp"
 
 #include <vector>
 #include <string>
-#include <sstream>
 #include <atomic>
 #include <thread>
 #include <chrono>
@@ -73,6 +71,6 @@ private:
     std::atomic<bool> _is_running;
     std::thread _worker_thread;
 
-}; // class MeasurementManager
+};
 
-}; // namespace MeasurementManager
+};
