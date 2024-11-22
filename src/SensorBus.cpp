@@ -7,9 +7,9 @@
 #include "canprotocol.hpp"
 #include "ComManager.hpp"
 
-namespace sensorbus{
+namespace bus{
 
-SensorBus::SensorBus(SensorBusParams params) : _params(params){
+SensorBus::SensorBus(BusParams params) : _params(params){
 
     auto interface = com::ComManager::getInstance()->createInterface(params.interface_name, params.board_param_vec.size());
     //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
@@ -117,7 +117,7 @@ void SensorBus::requestEEPROM(){
         // enable eeprom reading in thermal sensors
         sensor->thermalReadEEPROM();
         // check which boards have an active thermal sensor
-        active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getParams().idx;
+        active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
     }
     
     if(active_devices != 0){
@@ -148,7 +148,7 @@ void SensorBus::requestTofMeasurement(){
     for(auto& sensor : _sensor_board_vec){
         // check which boards have an active tof sensor
         if(sensor->getTof()->isEnabled()){
-            active_devices |= 1 << sensor->getTof()->getParams().idx;
+            active_devices |= 1 << sensor->getTof()->getIdx();
             _active_tof_sensors ++;
         }
     }
@@ -164,7 +164,7 @@ void SensorBus::fetchTofData(){
     for(auto& sensor : _sensor_board_vec){
         sensor->tofClearDataFlag();
         // check which boards have an active tof sensor
-        active_devices |= sensor->getTof()->isEnabled() << sensor->getTof()->getParams().idx;
+        active_devices |= sensor->getTof()->isEnabled() << sensor->getTof()->getIdx();
     }
     
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);
@@ -181,7 +181,7 @@ void SensorBus::requestThermalMeasurement(){
     for(auto& sensor : _sensor_board_vec){
         // check which boards have an active thermal sensor
         if(sensor->getThermal()->isEnabled()){
-            active_devices |= 1 << sensor->getThermal()->getParams().idx;
+            active_devices |= 1 << sensor->getThermal()->getIdx();
             _active_thermal_sensors ++;
         }
     }
@@ -197,7 +197,7 @@ void SensorBus::fetchThermalData(){
     for(auto& sensor : _sensor_board_vec){
         sensor->thermalClearDataFlag();
         // check which boards have an active tof sensor
-        active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getParams().idx;
+        active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getIdx();
     }
     
     uint8_t sensor_select_high = (uint8_t) ((active_devices >> 8) & 0xFF);

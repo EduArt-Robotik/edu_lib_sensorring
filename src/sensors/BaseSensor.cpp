@@ -2,7 +2,9 @@
 
 namespace sensor{
 
-BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, bool enable) : ComObserver(),
+BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable) : ComObserver(),
+    _idx(idx),
+    _error(SensorState::SensorInit),
     _new_data_available_flag(false),
     _new_data_in_buffer_flag(false),
     _new_measurement_ready_flag(false),
@@ -16,6 +18,10 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, bo
 
 BaseSensor::~BaseSensor(){
 
+};
+
+std::size_t BaseSensor::getIdx() const{
+    return _idx;
 };
 
 /*void BaseSensor::enableCallback(){

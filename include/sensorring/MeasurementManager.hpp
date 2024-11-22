@@ -13,20 +13,20 @@
 
 
 // Forward declaration
-namespace sensorring{
+namespace ring{
     class SensorRing;
 };
 
 
-namespace measurementmanager{
+namespace manager{
 
 // Forward declaration
 enum class MeasurementState;
 
 class MeasurementManager{
 public:
-    MeasurementManager(MeasurementManagerParams params);
-    MeasurementManager(MeasurementManagerParams params, MeasurementObserver* observer);
+    MeasurementManager(ManagerParams params);
+    MeasurementManager(ManagerParams params, MeasurementObserver* observer);
     ~MeasurementManager();
     
     int measureSome();
@@ -37,7 +37,7 @@ public:
     
     std::string printTopology() const;
     WorkerState getWorkerState() const;
-    MeasurementManagerParams getParams() const;
+    ManagerParams getParams() const;
 
     void enableTofMeasurement(bool state);
     void enableThermalMeasurement(bool state);
@@ -55,8 +55,8 @@ private:
     
     WorkerState _manager_state;
     MeasurementState _measurement_state;
-    MeasurementManagerParams _params;
-    std::unique_ptr<sensorring::SensorRing> _sensor_ring;
+    ManagerParams _params;
+    std::unique_ptr<ring::SensorRing> _sensor_ring;
 
     bool _tof_enabled;
     bool _thermal_enabled;

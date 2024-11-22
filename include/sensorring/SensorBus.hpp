@@ -8,12 +8,12 @@
 #include "SensorBoard.hpp"
 #include "Parameters.hpp"
 
-namespace sensorbus{
+namespace bus{
 
 
 class SensorBus : public com::ComObserver{
     public:
-        SensorBus(SensorBusParams params);
+        SensorBus(BusParams params);
         ~SensorBus();
 
         const std::string getInterfaceName() const;
@@ -49,7 +49,7 @@ class SensorBus : public com::ComObserver{
         void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
     private:
-        SensorBusParams _params;
+        BusParams _params;
         std::vector<std::unique_ptr<sensor::SensorBoard>> _sensor_board_vec;
         
         volatile bool _enumerate_flag;

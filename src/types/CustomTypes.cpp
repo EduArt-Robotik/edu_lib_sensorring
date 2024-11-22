@@ -96,7 +96,7 @@ GenericGrayscaleImage<T, RESOLUTION>& GenericGrayscaleImage<T, RESOLUTION>::oper
 	return *this;
 }
 
-void TofSensorMeasurement::reserve(std::size_t size){
+void TofMeasurement::reserve(std::size_t size){
         point_distance.reserve(size);
         point_sigma.reserve(size);
         point_data.reserve(size);

@@ -2,7 +2,7 @@
 
 namespace sensor{
 
-LedLight::LedLight(LedLightParams params){
+LedLight::LedLight(LightParams params){
     _params = params;
     // ToDo: assign individual parameters to each light
     //make_can_ids(SYSID_LIGHT, NODEID_HEADLEFT);
@@ -15,7 +15,7 @@ LedLight::~LedLight(){
 
 };
 
-const LedLightParams& LedLight::getParams() const{
+const LightParams& LedLight::getParams() const{
     return _params;
 };
 

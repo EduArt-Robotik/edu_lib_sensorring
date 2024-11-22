@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-namespace measurementmanager{
+namespace manager{
 
 enum class MeasurementState{
     init,
@@ -25,13 +25,13 @@ enum class MeasurementState{
     shutdown
 };
 
-MeasurementManager::MeasurementManager(MeasurementManagerParams params) :
+MeasurementManager::MeasurementManager(ManagerParams params) :
 _params(params){
 
 	init();
 };
 
-MeasurementManager::MeasurementManager(MeasurementManagerParams params, MeasurementObserver* observer) :
+MeasurementManager::MeasurementManager(ManagerParams params, MeasurementObserver* observer) :
 _params(params){
 
 	registerObserver(observer);
@@ -43,7 +43,7 @@ MeasurementManager::~MeasurementManager(){
 };
 
 void MeasurementManager::init(){
-	_sensor_ring = std::make_unique<sensorring::SensorRing>(_params.ring_params);
+	_sensor_ring = std::make_unique<ring::SensorRing>(_params.ring_params);
 
 	_is_tof_throttled = _params.frequency_tof_hz > 0.0;
     _is_thermal_throttled = _params.frequency_thermal_hz > 0.0;
@@ -82,7 +82,7 @@ void MeasurementManager::enableThermalMeasurement(bool state){
 	_thermal_enabled = state;
 };
 
-MeasurementManagerParams MeasurementManager::getParams() const{
+ManagerParams MeasurementManager::getParams() const{
 	return _params;
 };
 
@@ -133,7 +133,7 @@ std::string MeasurementManager::printTopology() const{
 					break;
 			}
 
-			ss << "sensor " << sensor_board->getTof()->getParams().idx << " is a " << board_type;
+			ss << "sensor " << sensor_board->getTof()->getIdx() << " is a " << board_type;
 			ss << "		ToF sensor: "		<< tof_sensor;
 			ss << "		Thermal sensor: "	<< thermal_sensor;
 			ss << "		Nr of LEDs: "		<< led_count;
@@ -166,7 +166,7 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
 	sensor::SensorState error = sensor::SensorState::SensorOK;
-	std::vector<const measurement::TofSensorMeasurement*> measurement_vec;
+	std::vector<const measurement::TofMeasurement*> measurement_vec;
 
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
 		for(auto sensor_board : sensor_bus->getSensorBoards()){

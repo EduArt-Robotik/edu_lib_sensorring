@@ -13,7 +13,7 @@ namespace sensor{
 
 class ThermalSensor : public BaseSensor{
     public:
-        ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, bool enable);
+        ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable);
         ~ThermalSensor();
         
 		void readEEPROM();
@@ -24,10 +24,10 @@ class ThermalSensor : public BaseSensor{
 
 		const measurement::GrayscaleImage* getLatestGrayscaleImage() const;
 		const measurement::FalseColorImage* getLatestFalseColorImage() const;
-		const measurement::ThermalSensorMeasurement* getLatestMeasurement() const;
+		const measurement::ThermalMeasurement* getLatestMeasurement() const;
 		const measurement::GrayscaleImage* getLatestGrayscaleImage(SensorState &error) const;
 		const measurement::FalseColorImage* getLatestFalseColorImage(SensorState &error) const;
-		const measurement::ThermalSensorMeasurement* getLatestMeasurement(SensorState &error) const;
+		const measurement::ThermalMeasurement* getLatestMeasurement(SensorState &error) const;
 		
 
         void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
@@ -37,14 +37,14 @@ class ThermalSensor : public BaseSensor{
 		void rotateLeftImage(measurement::GrayscaleImage &image) const;
 		const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
 		const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;
-		const measurement::ThermalSensorMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
+		const measurement::ThermalMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
 
         const ThermalSensorParams _params;
         heimannsensor::HTPA32Eeprom _eeprom;
 
 		uint16_t _vdd;
 		uint16_t _ptat;
-		measurement::ThermalSensorMeasurement _latest_measurement;
+		measurement::ThermalMeasurement _latest_measurement;
 
 		uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2];
         unsigned int _rx_buffer_offset;

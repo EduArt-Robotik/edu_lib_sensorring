@@ -4,8 +4,8 @@
 
 namespace sensor{
 
-TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, bool enable) :
-    BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(params.idx) + "_data"), enable),
+TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable) :
+    BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, enable),
     _rot_m(math::MiniMath::rotation_matrix_from_euler_degrees(params.rotation)),
     _params(params){
 
@@ -21,11 +21,11 @@ const TofSensorParams& TofSensor::getParams() const{
     return _params;
 }
 
-const measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement() const{
+const measurement::TofMeasurement* TofSensor::getLatestMeasurement() const{
     return &_latest_measurement;
 }
 
-const measurement::TofSensorMeasurement* TofSensor::getLatestMeasurement(SensorState &error) const{
+const measurement::TofMeasurement* TofSensor::getLatestMeasurement(SensorState &error) const{
     error = _error;
     return &_latest_measurement;
 }
@@ -68,8 +68,8 @@ void TofSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoint so
     }
 }
 
-const measurement::TofSensorMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
-    measurement::TofSensorMeasurement measurement;
+const measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
+    measurement::TofMeasurement measurement;
     measurement.reserve(TOF_RESOLUTION);
     measurement.frame_id = frame_id;
 
@@ -120,8 +120,8 @@ std::vector<math::Vector3> TofSensor::transformPointCloud(const measurement::Poi
     return point_data_transformed;
 }
 
-measurement::TofSensorMeasurement TofSensor::combineTofMeasurements(const std::vector<const measurement::TofSensorMeasurement*>& measurements_vec){
-    measurement::TofSensorMeasurement combined_measurement;
+measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<const measurement::TofMeasurement*>& measurements_vec){
+    measurement::TofMeasurement combined_measurement;
 
     unsigned int size = 0;
     for(auto measurement : measurements_vec){
