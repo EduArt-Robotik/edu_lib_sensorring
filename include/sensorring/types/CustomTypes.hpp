@@ -9,18 +9,13 @@
 #define THERMAL_RESOLUTION 1024
 #define MAX_MSG_LENGTH 64
 
-namespace sensor{
-	enum class SensorOrientation{
-		left,
-		right,
-		none
-	};
-
+namespace sensor{ // ToDo: Move to internal types
 	enum class SensorState{
+		SensorInit,
 		SensorOK,
 		ReceiveError
 	};
-} // namespace sensor
+}
 
 namespace measurement{
 
@@ -54,7 +49,7 @@ using GrayscaleImage	= GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 using TemperatureImage	= GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 using FalseColorImage	= GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 
-struct TofSensorMeasurement {
+struct TofMeasurement {
     int frame_id = 0;
     unsigned int size = 0;
     std::vector<float> point_distance;
@@ -65,7 +60,7 @@ struct TofSensorMeasurement {
     void reserve(std::size_t size);
 };
 
-struct ThermalSensorMeasurement {
+struct ThermalMeasurement {
     int frame_id = 0;
 	double t_ambient_deg_c = 0;
 	double min_deg_c = 0;
@@ -75,4 +70,4 @@ struct ThermalSensorMeasurement {
 	FalseColorImage falsecolor_img;
 };
 
-}; //namespace measurement
+};

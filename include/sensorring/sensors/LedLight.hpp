@@ -7,13 +7,13 @@ namespace sensor{
 
 class LedLight{
     public:
-        LedLight(LedLightParams params);
+        LedLight(LightParams params);
         ~LedLight();
     
-        const LedLightParams& getParams() const;
+        const LightParams& getParams() const;
 
     private:
-        LedLightParams _params;
+        LightParams _params;
 
         int _canid_in;
         int _canid_out;

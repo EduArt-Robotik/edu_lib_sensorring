@@ -11,11 +11,12 @@ namespace sensor{
 
 class BaseSensor : public com::ComObserver{
     public:
-        BaseSensor(com::ComInterface* interface, com::ComEndpoint target, bool enable);
+        BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
         ~BaseSensor();
 
         //void enableCallback();
-
+        
+        std::size_t getIdx() const;
         bool isEnabled() const;
         bool gotNewData() const;
         bool newDataAvailable() const;
@@ -28,10 +29,12 @@ class BaseSensor : public com::ComObserver{
         virtual void onClearDataFlag() = 0;
 
     protected:
+        std::size_t _idx;
+        SensorState _error;
+
         bool _new_data_available_flag;
         bool _new_data_in_buffer_flag;
         bool _new_measurement_ready_flag;
-        SensorState _error;
         
     private:
         bool _enable_flag;
