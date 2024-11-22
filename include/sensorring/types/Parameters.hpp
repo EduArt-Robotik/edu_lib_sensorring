@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
 #include "CustomTypes.hpp"
 
 namespace sensor{
@@ -58,6 +59,7 @@ namespace bus{
 namespace ring{
     struct RingParams{
         std::string tf_name;
+        std::chrono::milliseconds timeout;
         std::vector<bus::BusParams> bus_param_vec;
     };
 };

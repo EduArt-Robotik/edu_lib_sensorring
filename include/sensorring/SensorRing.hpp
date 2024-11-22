@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <string>
 #include <vector>
 #include <memory>
 
@@ -35,8 +34,8 @@ public:
 
 private:
 
+    const RingParams _params;
     std::vector<std::unique_ptr<bus::SensorBus>> _sensor_bus_vec;
-    //SensorBus::SensorBus _testbus;
 };
 
-} // namespace SensorRing
+};

@@ -24,14 +24,6 @@ void SensorBoard::setType(SensorBoardType type){
 	}
 };
 
-/*void SensorBoard::tofSetEnable(bool enable){ //ToDo: Remove
-	_tof->setEnable(enable);
-};
-
-void SensorBoard::thermalSetEnable(bool enable){ //ToDo: Remove
-   _thermal->setEnable(enable);
-};*/
-
 void SensorBoard::tofClearDataFlag(){
 	_tof->clearDataFlag();
 };

@@ -10,7 +10,7 @@ TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::
     _params(params){
 
     _rx_buffer_offset = 0;
-    memset(_rx_buffer, 0, sizeof(_rx_buffer)); // ToDo: replace c style with cpp
+    std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 }
 
 TofSensor::~TofSensor(){
@@ -31,7 +31,7 @@ const measurement::TofMeasurement* TofSensor::getLatestMeasurement(SensorState &
 }
 
 void TofSensor::onClearDataFlag(){
-    memset(_rx_buffer, 0, sizeof(_rx_buffer));
+    std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
     _rx_buffer_offset = 0;
 }
 
@@ -41,7 +41,7 @@ void TofSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoint so
     // point data msg
     if(msg_size == 48){
         if((_rx_buffer_offset + msg_size) <= (int) sizeof(_rx_buffer)){
-            std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset); //ToDO: Check _rx_buffer_offset -> Source of error !!!
+            std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
             _rx_buffer_offset += msg_size;
             //_new_data_in_buffer_flag = true;
             _new_data_available_flag = false;

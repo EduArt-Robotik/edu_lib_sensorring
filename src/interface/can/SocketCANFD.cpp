@@ -18,7 +18,7 @@ namespace com
 SocketCANFD::SocketCANFD(std::string interface_name, std::size_t sensor_count) : ComInterface(interface_name), _soc(0){
 
 	if(!openInterface(interface_name)){
-		logger::Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "Cannot open interface: " << interface_name);
+		Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "Cannot open interface: " << interface_name);
 	}
 
 	_endpoints = ComEndpoint::createEndpoints(sensor_count);
@@ -106,7 +106,7 @@ bool SocketCANFD::send(const canfd_frame* frame)
 		_mutex.unlock();
 		
 		if (retval != sizeof(canfd_frame)){
-			logger::Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "Can transmission error for command " << (int)(frame->data[0]) << ", returned " << retval << " submitted bytes instead of " << sizeof(canfd_frame));
+			Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "Can transmission error for command " << (int)(frame->data[0]) << ", returned " << retval << " submitted bytes instead of " << sizeof(canfd_frame));
 			return false;
 		}
 		else{
@@ -128,7 +128,7 @@ bool SocketCANFD::listener()
 	timeval timeout = {0, 100};
 	fd_set readSet;
 
-	logger::Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Starting can listener on interface " << _interface_name);
+	Logger::getInstance()->log(LogVerbosity::Debug, std::stringstream() << "Starting can listener on interface " << _interface_name);
 
 	_listenerIsRunning = true;
 	while(!_shutDownListener)
@@ -162,7 +162,7 @@ bool SocketCANFD::listener()
 
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
-	logger::Logger::getInstance()->log(LogVerbosity::Info, std::stringstream()<< "Stopping can listener on interface " << _interface_name);
+	Logger::getInstance()->log(LogVerbosity::Debug, std::stringstream()<< "Stopping can listener on interface " << _interface_name);
 
 	_listenerIsRunning = false;
 	return true;
