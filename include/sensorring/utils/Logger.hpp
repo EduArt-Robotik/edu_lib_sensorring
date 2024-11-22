@@ -4,9 +4,8 @@
 #include <string>
 #include <sstream>
 
-#include "CustomTypes.hpp"
 #include "SingletonTemplate.hpp"
-#include "ObserverInterface.hpp"
+#include "MeasurementObserver.hpp"
 
 namespace logger{
 

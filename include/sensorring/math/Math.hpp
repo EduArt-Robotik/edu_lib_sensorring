@@ -4,7 +4,7 @@
 #include <math.h>
 
 
-namespace math{ // MiniMath
+namespace math{
 
 //===============================
 // Vector3
@@ -23,7 +23,6 @@ struct Vector3 {
     const double& z() const;
 
     double& operator[](std::size_t idx);
-
     const double& operator[](std::size_t idx) const;
 
     Vector3 operator+(const Vector3& other) const;
@@ -56,4 +55,4 @@ public:
     static const Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg);
 };
 
-} // Namespace mm
+}

@@ -9,7 +9,7 @@
 #define THERMAL_RESOLUTION 1024
 #define MAX_MSG_LENGTH 64
 
-namespace sensor{ // ToDo: Move to internal types
+namespace sensor{
 	enum class SensorState{
 		SensorInit,
 		SensorOK,
