@@ -1,7 +1,5 @@
 #include "Logger.hpp"
 
-namespace logger{
-
 void Logger::registerObserver(MeasurementObserver* observer){
     if(observer) _observer_vec.push_back(observer);
 };
@@ -15,5 +13,3 @@ void Logger::log(const LogVerbosity verbosity, const std::string msg){
 void Logger::log(const LogVerbosity verbosity, const std::stringstream msg){
 	log(verbosity, msg.str());
 };
-
-}; // namespace log

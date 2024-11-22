@@ -66,7 +66,7 @@ void MeasurementManager::init(){
 	_last_thermal_measurement_timestamp_s	= std::chrono::steady_clock::now();;
 
 	if(_params.print_topology){
-		logger::Logger::getInstance()->log(LogVerbosity::Info, printTopology());
+		Logger::getInstance()->log(LogVerbosity::Info, printTopology());
 	}
 
 	// prepare state machine
@@ -159,7 +159,7 @@ bool MeasurementManager::startThermalCalibration(std::size_t window){
 void MeasurementManager::registerObserver(MeasurementObserver* observer){
 	if(observer){
 		_observer_vec.push_back(observer);
-		logger::Logger::getInstance()->registerObserver(observer);
+		Logger::getInstance()->registerObserver(observer);
 	}
 };
 
@@ -306,14 +306,14 @@ void MeasurementManager::StateMachine(){
 		============================================= */
 
 		case MeasurementState::init:
-			logger::Logger::getInstance()->log(LogVerbosity::Info, "Initializing MeasurementManager state machine");
+			Logger::getInstance()->log(LogVerbosity::Info, "Initializing MeasurementManager state machine");
 			
 			// state transition
 			_measurement_state = MeasurementState::reset_sensors;
 			break;
 
 		case MeasurementState::reset_sensors:
-			logger::Logger::getInstance()->log(LogVerbosity::Info, "Resetting all connected sensors");
+			Logger::getInstance()->log(LogVerbosity::Info, "Resetting all connected sensors");
 			_sensor_ring->resetDevices();
 			std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors!
 			
@@ -322,7 +322,7 @@ void MeasurementManager::StateMachine(){
 			break;
 
 		case MeasurementState::sync_lights:
-			logger::Logger::getInstance()->log(LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
+			Logger::getInstance()->log(LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 			_sensor_ring->syncLight();
 
 			// state transition
@@ -330,16 +330,16 @@ void MeasurementManager::StateMachine(){
 			break;
 
 		case MeasurementState::enumerate_sensors:
-			logger::Logger::getInstance()->log(LogVerbosity::Info, "Enumerating all connected sensors");
+			Logger::getInstance()->log(LogVerbosity::Info, "Enumerating all connected sensors");
             
 			success = _sensor_ring->enumerateDevices();
 			
 			for(auto sensor_bus : _sensor_ring->getInterfaces()){
 				if(sensor_bus->getSensorCount() == sensor_bus->getEnumerationCount()){   
-					logger::Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
+					Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
 				}else{
-					logger::Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
-					logger::Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << sensor_bus->getSensorCount() << " sensors were specified in the launchfile. Check topology and restart.");
+					Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
+					Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << sensor_bus->getSensorCount() << " sensors were specified in the launchfile. Check topology and restart.");
 				}
 			}
 
@@ -347,14 +347,14 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::get_eeprom;
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Failed to enumerate sensors.");
+				Logger::getInstance()->log(LogVerbosity::Error, "Failed to enumerate sensors.");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
 		case MeasurementState::get_eeprom:
 			if(_thermal_enabled){
-				logger::Logger::getInstance()->log(LogVerbosity::Info, "Reading EEPROM from thermal sensors");
+				Logger::getInstance()->log(LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 				success = _sensor_ring->getEEPROM();
 			}
 
@@ -362,13 +362,13 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::pre_loop_init;        
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor->");
+				Logger::getInstance()->log(LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor->");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
 
 		case MeasurementState::pre_loop_init:
-			logger::Logger::getInstance()->log(LogVerbosity::Info, "Starting to fetch measurements now ...");
+			Logger::getInstance()->log(LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();;
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();;
 			std::this_thread::sleep_for(std::chrono::seconds(1)); // sleep 1 second
@@ -430,7 +430,7 @@ void MeasurementManager::StateMachine(){
 					_measurement_state = MeasurementState::fetch_tof_data; 
 				}
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while waiting for completion of measurements.");
+				Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while waiting for completion of measurements.");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
@@ -442,7 +442,7 @@ void MeasurementManager::StateMachine(){
 				success = _sensor_ring->waitForAllTofDataTransmissionsComplete();
 				if(success){
 					int error = notifyToFData();
-					if (error != 0) logger::Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing tof measurements from " << error << " sensor(s)");
+					if (error != 0) Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing tof measurements from " << error << " sensor(s)");
 				}
 			}
 
@@ -450,7 +450,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::fetch_thermal_data;
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while fetching tof measurements.");
+				Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while fetching tof measurements.");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
@@ -462,7 +462,7 @@ void MeasurementManager::StateMachine(){
 				success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
 				if(success){
 					int error = notifyThermalData();
-					if(error != 0) logger::Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing thermal measurements from " << error << " sensor(s)");
+					if(error != 0) Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing thermal measurements from " << error << " sensor(s)");
 				} 
 				_thermal_measurement_flag = false;
 			}
@@ -471,7 +471,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::throttle_measurement;
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while fetching thermal measurements.");
+				Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while fetching thermal measurements.");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
@@ -481,9 +481,6 @@ void MeasurementManager::StateMachine(){
 				// throttled mode: wait until next measurement period
 				std::this_thread::sleep_until(_last_tof_measurement_timestamp_s + std::chrono::duration<double>(1.0F / _params.frequency_tof_hz));
 
-				/*while(std::chrono::duration<double> > (std::chrono::steady_clock::now() - _last_tof_measurement_timestamp_s)){// ToDo: Fix this mess -> add measurement period to parameters
-					usleep(10);
-				};*/
 			}else{
 				// free running mode: wait until current measurements are finished
 				if(_tof_enabled)     success &= _sensor_ring->waitForAllTofMeasurementsReady();
@@ -493,7 +490,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::request_tof_measurement;
 			}else{
-				logger::Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while taking tof measurements.");
+				Logger::getInstance()->log(LogVerbosity::Error, "Timeout occured while taking tof measurements.");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
@@ -503,7 +500,7 @@ void MeasurementManager::StateMachine(){
 		============================================= */
 
 		case MeasurementState::error_handler:
-			logger::Logger::getInstance()->log(LogVerbosity::Error, "Error handler called.");
+			Logger::getInstance()->log(LogVerbosity::Error, "Error handler called.");
 			notifyState(WorkerState::Error);
 			_measurement_state = MeasurementState::shutdown;
 			break;
@@ -513,7 +510,7 @@ void MeasurementManager::StateMachine(){
 		============================================= */
 
 		case MeasurementState::shutdown:
-			logger::Logger::getInstance()->log(LogVerbosity::Error, "Shutting down state machine.");
+			Logger::getInstance()->log(LogVerbosity::Error, "Shutting down state machine.");
 			notifyState(WorkerState::Shutdown);
 			_is_running = false;
 			break;

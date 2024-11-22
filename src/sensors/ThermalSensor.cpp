@@ -13,7 +13,7 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* inte
     _params(params){
 
     _rx_buffer_offset = 0;
-    memset(_rx_buffer, 0, sizeof(_rx_buffer));
+    std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 
     _vdd = 0;
     _ptat = 0;
@@ -102,7 +102,7 @@ bool ThermalSensor::startCalibration(size_t window){
 };
 
 void ThermalSensor::onClearDataFlag(){
-    memset(_rx_buffer, 0, sizeof(_rx_buffer));
+    std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
     _rx_buffer_offset = 0;
 };
 

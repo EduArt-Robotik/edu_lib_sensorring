@@ -106,7 +106,7 @@ int SensorBus::enumerateDevices(){
     }
     
     // wait a little longer in case there are more sensors than specified
-    usleep(0.01 * 1e6);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     _enumerate_flag = false;
     return _enumerate_count;
 };

@@ -14,7 +14,7 @@ ComInterface* ComManager::createInterface(std::string interface_name, std::size_
     }
 
     if(!requested_interface){
-        _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count)); // ToDo: Incorporate different Interface types
+        _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count));
         requested_interface = _interfaces.back().get();
     }
 

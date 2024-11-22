@@ -2,12 +2,19 @@
 #include <math.h>
 
 #include "SensorRing.hpp"
-#include "can/canprotocol.hpp"
+#include "canprotocol.hpp"
+#include "Logger.hpp"
 
 
 namespace ring{
 
-SensorRing::SensorRing(RingParams params){
+SensorRing::SensorRing(RingParams params) : _params(params){
+
+	if(_params.timeout == std::chrono::milliseconds(0)){
+		Logger::getInstance()->log(LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
+	} else if(_params.timeout < std::chrono::milliseconds(200)){
+		Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "SensorRing timeout parameter of " << _params.timeout.count() << " ms probably too low");
+	} 
 
 	for(auto bus_params : params.bus_param_vec){
 		_sensor_bus_vec.push_back(std::make_unique<bus::SensorBus>(bus_params));
@@ -65,17 +72,16 @@ bool SensorRing::getEEPROM(){
 	}
 
 	// wait until all sensors sent their response. 1 sec timeout
-    int watchdog = 0;
     bool ready = false;
+	auto timestamp = std::chrono::steady_clock::now();
 
-    while(!ready && watchdog < 1e6){ //ToDo: remove constant add parameter
+    while(!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout){
 		ready = true;
 		for(auto& sensor_bus : _sensor_bus_vec){
 			ready &= sensor_bus->allEEPROMTransmissionsComplete();
 		}
 		
-		usleep(100);
-		watchdog += 100;
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 
 	return ready;
@@ -88,72 +94,67 @@ void SensorRing::requestTofMeasurement(){
 };
 
 bool SensorRing::waitForAllTofMeasurementsReady() const{
-	int watchdog = 0;
+	
 	bool ready = false;
-
-	while(!ready && watchdog < 1e6){ //ToDo: remove constant add parameter
+	auto timestamp = std::chrono::steady_clock::now();
+	
+	while(!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout){
 		ready = true;
 		for(auto& sensor_bus : _sensor_bus_vec){
 			ready &= sensor_bus->allTofMeasurementsReady();
 		}
 
-		watchdog += 100;
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	
 	return ready;
 };
 
-
 bool SensorRing::waitForAllThermalMeasurementsReady() const{
 	// int watchdog = 0;
 	// bool ready = false;
 
-	// while(!ready && watchdog < 1e6){ //ToDo: remove constant add parameter
+	// while(!ready && watchdog < _params.timeout){
 	// 	ready = true;
 	// 	for(auto& sensor_bus : _sensor_bus_vec){
 	// 		ready &= sensor_bus->allThermalMeasurementsReady();
 	// 	}
 
 	// 	watchdog += 100;
-	// 	usleep(100);
+	// 	std::this_thread::sleep_for(std::chrono::microseconds(100);
 	// }
 	
-	// return ready;
-
-	// ToDo: Check if a thermal frame is actually available
+	// return ready; // ToDo: Check if a thermal frame is actually available
 	return true;
 }
 
 bool SensorRing::waitForAllTofDataTransmissionsComplete() const{
-	int watchdog = 0;
 	bool ready = false;
+	auto timestamp = std::chrono::steady_clock::now();
 
-	while(!ready && watchdog < 1e6){ //ToDo: remove constant add parameter
+	while(!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout){
 		ready = true;
 		for(auto& sensor_bus : _sensor_bus_vec){
 			ready &= sensor_bus->allTofDataTransmissionsComplete();
 		}
 
-		watchdog += 100;
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	
 	return ready;
 };
 
 bool SensorRing::waitForAllThermalDataTransmissionsComplete() const{
-	int watchdog = 0;
 	bool ready = false;
+	auto timestamp = std::chrono::steady_clock::now();
 
-	while(!ready && watchdog < 1e6){ //ToDo: remove constant add parameter
+	while(!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout){
 		ready = true;
 		for(auto& sensor_bus : _sensor_bus_vec){
 			ready &= sensor_bus->allThermalDataTransmissionsComplete();
 		}
 
-		watchdog += 100;
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	
 	return ready;
