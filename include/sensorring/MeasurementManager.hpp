@@ -21,25 +21,97 @@ namespace manager{
 // Forward declaration
 enum class MeasurementState;
 
+/**
+ * @class MeasurementManager
+ * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a looping state machine.
+ * @author Hannes Duske
+ * @date 25.12.2024
+ */
 class MeasurementManager{
 public:
+    /**
+     * Constructor
+     * @param[in] params Parameter structure for the MeasurementManager
+     */
     MeasurementManager(ManagerParams params);
+
+    /**
+     * Constructor
+     * @param[in] params Parameter structure for the MeasurementManager
+     * @param[in] observer Observer that is automatically registered before any other internal action that no callbacks are missed.
+     */
     MeasurementManager(ManagerParams params, MeasurementObserver* observer);
+
+    /**
+     * Destructor
+     */
     ~MeasurementManager();
     
-    int measureSome();
-    int startMeasuring();
-    int stopMeasuring();
+    /**
+     * Run one processing cycle of the state machine worker
+     * @return error code
+     */
+    bool measureSome();
 
+    /**
+     * Start running the state machine worker loop in a thread
+     * @return error code
+     */
+    bool startMeasuring();
+
+    /**
+     * Stop the state machine worker loop and close the thread
+     * @return error code
+     */
+    bool stopMeasuring();
+
+    /**
+     * Register an observer with the MeasurementManager object
+     * @param[in] observer Observer that is registered and gets notified on future events
+     */
     void registerObserver(MeasurementObserver* observer);
     
+    /**
+     * Get a string representation of the topology of the connected sensors
+     * @return Formatted string describing the topology
+     */
     std::string printTopology() const;
+
+    /**
+     * Get the health status of the state machine
+     * @return Current worker state
+     */
     WorkerState getWorkerState() const;
+
+    /**
+     * Get the parameters with which the MeasurementManager was initialized
+     * @return Initial parameter struct
+     */
     ManagerParams getParams() const;
 
+    /**
+     * Enable or disable the Time-of-Flight sensor measurements
+     * @param[in] state enable signal
+     */
     void enableTofMeasurement(bool state);
+
+    /**
+     * Enable or disable the thermal sensor measurements
+     * @param[in] state enable signal
+     */
     void enableThermalMeasurement(bool state);
+
+    /**
+     * Stop any ongoing thermal calibration
+     * @return error code
+     */
     bool stopThermalCalibration();
+
+    /**
+     * Start a thermal calibration
+     * @param[in] window number of thermal frames used for averaging
+     * @return error code
+     */
     bool startThermalCalibration(std::size_t window);
 
 private:
