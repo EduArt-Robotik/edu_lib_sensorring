@@ -62,7 +62,7 @@ namespace measurement{
 
 	/**
      * @enum GenericRGBImage
-     * @brief Generic structure for images with three (3) channel. Typically used for rgb images.
+     * @brief Generic structure for images with three (3) channels. Typically used for rgb images.
      */
 	template<typename T, std::size_t RESOLUTION>
 	struct GenericRGBImage {

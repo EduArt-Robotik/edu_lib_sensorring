@@ -62,8 +62,8 @@ void MeasurementManager::init(){
     _first_measurement = true;
 	_thermal_measurement_flag = false;
     
-	_last_tof_measurement_timestamp_s 		= std::chrono::steady_clock::now();;
-	_last_thermal_measurement_timestamp_s	= std::chrono::steady_clock::now();;
+	_last_tof_measurement_timestamp_s 		= std::chrono::steady_clock::now();
+	_last_thermal_measurement_timestamp_s	= std::chrono::steady_clock::now();
 
 	if(_params.print_topology){
 		Logger::getInstance()->log(LogVerbosity::Info, printTopology());
@@ -158,8 +158,14 @@ bool MeasurementManager::startThermalCalibration(std::size_t window){
 
 void MeasurementManager::registerObserver(MeasurementObserver* observer){
 	if(observer){
-		_observer_vec.push_back(observer);
-		Logger::getInstance()->registerObserver(observer);
+		// check if the observer is already registered
+		if (std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end()) {
+			_observer_vec.push_back(observer);
+			Logger::getInstance()->registerObserver(observer);
+			Logger::getInstance()->log(LogVerbosity::Debug, std::stringstream() << "Registered new observer");
+		}else{
+			Logger::getInstance()->log(LogVerbosity::Warning, "Observer already registered");
+		}
 	}
 };
 

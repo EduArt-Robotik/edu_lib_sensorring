@@ -86,7 +86,6 @@ namespace ring{
      * @brief Parameter structure of a sensor ring. The sensor ring is the abstraction of the whole sensor system and consists of an arbitrary number of communication interfaces.
      */
     struct RingParams{
-        std::string tf_name;
         std::chrono::milliseconds timeout;
         std::vector<bus::BusParams> bus_param_vec;
     };

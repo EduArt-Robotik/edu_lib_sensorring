@@ -18,131 +18,131 @@ namespace ring{
 
 namespace manager{
 
-// Forward declaration
-enum class MeasurementState;
-
-/**
- * @class MeasurementManager
- * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a looping state machine.
- * @author Hannes Duske
- * @date 25.12.2024
- */
-class MeasurementManager{
-public:
-    /**
-     * Constructor
-     * @param[in] params Parameter structure for the MeasurementManager
-     */
-    MeasurementManager(ManagerParams params);
+    // Forward declaration
+    enum class MeasurementState;
 
     /**
-     * Constructor
-     * @param[in] params Parameter structure for the MeasurementManager
-     * @param[in] observer Observer that is automatically registered before any other internal action that no callbacks are missed.
+     * @class MeasurementManager
+     * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a looping state machine.
+     * @author Hannes Duske
+     * @date 25.12.2024
      */
-    MeasurementManager(ManagerParams params, MeasurementObserver* observer);
+    class MeasurementManager{
+    public:
+        /**
+         * Constructor
+         * @param[in] params Parameter structure of the MeasurementManager
+         */
+        MeasurementManager(ManagerParams params);
 
-    /**
-     * Destructor
-     */
-    ~MeasurementManager();
-    
-    /**
-     * Run one processing cycle of the state machine worker
-     * @return error code
-     */
-    bool measureSome();
+        /**
+         * Constructor
+         * @param[in] params Parameter structure of the MeasurementManager
+         * @param[in] observer Observer that is automatically registered before any other internal action. This ensures that no callbacks are missed.
+         */
+        MeasurementManager(ManagerParams params, MeasurementObserver* observer);
 
-    /**
-     * Start running the state machine worker loop in a thread
-     * @return error code
-     */
-    bool startMeasuring();
+        /**
+         * Destructor
+         */
+        ~MeasurementManager();
+        
+        /**
+         * Run one processing cycle of the state machine worker
+         * @return error code
+         */
+        bool measureSome();
 
-    /**
-     * Stop the state machine worker loop and close the thread
-     * @return error code
-     */
-    bool stopMeasuring();
+        /**
+         * Start running the state machine worker loop in a thread
+         * @return error code
+         */
+        bool startMeasuring();
 
-    /**
-     * Register an observer with the MeasurementManager object
-     * @param[in] observer Observer that is registered and gets notified on future events
-     */
-    void registerObserver(MeasurementObserver* observer);
-    
-    /**
-     * Get a string representation of the topology of the connected sensors
-     * @return Formatted string describing the topology
-     */
-    std::string printTopology() const;
+        /**
+         * Stop the state machine worker loop and close the thread
+         * @return error code
+         */
+        bool stopMeasuring();
 
-    /**
-     * Get the health status of the state machine
-     * @return Current worker state
-     */
-    WorkerState getWorkerState() const;
+        /**
+         * Register an observer with the MeasurementManager object
+         * @param[in] observer Observer that is registered and gets notified on future events
+         */
+        void registerObserver(MeasurementObserver* observer);
+        
+        /**
+         * Get a string representation of the topology of the connected sensors
+         * @return Formatted string describing the topology
+         */
+        std::string printTopology() const;
 
-    /**
-     * Get the parameters with which the MeasurementManager was initialized
-     * @return Initial parameter struct
-     */
-    ManagerParams getParams() const;
+        /**
+         * Get the health status of the state machine
+         * @return Current worker state
+         */
+        WorkerState getWorkerState() const;
 
-    /**
-     * Enable or disable the Time-of-Flight sensor measurements
-     * @param[in] state enable signal
-     */
-    void enableTofMeasurement(bool state);
+        /**
+         * Get the parameters with which the MeasurementManager was initialized
+         * @return Initial parameter struct
+         */
+        ManagerParams getParams() const;
 
-    /**
-     * Enable or disable the thermal sensor measurements
-     * @param[in] state enable signal
-     */
-    void enableThermalMeasurement(bool state);
+        /**
+         * Enable or disable the Time-of-Flight sensor measurements
+         * @param[in] state enable signal
+         */
+        void enableTofMeasurement(bool state);
 
-    /**
-     * Stop any ongoing thermal calibration
-     * @return error code
-     */
-    bool stopThermalCalibration();
+        /**
+         * Enable or disable the thermal sensor measurements
+         * @param[in] state enable signal
+         */
+        void enableThermalMeasurement(bool state);
 
-    /**
-     * Start a thermal calibration
-     * @param[in] window number of thermal frames used for averaging
-     * @return error code
-     */
-    bool startThermalCalibration(std::size_t window);
+        /**
+         * Start a thermal calibration
+         * @param[in] window number of thermal frames used for averaging
+         * @return error code
+         */
+        bool startThermalCalibration(std::size_t window);
 
-private:
-    void init();
-    void StateMachine();
-    void StateMachineWorker();
-    
-    int  notifyToFData();
-    int  notifyThermalData();
-    void notifyState(const WorkerState state);
-    
-    WorkerState _manager_state;
-    MeasurementState _measurement_state;
-    ManagerParams _params;
-    std::unique_ptr<ring::SensorRing> _sensor_ring;
+        /**
+         * Stop any ongoing thermal calibration
+         * @return error code
+         */
+        bool stopThermalCalibration();
 
-    bool _tof_enabled;
-    bool _thermal_enabled;
-    bool _first_measurement;
-    std::chrono::time_point<std::chrono::steady_clock>  _last_tof_measurement_timestamp_s;
-    std::chrono::time_point<std::chrono::steady_clock>  _last_thermal_measurement_timestamp_s;
+    private:
+        void init();
+        void StateMachine();
+        void StateMachineWorker();
+        
+        int  notifyToFData();
+        int  notifyThermalData();
+        void notifyState(const WorkerState state);
+        
+        WorkerState _manager_state;
+        MeasurementState _measurement_state;
+        ManagerParams _params;
+        std::unique_ptr<ring::SensorRing> _sensor_ring;
 
-    bool _is_tof_throttled;
-    bool _is_thermal_throttled;
-    bool _thermal_measurement_flag;
+        bool _tof_enabled;
+        bool _thermal_enabled;
+        bool _first_measurement;
+        std::chrono::time_point<std::chrono::steady_clock>  _last_tof_measurement_timestamp_s;
+        std::chrono::time_point<std::chrono::steady_clock>  _last_thermal_measurement_timestamp_s;
 
-    std::vector<MeasurementObserver*> _observer_vec;
+        bool _is_tof_throttled;
+        bool _is_thermal_throttled;
+        bool _thermal_measurement_flag;
 
-    std::atomic<bool> _is_running;
-    std::thread _worker_thread;
+        std::vector<MeasurementObserver*> _observer_vec;
 
-};
+        std::atomic<bool> _is_running;
+        std::thread _worker_thread;
+
+    };
 
 };
