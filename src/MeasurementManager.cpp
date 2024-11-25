@@ -238,22 +238,22 @@ WorkerState MeasurementManager::getWorkerState() const
 	Start and stop measurements
 ========================================================================================== */
 
-int MeasurementManager::measureSome(){
-	int error = -1;
+bool MeasurementManager::measureSome(){
+	bool error = false;
 
 	if(!_is_running){
 		if(_tof_enabled || _thermal_enabled){
 			notifyState(WorkerState::Running);
 			StateMachine();
-			error = 0;
+			error = true;
 		}
 	}
 
 	return error;
 };
 
-int MeasurementManager::startMeasuring(){
-	int error = -1;
+bool MeasurementManager::startMeasuring(){
+	bool error = false;
 
 	if(!_is_running){
 		if(_tof_enabled || _thermal_enabled){
@@ -261,22 +261,22 @@ int MeasurementManager::startMeasuring(){
 			_is_running = true;
 			_worker_thread = std::thread(&MeasurementManager::StateMachineWorker, this);
 			notifyState(WorkerState::Running);
-			error = 0;
+			error = true;
 		}
 	}
 	
 	return error;
 };
 
-int MeasurementManager::stopMeasuring(){
-	int error = -1;
+bool MeasurementManager::stopMeasuring(){
+	bool error = false;
 
 	if(_is_running){
 		_is_running = false;
 		if(_worker_thread.joinable()){
 			_worker_thread.join();
 			notifyState(WorkerState::Shutdown);
-			error = 0;
+			error = true;
 		}
 	}
 
