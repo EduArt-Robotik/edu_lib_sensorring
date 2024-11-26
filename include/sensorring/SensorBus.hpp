@@ -49,7 +49,7 @@ class SensorBus : public com::ComObserver{
         void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
     private:
-        BusParams _params;
+        const BusParams _params;
         std::vector<std::unique_ptr<sensor::SensorBoard>> _sensor_board_vec;
         
         volatile bool _enumerate_flag;
@@ -60,7 +60,7 @@ class SensorBus : public com::ComObserver{
         size_t _tof_measurement_count;
         size_t _thermal_measurement_count;
 
-        com::ComInterface* _can_interface;
+        com::ComInterface* _interface;
 };
 
 };

@@ -1,176 +1,176 @@
-<diagram program="umletino" version="15.1"><zoom_level>7</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLState</id><coordinates><x>567</x><y>344</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+<diagram program="umletino" version="15.1"><zoom_level>7</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLState</id><coordinates><x>1085</x><y>245</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Init Can Interface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>567</x><y>449</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Init Can Interface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1085</x><y>350</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Reset sensor boards</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>372</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLState</id><coordinates><x>567</x><y>554</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Reset sensor boards</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>273</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLState</id><coordinates><x>1085</x><y>455</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Synchronize lights</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>477</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>582</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLState</id><coordinates><x>567</x><y>659</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Synchronize lights</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>378</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>483</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLState</id><coordinates><x>1085</x><y>560</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Enumerate sensors</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>728</x><y>785</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Enumerate sensors</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1246</x><y>686</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Get EEPROM from
-thermal sensors</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>687</y><w>21</w><h>98</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>771</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+thermal sensors</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>588</y><w>21</w><h>98</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>672</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one thermal
-sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>820</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
-m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLState</id><coordinates><x>756</x><y>1212</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>721</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
+m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLState</id><coordinates><x>1274</x><y>1113</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Request ToF
-measurement</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>792</y><w>49</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;50;10</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>855</y><w>105</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>130;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>2031</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+measurement</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>693</y><w>49</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;50;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>756</y><w>105</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>130;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>1932</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 First ToF
 measurement
-request?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>1198</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+request?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>1099</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one ToF
-sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>1219</y><w>77</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;90;10</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>981</y><w>21</w><h>231</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;310</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>855</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>721</x><y>841</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
+sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>1120</y><w>77</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;90;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>882</y><w>21</w><h>231</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;10;10;310</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>756</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1239</x><y>742</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
-Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1247</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
-m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>1282</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>1387</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1148</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
+m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>1183</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>1288</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one thermal
-sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1289</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>UMLState</id><coordinates><x>756</x><y>1730</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1190</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>UMLState</id><coordinates><x>1274</x><y>1631</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Request thermal
-measurement</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>812</x><y>1688</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1436</y><w>28</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>1744</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1751</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>119</x><y>260</y><w>875</w><h>791</h></coordinates><panel_attributes>One shot Initialization
+measurement</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1330</x><y>1589</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1337</y><w>28</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>1645</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1652</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>637</x><y>161</y><w>875</w><h>791</h></coordinates><panel_attributes>One shot Initialization
 --
 bg=#303030
 layer=-1
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>119</x><y>1086</y><w>875</w><h>1610</h></coordinates><panel_attributes>Loop
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>637</x><y>987</y><w>875</w><h>1610</h></coordinates><panel_attributes>Loop
 --
 bg=#303030
 layer=-2
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1043</x><y>1100</y><w>196</w><h>210</h></coordinates><panel_attributes>Error Handler
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1561</x><y>1001</y><w>196</w><h>210</h></coordinates><panel_attributes>Error Handler
 --
 bg=#303030
 layer=-1
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1996</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLState</id><coordinates><x>756</x><y>2192</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1897</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLState</id><coordinates><x>1274</x><y>2093</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Request and read
-ToF data</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>2178</y><w>147</w><h>56</h></coordinates><panel_attributes>fg=black
+ToF data</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>2079</y><w>147</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one ToF
-sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>427</x><y>99</y><w>98</w><h>49</h></coordinates><panel_attributes>To enter the state
+sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>945</x><y>0</y><w>98</w><h>49</h></coordinates><panel_attributes>To enter the state
 machine at least one
 ToF or thermal sensor
 must be active!
 fg=black
 bg=white
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>700</x><y>2199</y><w>70</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>2367</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1218</x><y>2100</y><w>70</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>2268</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one thermal
-sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>2269</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>2227</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
-m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>2262</y><w>140</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>180;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>2262</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>763</x><y>2528</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>2170</y><w>21</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>2128</y><w>28</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
+m2=n</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>2163</y><w>140</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>180;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>2163</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1281</x><y>2429</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Request and read
-thermal data</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>2388</y><w>154</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;200;10;200;70</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>2605</y><w>147</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>2416</y><w>28</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>2605</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>483</x><y>2605</y><w>154</w><h>21</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>200;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>784</x><y>813</y><w>21</w><h>42</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLState</id><coordinates><x>1078</x><y>1184</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+thermal data</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>2289</y><w>154</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;200;10;200;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>2506</y><w>147</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>2317</y><w>28</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>2506</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1001</x><y>2506</y><w>154</w><h>21</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>200;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1302</x><y>714</y><w>21</w><h>42</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLState</id><coordinates><x>1596</x><y>1085</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Error handler</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1078</x><y>1247</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Error handler</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1596</x><y>1148</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Exit program</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1134</x><y>1212</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>756</x><y>2248</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
-bg=white
-transparency=0
-type=decision
-Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>763</x><y>2591</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
+Exit program</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1652</x><y>1113</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1274</x><y>2149</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
-Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>1240</y><w>203</w><h>63</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>270;10;270;70;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>1744</y><w>140</w><h>21</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>180;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>819</x><y>2220</y><w>21</w><h>42</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>826</x><y>2556</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1134</x><y>1142</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>896</x><y>2605</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>889</x><y>2262</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>854</x><y>855</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>357</x><y>2493</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1281</x><y>2492</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
+bg=white
+transparency=0
+type=decision
+Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>1141</y><w>203</w><h>63</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>270;10;270;70;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>1645</y><w>140</w><h>21</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>180;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1337</x><y>2121</y><w>21</w><h>42</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>1344</x><y>2457</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1652</x><y>1043</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1414</x><y>2506</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1407</x><y>2163</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1372</x><y>756</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>875</x><y>2394</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Wait for next
-measurement period</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>413</x><y>2360</y><w>21</w><h>147</h></coordinates><panel_attributes>lt=-&gt;
-</panel_attributes><additional_attributes>10;190;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>756</x><y>1863</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+measurement period</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>931</x><y>2261</y><w>21</w><h>147</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes>10;190;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>1274</x><y>1764</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Wait for completion of ToF
-and thermal measurements</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>1849</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+and thermal measurements</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>1750</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Throttle fequency
 specified or first
-measurement?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>1870</y><w>77</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;90;10</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>1961</y><w>203</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>270;10;270;50;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>350</x><y>2584</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+measurement?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>1771</y><w>77</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;90;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>1862</y><w>203</w><h>49</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>270;10;270;50;10;50</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>868</x><y>2485</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Throttle fequency
-for ToF specified?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>182</x><y>2493</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+for ToF specified?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>700</x><y>2394</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 Wait for completion of
-ToF measurements</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>420</x><y>2052</y><w>154</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>200;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>238</x><y>2353</y><w>189</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;70;10;10;250;10</additional_attributes></element><element><id>Relation</id><coordinates><x>238</x><y>2521</y><w>126</w><h>112</h></coordinates><panel_attributes>m1=n
-lt=-&gt;</panel_attributes><additional_attributes>160;130;10;130;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>567</x><y>113</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+ToF measurements</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>938</x><y>1953</y><w>154</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>200;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>756</x><y>2254</y><w>189</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;70;10;10;250;10</additional_attributes></element><element><id>Relation</id><coordinates><x>756</x><y>2422</y><w>126</w><h>112</h></coordinates><panel_attributes>m1=n
+lt=-&gt;</panel_attributes><additional_attributes>160;130;10;130;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>1085</x><y>14</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Start</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>560</x><y>176</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+Start</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1078</x><y>77</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 At least one tof or
-thermal sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>141</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>225</y><w>21</w><h>133</h></coordinates><panel_attributes>m1=y
+thermal sensor active?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>42</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>126</y><w>21</w><h>133</h></coordinates><panel_attributes>m1=y
 lt=-&gt;
-</panel_attributes><additional_attributes>10;10;10;170</additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>190</y><w>56</w><h>35</h></coordinates><panel_attributes>m1=n
+</panel_attributes><additional_attributes>10;10;10;170</additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>91</y><w>56</w><h>35</h></coordinates><panel_attributes>m1=n
 lt=-&gt;
-</panel_attributes><additional_attributes>10;20;60;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>1989</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>2080</y><w>28</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>413</x><y>2521</y><w>21</w><h>77</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>567</x><y>953</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
+</panel_attributes><additional_attributes>10;20;60;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>1890</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1981</y><w>28</w><h>112</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>931</x><y>2422</y><w>21</w><h>77</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>1085</x><y>854</y><w>126</w><h>35</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
-Sleep 1 second</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>862</y><w>21</w><h>105</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1898</y><w>28</w><h>105</h></coordinates><panel_attributes>lt=-&gt;
-m2=n</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>175</x><y>2402</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
+Sleep 1 second</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>763</y><w>21</w><h>105</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1799</y><w>28</w><h>105</h></coordinates><panel_attributes>lt=-&gt;
+m2=n</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>693</x><y>2303</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
-Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>413</x><y>2059</y><w>21</w><h>308</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;420;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>308</x><y>2416</y><w>49</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;50;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>154</x><y>2290</y><w>357</w><h>364</h></coordinates><panel_attributes>throttle
+Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>931</x><y>1960</y><w>21</w><h>308</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;420;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>826</x><y>2317</y><w>49</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;50;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>672</x><y>2191</y><w>357</w><h>364</h></coordinates><panel_attributes>throttle
 measurement
 --
 
@@ -179,12 +179,12 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>735</x><y>197</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>896</x><y>855</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>931</x><y>2262</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>938</x><y>2605</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>343</x><y>2416</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1134</x><y>1135</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>749</x><y>1926</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1253</x><y>98</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1414</x><y>756</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1449</x><y>2163</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1456</x><y>2506</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>861</x><y>2317</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1652</x><y>1036</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1267</x><y>1827</y><w>140</w><h>42</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
-Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>812</x><y>1891</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>882</x><y>1940</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>924</x><y>1940</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>413</x><y>2353</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>238</x><y>2437</y><w>21</w><h>70</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>413</x><y>2052</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>413</x><y>1219</y><w>161</w><h>847</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;1190;10;10;210;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>729</y><w>427</w><h>175</h></coordinates><panel_attributes>get eeprom
+Success?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1330</x><y>1792</y><w>21</w><h>49</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1400</x><y>1841</y><w>56</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1442</x><y>1841</y><w>14</w><h>14</h></coordinates><panel_attributes>type=flow_final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>931</x><y>2254</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>756</x><y>2338</y><w>21</w><h>70</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>931</x><y>1953</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>931</x><y>1120</y><w>161</w><h>847</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;1190;10;10;210;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>630</y><w>427</w><h>175</h></coordinates><panel_attributes>get eeprom
 --
 
 valign=top
@@ -192,7 +192,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>1800</y><w>427</w><h>322</h></coordinates><panel_attributes>wait for data
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>1701</y><w>427</w><h>322</h></coordinates><panel_attributes>wait for data
 
 --
 
@@ -201,7 +201,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>1331</y><w>427</w><h>455</h></coordinates><panel_attributes>request thermal
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>1232</y><w>427</w><h>455</h></coordinates><panel_attributes>request thermal
 measurement
 --
 
@@ -210,7 +210,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>2325</y><w>427</w><h>336</h></coordinates><panel_attributes>fetch thermal
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>2226</y><w>427</w><h>336</h></coordinates><panel_attributes>fetch thermal
 measurement
 --
 
@@ -219,7 +219,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>918</y><w>427</w><h>91</h></coordinates><panel_attributes>pre loop init
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>819</y><w>427</w><h>91</h></coordinates><panel_attributes>pre loop init
 --
 
 valign=top
@@ -227,7 +227,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>624</y><w>427</w><h>91</h></coordinates><panel_attributes>enumerate sensors
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>525</y><w>427</w><h>91</h></coordinates><panel_attributes>enumerate sensors
 --
 
 valign=top
@@ -235,7 +235,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>519</y><w>427</w><h>91</h></coordinates><panel_attributes>sync lights
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>420</y><w>427</w><h>91</h></coordinates><panel_attributes>sync lights
 --
 
 valign=top
@@ -243,7 +243,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>414</y><w>427</w><h>91</h></coordinates><panel_attributes>reset sensors
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>315</y><w>427</w><h>91</h></coordinates><panel_attributes>reset sensors
 --
 
 valign=top
@@ -251,7 +251,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>309</y><w>427</w><h>91</h></coordinates><panel_attributes>init
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>210</y><w>427</w><h>91</h></coordinates><panel_attributes>init
 --
 
 valign=top
@@ -259,7 +259,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>2136</y><w>427</w><h>175</h></coordinates><panel_attributes>fetch tof
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>2037</y><w>427</w><h>175</h></coordinates><panel_attributes>fetch tof
 measurement
 --
 
@@ -268,7 +268,7 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>532</x><y>1142</y><w>427</w><h>175</h></coordinates><panel_attributes>request tof
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1050</x><y>1043</y><w>427</w><h>175</h></coordinates><panel_attributes>request tof
 measurement
 --
 
@@ -277,35 +277,35 @@ halign=left
 transparency=0
 layer=-1
 fg=white
-bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>763</x><y>2437</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+bg=#808080</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1281</x><y>2338</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Has a thermal
 measurement been
-requested?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>826</x><y>2486</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>2458</y><w>147</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>2458</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>2465</y><w>21</w><h>154</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;200</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>749</x><y>1639</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+requested?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1344</x><y>2387</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>2359</y><w>147</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>2359</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>2366</y><w>21</w><h>154</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;200</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1267</x><y>1540</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Measurement
 period elapsed since last
-measurement?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>693</x><y>1408</y><w>140</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;180;10;180;70</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>749</x><y>1457</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+measurement?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1211</x><y>1309</y><w>140</w><h>63</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;180;10;180;70</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1267</x><y>1358</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Previous
 thermal measurement
-finished?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>1478</y><w>133</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>170;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>1478</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>749</x><y>1548</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
+finished?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>1379</y><w>133</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>170;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>1379</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1267</x><y>1449</y><w>140</w><h>56</h></coordinates><panel_attributes>fg=black
 bg=white
 transparency=0
 type=decision
 Throttle frequency for
-thermal specified?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>812</x><y>1597</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>812</x><y>1506</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
-m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>630</x><y>1660</y><w>133</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
-m1=n</panel_attributes><additional_attributes>170;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>623</x><y>1660</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1485</y><w>21</w><h>189</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;250</additional_attributes></element><element><id>Relation</id><coordinates><x>623</x><y>1667</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>875</x><y>1569</y><w>63</w><h>196</h></coordinates><panel_attributes>lt=-&gt;
+thermal specified?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1330</x><y>1498</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1330</x><y>1407</y><w>21</w><h>56</h></coordinates><panel_attributes>lt=-&gt;
+m1=y</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1148</x><y>1561</y><w>133</w><h>28</h></coordinates><panel_attributes>lt=-&gt;
+m1=n</panel_attributes><additional_attributes>170;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1141</x><y>1561</y><w>14</w><h>14</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1386</y><w>21</w><h>189</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;250</additional_attributes></element><element><id>Relation</id><coordinates><x>1141</x><y>1568</y><w>21</w><h>91</h></coordinates><panel_attributes>lt=-&gt;</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1393</x><y>1470</y><w>63</w><h>196</h></coordinates><panel_attributes>lt=-&gt;
 m1=n</panel_attributes><additional_attributes>20;10;70;10;70;260;10;260</additional_attributes></element></diagram>
