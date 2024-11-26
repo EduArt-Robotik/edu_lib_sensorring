@@ -27,14 +27,19 @@ public:
 	~ComInterface();
 
 	/**
-	 * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
-	 * @param[in] observer Observer instance, which should be notified when data is available.
-	 * @return success==true
+	 * Get the interface name of the ComInterface object
+	 * @return name of the interface
 	 */
 	std::string getInterfaceName();
 
 	/**
-	 * The SocketCANFD class instance reads all CAN data packets and distributes them according to the observer IDs.
+	 * Get all known ComEndpoints.
+	 * @return Vector of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
+	 */
+	const std::vector<ComEndpoint>& getEndpoints();
+
+	/**
+	 * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
 	 * @param[in] observer Observer instance, which should be notified when data is available.
 	 * @return success==true
 	 */
@@ -57,24 +62,23 @@ public:
   	void stopListener();
 
 	/**
-	 * Send CAN frame.
-	 * @param[in] frame CAN frame
+	 * Send a generic communication message.
+	 * @param[in] target ComEndpoint to which the message is sent.
+	 * @param[in] data Vector holding the message payload.
 	 */
 	virtual bool send(ComEndpoint target, const std::vector<std::uint8_t>& data) = 0;
 
 	/**
-	 * Close device file link.
+	 * Open the communication interface.
 	 * @return success==true
 	 */
   	virtual bool openInterface(std::string interface_name) = 0;
 
 	/**
-	 * Close device file link.
+	 * Close the communication interface.
 	 * @return success==true
 	 */
   	virtual bool closeInterface() = 0;
-
-	const std::vector<ComEndpoint>& getEndpoints();
 
 protected:
 	virtual bool listener() = 0;
@@ -97,4 +101,4 @@ private:
 
 };
 
-}; // namespace
+};

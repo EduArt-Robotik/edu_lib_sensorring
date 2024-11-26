@@ -26,7 +26,8 @@ class SocketCANFD : public ComInterface
 public:
   /**
    * Constructor
-   * @param[in] devFile device file link to CAN interface
+   * @param[in] interface_name device file link to CAN interface
+   * @param[in] sensor_count number of sensor boards that are connected on this interface
    */
   SocketCANFD(std::string interface_name, std::size_t sensor_count);
 
@@ -37,26 +38,31 @@ public:
 
   /**
    * Open CAN interface.
-   * @param[in] port CAN interface name specified with slcand.
+   * @param[in] interface_name CAN interface name specified with slcand.
    * @return success==true
    */
   bool openInterface(std::string interface_name) override;
 
   /**
-   * Send CAN frame.
-   * @param[in] frame CAN frame
+   * Send generic communication messsage.
+   * @param[in] target ComEndpoint to which the message is sent.
+   * @param[in] data Message payload.
+   * @return success==true
    */
   bool send(ComEndpoint target, const std::vector<uint8_t>& data) override;
 
   /**
    * Send CAN frame.
-   * @param[in] frame CAN frame
+   * @param[in] canid ID of the can message.
+   * @param[in] tx_buf Message payload.
+   * @return success==true
    */
   bool send(canid_t canid, const std::vector<uint8_t>& tx_buf);
 
   /**
    * Send CAN frame.
-   * @param[in] frame CAN frame
+   * @param[in] frame CAN frame.
+   * @return success==true
    */
   bool send(const canfd_frame* frame);
 
@@ -81,4 +87,4 @@ private:
   int _soc;
 };
 
-} // namespace
+};

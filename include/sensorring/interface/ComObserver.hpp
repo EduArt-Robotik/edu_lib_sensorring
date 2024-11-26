@@ -28,14 +28,14 @@ public:
   virtual ~ComObserver();
 
   /**
-   * Set CAN bus identifier
-   * @param[in] id CAN ID
+   * Add a ComEndpoint to the list of observed endpoints.
+   * @param[in] target ComEndpoint which will trigger the notify callback on future messages.
    */
   void addEndpoint(const ComEndpoint target);
 
   /**
-   * Get CAN bus identifier
-   * @return CAN ID
+   * Get a list of all ComEndpoints that currently trigger the notify callback.
+   * @return Vector of all subscribed endpoints.
    */
   const std::vector<ComEndpoint>& getEndpoints() const;
 
@@ -48,13 +48,15 @@ public:
   
    /**
    * Distribute new can frame to all registered observers
-   * @param[in] frame CANFD Frame that will be distributed
+   * @param[in] source ComEndpoint that sent the message
+   * @param[in] data Message payload
    */
   void forwardNotification(const ComEndpoint source, const std::vector<uint8_t>& data);
   
   /**
    * Interface declaration for implementation through inherited classes.
-   * @params[in] frame CAN frame
+   * @param[in] source ComEndpoint that sent the message
+   * @param[in] data Message payload
    */
   virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
@@ -65,4 +67,4 @@ private:
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };
 
-} // namespace
+};
