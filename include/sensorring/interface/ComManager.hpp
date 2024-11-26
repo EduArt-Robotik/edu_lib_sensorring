@@ -24,4 +24,4 @@ class ComManager : public Singleton<ComManager>{
         std::vector<std::unique_ptr<ComInterface>> _interfaces;
 };
 
-}; // namespace
+};
