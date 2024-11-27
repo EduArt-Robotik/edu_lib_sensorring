@@ -106,7 +106,7 @@ void ThermalSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 };
 
-void ThermalSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoint source, const std::vector<uint8_t>& data){
+void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
 
     if(!_got_eeprom){
