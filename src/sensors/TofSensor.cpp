@@ -35,7 +35,7 @@ void TofSensor::onClearDataFlag(){
     _rx_buffer_offset = 0;
 }
 
-void TofSensor::canCallback(__attribute_maybe_unused__ const com::ComEndpoint source, const std::vector<uint8_t>& data){
+void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
 
     // point data msg
