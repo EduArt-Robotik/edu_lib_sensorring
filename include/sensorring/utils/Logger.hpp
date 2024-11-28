@@ -7,6 +7,8 @@
 #include "SingletonTemplate.hpp"
 #include "MeasurementObserver.hpp"
 
+namespace logger{
+
 class Logger : public Singleton<Logger>{
     public:
         ~Logger() = default;
@@ -23,3 +25,5 @@ class Logger : public Singleton<Logger>{
         std::vector<MeasurementObserver*> _observer_vec;
 
 };
+
+}
