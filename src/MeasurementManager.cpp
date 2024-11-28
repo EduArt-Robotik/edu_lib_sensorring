@@ -162,7 +162,7 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 		if (std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end()) {
 			_observer_vec.push_back(observer);
 			Logger::getInstance()->registerObserver(observer);
-			Logger::getInstance()->log(LogVerbosity::Debug, std::stringstream() << "Registered new observer");
+			Logger::getInstance()->log(LogVerbosity::Debug, "Registered new observer");
 		}else{
 			Logger::getInstance()->log(LogVerbosity::Warning, "Observer already registered");
 		}
@@ -342,10 +342,10 @@ void MeasurementManager::StateMachine(){
 			
 			for(auto sensor_bus : _sensor_ring->getInterfaces()){
 				if(sensor_bus->getSensorCount() == sensor_bus->getEnumerationCount()){   
-					Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
+					Logger::getInstance()->log(LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterfaceName());
 				}else{
-					Logger::getInstance()->log(LogVerbosity::Info, std::stringstream() << "Counted " << sensor_bus->getEnumerationCount() << " of " << sensor_bus->getSensorCount() << " sensors on interface " << sensor_bus->getInterfaceName());
-					Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << sensor_bus->getSensorCount() << " sensors were specified in the launchfile. Check topology and restart.");
+					Logger::getInstance()->log(LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterfaceName());
+					Logger::getInstance()->log(LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount()) + " sensors were specified in the launchfile. Check topology and restart.");
 				}
 			}
 
@@ -448,7 +448,7 @@ void MeasurementManager::StateMachine(){
 				success = _sensor_ring->waitForAllTofDataTransmissionsComplete();
 				if(success){
 					int error = notifyToFData();
-					if (error != 0) Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing tof measurements from " << error << " sensor(s)");
+					if (error != 0) Logger::getInstance()->log(LogVerbosity::Warning, "Error occured while parsing tof measurements from " + std::to_string(error) + " sensor(s)");
 				}
 			}
 
@@ -468,7 +468,7 @@ void MeasurementManager::StateMachine(){
 				success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
 				if(success){
 					int error = notifyThermalData();
-					if(error != 0) Logger::getInstance()->log(LogVerbosity::Warning, std::stringstream() << "Error occured while parsing thermal measurements from " << error << " sensor(s)");
+					if(error != 0) Logger::getInstance()->log(LogVerbosity::Warning, "Error occured while parsing thermal measurements from " + std::to_string(error) + " sensor(s)");
 				} 
 				_thermal_measurement_flag = false;
 			}
