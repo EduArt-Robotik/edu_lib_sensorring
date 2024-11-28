@@ -10,6 +10,8 @@
 #include "ComObserver.hpp"
 #include "SingletonTemplate.hpp"
 
+namespace eduart{
+
 namespace com{
 
 class ComInterface : public Singleton<ComInterface>{
@@ -100,5 +102,7 @@ private:
 	std::unique_ptr<std::thread> _thread;
 
 };
+
+}
 
 }

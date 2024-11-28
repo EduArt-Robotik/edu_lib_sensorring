@@ -7,6 +7,8 @@
 #include "heimann_htpa32.hpp"
 #include "CustomTypes.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 class BaseSensor : public com::ComObserver{
@@ -42,5 +44,7 @@ class BaseSensor : public com::ComObserver{
         com::ComEndpoint _target;
         com::ComInterface* _interface;
 };
+
+}
 
 }

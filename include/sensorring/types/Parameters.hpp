@@ -5,6 +5,8 @@
 #include <chrono>
 #include "CustomTypes.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 /**
@@ -22,8 +24,7 @@ enum class SensorOrientation{
  * @brief Parameter structure of the sensor lights of a sensor board.
  */
 struct LightParams{
-    int nr_of_leds = 0;
-    SensorOrientation orientation = SensorOrientation::none;
+    bool enable;
 };
 
 /**
@@ -31,6 +32,7 @@ struct LightParams{
  * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
  */
 struct ThermalSensorParams {
+    bool enable;
     double t_min_deg_c = 0;
     double t_max_deg_c = 0;
     bool auto_min_max = false;
@@ -48,6 +50,7 @@ struct ThermalSensorParams {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct TofSensorParams {
+    bool enable;
     math::Vector3 rotation = {0, 0, 0};
     math::Vector3 translation = {0, 0, 0};
 };
@@ -109,5 +112,7 @@ struct ManagerParams{
     double frequency_thermal_hz;
     ring::RingParams ring_params;
 };
+
+}
 
 }

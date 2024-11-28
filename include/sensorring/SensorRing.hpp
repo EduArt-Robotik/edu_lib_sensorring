@@ -6,6 +6,8 @@
 #include "SensorBus.hpp"
 #include "Parameters.hpp"
 
+namespace eduart{
+
 namespace ring{
 
 class SensorRing{
@@ -37,5 +39,7 @@ private:
     const RingParams _params;
     std::vector<std::unique_ptr<bus::SensorBus>> _sensor_bus_vec;
 };
+
+}
 
 }

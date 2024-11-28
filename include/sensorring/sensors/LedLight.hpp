@@ -3,6 +3,8 @@
 #include "BaseSensor.hpp"
 #include "Parameters.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 class LedLight{
@@ -18,5 +20,7 @@ class LedLight{
         int _canid_in;
         int _canid_out;
 };
+
+}
 
 }

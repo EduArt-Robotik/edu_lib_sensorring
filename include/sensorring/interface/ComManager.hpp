@@ -7,6 +7,8 @@
 #include "ComInterface.hpp"
 #include "SingletonTemplate.hpp"
 
+namespace eduart{
+
 namespace com{
 
 class ComManager : public Singleton<ComManager>{
@@ -23,5 +25,7 @@ class ComManager : public Singleton<ComManager>{
 
         std::vector<std::unique_ptr<ComInterface>> _interfaces;
 };
+
+}
 
 }

@@ -56,7 +56,7 @@ install(TARGETS sensorring
 
 install(FILES
   ../include/${PROJECT_NAME}/MeasurementManager.hpp
-  ../include/${PROJECT_NAME}/types/MeasurementObserver.hpp
+  ../include/${PROJECT_NAME}/MeasurementObserver.hpp
   ../include/${PROJECT_NAME}/types/install_types/CustomTypes.hpp
   ../include/${PROJECT_NAME}/types/Parameters.hpp
   DESTINATION include/${PROJECT_NAME}

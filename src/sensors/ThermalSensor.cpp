@@ -6,6 +6,8 @@
 #include "FileManager.hpp"
 #include "Iron.hpp"
 
+namespace eduart{
+    
 namespace sensor{
 
 ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable) :
@@ -294,5 +296,6 @@ void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const{
     }
 }
 
+}
 
 }

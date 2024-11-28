@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <linux/can.h>
 
+namespace eduart{
+
 namespace com
 {
 
@@ -133,5 +135,7 @@ public:
     CanProtocol() = delete;
     static void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
 };
+
+}
 
 }

@@ -1,0 +1,303 @@
+<diagram program="umletino" version="15.1"><zoom_level>12</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>624</x><y>840</y><w>564</w><h>240</h></coordinates><panel_attributes>SensorRing
+--
+params : RingParams
+sensor_bus_vec : vector&lt;SensorBus&gt;
+
+--
++ SensorRing (params : RingParams)
++ ~SensorRing ()
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>564</x><y>1692</y><w>696</w><h>192</h></coordinates><panel_attributes>SensorBoard
+--
+- tof : TofSensor
+- thermal : ThermalSensor
+- leds : LedLight
+
+--
+
+
+bg=white
+fg=black
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>ThermalSensor
+--
+- params : ThermalSensorParams
+- eeprom : HTPA32Eeprom
+
+--
++ ThermalSensor (ThermalSensorParams params)
++ ~ThermalSensor ()
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>LedLight
+--
+- params : LedPanelParams
+
+
+--
++ LedLight( params : LedPanelParams)
++ ~ LedLight ()
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>TofSensor
+--
+- params : TofSensorParams
+
+
+--
++ TofSensor (params : TofSensorParams)
++ ~TofSensor ()
+
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>936</x><y>2292</y><w>384</w><h>228</h></coordinates><panel_attributes>BaseSensor
+--
+- canid_data : int
+- can_interface : SocketCANFD
+
+--
++ BaseSensor ()
++ ~BaseSensor ()
+
++ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>636</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1164</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>912</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>900</x><y>1500</y><w>48</w><h>216</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>Relation</id><coordinates><x>1020</x><y>2184</y><w>36</w><h>132</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1212</x><y>2184</y><w>36</w><h>132</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>624</x><y>1260</y><w>576</w><h>252</h></coordinates><panel_attributes>SensorBus
+--
+params : BusParams
+interface : ComInterface
+sensor_board_vec : vector&lt;SensorBoard&gt;
+        
+--
+SensorBus(params : BusParams);
+~SensorBus();
+
++ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>900</x><y>1068</y><w>48</w><h>216</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>1608</y><w>1572</w><h>996</h></coordinates><panel_attributes>PCB Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>1188</y><w>1248</w><h>372</h></coordinates><panel_attributes>Com Interface Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>768</y><w>1248</w><h>372</h></coordinates><panel_attributes>System Level Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1320</y><w>900</w><h>1020</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>730;830;730;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>48</x><y>1692</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBoard corresponds to one
+physical circuit board. It aggregates
+the individual sensors that are physically
+present on the circuit board.
+
+The individual sensors implement
+the ComObserver interface interface
+and directly receive the can data from
+their corresponding sensor.
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1944</x><y>2316</y><w>432</w><h>240</h></coordinates><panel_attributes>ComObserver
+--
+
+
+--
++ addEndpoint(target : ComEndpoint) = 0
++ getEndpoints() : vector&lt;ComEndpoint&gt;
++ checkConnectionStatus( timeout_ms : unsigned int) : bool
+
+/+ addEndpoint(target : ComEndpoint) = 0/
+/+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1308</x><y>2412</y><w>660</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>530;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>1248</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
+communication interface, e.g. a can bus.
+It holds all information corresponding to
+that interface including a vector of all
+connected sensors.
+
+The SensorBus also handles broadcast
+messages that are sent to multiple
+sensor boards.
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>828</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorRing is the highest layer
+abstraction and describes the whole
+sensor system. The sensor system
+includes sensors on multiple interfaces.
+
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>612</x><y>276</y><w>576</w><h>456</h></coordinates><panel_attributes>MeasurementManager
+--
+params : ManagerParams
+sensor_ring : SensorRing
+vector&lt;MeasurementObserver*&gt; observers
+
+--
+
+MeasurementManager(params : ManagerParams)
+MeasurementManager(params : ManagerParams, observer : MeasurementObserver*)
+~MeasurementManager()
+   
+bool measureSome()
+bool startMeasuring()
+bool stopMeasuring()
+
+registerObserver(observer : MeasurementObserver*)
+printTopology() : string
+getWorkerState() : WorkerState
+getParams() : ManagerParams
+
+enableTofMeasurement(state : bool)
+enableThermalMeasurement(state : bool)
+startThermalCalibration(window : size_t) : bool
+stopThermalCalibration() : bool
+
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>276</y><w>324</w><h>180</h></coordinates><panel_attributes>The MeasurementManager manages a
+SensorRing object. The main component
+is a state machine which handles the timing
+of the measurements.
+
+
+fg=black
+bg=white
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>888</x><y>720</y><w>48</w><h>144</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1404</x><y>276</y><w>576</w><h>180</h></coordinates><panel_attributes>MeasurementObserver
+--
+
+
+--
+/+ onStateChange(status : WorkerState)/
+/+ onOutputLog(verbosity : LogVerbosity, msg : string)/
+/+ onTofMeasurement(measurement : TofMeasurement)/
+/+ onThermalMeasurement(idx : size_t, measurement : ThermalMeasurement)/
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1176</x><y>336</y><w>252</w><h>36</h></coordinates><panel_attributes>lt=&lt;-&gt;&gt;&gt;&gt;&gt;</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>1716</y><w>432</w><h>204</h></coordinates><panel_attributes>ComManager
+--
+vector&lt;ComInterface&gt;
+
+--
++ ComManager() = delete
++ getInstance( ) : ComManager*
+
++ createInterface(name : string, sensor_count : size_t)
++ getInterface(name : string)
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2832</x><y>1644</y><w>168</w><h>180</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;
+m1=1
+m2=1</panel_attributes><additional_attributes>10;60;10;10;120;10;120;120;70;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>2004</y><w>432</w><h>240</h></coordinates><panel_attributes>ComInterface
+--
+vector&lt;ComObserver*&gt; observers
+
+--
++ ComInterface(name : string)
+
++ startListener()
++ stopListener()
++ getEndpoints() : vector&lt;ComEndpoints&gt;
++ registerObserver(observer : ComObserver*) : bool
+
+/+ send(target : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>3060</x><y>2004</y><w>480</w><h>240</h></coordinates><panel_attributes>ComEndpoint
+--
+
+
+--
++ ComEndpoint(id : string)
++ getId() : string
+
+_+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoints&gt;
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2904</x><y>2064</y><w>180</w><h>60</h></coordinates><panel_attributes>lt=&lt;.
+&lt;&lt;uses&gt;&gt;
+</panel_attributes><additional_attributes>130;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>1908</y><w>48</w><h>120</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>2256</x><y>2076</y><w>252</w><h>264</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;200;10;10;190;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>2316</y><w>432</w><h>240</h></coordinates><panel_attributes>SocketCANFD
+--
+vector&lt;ComObserver*&gt; observers
+
+--
++ SocketCANFD(name : string, sensorCount : size_t)
+
++ send(target : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ send(id : canid_t, data : vector&lt;uint8_t&gt;)
++ send(frame : canfd_frame*)
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>2232</y><w>36</w><h>108</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1284</y><w>1536</w><h>456</h></coordinates><panel_attributes>lt=&lt;.
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>1260;360;1260;20;10;20</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1836</x><y>1608</y><w>1776</w><h>996</h></coordinates><panel_attributes>Communication
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>480</x><y>2676</y><w>384</w><h>228</h></coordinates><panel_attributes>FileManager
+--
+
+--
+
+_+saveVectorToFile_
+_+readVectorFromFile_
+_+saveArrayToFile_
+_+readArrayFromFile_
+_+saveStructToFile_
+_+readStructFromFile_
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>780</x><y>2184</y><w>84</w><h>516</h></coordinates><panel_attributes>lt=&lt;.
+
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>10;410;10;10</additional_attributes></element></diagram>

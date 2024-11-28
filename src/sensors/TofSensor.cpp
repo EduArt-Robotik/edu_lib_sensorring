@@ -2,6 +2,8 @@
 #include <cstring>
 #include <algorithm>
 
+namespace eduart{
+
 namespace sensor{
 
 TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable) :
@@ -143,6 +145,8 @@ measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<
     }
 
     return combined_measurement;
+}
+
 }
 
 }

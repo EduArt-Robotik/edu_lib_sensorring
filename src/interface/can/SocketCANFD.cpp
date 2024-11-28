@@ -12,13 +12,15 @@
 #include <algorithm>
 #include <chrono>
 
+namespace eduart{
+
 namespace com
 {
 
 SocketCANFD::SocketCANFD(std::string interface_name, std::size_t sensor_count) : ComInterface(interface_name), _soc(0){
 
 	if(!openInterface(interface_name)){
-		logger::Logger::getInstance()->log(LogVerbosity::Error, "Cannot open interface: " + interface_name);
+		logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Cannot open interface: " + interface_name);
 	}
 
 	_endpoints = ComEndpoint::createEndpoints(sensor_count);
@@ -106,7 +108,7 @@ bool SocketCANFD::send(const canfd_frame* frame)
 		_mutex.unlock();
 		
 		if (retval != sizeof(canfd_frame)){
-			logger::Logger::getInstance()->log(LogVerbosity::Error, "Can transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " +  std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
+			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Can transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " +  std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
 			return false;
 		}
 		else{
@@ -128,7 +130,7 @@ bool SocketCANFD::listener()
 	timeval timeout = {0, 100};
 	fd_set readSet;
 
-	logger::Logger::getInstance()->log(LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
+	logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
 
 	_listenerIsRunning = true;
 	while(!_shutDownListener)
@@ -162,7 +164,7 @@ bool SocketCANFD::listener()
 
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
-	logger::Logger::getInstance()->log(LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
+	logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
 
 	_listenerIsRunning = false;
 	return true;
@@ -212,5 +214,7 @@ canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint){
 // ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id){
 
 // };
+
+}
 
 }

@@ -7,13 +7,15 @@
 #include "SingletonTemplate.hpp"
 #include "MeasurementObserver.hpp"
 
+namespace eduart{
+
 namespace logger{
 
 class Logger : public Singleton<Logger>{
     public:
         ~Logger() = default;
 
-        void registerObserver(MeasurementObserver* observer);
+        void registerObserver(manager::MeasurementObserver* observer);
 
         void log(const LogVerbosity verbosity, const std::string msg);
         void log(const LogVerbosity verbosity, const std::stringstream msg);
@@ -22,8 +24,10 @@ class Logger : public Singleton<Logger>{
         friend class Singleton<Logger>;
         Logger() = default;
 
-        std::vector<MeasurementObserver*> _observer_vec;
+        std::vector<manager::MeasurementObserver*> _observer_vec;
 
 };
+
+}
 
 }

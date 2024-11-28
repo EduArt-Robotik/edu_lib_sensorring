@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+namespace eduart{
+
 namespace com{
 
 class ComEndpoint{
@@ -37,5 +39,7 @@ class ComEndpoint{
 		const std::string _id;
 
 };
+
+}
 
 }

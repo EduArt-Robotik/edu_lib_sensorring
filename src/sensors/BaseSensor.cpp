@@ -1,5 +1,7 @@
 #include "sensors/BaseSensor.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable) : ComObserver(),
@@ -53,6 +55,8 @@ void BaseSensor::clearDataFlag(){
 
 void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     canCallback(source, data);
+}
+
 }
 
 }

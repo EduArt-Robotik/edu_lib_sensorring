@@ -12,6 +12,8 @@
 #include "ComInterface.hpp"
 #include "ComObserver.hpp"
 
+namespace eduart{
+
 namespace com{
 
 /**
@@ -85,5 +87,7 @@ private:
 
   int _soc;
 };
+
+}
 
 }

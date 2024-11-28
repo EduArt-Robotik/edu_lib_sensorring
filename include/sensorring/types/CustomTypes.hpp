@@ -9,6 +9,8 @@
 #define THERMAL_RESOLUTION 1024
 #define MAX_MSG_LENGTH 64
 
+namespace eduart{
+
 namespace sensor{
 	enum class SensorState{
 		SensorInit,
@@ -69,5 +71,7 @@ struct ThermalMeasurement {
 	GrayscaleImage grayscale_img;
 	FalseColorImage falsecolor_img;
 };
+
+}
 
 }

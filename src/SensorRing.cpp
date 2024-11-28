@@ -4,16 +4,16 @@
 #include "canprotocol.hpp"
 #include "Logger.hpp"
 
-
+namespace eduart{
 
 namespace ring{
 
 SensorRing::SensorRing(RingParams params) : _params(params){
 
 	if(_params.timeout == std::chrono::milliseconds(0)){
-		logger::Logger::getInstance()->log(LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
+		logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
 	} else if(_params.timeout < std::chrono::milliseconds(200)){
-		logger::Logger::getInstance()->log(LogVerbosity::Error, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
+		logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
 	} 
 
 	for(auto bus_params : params.bus_param_vec){
@@ -196,6 +196,8 @@ bool SensorRing::startThermalCalibration(size_t window){
     }
 
     return success;
+}
+
 }
 
 }

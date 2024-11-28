@@ -1,5 +1,7 @@
 #include "SensorBoard.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface){
@@ -54,6 +56,8 @@ const ThermalSensor* SensorBoard::getThermal() const{
 
 const LedLight* SensorBoard::getLed() const{
 	return _leds.get();
+}
+
 }
 
 }

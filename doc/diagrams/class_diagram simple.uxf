@@ -1,0 +1,156 @@
+<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>975</x><y>480</y><w>465</w><h>150</h></coordinates><panel_attributes>SensorRing
+--
+- params : RingParams
+
+--
+
+
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>975</x><y>1110</y><w>465</w><h>150</h></coordinates><panel_attributes>SensorBoard
+--
+- params : BoardParams
+
+--
+
+
+bg=white
+fg=black
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1095</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>ThermalSensor
+--
+- params : ThermalParams
+
+--
+
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>825</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>LedLight
+--
+- params : LightParams
+
+--
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1365</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>TofSensor
+--
+- params : TofParams
+
+--
+
+
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>930</x><y>1245</y><w>165</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>80;10;80;50;10;50;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>1365</x><y>1245</y><w>165</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;50;80;50;80;80</additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>1245</y><w>60</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>930</y><w>60</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>975</x><y>795</y><w>465</w><h>150</h></coordinates><panel_attributes>SensorBus
+--
+- params : BusParams
+    
+--
+
+
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>615</y><w>60</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=n</panel_attributes><additional_attributes>10;10;10;120</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>480</x><y>1035</y><w>1155</w><h>510</h></coordinates><panel_attributes>PCB Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>480</x><y>720</y><w>1155</w><h>285</h></coordinates><panel_attributes>Com Interface Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>480</x><y>405</y><w>1155</w><h>285</h></coordinates><panel_attributes>System Level Abstraction
+--
+fg=white
+bg=gray
+layer=-1
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>525</x><y>1110</y><w>405</w><h>150</h></coordinates><panel_attributes>The SensorBoard corresponds to one
+physical circuit board. It aggregates
+the individual sensors that are physically
+present on the circuit board.
+
+
+fg=black
+bg=yellow
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>525</x><y>795</y><w>405</w><h>150</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
+communication interface, e.g. a can bus.
+It holds all information corresponding to
+that interface including a vector of all
+connected sensors.
+
+
+fg=black
+bg=yellow
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>525</x><y>480</y><w>405</w><h>150</h></coordinates><panel_attributes>The SensorRing is the highest layer
+abstraction and describes the whole
+sensor system. The sensor system
+includes sensors on multiple interfaces.
+
+
+fg=black
+bg=yellow
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>960</x><y>165</y><w>480</w><h>195</h></coordinates><panel_attributes>MeasurementManager
+--
+- params : ManagerParams
+
+--
+registerObserver(observer : MeasurementObserver*)
+bool startMeasuring()
+bool stopMeasuring()
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>510</x><y>165</y><w>405</w><h>195</h></coordinates><panel_attributes>The MeasurementManager manages a
+SensorRing object. The main component
+is a state machine which handles the timing
+of the measurements.
+
+
+fg=black
+bg=yellow
+transparency=0
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>345</y><w>60</w><h>165</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1590</x><y>165</y><w>285</w><h>195</h></coordinates><panel_attributes>MeasurementObserver
+--
+
+
+--
+- onStateChange()
+- onTofMeasurement()
+- onThermalMeasurement()
+- onOutputLog()
+   
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1425</x><y>240</y><w>195</w><h>75</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;
+m1=1
+m2=n
+
+</panel_attributes><additional_attributes>10;20;110;20</additional_attributes></element></diagram>

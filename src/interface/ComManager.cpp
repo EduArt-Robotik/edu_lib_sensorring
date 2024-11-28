@@ -1,6 +1,8 @@
 #include "ComManager.hpp"
 #include "SocketCANFD.hpp"
 
+namespace eduart{
+
 namespace com{
 
 ComInterface* ComManager::createInterface(std::string interface_name, std::size_t sensor_count){
@@ -32,6 +34,8 @@ ComInterface* ComManager::getInterface(std::string interface_name){
     }
 
     return requested_interface;
+}
+
 }
 
 }

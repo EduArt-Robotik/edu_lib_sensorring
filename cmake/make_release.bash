@@ -1,6 +1,6 @@
 #!/bin/bash
  
- cd ..
+ rm build -r
  mkdir build
  cd build
  cmake ../cmake

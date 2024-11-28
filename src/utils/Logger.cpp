@@ -1,8 +1,10 @@
 #include "Logger.hpp"
 
+namespace eduart{
+
 namespace logger{
 
-void Logger::registerObserver(MeasurementObserver* observer){
+void Logger::registerObserver(manager::MeasurementObserver* observer){
     if(observer) _observer_vec.push_back(observer);
 }
 
@@ -14,6 +16,8 @@ void Logger::log(const LogVerbosity verbosity, const std::string msg){
 
 void Logger::log(const LogVerbosity verbosity, const std::stringstream msg){
 	log(verbosity, msg.str());
+}
+
 }
 
 }
