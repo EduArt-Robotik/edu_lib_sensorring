@@ -13,35 +13,34 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 add_library(sensorring SHARED
-  src/MeasurementManager.cpp
-  src/SensorRing.cpp
-  src/SensorBus.cpp
-  src/SensorBoard.cpp
-  src/interface/ComInterface.cpp
-  src/interface/ComManager.cpp
-  src/interface/ComObserver.cpp
-  src/interface/can/canprotocol.cpp
-  src/interface/can/SocketCANFD.cpp
-  src/math/Math.cpp
-  src/sensors/TofSensor.cpp
-  src/sensors/ThermalSensor.cpp
-  src/sensors/LedLight.cpp
-  src/sensors/BaseSensor.cpp
-  src/types/CustomTypes.cpp
-  src/utils/Logger.cpp
-  src/utils/FileManager.cpp
-  
+  ../src/MeasurementManager.cpp
+  ../src/SensorRing.cpp
+  ../src/SensorBus.cpp
+  ../src/SensorBoard.cpp
+  ../src/interface/ComInterface.cpp
+  ../src/interface/ComManager.cpp
+  ../src/interface/ComObserver.cpp
+  ../src/interface/can/canprotocol.cpp
+  ../src/interface/can/SocketCANFD.cpp
+  ../src/math/Math.cpp
+  ../src/sensors/TofSensor.cpp
+  ../src/sensors/ThermalSensor.cpp
+  ../src/sensors/LedLight.cpp
+  ../src/sensors/BaseSensor.cpp
+  ../src/types/CustomTypes.cpp
+  ../src/utils/Logger.cpp
+  ../src/utils/FileManager.cpp
 )
 
 target_include_directories( sensorring PRIVATE
-  include/${PROJECT_NAME}
-  include/${PROJECT_NAME}/boardmanager
-  include/${PROJECT_NAME}/interface
-  include/${PROJECT_NAME}/interface/can
-  include/${PROJECT_NAME}/math
-  include/${PROJECT_NAME}/sensors
-  include/${PROJECT_NAME}/types
-  include/${PROJECT_NAME}/utils
+  ../include/${PROJECT_NAME}
+  ../include/${PROJECT_NAME}/boardmanager
+  ../include/${PROJECT_NAME}/interface
+  ../include/${PROJECT_NAME}/interface/can
+  ../include/${PROJECT_NAME}/math
+  ../include/${PROJECT_NAME}/sensors
+  ../include/${PROJECT_NAME}/types
+  ../include/${PROJECT_NAME}/utils
 )
 
 target_include_directories(sensorring PUBLIC
@@ -56,10 +55,10 @@ install(TARGETS sensorring
 )
 
 install(FILES
-  include/${PROJECT_NAME}/MeasurementManager.hpp
-  include/${PROJECT_NAME}/types/MeasurementObserver.hpp
-  include/${PROJECT_NAME}/types/install_types/CustomTypes.hpp
-  include/${PROJECT_NAME}/types/Parameters.hpp
+  ../include/${PROJECT_NAME}/MeasurementManager.hpp
+  ../include/${PROJECT_NAME}/types/MeasurementObserver.hpp
+  ../include/${PROJECT_NAME}/types/install_types/CustomTypes.hpp
+  ../include/${PROJECT_NAME}/types/Parameters.hpp
   DESTINATION include/${PROJECT_NAME}
 )
 
