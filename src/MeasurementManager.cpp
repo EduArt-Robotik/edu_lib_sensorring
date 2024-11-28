@@ -29,18 +29,18 @@ MeasurementManager::MeasurementManager(ManagerParams params) :
 _params(params){
 
 	init();
-};
+}
 
 MeasurementManager::MeasurementManager(ManagerParams params, MeasurementObserver* observer) :
 _params(params){
 
 	registerObserver(observer);
 	init();
-};
+}
 
 MeasurementManager::~MeasurementManager(){
 	stopMeasuring();
-};
+}
 
 void MeasurementManager::init(){
 	_sensor_ring = std::make_unique<ring::SensorRing>(_params.ring_params);
@@ -72,19 +72,19 @@ void MeasurementManager::init(){
 	// prepare state machine
 	notifyState(WorkerState::Initialized);
 	_measurement_state = MeasurementState::init;
-};
+}
 
 void MeasurementManager::enableTofMeasurement(bool state){
 	_tof_enabled = state;
-};
+}
 
 void MeasurementManager::enableThermalMeasurement(bool state){
 	_thermal_enabled = state;
-};
+}
 
 ManagerParams MeasurementManager::getParams() const{
 	return _params;
-};
+}
 
 std::string MeasurementManager::printTopology() const{
 	std::stringstream ss;
@@ -142,15 +142,15 @@ std::string MeasurementManager::printTopology() const{
 	}
 	ss << "";
 	return ss.str();
-};
+}
 
 bool MeasurementManager::stopThermalCalibration(){
 	return _sensor_ring->stopThermalCalibration();
-};
+}
 
 bool MeasurementManager::startThermalCalibration(std::size_t window){
 	return _sensor_ring->startThermalCalibration(window);
-};
+}
 
 /* ==========================================================================================
 	Handle observers
@@ -167,7 +167,7 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 			Logger::getInstance()->log(LogVerbosity::Warning, "Observer already registered");
 		}
 	}
-};
+}
 
 int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
@@ -200,7 +200,7 @@ int MeasurementManager::notifyToFData(){
 	}
 
 	return -1;
-};
+}
 
 int MeasurementManager::notifyThermalData(){
 	int error_frames = 0;
@@ -225,7 +225,7 @@ int MeasurementManager::notifyThermalData(){
 		}
 	}
 	return error_frames;
-};
+}
 
 void MeasurementManager::notifyState(const WorkerState state){
 	_manager_state = state;
@@ -233,12 +233,12 @@ void MeasurementManager::notifyState(const WorkerState state){
 	for(auto observer : _observer_vec){
 		if(observer) observer->onStateChange(state);
 	}
-};
+}
 
 WorkerState MeasurementManager::getWorkerState() const
 {
 	return _manager_state;
-};
+}
 
 /* ==========================================================================================
 	Start and stop measurements
@@ -256,7 +256,7 @@ bool MeasurementManager::measureSome(){
 	}
 
 	return error;
-};
+}
 
 bool MeasurementManager::startMeasuring(){
 	bool error = false;
@@ -272,7 +272,7 @@ bool MeasurementManager::startMeasuring(){
 	}
 	
 	return error;
-};
+}
 
 bool MeasurementManager::stopMeasuring(){
 	bool error = false;
@@ -287,7 +287,7 @@ bool MeasurementManager::stopMeasuring(){
 	}
 
 	return error;
-};
+}
 
 /* ==========================================================================================
 	State machine function
@@ -521,6 +521,6 @@ void MeasurementManager::StateMachine(){
 			_is_running = false;
 			break;
 	};
-};
+}
 
-}; // namespace MeasurementManager
+}

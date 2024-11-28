@@ -38,4 +38,4 @@ private:
     std::vector<std::unique_ptr<bus::SensorBus>> _sensor_bus_vec;
 };
 
-};
+}

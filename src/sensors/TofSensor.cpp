@@ -145,4 +145,4 @@ measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<
     return combined_measurement;
 }
 
-};
+}

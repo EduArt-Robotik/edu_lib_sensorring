@@ -70,4 +70,4 @@ struct ThermalMeasurement {
 	FalseColorImage falsecolor_img;
 };
 
-};
+}

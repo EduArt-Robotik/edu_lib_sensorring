@@ -101,4 +101,4 @@ inline SensorBoard getBoardParameters(BoardType boardType) {
     }
 };
 
-};
+}

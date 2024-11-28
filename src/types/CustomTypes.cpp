@@ -101,7 +101,7 @@ void TofMeasurement::reserve(std::size_t size){
         point_sigma.reserve(size);
         point_data.reserve(size);
         point_data_transformed.reserve(size);
-};
+}
 
 
-}; //namespace Measurement
+}

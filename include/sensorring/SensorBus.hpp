@@ -63,4 +63,4 @@ class SensorBus : public com::ComObserver{
         com::ComInterface* _interface;
 };
 
-};
+}

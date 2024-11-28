@@ -43,4 +43,4 @@ class BaseSensor : public com::ComObserver{
         com::ComInterface* _interface;
 };
 
-}; // namespace sensor
+}

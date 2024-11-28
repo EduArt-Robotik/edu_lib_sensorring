@@ -60,4 +60,4 @@ class ThermalSensor : public BaseSensor{
 		measurement::TemperatureImage _calibration_image;
 };
 
-}; // namespace Sensor
+}

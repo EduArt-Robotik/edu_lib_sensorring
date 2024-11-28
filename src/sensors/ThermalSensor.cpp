@@ -36,15 +36,15 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* inte
         _got_calibration = filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::readArrayFromFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
         _calibration_average = _calibration_image.avg();
     }
-};
+}
 
 ThermalSensor::~ThermalSensor(){
     
-};
+}
 
 const ThermalSensorParams& ThermalSensor::getParams() const{
     return _params;
-};
+}
 
 const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage() const{    
     return &_latest_measurement.grayscale_img;
@@ -75,20 +75,20 @@ const measurement::ThermalMeasurement* ThermalSensor::getLatestMeasurement(Senso
 
 bool ThermalSensor::gotEEPROM() const{
     return _got_eeprom;
-};
+}
 
 void ThermalSensor::readEEPROM(){
     if(!_got_eeprom){
         _got_eeprom = false;
         _rx_buffer_offset = 0;
     }
-};
+}
 
 bool ThermalSensor::stopCalibration(){
     bool result = _calibration_active;
     _calibration_active = false;
     return result;
-};
+}
 
 bool ThermalSensor::startCalibration(size_t window){
     if(!_calibration_active){
@@ -99,12 +99,12 @@ bool ThermalSensor::startCalibration(size_t window){
     }else{
         return false;
     }
-};
+}
 
 void ThermalSensor::onClearDataFlag(){
     std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
     _rx_buffer_offset = 0;
-};
+}
 
 void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data){
     std::size_t msg_size = data.size();
@@ -183,7 +183,7 @@ void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, 
             }
         }
     }
-};
+}
 
 const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
     uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
@@ -248,7 +248,7 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     }
 
     return result;
-};
+}
 
 const measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const {
     measurement::GrayscaleImage result;
@@ -273,7 +273,7 @@ const measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const m
     }
 
     return result;
-};
+}
 
 const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const measurement::GrayscaleImage& image) const{
     measurement::FalseColorImage color_image;
@@ -286,7 +286,7 @@ const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
     }
 
     return color_image;
-};
+}
 
 void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const{
     if(_params.orientation == sensor::SensorOrientation::left){
@@ -295,4 +295,4 @@ void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const{
 }
 
 
-};
+}

@@ -47,4 +47,4 @@ class SensorBoard{
         std::unique_ptr<LedLight>       _leds;
 };
 
-} // namespace Sensor
+}
