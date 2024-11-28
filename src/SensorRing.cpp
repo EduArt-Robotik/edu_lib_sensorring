@@ -1,9 +1,9 @@
-#include <unistd.h>
-#include <math.h>
+#include <cmath>
 
 #include "SensorRing.hpp"
 #include "canprotocol.hpp"
 #include "Logger.hpp"
+
 
 
 namespace ring{
@@ -13,7 +13,7 @@ SensorRing::SensorRing(RingParams params) : _params(params){
 	if(_params.timeout == std::chrono::milliseconds(0)){
 		Logger::getInstance()->log(LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
 	} else if(_params.timeout < std::chrono::milliseconds(200)){
-		Logger::getInstance()->log(LogVerbosity::Error, std::stringstream() << "SensorRing timeout parameter of " << _params.timeout.count() << " ms probably too low");
+		Logger::getInstance()->log(LogVerbosity::Error, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
 	} 
 
 	for(auto bus_params : params.bus_param_vec){
