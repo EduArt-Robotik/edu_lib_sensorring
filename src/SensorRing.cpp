@@ -19,11 +19,11 @@ SensorRing::SensorRing(RingParams params) : _params(params){
 	for(auto bus_params : params.bus_param_vec){
 		_sensor_bus_vec.push_back(std::make_unique<bus::SensorBus>(bus_params));
 	}
-};
+}
 
 SensorRing::~SensorRing(){
 
-};
+}
 
 std::vector<const bus::SensorBus*> SensorRing::getInterfaces() const{
 	
@@ -33,13 +33,13 @@ std::vector<const bus::SensorBus*> SensorRing::getInterfaces() const{
     }
 
     return ref_vec;
-};
+}
 
 void SensorRing::resetDevices(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->resetDevices();
 	}
-};
+}
 
 bool SensorRing::enumerateDevices(){
 	size_t sensor_count = 0;
@@ -51,7 +51,7 @@ bool SensorRing::enumerateDevices(){
 	}
 
 	return success;
-};
+}
 
 void SensorRing::syncLight(){
 	for(auto& sensor_bus : _sensor_bus_vec){
@@ -62,7 +62,7 @@ void SensorRing::syncLight(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->setLights(CAN_LIGHT_PULSATION, red, green, blue);
 	}
-};
+}
 
 bool SensorRing::getEEPROM(){
 
@@ -85,13 +85,13 @@ bool SensorRing::getEEPROM(){
 	}
 
 	return ready;
-};
+}
 
 void SensorRing::requestTofMeasurement(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->requestTofMeasurement();
 	}
-};
+}
 
 bool SensorRing::waitForAllTofMeasurementsReady() const{
 	
@@ -108,7 +108,7 @@ bool SensorRing::waitForAllTofMeasurementsReady() const{
 	}
 	
 	return ready;
-};
+}
 
 bool SensorRing::waitForAllThermalMeasurementsReady() const{
 	// int watchdog = 0;
@@ -142,7 +142,7 @@ bool SensorRing::waitForAllTofDataTransmissionsComplete() const{
 	}
 	
 	return ready;
-};
+}
 
 bool SensorRing::waitForAllThermalDataTransmissionsComplete() const{
 	bool ready = false;
@@ -158,25 +158,25 @@ bool SensorRing::waitForAllThermalDataTransmissionsComplete() const{
 	}
 	
 	return ready;
-};
+}
 
 void SensorRing::fetchTofData(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->fetchTofData();
 	}
-};
+}
 
 void SensorRing::requestThermalMeasurement(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->requestThermalMeasurement();
 	}
-};
+}
 
 void SensorRing::fetchThermalData(){  
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->fetchThermalData();
 	}
-};
+}
 
 bool SensorRing::stopThermalCalibration(){
     bool success = true;
@@ -186,7 +186,7 @@ bool SensorRing::stopThermalCalibration(){
     }
 
     return success;
-};
+}
 
 bool SensorRing::startThermalCalibration(size_t window){
     bool success = true;
@@ -196,6 +196,6 @@ bool SensorRing::startThermalCalibration(size_t window){
     }
 
     return success;
-};
+}
 
-} //namespace SensorRing
+}

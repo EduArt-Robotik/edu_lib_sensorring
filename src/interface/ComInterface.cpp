@@ -57,6 +57,6 @@ void ComInterface::stopListener()
 
 const std::vector<ComEndpoint>& ComInterface::getEndpoints(){
 	return _endpoints;
-};
+}
 
-}; // namespace
+}

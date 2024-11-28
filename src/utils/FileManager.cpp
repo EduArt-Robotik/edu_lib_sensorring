@@ -13,7 +13,7 @@ namespace filemanager{
 template<typename T>
 bool VectorHandler<T>::saveVectorToFile(const std::string filename, const std::vector<T> &vec){
     return saveVectorToFile("", filename, vec);
-};
+}
 
 template<typename T>
 bool VectorHandler<T>::saveVectorToFile(const std::string filepath, const std::string filename, const std::vector<T> &vec){
@@ -32,12 +32,12 @@ bool VectorHandler<T>::saveVectorToFile(const std::string filepath, const std::s
     file.close();
 
     return true;
-};
+}
 
 template<typename T>
 bool VectorHandler<T>::readVectorFromFile(const std::string filename, std::vector<T> &vec){
     return readVectorFromFile("", filename, vec);
-};
+}
 
 template<typename T>
 bool VectorHandler<T>::readVectorFromFile(const std::string filepath, const std::string filename, std::vector<T> &vec){
@@ -57,7 +57,7 @@ bool VectorHandler<T>::readVectorFromFile(const std::string filepath, const std:
 
     file.close();
     return true;
-};
+}
 
 
 //==================================================
@@ -67,7 +67,7 @@ bool VectorHandler<T>::readVectorFromFile(const std::string filepath, const std:
 template<typename T, std::size_t l>
 bool ArrayHandler<T, l>::saveArrayToFile(const std::string filename, const std::array<T, l> &arr){
     return saveArrayToFile("", filename, arr);
-};
+}
 
 template<typename T, std::size_t l>
 bool ArrayHandler<T, l>::saveArrayToFile(const std::string filepath, const std::string filename, const std::array<T, l> &arr){
@@ -85,12 +85,12 @@ bool ArrayHandler<T, l>::saveArrayToFile(const std::string filepath, const std::
     file.close();
 
     return true;
-};
+}
 
 template<typename T, std::size_t l>
 bool ArrayHandler<T, l>::readArrayFromFile(const std::string filename, std::array<T, l> &arr){
     return readArrayFromFile("", filename, arr);
-};
+}
 
 template<typename T, std::size_t l>
 bool ArrayHandler<T, l>::readArrayFromFile(const std::string filepath, const std::string filename, std::array<T, l> &arr){
@@ -113,7 +113,7 @@ bool ArrayHandler<T, l>::readArrayFromFile(const std::string filepath, const std
 
     file.close();
     return true;
-};
+}
 
 
 //==================================================
@@ -123,7 +123,7 @@ bool ArrayHandler<T, l>::readArrayFromFile(const std::string filepath, const std
 template<typename T>
 bool StructHandler<T>::saveStructToFile(const std::string filename, const T &str){
     return saveStructToFile("", filename, str);
-};
+}
 
 template<typename T>
 bool StructHandler<T>::saveStructToFile(const std::string filepath, const std::string filename, const T &str){
@@ -137,12 +137,12 @@ bool StructHandler<T>::saveStructToFile(const std::string filepath, const std::s
     file.close();
     
     return file.good();
-};
+}
 
 template<typename T>
 bool StructHandler<T>::readStructFromFile(const std::string filename, T &str){
     return readStructFromFile("", filename, str);
-};
+}
 
 template<typename T>
 bool StructHandler<T>::readStructFromFile(const std::string filepath, const std::string filename, T &str){
@@ -156,6 +156,6 @@ bool StructHandler<T>::readStructFromFile(const std::string filepath, const std:
     file.close();
     
     return file.good();
-};
+}
 
-}; // namespace FileManager
+}

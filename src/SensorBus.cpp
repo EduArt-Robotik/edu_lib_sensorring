@@ -32,15 +32,15 @@ SensorBus::SensorBus(BusParams params) : _params(params){
     addEndpoint(com::ComEndpoint("thermal_status"));
     _interface = com::ComManager::getInstance()->getInterface(_params.interface_name);
     _interface->registerObserver(this);
-};
+}
 
 SensorBus::~SensorBus(){
 
-};
+}
 
 const std::string SensorBus::getInterfaceName() const{
     return _params.interface_name;
-};
+}
 
 std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const{
 
@@ -50,46 +50,46 @@ std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const{
     }
 
     return ref_vec;
-};
+}
 
 bool SensorBus::isTofEnabled(int idx) const{
     if(idx >= 0 && idx < (int)_sensor_board_vec.size()){
         return _sensor_board_vec[idx]->getTof()->isEnabled();
     }
     return false;
-};
+}
 
 bool SensorBus::isThermalEnabled(int idx) const{
     if(idx >= 0 && idx < (int)_sensor_board_vec.size()){
         return _sensor_board_vec[idx]->getThermal()->isEnabled();
     }
     return false;
-};
+}
 
 size_t SensorBus::getSensorCount() const{
     return _sensor_board_vec.size();
-};
+}
 
 size_t SensorBus::getEnumerationCount() const{
     return _enumerate_count;
-};
+}
 
 void SensorBus::syncLights(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};
     _interface->send(com::ComEndpoint("light"), tx_buf);
-};
+}
 
 void SensorBus::setLights(int mode, unsigned char red, unsigned char green, unsigned char blue){
 
     std::vector<uint8_t> tx_buf = {(uint8_t )mode, red, green, blue};
     _interface->send(com::ComEndpoint("light"), tx_buf);
-};
+}
 
 void SensorBus::resetDevices(){
     std::vector<uint8_t> tx_buf = {CMD_HARD_RESET};
     _interface->send(com::ComEndpoint("broadcast"), tx_buf);
-};
+}
 
 int SensorBus::enumerateDevices(){
     _enumerate_flag = true;
@@ -109,7 +109,7 @@ int SensorBus::enumerateDevices(){
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     _enumerate_flag = false;
     return _enumerate_count;
-};
+}
 
 void SensorBus::requestEEPROM(){
     int active_devices = 0;
@@ -126,7 +126,7 @@ void SensorBus::requestEEPROM(){
         std::vector<uint8_t> tx_buf = {CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low};
         _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
     }
-};
+}
 
 bool SensorBus::allEEPROMTransmissionsComplete() const{
     bool ready = true;
@@ -138,7 +138,7 @@ bool SensorBus::allEEPROMTransmissionsComplete() const{
     }
     
     return ready;
-};
+}
 
 void SensorBus::requestTofMeasurement(){
     int active_devices = 0;
@@ -157,7 +157,7 @@ void SensorBus::requestTofMeasurement(){
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low};
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
-};
+}
 
 void SensorBus::fetchTofData(){
     int active_devices = 0;
@@ -171,7 +171,7 @@ void SensorBus::fetchTofData(){
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {sensor_select_high, sensor_select_low};
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
-};
+}
 
 void SensorBus::requestThermalMeasurement(){
     int active_devices = 0;
@@ -190,7 +190,7 @@ void SensorBus::requestThermalMeasurement(){
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low};
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-};
+}
 
 void SensorBus::fetchThermalData(){
     int active_devices = 0;
@@ -204,7 +204,7 @@ void SensorBus::fetchThermalData(){
     uint8_t sensor_select_low  = (uint8_t) ((active_devices >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = {CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low};
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-};
+}
 
 bool SensorBus::allTofMeasurementsReady() const{
     bool ready = true;
@@ -212,7 +212,7 @@ bool SensorBus::allTofMeasurementsReady() const{
         ready &= sensor->getTof()->newDataAvailable();
     }
     return ready;
-};
+}
 
 bool SensorBus::allTofMeasurementsReady(int &ready_sensors_count) const{
     bool ready = true;
@@ -222,16 +222,16 @@ bool SensorBus::allTofMeasurementsReady(int &ready_sensors_count) const{
         if(ready) ready_sensors_count ++;
     }
     return ready;
-};
+}
 
 bool SensorBus::allThermalMeasurementsReady() const{
     return _active_thermal_sensors == _thermal_measurement_count;
-};
+}
 
 bool SensorBus::allThermalMeasurementsReady(int &ready_sensors_count) const{
     ready_sensors_count = _thermal_measurement_count;
     return _active_thermal_sensors == _thermal_measurement_count;
-};
+}
 
 bool SensorBus::allTofDataTransmissionsComplete() const{
     unsigned int tof_data_count = 0;
@@ -240,7 +240,7 @@ bool SensorBus::allTofDataTransmissionsComplete() const{
     }
 
     return _active_tof_sensors == tof_data_count;
-};
+}
 
 bool SensorBus::allTofDataTransmissionsComplete(int &ready_sensors_count) const{
     unsigned int tof_data_count = 0;
@@ -250,7 +250,7 @@ bool SensorBus::allTofDataTransmissionsComplete(int &ready_sensors_count) const{
 
     ready_sensors_count = tof_data_count;
     return _active_tof_sensors == tof_data_count;
-};
+}
 
 bool SensorBus::allThermalDataTransmissionsComplete() const{
     unsigned int thermal_data_count = 0;
@@ -259,7 +259,7 @@ bool SensorBus::allThermalDataTransmissionsComplete() const{
     }
 
     return _active_thermal_sensors == thermal_data_count;
-};
+}
 
 bool SensorBus::allThermalDataTransmissionsComplete(int &ready_sensors_count) const{
     unsigned int thermal_data_count = 0;
@@ -269,7 +269,7 @@ bool SensorBus::allThermalDataTransmissionsComplete(int &ready_sensors_count) co
 
     ready_sensors_count = thermal_data_count;
     return _active_thermal_sensors == thermal_data_count;
-};
+}
 
 bool SensorBus::stopThermalCalibration(){
     bool success = true;
@@ -279,7 +279,7 @@ bool SensorBus::stopThermalCalibration(){
     }
 
     return success;
-};
+}
 
 bool SensorBus::startThermaltCalibration(size_t window){
     bool success = true;
@@ -289,7 +289,7 @@ bool SensorBus::startThermaltCalibration(size_t window){
     }
 
     return success;
-};
+}
 
 void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     // general sensor board status
@@ -319,6 +319,6 @@ void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>
     }else if(source == com::ComEndpoint("thermal_status")){
     
     }
-};
+}
 
-}; //namespace sensor
+}

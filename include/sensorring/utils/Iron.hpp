@@ -261,4 +261,4 @@ const static unsigned char Iron[256][3] = {
 	{255,248,223}
 };
 
-}; // namespace ThermalPalette
+}

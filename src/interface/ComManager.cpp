@@ -34,4 +34,4 @@ ComInterface* ComManager::getInterface(std::string interface_name){
     return requested_interface;
 }
 
-}; // namespace edu
+}

@@ -39,4 +39,4 @@ class TofSensor : public BaseSensor{
         unsigned int _rx_buffer_offset;
 };
 
-};
+}

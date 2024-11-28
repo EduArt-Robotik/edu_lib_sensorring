@@ -86,7 +86,7 @@ bool SocketCANFD::send(canid_t canid, const std::vector<uint8_t>& tx_buf){
 	}
 
 	return false;
-};
+}
 
 bool SocketCANFD::send(const canfd_frame* frame)
 {
@@ -207,10 +207,10 @@ void SocketCANFD::fillMap(std::size_t sensor_count){
 canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint){
 	canid_t id = _id_map.at(endpoint); // may throw out_of_range exception
 	return id;
-};
+}
   
 // ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id){
 
 // };
 
-} // namespace
+}

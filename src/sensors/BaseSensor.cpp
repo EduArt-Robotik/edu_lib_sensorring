@@ -14,15 +14,15 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, st
 {
     addEndpoint(target);    
     _interface->registerObserver(this);
-};
+}
 
 BaseSensor::~BaseSensor(){
 
-};
+}
 
 std::size_t BaseSensor::getIdx() const{
     return _idx;
-};
+}
 
 /*void BaseSensor::enableCallback(){
     _can_interface->registerObserver(this);
@@ -30,15 +30,15 @@ std::size_t BaseSensor::getIdx() const{
 
 bool BaseSensor::isEnabled() const {
     return _enable_flag;
-};
+}
 
 bool BaseSensor::gotNewData() const {
     return _new_measurement_ready_flag;
-};
+}
 
 bool BaseSensor::newDataAvailable() const {
     return _new_data_available_flag;
-};
+}
 
 /*void BaseSensor::setEnable(bool enable){
     _enable_flag = enable;
@@ -49,10 +49,10 @@ void BaseSensor::clearDataFlag(){
     _new_data_in_buffer_flag = false;
     _new_measurement_ready_flag = false;
     onClearDataFlag();
-};
+}
 
 void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data){
     canCallback(source, data);
-};
+}
 
-};
+}

@@ -12,8 +12,7 @@
 #include "ComInterface.hpp"
 #include "ComObserver.hpp"
 
-namespace com
-{
+namespace com{
 
 /**
  * @class SocketCANFD
@@ -87,4 +86,4 @@ private:
   int _soc;
 };
 
-};
+}
