@@ -1,6 +1,6 @@
 # Software interface of the library
 
-The installed library exports four header files which define the interface of the library.
+The software interface of the Sensorring library is defined in four header files which are installed with the library.
 
 ## MeasurementManager.hpp
 The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp) defines the central class `manager::MeasurementManager`. The MeasurementManager runs a looping state machine in a thread which handles all communication with the sensors, times all measurements and processes them. The class must be instantiated with a parameter set of type `manager::ManagerParams`. The implementation of the parameters is described below and all individual parameters are explained [here](parameters.md).

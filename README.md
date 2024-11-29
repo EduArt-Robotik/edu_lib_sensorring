@@ -24,11 +24,51 @@ Each of the core classes of the library has its own parameter set which is shown
 
 ## 3. Software interface of the library
 
-See [here](doc/sw_interface.md) for a description of the software interface of the library.
+The software interface of the Sensorring library is defined in four header files which are installed with the library.
+- [MeasurementManger.hpp](include/sensorring/MeasurementManager.hpp)
+- [MeasurementObserver.hpp](include/sensorring/MeasurementObserver.hpp)
+- [Parameters.hpp](include/sensorring/types/Parameters.hpp)
+- [CustomTypes.hpp](include/sensorring/types/install_types/CustomTypes.hpp)
+
+Implementation details of the interface are explained [here](doc/sw_interface.md).
 
 ## 4. Building and installing the library
 
-See [here](doc/build_guide.md) for a guide on how to build and install the library.
+
+
+To build the library execute the following commands starting in the root of the repository:
+```
+mkdir build
+cd build
+cmake ../cmake
+cmake --build . -j
+```
+
+Use this command to install the library to a custom location:
+```
+cmake --install . --prefix <install-path>
+```
+
+If the library is installed to a non-standard location, the directory should be added to the `CMAKE_PREFIX_PATH` environment variable. This enables cmake to find and include the library automatically in other projects. Add an export command to your .bashrc script or edit the environment variable file of your OS to set the path permanently.
+
+```
+export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:<install-path>
+```
+
+
+
+For an automatic build and automatic installation these above commands are also available as convenience scripts [make_release.bash](cmake/make_release.bash) and [install_release.bash](cmake/install_release.bash). These scripts should be called from the root of the repository.
+
+```
+cmake/make_release.bash
+```
+```
+cmake/install_release.bash
+```
+> **Notes on the installation script:**<br>  - The script automatically runs the build script<br>- The installation path in the script is hard-coded and should be changed if desired
+
+
+
 
 ## 5. Using the library in a custom project
 
