@@ -22,7 +22,7 @@ enum class SensorOrientation{
  * @brief Parameter structure of the sensor lights of a sensor board.
  */
 struct LightParams{
-    int nr_of_leds = 0;
+    std::size_t nr_of_leds = 0;
     SensorOrientation orientation = SensorOrientation::none;
 };
 
