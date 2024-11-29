@@ -3,6 +3,7 @@
 #include <string>
 #include "CustomTypes.hpp"
 
+namespace manager{
 
 /**
  * @enum LogVerbosity
@@ -42,16 +43,6 @@ class MeasurementObserver{
 public:
 
     /**
-     * Constructor
-     */
-    MeasurementObserver() = default;
-    
-    /**
-     * Destructor
-     */
-    ~MeasurementObserver() = default;
-
-    /**
      * Callback method for state changes of the state machine worker
      * @param[in] status the new status of the state machine worker
      */
@@ -77,3 +68,5 @@ public:
      */
     virtual void onThermalMeasurement([[maybe_unused]] const std::size_t idx, [[maybe_unused]] const measurement::ThermalMeasurement measurement) {};
 };
+
+}

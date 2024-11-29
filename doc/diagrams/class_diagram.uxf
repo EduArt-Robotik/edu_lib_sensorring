@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>13</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>1092</x><y>611</y><w>611</w><h>260</h></coordinates><panel_attributes>SensorRing
+<diagram program="umletino" version="15.1"><zoom_level>12</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>624</x><y>840</y><w>564</w><h>240</h></coordinates><panel_attributes>SensorRing
 --
 params : RingParams
 sensor_bus_vec : vector&lt;SensorBus&gt;
@@ -9,7 +9,7 @@ sensor_bus_vec : vector&lt;SensorBus&gt;
    
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1027</x><y>1534</y><w>754</w><h>208</h></coordinates><panel_attributes>SensorBoard
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>564</x><y>1692</y><w>696</w><h>192</h></coordinates><panel_attributes>SensorBoard
 --
 - tof : TofSensor
 - thermal : ThermalSensor
@@ -21,7 +21,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 bg=white
 fg=black
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1209</x><y>1872</y><w>403</w><h>208</h></coordinates><panel_attributes>ThermalSensor
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>ThermalSensor
 --
 - params : ThermalSensorParams
 - eeprom : HTPA32Eeprom
@@ -33,7 +33,7 @@ transparency=0
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>754</x><y>1872</y><w>403</w><h>208</h></coordinates><panel_attributes>LedLight
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>LedLight
 --
 - params : LedPanelParams
 
@@ -44,7 +44,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1651</x><y>1872</y><w>403</w><h>208</h></coordinates><panel_attributes>TofSensor
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>2004</y><w>372</w><h>192</h></coordinates><panel_attributes>TofSensor
 --
 - params : TofSensorParams
 
@@ -58,7 +58,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>2184</y><w>416</w><h>247</h></coordinates><panel_attributes>BaseSensor
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>936</x><y>2292</y><w>384</w><h>228</h></coordinates><panel_attributes>BaseSensor
 --
 - canid_data : int
 - can_interface : SocketCANFD
@@ -71,15 +71,15 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1105</x><y>1729</y><w>52</w><h>169</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>636</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1677</x><y>1729</y><w>52</w><h>169</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1164</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1404</x><y>1729</y><w>52</w><h>169</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>912</x><y>1872</y><w>48</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>1391</x><y>1326</y><w>52</w><h>234</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>Relation</id><coordinates><x>900</x><y>1500</y><w>48</w><h>216</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>Relation</id><coordinates><x>1521</x><y>2067</y><w>39</w><h>143</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1729</x><y>2067</y><w>39</w><h>143</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1092</x><y>1066</y><w>624</w><h>273</h></coordinates><panel_attributes>SensorBus
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>Relation</id><coordinates><x>1020</x><y>2184</y><w>36</w><h>132</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1212</x><y>2184</y><w>36</w><h>132</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>624</x><y>1260</y><w>576</w><h>252</h></coordinates><panel_attributes>SensorBus
 --
 params : BusParams
 interface : ComInterface
@@ -93,24 +93,24 @@ SensorBus(params : BusParams);
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1391</x><y>858</y><w>52</w><h>234</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>900</x><y>1068</y><w>48</w><h>216</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>416</x><y>1443</y><w>1703</w><h>1079</h></coordinates><panel_attributes>PCB Abstraction
+m2=n</panel_attributes><additional_attributes>10;10;10;160</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>1608</y><w>1572</w><h>996</h></coordinates><panel_attributes>PCB Abstraction
 --
 fg=white
 bg=gray
 layer=-1
-transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>416</x><y>988</y><w>1352</w><h>403</h></coordinates><panel_attributes>CAN Bus Abstraction
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>1188</y><w>1248</w><h>372</h></coordinates><panel_attributes>Com Interface Abstraction
 --
 fg=white
 bg=gray
 layer=-1
-transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>416</x><y>533</y><w>1352</w><h>403</h></coordinates><panel_attributes>System Level Abstraction
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>768</y><w>1248</w><h>372</h></coordinates><panel_attributes>System Level Abstraction
 --
 fg=white
 bg=gray
 layer=-1
-transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1703</x><y>1131</y><w>975</w><h>1105</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>730;830;730;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>468</x><y>1534</y><w>351</w><h>195</h></coordinates><panel_attributes>The SensorBoard corresponds to one
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1320</y><w>900</w><h>1020</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>730;830;730;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>48</x><y>1692</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBoard corresponds to one
 physical circuit board. It aggregates
 the individual sensors that are physically
 present on the circuit board.
@@ -123,7 +123,7 @@ their corresponding sensor.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2522</x><y>2210</y><w>468</w><h>260</h></coordinates><panel_attributes>ComObserver
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1944</x><y>2316</y><w>432</w><h>240</h></coordinates><panel_attributes>ComObserver
 --
 
 
@@ -138,7 +138,7 @@ transparency=0
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1833</x><y>2314</y><w>715</w><h>39</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>530;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>455</x><y>1053</y><w>351</w><h>195</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1308</x><y>2412</y><w>660</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>530;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>1248</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
 communication interface, e.g. a can bus.
 It holds all information corresponding to
 that interface including a vector of all
@@ -151,7 +151,7 @@ sensor boards.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>455</x><y>598</y><w>351</w><h>195</h></coordinates><panel_attributes>The SensorRing is the highest layer
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>828</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorRing is the highest layer
 abstraction and describes the whole
 sensor system. The sensor system
 includes sensors on multiple interfaces.
@@ -160,7 +160,7 @@ includes sensors on multiple interfaces.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1079</x><y>0</y><w>624</w><h>494</h></coordinates><panel_attributes>MeasurementManager
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>612</x><y>276</y><w>576</w><h>456</h></coordinates><panel_attributes>MeasurementManager
 --
 params : ManagerParams
 sensor_ring : SensorRing
@@ -189,7 +189,7 @@ stopThermalCalibration() : bool
    
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>455</x><y>0</y><w>351</w><h>195</h></coordinates><panel_attributes>The MeasurementManager manages a
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>276</y><w>324</w><h>180</h></coordinates><panel_attributes>The MeasurementManager manages a
 SensorRing object. The main component
 is a state machine which handles the timing
 of the measurements.
@@ -198,9 +198,9 @@ of the measurements.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1378</x><y>481</y><w>52</w><h>156</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>888</x><y>720</y><w>48</w><h>144</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1937</x><y>0</y><w>624</w><h>195</h></coordinates><panel_attributes>MeasurementObserver
+m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1404</x><y>276</y><w>576</w><h>180</h></coordinates><panel_attributes>MeasurementObserver
 --
 
 
@@ -212,7 +212,7 @@ m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attribute
    
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1690</x><y>65</y><w>273</w><h>39</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>3107</x><y>1560</y><w>468</w><h>221</h></coordinates><panel_attributes>ComManager
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1176</x><y>336</y><w>252</w><h>36</h></coordinates><panel_attributes>lt=&lt;-&gt;&gt;&gt;&gt;&gt;</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>1716</y><w>432</w><h>204</h></coordinates><panel_attributes>ComManager
 --
 vector&lt;ComInterface&gt;
 
@@ -226,9 +226,9 @@ vector&lt;ComInterface&gt;
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>3484</x><y>1482</y><w>182</w><h>195</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2832</x><y>1644</y><w>168</w><h>180</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-&gt;
 m1=1
-m2=1</panel_attributes><additional_attributes>10;60;10;10;120;10;120;120;70;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>3107</x><y>1872</y><w>468</w><h>260</h></coordinates><panel_attributes>ComInterface
+m2=1</panel_attributes><additional_attributes>10;60;10;10;120;10;120;120;70;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>2004</y><w>432</w><h>240</h></coordinates><panel_attributes>ComInterface
 --
 vector&lt;ComObserver*&gt; observers
 
@@ -246,7 +246,7 @@ vector&lt;ComObserver*&gt; observers
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>3731</x><y>1872</y><w>520</w><h>260</h></coordinates><panel_attributes>ComEndpoint
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>3060</x><y>2004</y><w>480</w><h>240</h></coordinates><panel_attributes>ComEndpoint
 --
 
 
@@ -259,12 +259,12 @@ _+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoints&gt;
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>3562</x><y>1937</y><w>195</w><h>65</h></coordinates><panel_attributes>lt=&lt;.
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2904</x><y>2064</y><w>180</w><h>60</h></coordinates><panel_attributes>lt=&lt;.
 &lt;&lt;uses&gt;&gt;
-</panel_attributes><additional_attributes>130;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>3328</x><y>1768</y><w>52</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+</panel_attributes><additional_attributes>130;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>1908</y><w>48</w><h>120</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>2860</x><y>1950</y><w>273</w><h>286</h></coordinates><panel_attributes>lt=&lt;-
-</panel_attributes><additional_attributes>10;200;10;10;190;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>3107</x><y>2210</y><w>468</w><h>260</h></coordinates><panel_attributes>SocketCANFD
+m2=1</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>2256</x><y>2076</y><w>252</w><h>264</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;200;10;10;190;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>2316</y><w>432</w><h>240</h></coordinates><panel_attributes>SocketCANFD
 --
 vector&lt;ComObserver*&gt; observers
 
@@ -278,13 +278,13 @@ vector&lt;ComObserver*&gt; observers
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>3328</x><y>2119</y><w>39</w><h>117</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1703</x><y>1092</y><w>1664</w><h>494</h></coordinates><panel_attributes>lt=&lt;.
-&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>1260;360;1260;20;10;20</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>2405</x><y>1443</y><w>1924</w><h>1079</h></coordinates><panel_attributes>Communication
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>2232</y><w>36</w><h>108</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1284</y><w>1536</w><h>456</h></coordinates><panel_attributes>lt=&lt;.
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>1260;360;1260;20;10;20</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1836</x><y>1608</y><w>1776</w><h>996</h></coordinates><panel_attributes>Communication
 --
 fg=white
 bg=gray
 layer=-1
-transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>936</x><y>2600</y><w>416</w><h>247</h></coordinates><panel_attributes>FileManager
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>480</x><y>2676</y><w>384</w><h>228</h></coordinates><panel_attributes>FileManager
 --
 
 --
@@ -298,6 +298,6 @@ _+readStructFromFile_
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1261</x><y>2067</y><w>91</w><h>559</h></coordinates><panel_attributes>lt=&lt;.
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>780</x><y>2184</y><w>84</w><h>516</h></coordinates><panel_attributes>lt=&lt;.
 
 &lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>10;410;10;10</additional_attributes></element></diagram>
