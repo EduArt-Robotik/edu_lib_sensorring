@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <filesystem>
 
 #include "CustomTypes.hpp"
 #include "heimann_htpa32.hpp"
@@ -10,6 +11,14 @@
 namespace eduart{
 
 namespace filemanager{
+
+class PathHandler{
+    public:
+        PathHandler() = delete;
+        static bool checkDirectory(std::string path);
+        static bool checkDirectory(std::filesystem::path path);
+        static std::filesystem::path resolvePath(const std::string path);
+};
 
 template <typename T>
 class VectorHandler{
