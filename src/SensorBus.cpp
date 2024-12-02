@@ -16,8 +16,10 @@ SensorBus::SensorBus(BusParams params) : _params(params){
     auto interface = com::ComManager::getInstance()->createInterface(params.interface_name, params.board_param_vec.size());
     //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
 
+    std::size_t idx = 0;
     for(auto board_params : params.board_param_vec){    
-        _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface));
+        _sensor_board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface, idx));
+        idx++;
     }
 
     _enumerate_flag = false;

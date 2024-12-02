@@ -15,7 +15,7 @@ namespace sensor{
 
 class ThermalSensor : public BaseSensor{
     public:
-        ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable);
+        ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
         ~ThermalSensor();
         
 		void readEEPROM();

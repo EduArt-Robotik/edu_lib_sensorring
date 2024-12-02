@@ -6,8 +6,8 @@ namespace eduart{
 
 namespace sensor{
 
-TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable) :
-    BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, enable),
+TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx) :
+    BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable),
     _rot_m(math::MiniMath::rotation_matrix_from_euler_degrees(params.rotation)),
     _params(params){
 
