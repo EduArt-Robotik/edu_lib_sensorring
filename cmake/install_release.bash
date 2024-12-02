@@ -1,5 +1,4 @@
 #!/bin/bash
  
-./make_release.bash
-cd ../build
-cmake --install . --prefix /workspaces/ros1_noetic/sensorring
+./cmake/make_release.bash
+sudo cmake --install ./build #--prefix /home/user/sensorring
