@@ -60,10 +60,6 @@ struct TofSensorParams {
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
 struct SensorBoardParams{
-    std::size_t idx = 0;
-    bool enable_tof;
-    bool enable_thermal;
-
     LightParams led_params;
     TofSensorParams tof_params;
     ThermalSensorParams thermal_params;

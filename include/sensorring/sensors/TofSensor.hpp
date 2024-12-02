@@ -17,7 +17,7 @@ static const double lut_tan_y[] = {0.3578, 0.3578, 0.3578, 0.3578, 0.3578, 0.357
 
 class TofSensor : public BaseSensor{
     public:
-        TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable);
+        TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
         ~TofSensor();
         
         const TofSensorParams& getParams() const;

@@ -10,8 +10,8 @@ namespace eduart{
     
 namespace sensor{
 
-ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx, bool enable) :
-    BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), idx, enable),
+ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx) :
+    BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), idx, params.enable),
     _params(params){
 
     _rx_buffer_offset = 0;

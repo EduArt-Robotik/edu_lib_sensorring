@@ -23,7 +23,7 @@ enum class SensorBoardType{
 
 class SensorBoard{
     public:
-        SensorBoard(SensorBoardParams params, com::ComInterface* interface);
+        SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx);
         ~SensorBoard();
 
         SensorBoardType getType() const;

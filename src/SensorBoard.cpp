@@ -4,9 +4,9 @@ namespace eduart{
 
 namespace sensor{
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface){
-	_tof        = std::make_unique<TofSensor>(params.tof_params, interface, params.idx, params.enable_tof);
-	_thermal    = std::make_unique<ThermalSensor>(params.thermal_params, interface, params.idx, params.enable_thermal);
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx){
+	_tof        = std::make_unique<TofSensor>(params.tof_params, interface, idx);
+	_thermal    = std::make_unique<ThermalSensor>(params.thermal_params, interface, idx);
 	_leds       = std::make_unique<LedLight>(params.led_params);
 
 	_sensor_type = SensorBoardType::unknown;
