@@ -2,6 +2,8 @@
 #include <cmath>
 #include "Math.hpp"
 
+namespace eduart{
+
 namespace math{
 
 //===============================
@@ -97,4 +99,6 @@ namespace math{
         return r;
     }
 
-} // namespace
+}
+
+}

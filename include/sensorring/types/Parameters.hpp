@@ -13,7 +13,7 @@ namespace sensor{
  * @enum SensorOrientation
  * @brief Possible orientations of a sensor board. Used to rotate the thermal images.
  */
-enum class SensorOrientation{
+enum class Orientation{
     left,
     right,
     none
@@ -25,6 +25,7 @@ enum class SensorOrientation{
  */
 struct LightParams{
     bool enable;
+    Orientation orientation = Orientation::none;
 };
 
 /**
@@ -42,7 +43,7 @@ struct ThermalSensorParams {
     std::string calibration_dir = "";
     math::Vector3 rotation = {0, 0, 0};
     math::Vector3 translation = {0, 0, 0};
-    SensorOrientation orientation = SensorOrientation::none;
+    Orientation orientation = Orientation::none;
 };
 
 /**
