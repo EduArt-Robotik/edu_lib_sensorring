@@ -8,8 +8,9 @@
 #include "SensorBoard.hpp"
 #include "Parameters.hpp"
 
-namespace bus{
+namespace eduart{
 
+namespace bus{
 
 class SensorBus : public com::ComObserver{
     public:
@@ -62,5 +63,7 @@ class SensorBus : public com::ComObserver{
 
         com::ComInterface* _interface;
 };
+
+}
 
 }

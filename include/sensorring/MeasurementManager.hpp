@@ -9,6 +9,7 @@
 #include <thread>
 #include <chrono>
 
+namespace eduart{
 
 // Forward declaration
 namespace ring{
@@ -144,5 +145,7 @@ private:
     std::thread _worker_thread;
 
 };
+
+}
 
 }

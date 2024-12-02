@@ -8,6 +8,8 @@
 #define THERMAL_RESOLUTION 1024
 #define MAX_MSG_LENGTH 64
 
+namespace eduart{
+
 namespace math{
 
 /**
@@ -101,5 +103,7 @@ struct ThermalMeasurement {
 	GrayscaleImage grayscale_img;
 	FalseColorImage falsecolor_img;
 };
+
+}
 
 }

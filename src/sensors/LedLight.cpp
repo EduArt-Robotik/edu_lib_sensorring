@@ -1,5 +1,7 @@
 #include "LedLight.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 LedLight::LedLight(LightParams params){
@@ -12,6 +14,8 @@ LedLight::~LedLight(){
 
 const LightParams& LedLight::getParams() const{
     return _params;
+}
+
 }
 
 }

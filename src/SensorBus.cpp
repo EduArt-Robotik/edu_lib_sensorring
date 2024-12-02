@@ -7,6 +7,8 @@
 #include "canprotocol.hpp"
 #include "ComManager.hpp"
 
+namespace eduart{
+
 namespace bus{
 
 SensorBus::SensorBus(BusParams params) : _params(params){
@@ -319,6 +321,8 @@ void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>
     }else if(source == com::ComEndpoint("thermal_status")){
     
     }
+}
+
 }
 
 }

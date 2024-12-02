@@ -9,6 +9,8 @@
 #include "CustomTypes.hpp"
 #include "Parameters.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 class ThermalSensor : public BaseSensor{
@@ -59,5 +61,7 @@ class ThermalSensor : public BaseSensor{
 		std::string _calibration_filename;
 		measurement::TemperatureImage _calibration_image;
 };
+
+}
 
 }

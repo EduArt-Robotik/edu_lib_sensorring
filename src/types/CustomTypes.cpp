@@ -1,6 +1,7 @@
 #include "CustomTypes.hpp"
 #include "Math.hpp"
 
+namespace eduart{
 
 namespace measurement{
 
@@ -103,5 +104,6 @@ void TofMeasurement::reserve(std::size_t size){
         point_data_transformed.reserve(size);
 }
 
+}
 
 }

@@ -1,5 +1,7 @@
 #include "ComObserver.hpp"
 
+namespace eduart{
+
 namespace com{
 
 ComObserver::ComObserver()
@@ -36,6 +38,8 @@ bool ComObserver::checkConnectionStatus(unsigned int timeoutInMillis)
     auto elapsed = std::chrono::steady_clock::now() - _timestamp;
    
     return elapsed < std::chrono::milliseconds(timeoutInMillis);
+}
+
 }
 
 }

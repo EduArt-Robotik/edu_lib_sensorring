@@ -4,6 +4,8 @@
 #include <iostream>
 #include <filesystem>
 
+namespace eduart{
+
 namespace filemanager{
 
 //==================================================
@@ -156,6 +158,8 @@ bool StructHandler<T>::readStructFromFile(const std::string filepath, const std:
     file.close();
     
     return file.good();
+}
+
 }
 
 }

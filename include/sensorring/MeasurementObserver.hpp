@@ -3,7 +3,9 @@
 #include <string>
 #include "CustomTypes.hpp"
 
-namespace manager{
+namespace eduart{
+
+namespace logger{
 
 /**
  * @enum LogVerbosity
@@ -18,6 +20,9 @@ enum class LogVerbosity{
     Error
 };
 
+}
+
+namespace manager{
 
 /**
  * @enum WorkerState
@@ -53,7 +58,7 @@ public:
      * @param[in] verbosity verbosity level of the log message
      * @param[in] msg       log message string
      */
-    virtual void onOutputLog([[maybe_unused]] const LogVerbosity verbosity, [[maybe_unused]] const std::string msg) {};
+    virtual void onOutputLog([[maybe_unused]] const logger::LogVerbosity verbosity, [[maybe_unused]] const std::string msg) {};
 
     /**
      * Callback method for new Time-of-Flight sensor measurements. Returns one combined measurement from all sensors.
@@ -68,5 +73,7 @@ public:
      */
     virtual void onThermalMeasurement([[maybe_unused]] const std::size_t idx, [[maybe_unused]] const measurement::ThermalMeasurement measurement) {};
 };
+
+}
 
 }

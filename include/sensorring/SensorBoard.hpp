@@ -9,6 +9,8 @@
 #include "ThermalSensor.hpp"
 #include "LedLight.hpp"
 
+namespace eduart{
+
 namespace sensor{
 
 enum class SensorBoardType{
@@ -46,5 +48,7 @@ class SensorBoard{
         std::unique_ptr<ThermalSensor>  _thermal;
         std::unique_ptr<LedLight>       _leds;
 };
+
+}
 
 }
