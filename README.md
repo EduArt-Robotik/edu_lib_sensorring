@@ -5,11 +5,11 @@ Software interface of the EduArt Sensorring.
 The sensorring library supports a variety of EduArt sensor boards. See the table below for the currently supported hardware:
 
 
-|  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200"/></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> -Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CANFD Interface </p>|
+|  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200"/></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> -Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CANFD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
 |---|---|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CANFD Interface |
-|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General Purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> -38 × 28 mm <br> - CANFD Interface|
-|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General Purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CANFD Interface|
+|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CANFD Interf<br> - Input voltage range 6 V - 65 V DCace |
+|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> -38 × 28 mm <br> - CANFD Inter<br> - Input voltage range 6 V - 65 V DCface|
+|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CANFD Inter<br> - Input voltage range 6 V - 65 V DCface|
 
 
 ## 1. Sensor topology
@@ -57,7 +57,7 @@ export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:<install-path>
 
 
 
-For an automatic build and automatic installation these above commands are also available as convenience scripts [make_release.bash](cmake/make_release.bash) and [install_release.bash](cmake/install_release.bash). These scripts should be called from the root of the repository.
+For an automatic build and automatic installation the above commands are also available as convenience scripts [make_release.bash](cmake/make_release.bash) and [install_release.bash](cmake/install_release.bash). These scripts should be called from the root of the repository.
 
 ```
 cmake/make_release.bash
@@ -65,7 +65,7 @@ cmake/make_release.bash
 ```
 cmake/install_release.bash
 ```
-> **Notes on the installation script:**<br>  - The script automatically runs the build script<br>- The installation path in the script is hard-coded and should be changed if desired
+> **Notes on the installation script:**<br>  - The installation script automatically runs the build script before installing the library. <br>- The installation path in the script is hard-coded and should be changed if desired. <br> - Don't forget to set the `CMAKE_PREFIX_PATH` when using the script.
 
 
 

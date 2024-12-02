@@ -3,7 +3,7 @@
 The software interface of the Sensorring library is defined in four header files which are installed with the library.
 
 ## MeasurementManager.hpp
-The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp) defines the central class `manager::MeasurementManager`. The MeasurementManager runs a looping state machine in a thread which handles all communication with the sensors, times all measurements and processes them. The class must be instantiated with a parameter set of type `manager::ManagerParams`. The implementation of the parameters is described below and all individual parameters are explained [here](parameters.md).
+The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp) defines the central class `manager::MeasurementManager`. The MeasurementManager runs a looping state machine in a thread which handles all communication with the sensors, times all measurements and processes them. The class must be instantiated with a parameter set of type `manager::ManagerParams`. The implementation of this parameter set is described below in the section *Parameters.hpp*.
 
 ```
     /**
@@ -157,7 +157,7 @@ The header [MeasurementObserver.hpp](../include/sensorring/MeasurementObserver.h
 ```
 
 ## Parameters.hpp
-The header [Parameters.hpp](../include/sensorring/types/Parameters.hpp) defines the parameter structure which is used to initialize the MeasurementManager. It describes the hardware topology of the system as well as meta parameters of the system. The function of all individual parameters is explained [here](parameters.md). Refer to the header file for implementation details.
+The header [Parameters.hpp](../include/sensorring/types/Parameters.hpp) defines the parameter structure which is used to initialize the MeasurementManager. It describes the hardware topology as well as meta parameters of the system. The function of the individual parameters is explained [here](parameters.md). Refer to the header file for more implementation details.
 
 ```
     /**
@@ -188,6 +188,7 @@ The header [Parameters.hpp](../include/sensorring/types/Parameters.hpp) defines 
     * @enum BusParams
     * @brief Parameter structure of a communication bus. A bus is one communication interface e.g. can bus and has an arbitrary number of sensor boards connected.
     */
+    struct bus::BusParams
 ```
 
 ```
@@ -257,5 +258,5 @@ The header [CustomTypes.hpp](../include/sensorring/types/install_types/CustomTyp
     * @enum ThermalMeasurement
     * @brief Structure to hold the measurement from a single thermal sensor or.
     */
-    struct measurement::GThermalMeasurement
+    struct measurement::ThermalMeasurement
 ```

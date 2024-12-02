@@ -345,7 +345,7 @@ void MeasurementManager::StateMachine(){
 					logger::Logger::getInstance()->log(LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterfaceName());
 				}else{
 					logger::Logger::getInstance()->log(LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterfaceName());
-					logger::Logger::getInstance()->log(LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount()) + " sensors were specified in the launchfile. Check topology and restart.");
+					logger::Logger::getInstance()->log(LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount()) + " sensors are specified in the parameters. Check topology and restart.");
 				}
 			}
 
