@@ -3,6 +3,7 @@
 #include <array>
 #include <math.h>
 
+namespace eduart{
 
 namespace math{
 
@@ -54,5 +55,7 @@ class MiniMath{
 public:
     static const Matrix3 rotation_matrix_from_euler_degrees(const Vector3& rotation_deg);
 };
+
+}
 
 }

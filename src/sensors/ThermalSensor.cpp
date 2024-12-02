@@ -291,7 +291,7 @@ const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
 }
 
 void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const{
-    if(_params.orientation == sensor::SensorOrientation::left){
+    if(_params.orientation == sensor::Orientation::left){
        std::reverse(image.data.begin(), image.data.end());
     }
 }

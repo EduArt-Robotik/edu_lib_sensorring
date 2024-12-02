@@ -242,7 +242,7 @@ The header [CustomTypes.hpp](../include/sensorring/types/install_types/CustomTyp
     template<typename T, std::size_t RESOLUTION>
     struct measurement::GenericRGBImage
 
-    using FalseColorImage	= GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
+    using FalseColorImage = GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 ```
 
 ```
