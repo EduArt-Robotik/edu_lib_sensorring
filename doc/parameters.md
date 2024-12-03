@@ -32,9 +32,6 @@
 **sensor::SensorBoardParams**
 | Type | Parameter name  | Description | Valid values |
 |---|---|---|---|
-| std::size_t | idx | Index of the sensor board | `>=0` |
-| bool | enable_tof | Enable flag for the Time-of-Flight sensor. Used to disable the sensor when no Time-of-Flight measurements should be performed on this board. | `true`, `false` |
-| bool | enable_thermal | Enable flag for the thermal sensor. Used to disable the sensor when no thermal measurements should be performed on this board. | `true`, `false` |
 | sensor::TofSensorParams | thermal_params | Parameters of the thermal sensor on the sensor board. Leave empty if no thermal sensor is placed on the board. | n.a. |
 | sensor::ThermalSensorParams | tof_params | Parameters of the Time-of-Flight sensor on the sensor board. Leave empty if no Time-of-Flight sensor is placed on the board. | n.a. |
 | sensor::LightParams | led_params | Parameters of the led lights on the sensor board. Leave empty if no leds are placed on the board. | n.a. |
@@ -44,6 +41,7 @@
 **sensor::TofSensorParams**
 | Type | Parameter name | Description | Valid values |
 |---|---|---|---|
+| bool | enable | Enable flag for the Time-of-Flight sensor. Used to disable the sensor when no Time-of-Flight measurements should be performed. | `true`, `false` |
 | math::Vector3 | rotation | 3 dimensional vector with euler angles specifying the sensor orientation. The elements are [`rx`, `ry`, `rz`] and describe the rotation around the cartesian coordinate axes `x`, `y` and `z` in `degrees`. | [`0..2π`, `0..2π`, `0..2π`]|
 | math::Vector3 | translation | 3 dimensional vector with offset distances specifying the sensor position in relation to a common reference point. The elements are [`x`, `y`, `z`] and describe the translation along the cartesian coordinate axes `x`, `y` and `z` in `meters`. | [`...`, `...`, `...`] |
 
@@ -52,6 +50,7 @@
 **sensor::ThermalSensorParams**
 | Type | Parameter name | Description  | Valid values |
 |---|---|---|---|
+| bool | enable | Enable flag for the thermal sensor. Used to disable the sensor when no thermal measurements should be performed. | `true`, `false` |
 | double | t_min_deg_c | Minimum temperature for scaling the grayscale and falsecolor images. Only used when the `auto_min_max` parameter is set to `false`. | `...` |
 | double | t_max_deg_c | Maximum temperature for scaling the grayscale and falsecolor images. Only used when the `auto_min_max` parameter is set to `false`. | `...` |
 | bool | auto_min_max | Flag to switch between automatic and manual scaling of the grayscale and falsecolor images. When set to `true` the images are scaled dynamically between the minimum and maximum temperature value in the image. When set to `false` the images are scaled dynamically between the values of the `t_min_deg_c` and `t_min_deg_c` parameters. When using manual scaling all out-of-bounds values are clipped. | `true`, `false` |
@@ -70,5 +69,5 @@ The light functionality is not fully implemented yet and there is currently no i
 **sensor::LightParams**
 | Type              | Parameter name        | Description | Valid values |
 |---|---|---|---|
-|std::size_t | nr_of_leds | Number of leds of a circuit board. The parameter is currently unused. | `>=0` |
+| bool | enable | Enable flag for the led lights. Used to disable the lights. *(Currently not implemented)* | `true`, `false` |
 |sensor::SensorOrientation | orientation | Specifies the orientation of a sensor board. Used to run light animations in the right direction. | `left`, `right`, `none` |
