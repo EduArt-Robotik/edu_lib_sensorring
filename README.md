@@ -7,9 +7,9 @@ The sensorring library supports a variety of EduArt sensor boards. See the table
 
 |  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200"/></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> -Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CANFD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
 |---|---|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CANFD Interf<br> - Input voltage range 6 V - 65 V DCace |
-|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> -38 × 28 mm <br> - CANFD Inter<br> - Input voltage range 6 V - 65 V DCface|
-|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CANFD Inter<br> - Input voltage range 6 V - 65 V DCface|
+|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CANFD Interface<br> - Input voltage range 6 V - 65 V DCace |
+|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> -38 × 28 mm <br> - CANFD Interface<br> - Input voltage range 6 V - 65 V DCface|
+|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CANFD Interface<br> - Input voltage range 6 V - 65 V DCface|
 
 
 ## 1. Sensor topology
@@ -67,8 +67,10 @@ cmake/install_release.bash
 ```
 > **Notes on the installation script:**<br>  - The installation script automatically runs the build script before installing the library. <br>- The installation path in the script is hard-coded and should be changed if desired. <br> - Don't forget to set the `CMAKE_PREFIX_PATH` when using the script.
 
-
-
+In addition to the make and install scripts there is a [remove_installation.bash](cmake/remove_installation.bash) cleanup script that removes the library when it is installed at the default installation location.
+```
+cmake/remove_installation.bash
+```
 
 ## 5. Using the library in a custom project
 
