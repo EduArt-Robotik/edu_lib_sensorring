@@ -1,6 +1,20 @@
 # Sensorring Library
 Software interface of the EduArt Sensorring.
 
+## 1. Application example
+
+A Raspberry Pi based EduBot equipped with a Sensorring consisting of 12 individual sensor boards.
+
+<img src="doc/images/bot_front.jpg" width="600"/>
+
+Close-up view of the three front facing sensors of the EduBot.
+
+<img src="doc/images/bot_front_close.jpg" width="600"/>
+
+A 3D map of an office room recorded with the above EduBot and [Octomap](https://octomap.github.io/).
+
+<img src="doc/images/map.png" width="600"/>
+
 ## 1. Hardware
 ### 1.1 Supported Sensors
 The sensorring library supports a variety of EduArt sensor boards. See the table below for the currently supported hardware:
@@ -33,7 +47,7 @@ device interrupt 170
 
 The EduArt Sensorring is a sensor system that collects and combines measurements from multiple individual sensors. The individual sensors are daisy chained together in series and share a communication interface and a power supply. The chain of sensor is terminated by a master device at one end e.g. a Raspberry Pi or a CAN to USB converter. It is possible to use multiple communication interfaces to distribute the sensor data and enable the use of more sensors simultaneously. The following class diagram illustrates the topology and the reflection of the hardware layers in the library.
 
-<img src="doc/images/class_diagram_simple.png" width="800"/>
+<img src="doc/images/class_diagram_simple.png" width="900"/>
 
 ## 3. Input Parameters
 
@@ -82,6 +96,8 @@ cmake/make_release.bash
 ```
 cmake/install_release.bash
 ```
+>**Note on the convenience scripts**:<br>If the bash script does not execute it may need to be converted to a file with unix style line endings. Run `dos2unix ./cmake/*` for an automatic conversion before executing the script.
+
 > **Notes on the installation script:**<br>  - The installation script automatically runs the build script before installing the library. <br>- The installation path in the script is hard-coded and should be changed if desired. <br> - Don't forget to set the `CMAKE_PREFIX_PATH` when using the script.
 
 In addition to the make and install scripts there is a [remove_installation.bash](cmake/remove_installation.bash) cleanup script that removes the library when it is installed at the default installation location.
@@ -92,3 +108,6 @@ cmake/remove_installation.bash
 ## 6. Using the library in a custom project
 
 Please refer to to the [Ros](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [Ros2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) wrappers of this library for examples on how to use the library in your own project.
+
+## 7. Developer documentation
+Refer to the [developer documentation](doc/dev_doc.md) for more details on how the library is implemented.
