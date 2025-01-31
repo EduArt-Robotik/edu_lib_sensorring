@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "CustomTypes.hpp"
 #include "ComEndpoints.hpp"
 #include "ComInterface.hpp"
 #include "SingletonTemplate.hpp"
@@ -16,7 +17,7 @@ class ComManager : public Singleton<ComManager>{
         ComManager(const ComManager&) = delete;
         ComManager& operator=(const ComManager&) = delete;
         
-        ComInterface* createInterface(std::string interface_name, std::size_t sensor_count);
+        ComInterface* createInterface(DeviceType type, std::string interface_name, std::size_t sensor_count);
         ComInterface* getInterface(std::string interface_name);
 
     private:

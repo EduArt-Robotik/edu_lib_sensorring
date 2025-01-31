@@ -76,6 +76,7 @@ namespace bus{
  * @brief Parameter structure of a communication bus. A bus is one communication interface e.g. can bus and has an arbitrary number of sensor boards connected.
  */
 struct BusParams{
+    com::DeviceType type;
     std::string interface_name;
     std::vector<sensor::SensorBoardParams> board_param_vec;
 };

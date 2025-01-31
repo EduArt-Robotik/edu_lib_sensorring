@@ -9,7 +9,7 @@ void Logger::registerObserver(manager::MeasurementObserver* observer){
 }
 
 void Logger::log(const LogVerbosity verbosity, const std::string msg){
-	for(auto observer : _observer_vec){
+	for(auto& observer : _observer_vec){
 		if(observer) observer->onOutputLog(verbosity, msg);
 	}
 }

@@ -13,7 +13,7 @@ namespace bus{
 
 SensorBus::SensorBus(BusParams params) : _params(params){
 
-    auto interface = com::ComManager::getInstance()->createInterface(params.interface_name, params.board_param_vec.size());
+    auto interface = com::ComManager::getInstance()->createInterface(params.type, params.interface_name, params.board_param_vec.size());
     //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
 
     std::size_t idx = 0;

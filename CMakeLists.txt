@@ -22,6 +22,13 @@ project(sensorring
 )
 
 #########################################################
+# Require out-of-source builds
+file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
+if(EXISTS "${LOC_PATH}")
+    message(FATAL_ERROR "You cannot build in a source directory (or any directory with a CMakeLists.txt file). Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles directory.")
+endif()
+
+#########################################################
 # build settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -32,8 +39,25 @@ endif()
 
 #########################################################
 # options
-option( VERBOSE "Verbose build" OFF)
-option( BUILD_SHARED_LIBS "Build as shared library" ON)
+
+if(UNIX)
+  option( USE_SOCKETCAN "Add support for Linux SocketCAN" ON)
+endif(UNIX)
+option( USE_USBTINGO "Add support for the USBtingo USB to CAN FD converter" OFF)
+option( BUILD_SHARED_LIBS "Build as shared library" OFF)
+option( VERBOSE_BUILD "Verbose build" OFF)
+
+if(WIN32)
+  set( USE_USBTINGO ON)
+endif(WIN32)
+
+if(NOT USE_SOCKETCAN AND NOT USE_USBTINGO)
+  message(FATAL_ERROR "At least one of the options USE_SOCKETCAN or USE_USBTINGO has to be turned on!")
+endif()
+
+if(USE_USBTINGO)
+  find_package(usbtingo REQUIRED)
+endif(USE_USBTINGO)
 
 #########################################################
 # declare library
@@ -46,7 +70,6 @@ add_library(sensorring
   src/interface/ComManager.cpp
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
-  src/interface/can/SocketCANFD.cpp
   src/math/Math.cpp
   src/sensors/TofSensor.cpp
   src/sensors/ThermalSensor.cpp
@@ -57,9 +80,23 @@ add_library(sensorring
   src/utils/FileManager.cpp
 )
 
+if(USE_SOCKETCAN)
+  list(APPEND SOURCES
+    src/interface/can/SocketCANFD.cpp
+  )
+endif(USE_SOCKETCAN)
+
+if(USE_USBTINGO)
+  list(APPEND SOURCES
+    src/interface/can/USBtingo.cpp
+  )
+endif(USE_USBTINGO)
+
+target_sources(sensorring PRIVATE ${SOURCES})
+
 #########################################################
 # library includes
-target_include_directories( sensorring PRIVATE
+target_include_directories(sensorring PRIVATE
   include/${PROJECT_NAME}
   include/${PROJECT_NAME}/boardmanager
   include/${PROJECT_NAME}/interface
@@ -69,6 +106,17 @@ target_include_directories( sensorring PRIVATE
   include/${PROJECT_NAME}/types
   include/${PROJECT_NAME}/utils
 )
+
+# build macros
+if(USE_SOCKETCAN)
+  target_compile_definitions(sensorring PRIVATE USE_SOCKETCAN)
+endif(USE_SOCKETCAN)
+
+if(USE_USBTINGO)
+  target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
+  target_include_directories(sensorring PRIVATE usbtingo)
+  target_link_libraries(sensorring PRIVATE usbtingo)
+endif(USE_USBTINGO)
 
 # export includes for other packages
 target_include_directories(sensorring PUBLIC

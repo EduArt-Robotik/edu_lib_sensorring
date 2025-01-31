@@ -11,12 +11,24 @@
 
 namespace eduart{
 
+namespace com{
+
+enum class DeviceType{
+    UNDEFINED,
+    SOCKETCAN,
+    USBTINGO
+};
+
+}
+
 namespace sensor{
-	enum class SensorState{
-		SensorInit,
-		SensorOK,
-		ReceiveError
-	};
+
+enum class SensorState{
+	SensorInit,
+	SensorOK,
+	ReceiveError
+};
+
 }
 
 namespace measurement{

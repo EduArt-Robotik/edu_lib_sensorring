@@ -50,11 +50,12 @@ bool ComInterface::startListener()
 
 void ComInterface::stopListener()
 {
-	if(_listenerIsRunning){
-		_shutDownListener = true;
+	if(!_listenerIsRunning) return;
+	
+	_shutDownListener = true;
+	if(_thread->joinable())
 		_thread->join();
-		_thread.release();
-	}
+	
 }
 
 const std::vector<ComEndpoint>& ComInterface::getEndpoints(){

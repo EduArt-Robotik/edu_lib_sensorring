@@ -10,6 +10,16 @@
 
 namespace eduart{
 
+namespace com{
+
+enum class DeviceType{
+    UNDEFINED,
+    SOCKETCAN,
+    USBTINGO
+};
+
+}
+
 namespace math{
 
 /**

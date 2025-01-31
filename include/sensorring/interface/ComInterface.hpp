@@ -14,7 +14,7 @@ namespace eduart{
 
 namespace com{
 
-class ComInterface : public Singleton<ComInterface>{
+class ComInterface/* : public Singleton<ComInterface>*/{
 public:
 
 	/**
