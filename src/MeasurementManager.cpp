@@ -354,7 +354,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::get_eeprom;
 			}else{
-				logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to enumerate sensors.");
+				logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to enumerate sensors");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
@@ -369,7 +369,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				_measurement_state = MeasurementState::pre_loop_init;        
 			}else{
-				logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor->");
+				logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor");
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;

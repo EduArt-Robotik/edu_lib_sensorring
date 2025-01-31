@@ -42,14 +42,14 @@ endif()
 
 if(UNIX)
   option( USE_SOCKETCAN "Add support for Linux SocketCAN" ON)
-endif(UNIX)
+endif()
 option( USE_USBTINGO "Add support for the USBtingo USB to CAN FD converter" OFF)
 option( BUILD_SHARED_LIBS "Build as shared library" OFF)
 option( VERBOSE_BUILD "Verbose build" OFF)
 
 if(WIN32)
   set( USE_USBTINGO ON)
-endif(WIN32)
+endif()
 
 if(NOT USE_SOCKETCAN AND NOT USE_USBTINGO)
   message(FATAL_ERROR "At least one of the options USE_SOCKETCAN or USE_USBTINGO has to be turned on!")
@@ -57,7 +57,7 @@ endif()
 
 if(USE_USBTINGO)
   find_package(usbtingo REQUIRED)
-endif(USE_USBTINGO)
+endif()
 
 #########################################################
 # declare library
@@ -84,13 +84,13 @@ if(USE_SOCKETCAN)
   list(APPEND SOURCES
     src/interface/can/SocketCANFD.cpp
   )
-endif(USE_SOCKETCAN)
+endif()
 
 if(USE_USBTINGO)
   list(APPEND SOURCES
     src/interface/can/USBtingo.cpp
   )
-endif(USE_USBTINGO)
+endif()
 
 target_sources(sensorring PRIVATE ${SOURCES})
 
@@ -110,13 +110,16 @@ target_include_directories(sensorring PRIVATE
 # build macros
 if(USE_SOCKETCAN)
   target_compile_definitions(sensorring PRIVATE USE_SOCKETCAN)
-endif(USE_SOCKETCAN)
+endif()
 
 if(USE_USBTINGO)
   target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
-  target_include_directories(sensorring PRIVATE usbtingo)
-  target_link_libraries(sensorring PRIVATE usbtingo)
-endif(USE_USBTINGO)
+  if(BUILD_SHARED_LIBS)
+    target_link_libraries(sensorring PRIVATE usbtingo)
+  else()
+    target_link_libraries(sensorring PUBLIC usbtingo)
+  endif()
+endif()
 
 # export includes for other packages
 target_include_directories(sensorring PUBLIC
@@ -151,6 +154,10 @@ install(EXPORT sensorringTargets
 #########################################################
 # cmake package configuration
 include(CMakePackageConfigHelpers)
+
+if(USE_USBTINGO)
+    set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)")
+endif()
 
 configure_package_config_file(cmake/Config.cmake.in
         "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
