@@ -4,6 +4,7 @@
 
 #include "ThermalSensor.hpp"
 #include "FileManager.hpp"
+#include "Logger.hpp"
 #include "Iron.hpp"
 
 namespace eduart{
@@ -231,22 +232,29 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
         }
 
         unsigned int table_row = buffer[i] + TABLEOFFSET;
-        table_row = table_row >> ADEXPBITS;
+        table_row = table_row >> ADEXPBITS; //ToDo: Table row too large. Causes Segfault when accessing the TempTable
 
-        int dta = t_ambient - heimannsensor::XTATemps[table_col];
-        
-        double vx = ((((int32_t)heimannsensor::TempTable[table_row][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row][table_col];
-        double vy = ((((int32_t)heimannsensor::TempTable[table_row + 1][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row + 1][table_col];
-        buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)heimannsensor::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
+        if((table_row < NROFADELEMENTS) && (table_col < NROFTAELEMENTS))
+        {
+            int dta = t_ambient - heimannsensor::XTATemps[table_col];
+            
+            double vx = ((((int32_t)heimannsensor::TempTable[table_row][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row][table_col];
+            double vy = ((((int32_t)heimannsensor::TempTable[table_row + 1][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row + 1][table_col];
+            buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)heimannsensor::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
 
-        // apply global offset
-        //buffer[i] += _eeprom.global_offset;
+            // apply global offset
+            //buffer[i] += _eeprom.global_offset;
 
-        // calculate temperature in °C
+            // calculate temperature in °C
 
-        result.temp_data_deg_c.data[i] = (buffer[i] - 2732.0F) / 10.0F;
-        if(result.temp_data_deg_c.data[i] < result.min_deg_c) result.min_deg_c = result.temp_data_deg_c.data[i];
-        if(result.temp_data_deg_c.data[i] > result.max_deg_c) result.max_deg_c = result.temp_data_deg_c.data[i];
+            result.temp_data_deg_c.data[i] = (buffer[i] - 2732.0F) / 10.0F;
+            if(result.temp_data_deg_c.data[i] < result.min_deg_c) result.min_deg_c = result.temp_data_deg_c.data[i];
+            if(result.temp_data_deg_c.data[i] > result.max_deg_c) result.max_deg_c = result.temp_data_deg_c.data[i];
+        }
+        else
+        {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while processing thermal image");
+        }
     }
 
     return result;

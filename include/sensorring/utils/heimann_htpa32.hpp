@@ -42,7 +42,7 @@ struct __attribute__((__packed__)) HTPA32Eeprom{
 	uint16_t	p[1024];
 };
 
-// DEVICE ADRESS
+// DEVICE ADDRESS
 #define  SENSOR_ADDRESS          0x1A
 #define  EEPROM_ADDRESS          0x50
 
@@ -100,28 +100,28 @@ struct __attribute__((__packed__)) HTPA32Eeprom{
 #define CONFIGURATION_REGISTER 0x01 // configuration register (WRITE only)
 // |  7  |  6  |  5  |  4  |   3   |    2     |   1   |    0   |
 // |    RFU    |   Block   | Start | VDD_MEAS | BLIND | WAKEUP |
-#define STATUS_REGISTER 0x02 // adress of status register (READ only)
+#define STATUS_REGISTER 0x02 // address of status register (READ only)
 // |  7  |  6  |  5  |  4  |   3   |    2     |   1   |    0   |
 // |    RFU    |   Block   |  RFU  | VDD_MEAS | BLIND |   EOC  |
-#define TRIM_REGISTER1 0x03 // adress for trim register 1 (WRITE only)
+#define TRIM_REGISTER1 0x03 // address for trim register 1 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |    RFU    |  REF_CAL  |         MBIT          |
-#define TRIM_REGISTER2 0x04 // adress for trim register 2 (WRITE only)
+#define TRIM_REGISTER2 0x04 // address for trim register 2 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       RFU       |       BIAS TRIM TOP         |
-#define TRIM_REGISTER3 0x05 // adress for trim register 3 (WRITE only)
+#define TRIM_REGISTER3 0x05 // address for trim register 3 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       RFU       |       BIAS TRIM BOT         |
-#define TRIM_REGISTER4 0x06 // adress for trim register 4 (WRITE only)
+#define TRIM_REGISTER4 0x06 // address for trim register 4 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       RFU |             CLK TRIM              |
-#define TRIM_REGISTER5 0x07 // adress for trim register 5 (WRITE only)
+#define TRIM_REGISTER5 0x07 // address for trim register 5 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       RFU       |        BPA TRIM TOP         |
-#define TRIM_REGISTER6 0x08 // adress for trim register 6 (WRITE only)
+#define TRIM_REGISTER6 0x08 // address for trim register 6 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       RFU       |       BPA TRIM BOT          |
-#define TRIM_REGISTER7 0x09 // adress for trim register 7 (WRITE only)
+#define TRIM_REGISTER7 0x09 // address for trim register 7 (WRITE only)
 // |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 // |       PU SDA TRIM     |       PU SDA TRIM     |
 
@@ -171,12 +171,12 @@ struct __attribute__((__packed__)) HTPA32Eeprom{
 #define E_CLK_USER 0x0062 // user settings of trim register 4
 #define E_BPA_USER 0x0063 // user settings of trim register 5 & 6
 #define E_PU_USER 0x0064 // user settings of trim register 7
-#define E_ID1 0x0074 // sensor idenification number, stored as unsigned long (1 of 4)
+#define E_ID1 0x0074 // sensor identification number, stored as unsigned long (1 of 4)
 #define E_ID2 0x0075
 #define E_ID3 0x0076
 #define E_ID4 0x0077
-#define E_NROFDEFPIX 0x007F // number of defekt pixel, stored as unsigned char
-#define E_DEADPIXADR 0x0080 // first register of dead adress
+#define E_NROFDEFPIX 0x007F // number of defect pixel, stored as unsigned char
+#define E_DEADPIXADR 0x0080 // first register of dead address
 #define E_DEADPIXMASK 0x00B0 // first register of dead pixel mask
 #define E_VDDCOMPGRAD 0x0340 // first register of VDD comp gradient
 #define E_VDDCOMPOFF 0x0540 // first register ofVDD comp offset
