@@ -34,7 +34,17 @@ bool USBtingo::openInterface(std::string interface_name)
 {
 	std::uint32_t serial_number = 0;
 	try {
-		serial_number = static_cast<std::uint32_t>(std::stoul(interface_name));
+		// if the serial number is specified in hex Format
+		if(interface_name.find("0x", 0) == 0)
+		{
+			// serial number is specified in decimal format
+			serial_number = static_cast<std::uint32_t>(std::stoul(interface_name.substr(2), nullptr, 16));	
+		}
+		else
+		{
+			// serial number is specified in decimal format
+			serial_number = static_cast<std::uint32_t>(std::stoul(interface_name));
+		}
 	} catch (...) {
 		logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid interface name for interface type USBtingo. The interface name must be an unsigned integer." + interface_name);
 		return false;
