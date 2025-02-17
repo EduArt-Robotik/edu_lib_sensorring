@@ -115,9 +115,13 @@ endif()
 if(USE_USBTINGO)
   target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
   if(BUILD_SHARED_LIBS)
-    target_link_libraries(sensorring PRIVATE usbtingo)
+    target_link_libraries(sensorring PRIVATE
+      usbtingo::usbtingo
+    )
   else()
-    target_link_libraries(sensorring PUBLIC usbtingo)
+    target_link_libraries(sensorring PUBLIC
+      usbtingo::usbtingo
+    )
   endif()
 endif()
 
