@@ -59,6 +59,8 @@ if(USE_USBTINGO)
   find_package(usbtingo REQUIRED)
 endif()
 
+find_package(Threads REQUIRED)
+
 #########################################################
 # declare library
 add_library(sensorring
@@ -117,10 +119,12 @@ if(USE_USBTINGO)
   if(BUILD_SHARED_LIBS)
     target_link_libraries(sensorring PRIVATE
       usbtingo::usbtingo
+      Threads::Threads
     )
   else()
     target_link_libraries(sensorring PUBLIC
       usbtingo::usbtingo
+      Threads::Threads
     )
   endif()
 endif()
@@ -160,7 +164,7 @@ install(EXPORT sensorringTargets
 include(CMakePackageConfigHelpers)
 
 if(USE_USBTINGO)
-    set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)")
+    set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
 endif()
 
 configure_package_config_file(cmake/Config.cmake.in
