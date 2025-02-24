@@ -71,7 +71,7 @@ To build the library execute the following commands starting in the root of the 
 ```
 mkdir build
 cd build
-cmake ../cmake
+cmake ..
 cmake --build . -j
 ```
 
