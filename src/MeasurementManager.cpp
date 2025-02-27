@@ -174,19 +174,23 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
 	sensor::SensorState error = sensor::SensorState::SensorOK;
-	std::vector<const measurement::TofMeasurement*> measurement_vec;
+	std::vector<measurement::TofMeasurement> measurement_vec;
 
+	int idx = 0;
 	for(auto sensor_bus : _sensor_ring->getInterfaces()){
 		for(auto sensor_board : sensor_bus->getSensorBoards()){
 			if(sensor_board->getTof()->isEnabled()){
 
 				auto tof_measurement = sensor_board->getTof()->getLatestMeasurement(error);
 				if(error == sensor::SensorState::SensorOK){
+					std::fill(tof_measurement.point_sensor_idx.begin(), tof_measurement.point_sensor_idx.end(), idx);
 					measurement_vec.push_back(tof_measurement);
 				}else{
 					error_frames++;
 				}
 			}
+
+			idx++;
 		}
 	}
 

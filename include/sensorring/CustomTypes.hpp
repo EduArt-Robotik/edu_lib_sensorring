@@ -68,6 +68,7 @@ struct TofMeasurement {
     unsigned int size = 0;
     std::vector<float> point_distance;
     std::vector<float> point_sigma;
+	std::vector<int> point_sensor_idx;
     PointCloud point_data;
     PointCloud point_data_transformed;
 

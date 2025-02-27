@@ -23,13 +23,13 @@ const TofSensorParams& TofSensor::getParams() const{
     return _params;
 }
 
-const measurement::TofMeasurement* TofSensor::getLatestMeasurement() const{
-    return &_latest_measurement;
+measurement::TofMeasurement TofSensor::getLatestMeasurement() const{
+    return _latest_measurement;
 }
 
-const measurement::TofMeasurement* TofSensor::getLatestMeasurement(SensorState &error) const{
+measurement::TofMeasurement TofSensor::getLatestMeasurement(SensorState &error) const{
     error = _error;
-    return &_latest_measurement;
+    return _latest_measurement;
 }
 
 void TofSensor::onClearDataFlag(){
@@ -97,6 +97,7 @@ const measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, ui
 
             measurement.point_distance.push_back(point_distance);
             measurement.point_sigma.push_back(point_sigma);
+            measurement.point_sensor_idx.push_back(_idx);
             measurement.point_data.push_back(point);
             point_idx++;
         }
@@ -122,26 +123,28 @@ std::vector<math::Vector3> TofSensor::transformPointCloud(const measurement::Poi
     return point_data_transformed;
 }
 
-measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<const measurement::TofMeasurement*>& measurements_vec){
+measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<measurement::TofMeasurement>& measurements_vec){
     measurement::TofMeasurement combined_measurement;
 
     unsigned int size = 0;
     for(auto measurement : measurements_vec){
-        size += measurement->size;
+        size += measurement.size;
     }
 
     // preallocate memory
     combined_measurement.size = size;
     combined_measurement.point_distance.reserve(size);
     combined_measurement.point_sigma.reserve(size);
+    combined_measurement.point_sensor_idx.reserve(size);
     combined_measurement.point_data.reserve(size);
     combined_measurement.point_data_transformed.reserve(size);
 
     for(auto measurement : measurements_vec){
-        combined_measurement.point_distance.insert(combined_measurement.point_distance.end(), measurement->point_distance.begin(), measurement->point_distance.end());
-        combined_measurement.point_sigma.insert(combined_measurement.point_sigma.end(), measurement->point_sigma.begin(), measurement->point_sigma.end());
-        combined_measurement.point_data.insert(combined_measurement.point_data.end(), measurement->point_data.begin(), measurement->point_data.end());
-        combined_measurement.point_data_transformed.insert(combined_measurement.point_data_transformed.end(), measurement->point_data_transformed.begin(), measurement->point_data_transformed.end());
+        combined_measurement.point_distance.insert(combined_measurement.point_distance.end(), measurement.point_distance.begin(), measurement.point_distance.end());
+        combined_measurement.point_sigma.insert(combined_measurement.point_sigma.end(), measurement.point_sigma.begin(), measurement.point_sigma.end());
+        combined_measurement.point_sensor_idx.insert(combined_measurement.point_sensor_idx.end(), measurement.point_sensor_idx.begin(), measurement.point_sensor_idx.end());
+        combined_measurement.point_data.insert(combined_measurement.point_data.end(), measurement.point_data.begin(), measurement.point_data.end());
+        combined_measurement.point_data_transformed.insert(combined_measurement.point_data_transformed.end(), measurement.point_data_transformed.begin(), measurement.point_data_transformed.end());
     }
 
     return combined_measurement;

@@ -21,14 +21,14 @@ class TofSensor : public BaseSensor{
         ~TofSensor();
         
         const TofSensorParams& getParams() const;
-        const measurement::TofMeasurement* getLatestMeasurement() const;
-        const measurement::TofMeasurement* getLatestMeasurement(SensorState &error) const;
+        measurement::TofMeasurement getLatestMeasurement() const;
+        measurement::TofMeasurement getLatestMeasurement(SensorState &error) const;
 
         void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
         void onClearDataFlag() override;
 
         static std::vector<math::Vector3> transformPointCloud(const std::vector<math::Vector3>& point_data, const math::Matrix3 rotation, const math::Vector3 translation);
-        static measurement::TofMeasurement combineTofMeasurements(const std::vector<const measurement::TofMeasurement*>& measurements_vec);
+        static measurement::TofMeasurement combineTofMeasurements(const std::vector<measurement::TofMeasurement>& measurements_vec);
     private:
 
         const measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
