@@ -1,13 +1,12 @@
 #pragma once
 
-#include <memory>
-
-#include "ComInterface.hpp"
-
 #include "Parameters.hpp"
-#include "TofSensor.hpp"
-#include "ThermalSensor.hpp"
-#include "LedLight.hpp"
+#include "interface/ComInterface.hpp"
+#include "sensors/TofSensor.hpp"
+#include "sensors/ThermalSensor.hpp"
+#include "sensors/LedLight.hpp"
+
+#include <memory>
 
 namespace eduart{
 

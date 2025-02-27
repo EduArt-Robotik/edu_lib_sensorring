@@ -1,12 +1,13 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <memory>
 #include "CustomTypes.hpp"
 #include "ComEndpoints.hpp"
 #include "ComInterface.hpp"
-#include "SingletonTemplate.hpp"
+#include "utils/SingletonTemplate.hpp"
+
+#include <vector>
+#include <string>
+#include <memory>
 
 namespace eduart{
 

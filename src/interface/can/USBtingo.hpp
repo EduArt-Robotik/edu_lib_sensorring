@@ -1,10 +1,5 @@
 #pragma once
 
-#include "ComInterface.hpp"
-#include "ComObserver.hpp"
-
-#include <usbtingo/basic_bus/BasicBus.hpp>
-
 #include <string>
 #include <vector>
 #include <thread>
@@ -12,6 +7,10 @@
 #include <memory>
 #include <map>
 
+#include <usbtingo/basic_bus/BasicBus.hpp>
+
+#include "interface/ComInterface.hpp"
+#include "interface/ComObserver.hpp"
 
 namespace eduart{
 

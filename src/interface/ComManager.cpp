@@ -1,11 +1,11 @@
 #include "ComManager.hpp"
 
 #ifdef USE_SOCKETCAN
-    #include "SocketCANFD.hpp"
+    #include "can/SocketCANFD.hpp"
 #endif
 
 #ifdef USE_USBTINGO
-    #include "USBtingo.hpp"
+    #include "can/USBtingo.hpp"
 #endif
 
 #include <algorithm>

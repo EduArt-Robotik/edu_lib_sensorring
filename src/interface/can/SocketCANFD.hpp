@@ -1,5 +1,8 @@
 #pragma once
 
+#include "interface/ComInterface.hpp"
+#include "interface/ComObserver.hpp"
+
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <string>
@@ -8,9 +11,6 @@
 #include <mutex>
 #include <memory>
 #include <map>
-
-#include "ComInterface.hpp"
-#include "ComObserver.hpp"
 
 namespace eduart{
 

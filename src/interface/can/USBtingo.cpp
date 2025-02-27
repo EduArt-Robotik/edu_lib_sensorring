@@ -1,10 +1,11 @@
 #include "USBtingo.hpp"
-#include "Logger.hpp"
-#include "canprotocol.hpp"
 
+#include "canprotocol.hpp"
+#include "utils/Logger.hpp"
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 #include <usbtingo/can/Dlc.hpp>
+
 #include <cstdint>
 #include <string>
 

@@ -1,11 +1,12 @@
 #pragma once
 
+#include "CustomTypes.hpp"
+#include "utils/heimann_htpa32.hpp"
+#include "interface/ComInterface.hpp"
+#include "interface/ComEndpoints.hpp"
+
 #include <memory>
 #include <array>
-#include "ComInterface.hpp"
-#include "ComEndpoints.hpp"
-#include "heimann_htpa32.hpp"
-#include "CustomTypes.hpp"
 
 namespace eduart{
 

@@ -1,11 +1,10 @@
 #include "SensorBus.hpp"
 
-#include <string.h>
-#include <unistd.h>
-#include <chrono>
+#include "interface/ComManager.hpp"
+#include "interface/can/canprotocol.hpp"
 
-#include "canprotocol.hpp"
-#include "ComManager.hpp"
+#include <string>
+#include <chrono>
 
 namespace eduart{
 

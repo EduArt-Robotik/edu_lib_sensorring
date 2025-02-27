@@ -72,13 +72,13 @@ add_library(sensorring
   src/interface/ComManager.cpp
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
-  src/math/Math.cpp
   src/sensors/TofSensor.cpp
   src/sensors/ThermalSensor.cpp
   src/sensors/LedLight.cpp
   src/sensors/BaseSensor.cpp
-  src/types/CustomTypes.cpp
+  src/utils/Math.cpp
   src/utils/Logger.cpp
+  src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
 )
 
@@ -129,6 +129,10 @@ if(USE_USBTINGO)
   endif()
 endif()
 
+target_include_directories(sensorring PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+)
+
 # export includes for other packages
 target_include_directories(sensorring PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -147,8 +151,9 @@ install(TARGETS sensorring
 install(FILES
   include/${PROJECT_NAME}/MeasurementManager.hpp
   include/${PROJECT_NAME}/MeasurementObserver.hpp
-  include/${PROJECT_NAME}/types/install_types/CustomTypes.hpp
-  include/${PROJECT_NAME}/types/Parameters.hpp
+  include/${PROJECT_NAME}/CustomTypes.hpp
+  include/${PROJECT_NAME}/Parameters.hpp
+  include/${PROJECT_NAME}/Math.hpp
   DESTINATION include/${PROJECT_NAME}
 )
 

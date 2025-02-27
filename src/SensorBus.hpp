@@ -4,9 +4,9 @@
 #include <vector>
 #include <memory>
 
-#include "ComObserver.hpp"
-#include "SensorBoard.hpp"
 #include "Parameters.hpp"
+#include "SensorBoard.hpp"
+#include "interface/ComObserver.hpp"
 
 namespace eduart{
 

@@ -1,13 +1,14 @@
 #pragma once
 
+#include "Math.hpp"
+#include "Parameters.hpp"
+#include "CustomTypes.hpp"
+#include "BaseSensor.hpp"
+#include "utils/heimann_htpa32.hpp"
+#include "interface/ComInterface.hpp"
+
 #include <vector>
 #include <array>
-#include "ComInterface.hpp"
-#include "BaseSensor.hpp"
-#include "Math.hpp"
-#include "heimann_htpa32.hpp"
-#include "CustomTypes.hpp"
-#include "Parameters.hpp"
 
 namespace eduart{
 

@@ -1,9 +1,10 @@
 #include "MeasurementManager.hpp"
 
 #include "SensorRing.hpp"
-#include "Logger.hpp"
-#include <algorithm>
+#include "utils/Logger.hpp"
+
 #include <sstream>
+#include <algorithm>
 
 namespace eduart{
 

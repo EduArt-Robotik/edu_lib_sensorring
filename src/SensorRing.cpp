@@ -1,8 +1,9 @@
-#include <cmath>
-
 #include "SensorRing.hpp"
-#include "canprotocol.hpp"
-#include "Logger.hpp"
+
+#include "interface/can/canprotocol.hpp" //ToDo: There should be not canprotocol dependency
+#include "utils/Logger.hpp"
+
+#include <cmath>
 
 namespace eduart{
 

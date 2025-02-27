@@ -1,14 +1,14 @@
 #pragma once
 
+#include "ComEndpoints.hpp"
+#include "ComObserver.hpp"
+#include "utils/SingletonTemplate.hpp"
+
 #include <vector>
 #include <cstdint>
 #include <thread>
 #include <string>
 #include <atomic>
-
-#include "ComEndpoints.hpp"
-#include "ComObserver.hpp"
-#include "SingletonTemplate.hpp"
 
 namespace eduart{
 
