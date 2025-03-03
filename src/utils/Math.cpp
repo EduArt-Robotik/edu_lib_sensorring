@@ -10,17 +10,17 @@ namespace math{
 // Vector3
 //===============================
 
-    double& Vector3::x() { return data[0]; }
-    const double& Vector3::x() const { return data[0]; }
+    float& Vector3::x() { return data[0]; }
+    const float& Vector3::x() const { return data[0]; }
     
-    double& Vector3::y() { return data[1]; }
-    const double& Vector3::y() const { return data[1]; }
+    float& Vector3::y() { return data[1]; }
+    const float& Vector3::y() const { return data[1]; }
     
-    double& Vector3::z() { return data[2]; }
-    const double& Vector3::z() const { return data[2]; }
+    float& Vector3::z() { return data[2]; }
+    const float& Vector3::z() const { return data[2]; }
 
-    double& Vector3::operator[](std::size_t idx) { return data[idx]; }
-    const double& Vector3::operator[](std::size_t idx) const { return data[idx]; }
+    float& Vector3::operator[](std::size_t idx) { return data[idx]; }
+    const float& Vector3::operator[](std::size_t idx) const { return data[idx]; }
 
     Vector3 Vector3::operator+(const Vector3& other) const {
         Vector3 result{};
@@ -75,9 +75,9 @@ namespace math{
 //===============================
 
     const Matrix3 MiniMath::rotation_matrix_from_euler_degrees(const Vector3& rotation_deg){
-        double x_rad = rotation_deg[0] * M_PI / 180.0F;
-        double y_rad = rotation_deg[1] * M_PI / 180.0F;
-        double z_rad = rotation_deg[2] * M_PI / 180.0F;
+        float x_rad = rotation_deg[0] * M_PI / 180.0F;
+        float y_rad = rotation_deg[1] * M_PI / 180.0F;
+        float z_rad = rotation_deg[2] * M_PI / 180.0F;
         
         Matrix3 r_x = {{{
                         {1, 0, 0},

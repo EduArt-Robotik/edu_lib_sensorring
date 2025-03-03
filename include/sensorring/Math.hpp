@@ -12,19 +12,19 @@ namespace math{
 //===============================
 
 struct Vector3 {
-    std::array<double, 3> data;
+    std::array<float, 3> data;
 
-    double& x();
-    const double& x() const;
+    float& x();
+    const float& x() const;
     
-    double& y();
-    const double& y() const;
+    float& y();
+    const float& y() const;
     
-    double& z();
-    const double& z() const;
+    float& z();
+    const float& z() const;
 
-    double& operator[](std::size_t idx);
-    const double& operator[](std::size_t idx) const;
+    float& operator[](std::size_t idx);
+    const float& operator[](std::size_t idx) const;
 
     Vector3 operator+(const Vector3& other) const;
 };
