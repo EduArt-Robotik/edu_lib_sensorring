@@ -23,16 +23,12 @@ class ThermalSensor : public BaseSensor{
 		bool gotEEPROM() const;
 		bool stopCalibration();
 		bool startCalibration(size_t window);
-		const ThermalSensorParams& getParams() const;
+		ThermalSensorParams getParams() const;
 
-		const measurement::GrayscaleImage* getLatestGrayscaleImage() const;
-		const measurement::FalseColorImage* getLatestFalseColorImage() const;
-		const measurement::ThermalMeasurement* getLatestMeasurement() const;
-		const measurement::GrayscaleImage* getLatestGrayscaleImage(SensorState &error) const;
-		const measurement::FalseColorImage* getLatestFalseColorImage(SensorState &error) const;
-		const measurement::ThermalMeasurement* getLatestMeasurement(SensorState &error) const;
+		std::pair<measurement::GrayscaleImage, SensorState> getLatestGrayscaleImage() const;
+		std::pair<measurement::FalseColorImage, SensorState> getLatestFalseColorImage() const;
+		std::pair<measurement::ThermalMeasurement, SensorState> getLatestMeasurement() const;
 		
-
         void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 		void onClearDataFlag() override;
 

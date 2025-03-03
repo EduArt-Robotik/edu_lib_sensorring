@@ -58,20 +58,26 @@ public:
      * @param[in] verbosity verbosity level of the log message
      * @param[in] msg       log message string
      */
-    virtual void onOutputLog([[maybe_unused]] const logger::LogVerbosity verbosity, [[maybe_unused]] const std::string msg) {};
+    virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
 
     /**
-     * Callback method for new Time-of-Flight sensor measurements. Returns one combined measurement from all sensors.
-     * @param[in] measurement the most recent combined Time-of-Flight sensor measurements
+     * Callback method for new Time-of-Flight sensor measurements. Returns a vector of the raw measurements per sensor.
+     * @param[in] measurement_vec the most recent Time-of-Flight sensor measurements in the individual sensor coordinate frames
      */
-    virtual void onTofMeasurement([[maybe_unused]] const measurement::TofMeasurement measurement) {};
+    virtual void onRawTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
+
+    /**
+     * Callback method for new Time-of-Flight sensor measurements.  Returns a vector of the transformed measurements per sensor.
+     * @param[in] measurement_vec the most recent Time-of-Flight sensor measurements in the common transformed coodinate frame
+     */
+    virtual void onTransformedTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
     
     /**
      * Callback method for new thermal sensor measurements. Returns one individual measurements of each thermal sensor.
      * @param[in] idx the index of the thermal sensor that that recorded the measurement. Index starts at zero (0) for the first thermal sensor and only counts active thermal sensors.
      * @param[in] measurement the most recent thermal sensor measurement of the specified sensor
      */
-    virtual void onThermalMeasurement([[maybe_unused]] const std::size_t idx, [[maybe_unused]] const measurement::ThermalMeasurement measurement) {};
+    virtual void onThermalMeasurement([[maybe_unused]] std::vector<measurement::ThermalMeasurement> measurement_vec) {};
 };
 
 }

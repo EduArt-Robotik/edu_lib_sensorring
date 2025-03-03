@@ -46,35 +46,20 @@ ThermalSensor::~ThermalSensor(){
     
 }
 
-const ThermalSensorParams& ThermalSensor::getParams() const{
+ThermalSensorParams ThermalSensor::getParams() const{
     return _params;
 }
 
-const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage() const{    
-    return &_latest_measurement.grayscale_img;
+std::pair<measurement::GrayscaleImage, SensorState> ThermalSensor::getLatestGrayscaleImage() const{    
+    return {_latest_measurement.grayscale_img, _error};
 }
 
-const measurement::GrayscaleImage* ThermalSensor::getLatestGrayscaleImage(SensorState &error) const{    
-    error = _error;
-    return &_latest_measurement.grayscale_img;
+std::pair<measurement::FalseColorImage, SensorState> ThermalSensor::getLatestFalseColorImage() const{   
+    return {_latest_measurement.falsecolor_img, _error};
 }
 
-const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage() const{    
-    return &_latest_measurement.falsecolor_img;
-}
-
-const measurement::FalseColorImage* ThermalSensor::getLatestFalseColorImage(SensorState &error) const{   
-    error = _error; 
-    return &_latest_measurement.falsecolor_img;
-}
-
-const measurement::ThermalMeasurement* ThermalSensor::getLatestMeasurement() const{
-    return &_latest_measurement;
-}
-
-const measurement::ThermalMeasurement* ThermalSensor::getLatestMeasurement(SensorState &error) const{
-    error = _error;
-    return &_latest_measurement;
+std::pair<measurement::ThermalMeasurement, SensorState> ThermalSensor::getLatestMeasurement() const{
+    return {_latest_measurement, _error};
 }
 
 bool ThermalSensor::gotEEPROM() const{
@@ -196,6 +181,7 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     std::vector<double> buffer(len);
     
     measurement::ThermalMeasurement result;
+    result.user_idx = _params.user_idx;
     result.frame_id = frame_id;
     result.min_deg_c = 1e6;
 

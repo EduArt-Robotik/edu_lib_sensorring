@@ -23,13 +23,12 @@ const TofSensorParams& TofSensor::getParams() const{
     return _params;
 }
 
-measurement::TofMeasurement TofSensor::getLatestMeasurement() const{
-    return _latest_measurement;
+std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestRawMeasurement() const{
+    return {_latest_raw_measurement, _error};
 }
 
-measurement::TofMeasurement TofSensor::getLatestMeasurement(SensorState &error) const{
-    error = _error;
-    return _latest_measurement;
+std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestTransformedMeasurement() const{
+    return {_latest_transformed_measurement, _error};
 }
 
 void TofSensor::onClearDataFlag(){
@@ -59,7 +58,8 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
     // transmission complete message
     } else if(msg_size == 2){
         if(_new_data_in_buffer_flag){
-            _latest_measurement = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
+            _latest_raw_measurement = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
+            _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _params.translation);
             _new_data_in_buffer_flag = false;
             _new_measurement_ready_flag = true;
         }
@@ -70,17 +70,15 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
     }
 }
 
-const measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
+measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
     measurement::TofMeasurement measurement;
-    measurement.reserve(TOF_RESOLUTION);
+    measurement.point_cloud.reserve(TOF_RESOLUTION);
     measurement.frame_id = frame_id;
 
     uint16_t distance_raw = 0;
     uint16_t sigma_raw = 0;
     float point_distance = 0;
     float point_sigma = 0;
-
-    int point_idx = 0;
 
     for(int i=0; i<len; i++){
         distance_raw    = (*((uint32_t*)(data + i*3)) >> 10) & 0x3FFF; // 14 bit
@@ -95,59 +93,23 @@ const measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, ui
             point.y() = point_distance * lut_tan_y[i];
             point.z() = point_distance;
 
-            measurement.point_distance.push_back(point_distance);
-            measurement.point_sigma.push_back(point_sigma);
-            measurement.point_sensor_idx.push_back(_idx);
-            measurement.point_data.push_back(point);
-            point_idx++;
+            measurement.point_cloud.push_back(measurement::PointData({point, point_distance, point_sigma, _params.user_idx}));
         }
     }
 
-    measurement.size = point_idx;
-    measurement.point_data_transformed = transformPointCloud(measurement.point_data, _rot_m, _params.translation);
-
+    measurement.point_cloud.shrink_to_fit();
     return measurement;
 }
 
-std::vector<math::Vector3> TofSensor::transformPointCloud(const measurement::PointCloud& point_data, const math::Matrix3 rotation, const math::Vector3 translation){
-    const unsigned int size = point_data.size();
-
-    std::vector<math::Vector3> point_data_transformed;
-    point_data_transformed.reserve(size);
-
-    for(unsigned int i = 0; i<size; i++){
-        math::Vector3 transformed_point = (rotation * point_data[i]) + translation;
-        point_data_transformed.push_back(transformed_point);
+measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation){
+    
+    auto transformed_measurement = measurement;
+    
+    for(unsigned int i = 0; i < transformed_measurement.point_cloud.size(); i++){
+        transformed_measurement.point_cloud[i].point = (rotation * measurement.point_cloud[i].point) + translation;
     }
     
-    return point_data_transformed;
-}
-
-measurement::TofMeasurement TofSensor::combineTofMeasurements(const std::vector<measurement::TofMeasurement>& measurements_vec){
-    measurement::TofMeasurement combined_measurement;
-
-    unsigned int size = 0;
-    for(auto measurement : measurements_vec){
-        size += measurement.size;
-    }
-
-    // preallocate memory
-    combined_measurement.size = size;
-    combined_measurement.point_distance.reserve(size);
-    combined_measurement.point_sigma.reserve(size);
-    combined_measurement.point_sensor_idx.reserve(size);
-    combined_measurement.point_data.reserve(size);
-    combined_measurement.point_data_transformed.reserve(size);
-
-    for(auto measurement : measurements_vec){
-        combined_measurement.point_distance.insert(combined_measurement.point_distance.end(), measurement.point_distance.begin(), measurement.point_distance.end());
-        combined_measurement.point_sigma.insert(combined_measurement.point_sigma.end(), measurement.point_sigma.begin(), measurement.point_sigma.end());
-        combined_measurement.point_sensor_idx.insert(combined_measurement.point_sensor_idx.end(), measurement.point_sensor_idx.begin(), measurement.point_sensor_idx.end());
-        combined_measurement.point_data.insert(combined_measurement.point_data.end(), measurement.point_data.begin(), measurement.point_data.end());
-        combined_measurement.point_data_transformed.insert(combined_measurement.point_data_transformed.end(), measurement.point_data_transformed.begin(), measurement.point_data_transformed.end());
-    }
-
-    return combined_measurement;
+    return transformed_measurement;
 }
 
 }

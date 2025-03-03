@@ -14,7 +14,7 @@ namespace sensor{
 
 class BaseSensor : public com::ComObserver{
     public:
-        BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
+        BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx,  bool enable);
         ~BaseSensor();
 
         //void enableCallback();

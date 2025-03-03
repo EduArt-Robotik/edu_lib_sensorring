@@ -24,7 +24,7 @@ enum class Orientation{
  * @brief Parameter structure of the sensor lights of a sensor board.
  */
 struct LightParams{
-    bool enable;
+    bool enable = false;
     Orientation orientation = Orientation::none;
 };
 
@@ -33,7 +33,8 @@ struct LightParams{
  * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
  */
 struct ThermalSensorParams {
-    bool enable;
+    int user_idx = 0;
+    bool enable = false;
     double t_min_deg_c = 0;
     double t_max_deg_c = 0;
     bool auto_min_max = false;
@@ -51,7 +52,8 @@ struct ThermalSensorParams {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct TofSensorParams {
-    bool enable;
+    int user_idx = 0;
+    bool enable = false;
     math::Vector3 rotation = {0, 0, 0};
     math::Vector3 translation = {0, 0, 0};
 };
@@ -76,7 +78,7 @@ namespace bus{
  * @brief Parameter structure of a communication bus. A bus is one communication interface e.g. can bus and has an arbitrary number of sensor boards connected.
  */
 struct BusParams{
-    com::DeviceType type;
+    com::DeviceType type = com::DeviceType::UNDEFINED;
     std::string interface_name;
     std::vector<sensor::SensorBoardParams> board_param_vec;
 };
@@ -91,7 +93,7 @@ namespace ring{
  * @brief Parameter structure of a sensor ring. The sensor ring is the abstraction of the whole sensor system and consists of an arbitrary number of communication interfaces.
  */
 struct RingParams{
-    std::chrono::milliseconds timeout;
+    std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
     std::vector<bus::BusParams> bus_param_vec;
 };
 
@@ -105,9 +107,9 @@ namespace manager{
  * @brief Meta parameter structure of the MeasurementManager. The MeasurementManager handles the timing and communication of the whole system by running a looping state machine. One measurement manager manages exactly one sensor ring.
  */
 struct ManagerParams{
-    bool print_topology;
-    double frequency_tof_hz;
-    double frequency_thermal_hz;
+    bool print_topology = false;
+    double frequency_tof_hz = 0.0;
+    double frequency_thermal_hz = 1.0;
     ring::RingParams ring_params;
 };
 

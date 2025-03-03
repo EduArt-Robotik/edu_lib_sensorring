@@ -57,26 +57,27 @@ struct GenericRGBImage {
 	std::array<std::array<T, 3>, RESOLUTION> data = {};
 };
 
+struct PointData {
+	math::Vector3 point = {0.0, 0.0, 0.0};
+	float raw_distance = 0.0;
+	float sigma = 0.0;
+	int user_idx = 0;
+};
+
 // Specific Types used in the Program
-using PointCloud        = std::vector<math::Vector3>;
+using PointCloud        = std::vector<PointData>;
 using GrayscaleImage	= GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 using TemperatureImage	= GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 using FalseColorImage	= GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 
 struct TofMeasurement {
-    int frame_id = 0;
-    unsigned int size = 0;
-    std::vector<float> point_distance;
-    std::vector<float> point_sigma;
-	std::vector<int> point_sensor_idx;
-    PointCloud point_data;
-    PointCloud point_data_transformed;
-
-    void reserve(std::size_t size);
+    unsigned int frame_id = 0;
+    PointCloud point_cloud;
 };
 
 struct ThermalMeasurement {
-    int frame_id = 0;
+    unsigned int frame_id = 0;
+	unsigned int user_idx = 0;
 	double t_ambient_deg_c = 0;
 	double min_deg_c = 0;
 	double max_deg_c = 0;

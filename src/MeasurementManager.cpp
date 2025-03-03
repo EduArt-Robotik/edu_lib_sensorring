@@ -173,63 +173,69 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 
 int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
-	sensor::SensorState error = sensor::SensorState::SensorOK;
-	std::vector<measurement::TofMeasurement> measurement_vec;
+	std::vector<measurement::TofMeasurement> raw_measurement_vec, tansformed_measurement_vec;
 
-	int idx = 0;
-	for(auto sensor_bus : _sensor_ring->getInterfaces()){
-		for(auto sensor_board : sensor_bus->getSensorBoards()){
+	for(const auto& sensor_bus : _sensor_ring->getInterfaces()){
+		for(const auto& sensor_board : sensor_bus->getSensorBoards()){
 			if(sensor_board->getTof()->isEnabled()){
 
-				auto tof_measurement = sensor_board->getTof()->getLatestMeasurement(error);
-				if(error == sensor::SensorState::SensorOK){
-					std::fill(tof_measurement.point_sensor_idx.begin(), tof_measurement.point_sensor_idx.end(), idx);
-					measurement_vec.push_back(tof_measurement);
+				auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
+				if(raw_error == sensor::SensorState::SensorOK){
+					if(!raw_measurement.point_cloud.empty())
+						raw_measurement_vec.push_back(raw_measurement);
 				}else{
 					error_frames++;
 				}
+
+				auto [tansformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
+				if(transformed_error == sensor::SensorState::SensorOK){
+					if(!tansformed_measurement.point_cloud.empty())
+					tansformed_measurement_vec.push_back(tansformed_measurement);
+				}
 			}
-
-			idx++;
 		}
 	}
 
-	auto combined_measurement = sensor::TofSensor::combineTofMeasurements(measurement_vec);
-	
-	if(combined_measurement.size > 0){
-
+	if(!raw_measurement_vec.empty()){
 		for(auto observer : _observer_vec){
-			if(observer) observer->onTofMeasurement(combined_measurement);
+			if(observer) observer->onRawTofMeasurement(raw_measurement_vec);
 		}
-		
-		return error_frames;
 	}
 
-	return -1;
+	if(!tansformed_measurement_vec.empty()){
+		for(auto observer : _observer_vec){
+			if(observer) observer->onTransformedTofMeasurement(tansformed_measurement_vec);
+		}
+	}
+
+	return error_frames;
 }
 
 int MeasurementManager::notifyThermalData(){
 	int error_frames = 0;
-	std::size_t idx = 0;
-	sensor::SensorState error = sensor::SensorState::SensorOK;
+	std::vector<measurement::ThermalMeasurement> measurement_vec;
 
-	for(auto sensor_bus : _sensor_ring->getInterfaces()){
-		for(auto sensor_board : sensor_bus->getSensorBoards()){
+	for(const auto& sensor_bus : _sensor_ring->getInterfaces()){
+		for(const auto& sensor_board : sensor_bus->getSensorBoards()){
 			if(sensor_board->getThermal()->isEnabled()){
 
-				auto measurement  = sensor_board->getThermal()->getLatestMeasurement(error);
+				auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
 
 				if(error == sensor::SensorState::SensorOK){
-
-					for(auto observer : _observer_vec){
-						if(observer) observer->onThermalMeasurement(idx, *measurement);
-					}
+					measurement_vec.push_back(measurement);
+				}else{
+					error_frames++;
 				}
-
-				idx++;
 			}
 		}
 	}
+
+	if(!measurement_vec.empty()){
+		for(auto observer : _observer_vec){
+			if(observer) observer->onThermalMeasurement(measurement_vec);
+		}
+	}
+
 	return error_frames;
 }
 

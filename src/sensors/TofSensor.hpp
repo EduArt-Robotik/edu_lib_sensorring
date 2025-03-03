@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 #include "Math.hpp"
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
@@ -21,21 +22,21 @@ class TofSensor : public BaseSensor{
         ~TofSensor();
         
         const TofSensorParams& getParams() const;
-        measurement::TofMeasurement getLatestMeasurement() const;
-        measurement::TofMeasurement getLatestMeasurement(SensorState &error) const;
+        std::pair<measurement::TofMeasurement, SensorState> getLatestRawMeasurement() const;
+        std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement() const;
 
         void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
         void onClearDataFlag() override;
 
-        static std::vector<math::Vector3> transformPointCloud(const std::vector<math::Vector3>& point_data, const math::Matrix3 rotation, const math::Vector3 translation);
-        static measurement::TofMeasurement combineTofMeasurements(const std::vector<measurement::TofMeasurement>& measurements_vec);
+        static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
     private:
 
-        const measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
+        measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
         const math::Matrix3 _rot_m;
         const TofSensorParams _params;
-        measurement::TofMeasurement _latest_measurement;
+        measurement::TofMeasurement _latest_raw_measurement;
+        measurement::TofMeasurement _latest_transformed_measurement;
 
         uint8_t _rx_buffer[TOF_RESOLUTION * 3];
         unsigned int _rx_buffer_offset;
