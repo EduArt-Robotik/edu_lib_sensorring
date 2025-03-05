@@ -92,21 +92,19 @@ bool USBtingo::listener()
 
 			// can message handling
 			if (can_future.valid() && can_future.wait_for(zero_timeout) == std::future_status::ready) {
-				if (can_future.get()) {
+				if (can_future.get())
+				{
 					_dev->receive_can_async(rx_frames, tx_event_frames);
 
 					// forward can frames
-					for (const auto& rx_frame : rx_frames) {
+					for (const auto& rx_frame : rx_frames)
+					{
+
+						auto endpoint = mapIdToEndpoint(rx_frame.id);
 						for(const auto& observer : _observers)
 						{
 							if (observer)
-							{
-								for(auto endpoint : observer->getEndpoints()){
-									auto canid = mapEndpointToId(endpoint);
-									if(canid == rx_frame.id)
-									observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
-								}
-							}
+								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
 						}
 					}
 					rx_frames.clear();
@@ -159,14 +157,20 @@ void USBtingo::fillMap(std::size_t sensor_count){
 	}
 }
 
-std::uint32_t USBtingo::mapEndpointToId(ComEndpoint endpoint){
-	std::uint32_t id = _id_map.at(endpoint); // may throw out_of_range exception
+std::uint32_t USBtingo::mapEndpointToId(ComEndpoint ep){
+	std::uint32_t id = _id_map.at(ep); // may throw out_of_range exception
 	return id;
 }
   
-// ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id){
+ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id){
+    auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) { return pair.second == id; });
 
-// };
+    if (it != _id_map.end()) {
+		return it->first;
+	}else{
+		throw std::runtime_error("No Endpoint found for given CAN ID");
+	}
+};
 
 }
 

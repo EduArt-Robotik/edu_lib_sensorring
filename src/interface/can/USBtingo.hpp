@@ -62,9 +62,9 @@ private:
 
   void fillMap(std::size_t sensor_count);
 
-  std::uint32_t mapEndpointToId(ComEndpoint endpoint);
+  std::uint32_t mapEndpointToId(ComEndpoint ep);
   
-  //ComEndpoint mapIdToEndpoint(std::uint32_t id);
+  ComEndpoint mapIdToEndpoint(std::uint32_t id);
 
   std::map<ComEndpoint, std::uint32_t> _id_map;
 

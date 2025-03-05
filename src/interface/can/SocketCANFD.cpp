@@ -12,6 +12,7 @@
 #include <string.h>
 #include <algorithm>
 #include <chrono>
+#include <stdexcept>
 
 namespace eduart{
 
@@ -147,16 +148,11 @@ bool SocketCANFD::listener()
 				recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
 				if(recvbytes)
 				{
-					for(auto observer : _observers)
+					auto endpoint = mapIdToEndpoint(frame_rd.can_id);
+					for(const auto& observer : _observers)
 					{
 						if (observer)
-						{
-							for(auto endpoint : observer->getEndpoints()){
-								canid_t canid = mapEndpointToId(endpoint);
-								if(canid == frame_rd.can_id)
-								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
-							}
-						}
+							observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
 					}
 				}
 			}
@@ -212,9 +208,15 @@ canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint){
 	return id;
 }
   
-// ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id){
+ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id){
+    auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) { return pair.second == id; });
 
-// };
+    if (it != _id_map.end()) {
+		return it->first;
+	}else{
+		throw std::runtime_error("No Endpoint found for given CAN ID");
+	}
+};
 
 }
 

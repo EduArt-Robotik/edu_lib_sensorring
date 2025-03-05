@@ -79,7 +79,7 @@ private:
 
   canid_t mapEndpointToId(ComEndpoint endpoint);
   
-  //ComEndpoint mapIdToEndpoint(canid_t id);
+  ComEndpoint mapIdToEndpoint(canid_t id);
 
   std::map<ComEndpoint, canid_t> _id_map;
 
