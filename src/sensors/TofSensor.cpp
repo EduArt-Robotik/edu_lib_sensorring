@@ -89,7 +89,7 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
             point_sigma     = (float)sigma_raw     / 128.0 / 1000.0F; // Factor 128 for fixed point conversion, Factor 1000 from mm to m
 
             math::Vector3 point;
-            point.x() = point_distance * lut_tan_x[i] * (-1.0);
+            point.x() = point_distance * lut_tan_x[i];
             point.y() = point_distance * lut_tan_y[i];
             point.z() = point_distance;
 
