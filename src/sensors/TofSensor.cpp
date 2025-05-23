@@ -77,12 +77,14 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
 
     uint16_t distance_raw = 0;
     uint16_t sigma_raw = 0;
-    float point_distance = 0;
-    float point_sigma = 0;
 
     for(int i=0; i<len; i++){
         distance_raw    = (*((uint32_t*)(data + i*3)) >> 10) & 0x3FFF; // 14 bit
         sigma_raw       = (*((uint32_t*)(data + i*3)) >>  0) & 0x03FF; // 10 bit
+
+        math::Vector3 point = {0, 0, 0};
+        float point_distance = 0;
+        float point_sigma = 0;
 
         if(distance_raw != 0){
             point_distance  = (float)distance_raw  /  4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
@@ -91,10 +93,10 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
             math::Vector3 point;
             point.x() = point_distance * lut_tan_x[i];
             point.y() = point_distance * lut_tan_y[i];
-            point.z() = point_distance;
-
-            measurement.point_cloud.push_back(measurement::PointData({point, point_distance, point_sigma, _params.user_idx}));
+            point.z() = point_distance;            
         }
+
+        measurement.point_cloud.push_back(measurement::PointData({point, point_distance, point_sigma, _params.user_idx}));
     }
 
     measurement.point_cloud.shrink_to_fit();
