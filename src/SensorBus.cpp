@@ -98,7 +98,7 @@ int SensorBus::enumerateDevices(){
     _enumerate_flag = true;
     _enumerate_count = 0;
 
-    std::vector<uint8_t> tx_buf = {CMD_ACTIVE_DEVICE_QUERY};
+    std::vector<uint8_t> tx_buf = {CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY};
     _interface->send(com::ComEndpoint("broadcast"), tx_buf);
 
     // wait until all sensors sent their response. 100 ms timeout
