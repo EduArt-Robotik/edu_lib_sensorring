@@ -56,12 +56,13 @@ bool SensorRing::enumerateDevices(){
 
 void SensorRing::syncLight(){
 	for(auto& sensor_bus : _sensor_bus_vec){
-		sensor_bus->syncLights();
+		sensor_bus->syncLight();
 	}
+}
 
-	unsigned char red = 0, green = 0, blue = 0;
+void SensorRing::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue){
 	for(auto& sensor_bus : _sensor_bus_vec){
-		sensor_bus->setLights(CAN_LIGHT_PULSATION, red, green, blue);
+		sensor_bus->setLight(mode, red, green, blue);
 	}
 }
 
@@ -193,7 +194,7 @@ bool SensorRing::startThermalCalibration(size_t window){
     bool success = true;
 
     for (auto& sensor_bus : _sensor_bus_vec){
-        success &= sensor_bus->startThermaltCalibration(window);
+        success &= sensor_bus->startThermalCalibration(window);
     }
 
     return success;

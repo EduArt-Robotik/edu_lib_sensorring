@@ -36,8 +36,8 @@ class SensorBus : public com::ComObserver{
 
         void resetDevices();
         int enumerateDevices();
-        void syncLights();
-        void setLights(int mode, unsigned char red, unsigned char green, unsigned char blue);
+        void syncLight();
+        void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
         void requestEEPROM();
         void requestTofMeasurement();
         void fetchTofData();
@@ -45,8 +45,8 @@ class SensorBus : public com::ComObserver{
         void fetchThermalData();
 
         bool stopThermalCalibration();
-		bool startThermaltCalibration(size_t window);
-        
+		bool startThermalCalibration(size_t window);
+
         void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
     private:

@@ -115,6 +115,16 @@ public:
      */
     bool stopThermalCalibration();
 
+    /**
+     * Set the light mode and color of the sensor ring
+     * @param[in] mode Light mode to set
+     * @param[in] red Red color value
+     * @param[in] green Green color value
+     * @param[in] blue Blue color value
+     * @return true if successful, false otherwise
+     */
+    void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
+
 private:
     void init();
     void StateMachine();
@@ -138,7 +148,12 @@ private:
     bool _is_tof_throttled;
     bool _is_thermal_throttled;
     bool _thermal_measurement_flag;
-
+	
+	light::LightMode _light_mode;
+    std::uint8_t _light_color[3];
+    std::uint8_t _light_brightness;
+    std::atomic<bool> _light_update_flag;
+	
     std::vector<MeasurementObserver*> _observer_vec;
 
     std::atomic<bool> _is_running;

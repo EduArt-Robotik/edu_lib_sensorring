@@ -77,15 +77,18 @@ size_t SensorBus::getEnumerationCount() const{
     return _enumerate_count;
 }
 
-void SensorBus::syncLights(){
+void SensorBus::syncLight(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};
     _interface->send(com::ComEndpoint("light"), tx_buf);
 }
 
-void SensorBus::setLights(int mode, unsigned char red, unsigned char green, unsigned char blue){
+void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue){
 
-    std::vector<uint8_t> tx_buf = {(uint8_t )mode, red, green, blue};
+    // Map the enum class value to the corresponding index in the command
+    std::uint8_t mode_idx = static_cast<uint8_t>(mode) + 2;
+    
+    std::vector<uint8_t> tx_buf = {mode_idx, red, green, blue};
     _interface->send(com::ComEndpoint("light"), tx_buf);
 }
 
@@ -284,7 +287,7 @@ bool SensorBus::stopThermalCalibration(){
     return success;
 }
 
-bool SensorBus::startThermaltCalibration(size_t window){
+bool SensorBus::startThermalCalibration(size_t window){
     bool success = true;
 
     for (auto& sensor : _sensor_board_vec){

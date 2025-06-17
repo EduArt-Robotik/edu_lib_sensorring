@@ -31,6 +31,21 @@ enum class SensorState{
 
 }
 
+namespace light{
+	enum class LightMode{
+		Off,
+		Dimmed,
+		HighBeam,
+		FlashAll,
+		FlashLeft,
+		FlashRight,
+		Pulsation,
+		Rotation,
+		Running,
+		MapDistance
+	};
+}
+
 namespace measurement{
 
 template<typename T, std::size_t RESOLUTION>

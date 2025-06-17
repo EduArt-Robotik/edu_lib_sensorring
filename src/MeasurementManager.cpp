@@ -17,6 +17,7 @@ enum class MeasurementState{
     sync_lights,
     get_eeprom,
     pre_loop_init,
+	set_lights,
     request_tof_measurement,
     fetch_tof_data,
     request_thermal_measurement,
@@ -63,7 +64,14 @@ void MeasurementManager::init(){
     _is_running = false;
     _first_measurement = true;
 	_thermal_measurement_flag = false;
-    
+
+	_light_mode = light::LightMode::Off;
+    _light_brightness = 0;
+    _light_color[0] = 0;
+    _light_color[1] = 0;
+    _light_color[2] = 0;
+    _light_update_flag = false;
+
 	_last_tof_measurement_timestamp_s 		= std::chrono::steady_clock::now();
 	_last_thermal_measurement_timestamp_s	= std::chrono::steady_clock::now();
 
@@ -152,6 +160,16 @@ bool MeasurementManager::stopThermalCalibration(){
 
 bool MeasurementManager::startThermalCalibration(std::size_t window){
 	return _sensor_ring->startThermalCalibration(window);
+}
+
+void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue){
+
+	_light_mode = mode;
+	_light_color[0] = red;
+	_light_color[1] = green;
+	_light_color[2] = blue;
+
+	_light_update_flag = true;
 }
 
 /* ==========================================================================================
@@ -342,6 +360,7 @@ void MeasurementManager::StateMachine(){
 		case MeasurementState::sync_lights:
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 			_sensor_ring->syncLight();
+			_sensor_ring->setLight(light::LightMode::Off, 0, 0, 0);
 
 			// state transition
 			_measurement_state = MeasurementState::enumerate_sensors;
@@ -392,13 +411,24 @@ void MeasurementManager::StateMachine(){
 			std::this_thread::sleep_for(std::chrono::seconds(1)); // sleep 1 second
 			
 			// state transition
-			_measurement_state = MeasurementState::request_tof_measurement;
+			_measurement_state = MeasurementState::set_lights;
 			break;
 
 		/* =============================================
 			Loop part of the state machine
 			Runs continuous to fetch data
 		============================================= */
+
+		case MeasurementState::set_lights:
+
+			if(_light_update_flag){
+				_sensor_ring->setLight(_light_mode, _light_color[0], _light_color[1], _light_color[2]);
+				_light_update_flag = false;
+			}
+
+			// state transition
+			_measurement_state = MeasurementState::request_tof_measurement;
+			break;
 
 		case MeasurementState::request_tof_measurement:
 			if(_tof_enabled) _sensor_ring->requestTofMeasurement();
@@ -442,7 +472,7 @@ void MeasurementManager::StateMachine(){
 			if(success){
 				if(_first_measurement){ 
 					_first_measurement = false;
-					_measurement_state = MeasurementState::request_tof_measurement;
+					_measurement_state = MeasurementState::set_lights;
 					break;
 				}else{
 					_measurement_state = MeasurementState::fetch_tof_data; 
@@ -506,7 +536,7 @@ void MeasurementManager::StateMachine(){
 			
 			// state transition
 			if(success){
-				_measurement_state = MeasurementState::request_tof_measurement;
+				_measurement_state = MeasurementState::set_lights;
 			}else{
 				logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occured while taking tof measurements.");
 				_measurement_state = MeasurementState::error_handler;
