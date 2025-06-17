@@ -160,7 +160,7 @@ includes sensors on multiple interfaces.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>612</x><y>276</y><w>576</w><h>456</h></coordinates><panel_attributes>MeasurementManager
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>624</x><y>240</y><w>564</w><h>492</h></coordinates><panel_attributes>MeasurementManager
 --
 params : ManagerParams
 sensor_ring : SensorRing
@@ -172,9 +172,9 @@ MeasurementManager(params : ManagerParams)
 MeasurementManager(params : ManagerParams, observer : MeasurementObserver*)
 ~MeasurementManager()
    
-bool measureSome()
-bool startMeasuring()
-bool stopMeasuring()
+measureSome() : bool
+startMeasuring() : bool
+topMeasuring() : bool
 
 registerObserver(observer : MeasurementObserver*)
 printTopology() : string
@@ -186,10 +186,11 @@ enableThermalMeasurement(state : bool)
 startThermalCalibration(window : size_t) : bool
 stopThermalCalibration() : bool
 
-   
+setLight(mode : LightMode, red : uint8_t, green : uint8_t, blue : uint8_t) : void
+
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>276</y><w>324</w><h>180</h></coordinates><panel_attributes>The MeasurementManager manages a
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>240</y><w>324</w><h>180</h></coordinates><panel_attributes>The MeasurementManager manages a
 SensorRing object. The main component
 is a state machine which handles the timing
 of the measurements.
@@ -200,7 +201,7 @@ bg=white
 transparency=0
 </panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>888</x><y>720</y><w>48</w><h>144</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1404</x><y>276</y><w>576</w><h>180</h></coordinates><panel_attributes>MeasurementObserver
+m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1404</x><y>240</y><w>576</w><h>180</h></coordinates><panel_attributes>MeasurementObserver
 --
 
 
@@ -212,7 +213,7 @@ m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attribute
    
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1176</x><y>336</y><w>252</w><h>36</h></coordinates><panel_attributes>lt=&lt;-&gt;&gt;&gt;&gt;&gt;</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>1716</y><w>432</w><h>204</h></coordinates><panel_attributes>ComManager
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1176</x><y>300</y><w>252</w><h>36</h></coordinates><panel_attributes>lt=&lt;-&gt;&gt;&gt;&gt;&gt;</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>1716</y><w>432</w><h>204</h></coordinates><panel_attributes>ComManager
 --
 vector&lt;ComInterface&gt;
 
