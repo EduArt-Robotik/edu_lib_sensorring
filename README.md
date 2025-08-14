@@ -21,7 +21,7 @@ The sensorring library supports a variety of EduArt sensor boards. See the table
 
 |  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200"/></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CAN FD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
 |---|---|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DCace |
+|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC |
 |  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - 38 × 28 mm <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
 |  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
 
