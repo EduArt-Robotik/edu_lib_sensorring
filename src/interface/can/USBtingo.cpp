@@ -170,7 +170,7 @@ ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id){
 	}else{
 		throw std::runtime_error("No Endpoint found for given CAN ID");
 	}
-};
+}
 
 }
 
