@@ -26,7 +26,7 @@ const std::vector<ComEndpoint>& ComObserver::getEndpoints() const
 
 void ComObserver::forwardNotification(const ComEndpoint source, const std::vector<uint8_t>& data)
 {
-	for(auto endpoint : _endpoints){
+	for(const auto& endpoint : _endpoints){
 		if(endpoint == source){
 			// Take time stamp
 			_timestamp = std::chrono::steady_clock::now();

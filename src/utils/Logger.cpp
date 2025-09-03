@@ -1,11 +1,30 @@
 #include "Logger.hpp"
 
+#include <algorithm>
+
 namespace eduart{
 
 namespace logger{
 
 void Logger::registerObserver(manager::MeasurementObserver* observer){
-    if(observer) _observer_vec.push_back(observer);
+    if(observer && std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end())
+	{
+		logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+		_observer_vec.push_back(observer);
+		return;
+	} 
+	logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+}
+
+void Logger::unregisterObserver(manager::MeasurementObserver* observer){
+	if(observer)
+	{
+		const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
+		if(it != _observer_vec.end())
+		{
+			_observer_vec.erase(it);
+		}
+	}
 }
 
 void Logger::log(const LogVerbosity verbosity, const std::string msg){

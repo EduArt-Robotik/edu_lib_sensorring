@@ -16,6 +16,7 @@ class Logger : public Singleton<Logger>{
         ~Logger() = default;
 
         void registerObserver(manager::MeasurementObserver* observer);
+        void unregisterObserver(manager::MeasurementObserver* observer);
 
         void log(const LogVerbosity verbosity, const std::string msg);
         void log(const LogVerbosity verbosity, const std::stringstream msg);

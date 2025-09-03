@@ -71,6 +71,12 @@ public:
      * @param[in] observer Observer that is registered and gets notified on future events
      */
     void registerObserver(MeasurementObserver* observer);
+
+    /**
+     * Unregister an observer with the MeasurementManager object
+     * @param[in] observer Observer that is unregistered and will not be notified on future events
+     */
+    void unregisterObserver(MeasurementObserver* observer);
     
     /**
      * Get a string representation of the topology of the connected sensors

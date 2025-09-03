@@ -38,7 +38,7 @@ SensorBus::SensorBus(BusParams params) : _params(params){
 }
 
 SensorBus::~SensorBus(){
-
+    _interface->unregisterObserver(this);
 }
 
 const std::string SensorBus::getInterfaceName() const{

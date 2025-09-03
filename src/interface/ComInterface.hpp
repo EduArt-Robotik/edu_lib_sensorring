@@ -48,6 +48,13 @@ public:
 	bool registerObserver(ComObserver* observer);
 
 	/**
+	 * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
+	 * @param[in] observer Observer instance, which should be notified when data is available.
+	 * @return success==true
+	 */
+	bool unregisterObserver(ComObserver* observer);
+
+	/**
 	 * Remove all registered observers
 	 */
 	void clearObservers();

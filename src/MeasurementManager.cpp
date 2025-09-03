@@ -189,6 +189,20 @@ void MeasurementManager::registerObserver(MeasurementObserver* observer){
 	}
 }
 
+void MeasurementManager::unregisterObserver(MeasurementObserver* observer){
+	if(observer){
+		// check if the observer is already registered
+		const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
+		if (it != _observer_vec.end()) {
+			_observer_vec.erase(it);
+			logger::Logger::getInstance()->unregisterObserver(observer);
+			logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+		}else{
+			logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+		}
+	}
+}
+
 int MeasurementManager::notifyToFData(){
 	int error_frames = 0;
 	std::vector<measurement::TofMeasurement> raw_measurement_vec, tansformed_measurement_vec;

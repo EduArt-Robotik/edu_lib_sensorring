@@ -19,7 +19,7 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, st
 }
 
 BaseSensor::~BaseSensor(){
-
+    _interface->unregisterObserver(this);
 }
 
 std::size_t BaseSensor::getIdx() const{

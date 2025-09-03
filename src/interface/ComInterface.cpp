@@ -29,6 +29,22 @@ bool ComInterface::registerObserver(ComObserver* observer)
 	return true;
 }
 
+bool ComInterface::unregisterObserver(ComObserver* observer)
+{
+	LockGuard guard(_mutex);
+	if(observer)
+	{
+		const auto& it = std::find(_observers.begin(), _observers.end(), observer);
+		if(it != _observers.end())
+		{
+			_observers.erase(it);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void ComInterface::clearObservers()
 {
 	_mutex.lock();
