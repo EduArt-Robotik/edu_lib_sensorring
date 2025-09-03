@@ -10,6 +10,8 @@
 #include <string>
 #include <atomic>
 
+using LockGuard = std::lock_guard<std::mutex>;
+
 namespace eduart{
 
 namespace com{

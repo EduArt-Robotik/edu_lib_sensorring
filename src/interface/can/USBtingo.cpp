@@ -88,7 +88,7 @@ bool USBtingo::listener()
 	while(!_shutDownListener)
 	{
 		{
-			std::lock_guard<std::mutex> lock(_mutex);
+			LockGuard guard(_mutex);
 
 			// can message handling
 			if (can_future.valid() && can_future.wait_for(zero_timeout) == std::future_status::ready) {
@@ -101,7 +101,7 @@ bool USBtingo::listener()
 					{
 
 						auto endpoint = mapIdToEndpoint(rx_frame.id);
-						for(const auto& observer : _observers)
+						for(auto observer : _observers)
 						{
 							if (observer)
 								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));

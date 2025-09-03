@@ -105,9 +105,11 @@ bool SocketCANFD::send(const canfd_frame* frame)
 		_timeCom = now;
 			
 		int retval;
-		_mutex.lock();
-		retval = write(_soc, frame, sizeof(canfd_frame));
-		_mutex.unlock();
+		
+		{
+			LockGuard guard(_mutex);
+			retval = write(_soc, frame, sizeof(canfd_frame));
+		}
 		
 		if (retval != sizeof(canfd_frame)){
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Can transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " +  std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
@@ -139,25 +141,26 @@ bool SocketCANFD::listener()
 	{
 		FD_ZERO(&readSet);
 
-		_mutex.lock();
-		FD_SET(_soc, &readSet);
-		if (select((_soc + 1), &readSet, NULL, NULL, &timeout) >= 0)
 		{
-			if (FD_ISSET(_soc, &readSet))
+			LockGuard guard(_mutex);
+			FD_SET(_soc, &readSet);
+			if (select((_soc + 1), &readSet, NULL, NULL, &timeout) >= 0)
 			{
-				recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
-				if(recvbytes)
+				if (FD_ISSET(_soc, &readSet))
 				{
-					auto endpoint = mapIdToEndpoint(frame_rd.can_id);
-					for(const auto& observer : _observers)
+					recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
+					if(recvbytes)
 					{
-						if (observer)
-							observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
+						auto endpoint = mapIdToEndpoint(frame_rd.can_id);
+						for(const auto& observer : _observers)
+						{
+							if (observer)
+								observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
+						}
 					}
 				}
 			}
 		}
-		_mutex.unlock();
 
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}

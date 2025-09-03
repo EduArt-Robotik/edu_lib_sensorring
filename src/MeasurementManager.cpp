@@ -54,7 +54,7 @@ void MeasurementManager::init(){
 	// check if there are active tof or thermal sensors
 	_tof_enabled = false;
 	_thermal_enabled = false;
-	for(auto sensor_bus : _sensor_ring->getInterfaces()){
+	for(const auto& sensor_bus : _sensor_ring->getInterfaces()){
 		for (size_t j=0; j<sensor_bus->getSensorCount(); j++){
 				_tof_enabled     |= sensor_bus->isTofEnabled(j);
 				_thermal_enabled |= sensor_bus->isThermalEnabled(j);
@@ -98,12 +98,12 @@ ManagerParams MeasurementManager::getParams() const{
 
 std::string MeasurementManager::printTopology() const{
 	std::stringstream ss;
-	for(auto sensor_bus : _sensor_ring->getInterfaces()){
+	for(const auto& sensor_bus : _sensor_ring->getInterfaces()){
 		ss << "";
 		ss << "=================================================";
 		ss << "Topology of the sensors on " << sensor_bus->getInterfaceName() << ":";
 		ss << "";
-		for(auto sensor_board : sensor_bus->getSensorBoards()){
+		for(const auto& sensor_board : sensor_bus->getSensorBoards()){
 			
 			std::string board_type 		= "";
 			std::string tof_sensor		= "";
@@ -337,12 +337,10 @@ bool MeasurementManager::stopMeasuring(){
 	State machine function
 ========================================================================================== */
 void MeasurementManager::StateMachineWorker(){
-	auto interval = std::chrono::microseconds(_params.loop_delay_us);
-	
 	while(_is_running){
 		auto start_time = std::chrono::steady_clock::now();
 		StateMachine();
-		std::this_thread::sleep_until(start_time + interval);
+		std::this_thread::sleep_until(start_time + _params.loop_delay);
 	}
 }
 
