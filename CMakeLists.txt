@@ -10,8 +10,8 @@ ENDIF()
 
 #########################################################
 # project
-set(CMAKE_PROJECT_VERSION_MAJOR 1)
-set(CMAKE_PROJECT_VERSION_MINOR 0)
+set(CMAKE_PROJECT_VERSION_MAJOR 2)
+set(CMAKE_PROJECT_VERSION_MINOR 1)
 set(CMAKE_PROJECT_VERSION_PATCH 0)
 set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}")
 
@@ -35,6 +35,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-O3)
+  endif()
+
+elseif(MSVC)
+  add_compile_options(/Wall)
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(/O2)
+  endif()
 endif()
 
 #########################################################
