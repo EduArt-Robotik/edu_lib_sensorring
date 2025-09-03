@@ -323,7 +323,7 @@ bool MeasurementManager::stopMeasuring(){
 	State machine function
 ========================================================================================== */
 void MeasurementManager::StateMachineWorker(){
-	auto interval = std::chrono::microseconds(500);
+	auto interval = std::chrono::microseconds(_params.loop_delay_us);
 	
 	while(_is_running){
 		auto start_time = std::chrono::steady_clock::now();
