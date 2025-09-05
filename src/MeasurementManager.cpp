@@ -353,13 +353,16 @@ void MeasurementManager::StateMachine(){
 		============================================= */
 
 		case MeasurementState::init:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager state machine");
 			
 			// state transition
 			_measurement_state = MeasurementState::reset_sensors;
 			break;
+		}
 
 		case MeasurementState::reset_sensors:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
 			_sensor_ring->resetDevices();
 			std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors!
@@ -367,8 +370,10 @@ void MeasurementManager::StateMachine(){
 			// state transition
 			_measurement_state = MeasurementState::sync_lights;
 			break;
+		}
 
 		case MeasurementState::sync_lights:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 			_sensor_ring->syncLight();
 			_sensor_ring->setLight(light::LightMode::Off, 0, 0, 0);
@@ -376,8 +381,10 @@ void MeasurementManager::StateMachine(){
 			// state transition
 			_measurement_state = MeasurementState::enumerate_sensors;
 			break;
+		}
 
 		case MeasurementState::enumerate_sensors:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Enumerating all connected sensors");
             
 			success = _sensor_ring->enumerateDevices();
@@ -399,8 +406,10 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		case MeasurementState::get_eeprom:
+		{
 			if(_thermal_enabled){
 				logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 				success = _sensor_ring->getEEPROM();
@@ -414,8 +423,10 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		case MeasurementState::pre_loop_init:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
@@ -424,6 +435,7 @@ void MeasurementManager::StateMachine(){
 			// state transition
 			_measurement_state = MeasurementState::set_lights;
 			break;
+		}
 
 		/* =============================================
 			Loop part of the state machine
@@ -431,6 +443,7 @@ void MeasurementManager::StateMachine(){
 		============================================= */
 
 		case MeasurementState::set_lights:
+		{
 
 			if(_light_update_flag){
 				_sensor_ring->setLight(_light_mode, _light_color[0], _light_color[1], _light_color[2]);
@@ -440,16 +453,20 @@ void MeasurementManager::StateMachine(){
 			// state transition
 			_measurement_state = MeasurementState::request_tof_measurement;
 			break;
+		}
 
 		case MeasurementState::request_tof_measurement:
+		{
 			if(_tof_enabled) _sensor_ring->requestTofMeasurement();
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 
 			// state transition
 			_measurement_state = MeasurementState::request_thermal_measurement;
 			break;
+		}
 
 		case MeasurementState::request_thermal_measurement:
+		{
 			if(_thermal_enabled){
 				
 				if(!_thermal_measurement_flag){
@@ -472,8 +489,10 @@ void MeasurementManager::StateMachine(){
 			// state transition
 			_measurement_state = MeasurementState::wait_for_data;
 			break;
+		}
 
 		case MeasurementState::wait_for_data:
+		{
 			// wait for the completion of measurements if a frequency was specified or this is the first measurement
 			if(_is_tof_throttled || _first_measurement){
 				if(_tof_enabled)     success &= _sensor_ring->waitForAllTofMeasurementsReady();
@@ -493,8 +512,10 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		case MeasurementState::fetch_tof_data:
+		{
 			// fetch and publish a tof measurement
 			if(_tof_enabled){
 				_sensor_ring->fetchTofData();
@@ -513,8 +534,10 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		case MeasurementState::fetch_thermal_data:
+		{
 			// fetch and publish a thermal measurement
 			if(_thermal_enabled and _thermal_measurement_flag){
 				_sensor_ring->fetchThermalData();
@@ -534,8 +557,10 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		case MeasurementState::throttle_measurement:
+		{
 			if(_is_tof_throttled){
 				// throttled mode: wait until next measurement period
 				std::this_thread::sleep_until(_last_tof_measurement_timestamp_s + std::chrono::duration<double>(1.0F / _params.frequency_tof_hz));
@@ -553,26 +578,31 @@ void MeasurementManager::StateMachine(){
 				_measurement_state = MeasurementState::error_handler;
 			}
 			break;
+		}
 
 		/* =============================================
 			Error handler
 		============================================= */
 
 		case MeasurementState::error_handler:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler called.");
 			notifyState(WorkerState::Error);
 			_measurement_state = MeasurementState::shutdown;
 			break;
+		}
 
 		/* =============================================
 			Shutdown
 		============================================= */
 
 		case MeasurementState::shutdown:
+		{
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down state machine.");
 			notifyState(WorkerState::Shutdown);
 			_is_running = false;
 			break;
+		}
 	};
 }
 
