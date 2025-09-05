@@ -1,4 +1,7 @@
 #include "TofSensor.hpp"
+
+#include "profiling/Profiling.hpp"
+
 #include <cstring>
 #include <algorithm>
 
@@ -37,6 +40,8 @@ void TofSensor::onClearDataFlag(){
 }
 
 void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data){
+    EduProfilingScope("TofSensor::canCallback");
+    
     std::size_t msg_size = data.size();
 
     // point data msg
@@ -71,6 +76,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
 }
 
 measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const{
+    EduProfilingScope("TofSensor::processMeasurement");
     measurement::TofMeasurement measurement;
     measurement.point_cloud.reserve(TOF_RESOLUTION);
     measurement.frame_id = frame_id;
@@ -103,7 +109,8 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
 }
 
 measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation){
-    
+    EduProfilingScope("TofSensor::transformTofMeasurements");
+
     auto transformed_measurement = measurement;
     
     for(unsigned int i = 0; i < transformed_measurement.point_cloud.size(); i++){

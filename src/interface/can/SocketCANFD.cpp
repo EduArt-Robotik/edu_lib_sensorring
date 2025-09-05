@@ -2,6 +2,7 @@
 
 #include "canprotocol.hpp"
 #include "utils/Logger.hpp"
+#include "profiling/Profiling.hpp"
 
 #include <sys/ioctl.h>
 #include <sys/time.h>
@@ -139,6 +140,7 @@ bool SocketCANFD::listener()
 	_listenerIsRunning = true;
 	while(!_shutDownListener)
 	{
+		EduProfilingScope("SocketCANFD::listener");
 		FD_ZERO(&readSet);
 
 		{
@@ -162,7 +164,10 @@ bool SocketCANFD::listener()
 			}
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(1));
+		{
+			EduProfilingScope("SocketCANFD::sleep");
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
 	}
 	logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
 

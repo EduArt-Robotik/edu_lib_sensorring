@@ -5,6 +5,7 @@
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 #include <usbtingo/can/Dlc.hpp>
+#include "profiling/Profiling.hpp"
 
 #include <cstdint>
 #include <string>
@@ -64,6 +65,7 @@ bool USBtingo::openInterface(std::string interface_name)
 }
 
 bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data){
+	EduProfilingScope("USBtingo::send_can_frame");
 	usbtingo::bus::Message msg(mapEndpointToId(target), data);
 	return _dev->send_can(msg.to_CanTxFrame());
 }
@@ -87,6 +89,7 @@ bool USBtingo::listener()
 	_listenerIsRunning = true;
 	while(!_shutDownListener)
 	{
+		EduProfilingScope("USBtingo::listener");
 		{
 			LockGuard guard(_mutex);
 
@@ -99,7 +102,7 @@ bool USBtingo::listener()
 					// forward can frames
 					for (const auto& rx_frame : rx_frames)
 					{
-
+						EduProfilingScope("USBtingo::received_can_frame");
 						auto endpoint = mapIdToEndpoint(rx_frame.id);
 						for(auto observer : _observers)
 						{
@@ -115,7 +118,10 @@ bool USBtingo::listener()
 		
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(1));
+		{
+			EduProfilingScope("USBtingo::sleep");
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
 	}
 	
  	logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);

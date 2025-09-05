@@ -57,6 +57,7 @@ endif()
 option( USE_USBTINGO "Add support for the USBtingo USB to CAN FD converter" OFF)
 option( BUILD_SHARED_LIBS "Build as shared library" OFF)
 option( VERBOSE_BUILD "Verbose build" OFF)
+option( ENABLE_PROFILING "Enable profiling" OFF)
 
 if(WIN32)
   set( USE_USBTINGO ON)
@@ -68,6 +69,11 @@ endif()
 
 if(USE_USBTINGO)
   find_package(usbtingo REQUIRED)
+endif()
+
+if(ENABLE_PROFILING)
+  add_compile_definitions(TRACY_ENABLE)
+  #add_subdirectory (tracy)
 endif()
 
 find_package(Threads REQUIRED)
@@ -105,6 +111,12 @@ if(USE_USBTINGO)
   )
 endif()
 
+if(ENABLE_PROFILING)
+  list(APPEND SOURCES
+    tracy/public/TracyClient.cpp
+  )
+endif()
+
 target_sources(sensorring PRIVATE ${SOURCES})
 
 #########################################################
@@ -119,6 +131,12 @@ target_include_directories(sensorring PRIVATE
   include/${PROJECT_NAME}/types
   include/${PROJECT_NAME}/utils
 )
+
+if(ENABLE_PROFILING)
+  target_include_directories(sensorring PRIVATE
+    tracy/public/tracy
+  )
+endif()
 
 # build macros
 if(USE_SOCKETCAN)
@@ -139,6 +157,12 @@ if(USE_USBTINGO)
     )
   endif()
 endif()
+
+# if(ENABLE_PROFILING)
+  # target_link_libraries(sensorring PUBLIC
+    # Tracy::TracyClient
+  # )
+# endif()
 
 target_include_directories(sensorring PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>

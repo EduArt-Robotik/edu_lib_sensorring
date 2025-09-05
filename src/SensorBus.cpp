@@ -2,6 +2,7 @@
 
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "profiling/Profiling.hpp"
 
 #include <string>
 #include <chrono>
@@ -166,6 +167,7 @@ void SensorBus::requestTofMeasurement(){
 }
 
 void SensorBus::fetchTofData(){
+    EduProfilingScope("fetchTofData");
     int active_devices = 0;
     for(auto& sensor : _sensor_board_vec){
         sensor->tofClearDataFlag();

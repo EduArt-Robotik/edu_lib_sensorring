@@ -2,6 +2,7 @@
 
 #include "SensorRing.hpp"
 #include "utils/Logger.hpp"
+#include "profiling/Profiling.hpp"
 
 #include <sstream>
 #include <algorithm>
@@ -338,6 +339,9 @@ bool MeasurementManager::stopMeasuring(){
 ========================================================================================== */
 void MeasurementManager::StateMachineWorker(){
 	while(_is_running){
+		// tracy profiler scope
+		EduProfilingScope("MeasurementManager::StateMachineWorker");
+
 		//no wait command here, the individual states of the state machine provide natural throttling
 		StateMachine();
 	}
@@ -354,6 +358,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::init:
 		{
+			// tracy profiler scope
+			EduProfilingScope("init");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager state machine");
 			
 			// state transition
@@ -363,6 +370,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::reset_sensors:
 		{
+			// tracy profiler scope
+			EduProfilingScope("reset_sensors");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
 			_sensor_ring->resetDevices();
 			std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors!
@@ -374,6 +384,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::sync_lights:
 		{
+			// tracy profiler scope
+			EduProfilingScope("sync_lights");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 			_sensor_ring->syncLight();
 			_sensor_ring->setLight(light::LightMode::Off, 0, 0, 0);
@@ -385,6 +398,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::enumerate_sensors:
 		{
+			// tracy profiler scope
+			EduProfilingScope("enumerate_sensors");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Enumerating all connected sensors");
             
 			success = _sensor_ring->enumerateDevices();
@@ -410,6 +426,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::get_eeprom:
 		{
+			// tracy profiler scope
+			EduProfilingScope("get_eeprom");
+
 			if(_thermal_enabled){
 				logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 				success = _sensor_ring->getEEPROM();
@@ -427,6 +446,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::pre_loop_init:
 		{
+			// tracy profiler scope
+			EduProfilingScope("pre_loop_init");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
@@ -443,6 +465,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::set_lights:
 		{
+			// tracy profiler scope
+			EduProfilingScope("set_lights");
+			EduFrameMark;
 
 			if(_light_update_flag){
 				_sensor_ring->setLight(_light_mode, _light_color[0], _light_color[1], _light_color[2]);
@@ -456,6 +481,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::request_tof_measurement:
 		{
+			// tracy profiler scope
+			EduProfilingScope("request_tof_measurement");
+
 			if(_tof_enabled) _sensor_ring->requestTofMeasurement();
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 
@@ -466,6 +494,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::request_thermal_measurement:
 		{
+			// tracy profiler scope
+			EduProfilingScope("request_thermal_measurement");
+
 			if(_thermal_enabled){
 				
 				if(!_thermal_measurement_flag){
@@ -492,6 +523,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::wait_for_data:
 		{
+			// tracy profiler scope
+			EduProfilingScope("wait_for_data");
+
 			// wait for the completion of measurements if a frequency was specified or this is the first measurement
 			if(_is_tof_throttled || _first_measurement){
 				if(_tof_enabled)     success &= _sensor_ring->waitForAllTofMeasurementsReady();
@@ -515,6 +549,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::fetch_tof_data:
 		{
+			// tracy profiler scope
+			EduProfilingScope("fetch_tof_data");
+
 			// fetch and publish a tof measurement
 			if(_tof_enabled){
 				_sensor_ring->fetchTofData();
@@ -537,6 +574,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::fetch_thermal_data:
 		{
+			// tracy profiler scope
+			EduProfilingScope("fetch_thermal_data");
+
 			// fetch and publish a thermal measurement
 			if(_thermal_enabled and _thermal_measurement_flag){
 				_sensor_ring->fetchThermalData();
@@ -560,6 +600,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::throttle_measurement:
 		{
+			// tracy profiler scope
+			EduProfilingScope("throttle_measurement");
+
 			if(_is_tof_throttled){
 				// throttled mode: wait until next measurement period
 				std::this_thread::sleep_until(_last_tof_measurement_timestamp_s + std::chrono::duration<double>(1.0F / _params.frequency_tof_hz));
@@ -585,6 +628,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::error_handler:
 		{
+			// tracy profiler scope
+			EduProfilingScope("error_handler");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler called.");
 			notifyState(WorkerState::Error);
 			_measurement_state = MeasurementState::shutdown;
@@ -597,6 +643,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::shutdown:
 		{
+			// tracy profiler scope
+			EduProfilingScope("shutdown");
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down state machine.");
 			notifyState(WorkerState::Shutdown);
 			_is_running = false;

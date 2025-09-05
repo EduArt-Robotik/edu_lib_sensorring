@@ -21,6 +21,7 @@ endif(UNIX)
 message(STATUS " USE_USBTINGO                : " ${USE_USBTINGO})
 message(STATUS " BUILD_SHARED_LIBS           : " ${BUILD_SHARED_LIBS})
 message(STATUS " VERBOSE_BUILD               : " ${VERBOSE_BUILD})
+message(STATUS " ENABLE_PROFILING            : " ${ENABLE_PROFILING})
 message(STATUS "")
 
 message(STATUS " _________________________ PLATFORM __________________________")

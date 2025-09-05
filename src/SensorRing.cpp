@@ -2,6 +2,7 @@
 
 #include "interface/can/canprotocol.hpp" //ToDo: There should be not canprotocol dependency
 #include "utils/Logger.hpp"
+#include "profiling/Profiling.hpp"
 
 #include <cmath>
 
@@ -96,6 +97,7 @@ void SensorRing::requestTofMeasurement(){
 }
 
 bool SensorRing::waitForAllTofMeasurementsReady() const{
+	EduProfilingScope("waitForAllTofMeasurementsReady");
 	
 	bool ready = false;
 	auto timestamp = std::chrono::steady_clock::now();
@@ -131,6 +133,7 @@ bool SensorRing::waitForAllThermalMeasurementsReady() const{
 }
 
 bool SensorRing::waitForAllTofDataTransmissionsComplete() const{
+	EduProfilingScope("waitForAllTofDataTransmissionsComplete");
 	bool ready = false;
 	auto timestamp = std::chrono::steady_clock::now();
 
