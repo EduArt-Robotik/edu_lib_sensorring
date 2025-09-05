@@ -112,7 +112,6 @@ struct ManagerParams{
     bool print_topology = false;
     double frequency_tof_hz = 0.0;
     double frequency_thermal_hz = 1.0;
-    std::chrono::microseconds loop_delay = 50us;
     ring::RingParams ring_params;
 };
 

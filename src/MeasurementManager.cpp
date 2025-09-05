@@ -338,9 +338,8 @@ bool MeasurementManager::stopMeasuring(){
 ========================================================================================== */
 void MeasurementManager::StateMachineWorker(){
 	while(_is_running){
-		auto start_time = std::chrono::steady_clock::now();
+		//no wait command here, the individual states of the state machine provide natural throttling
 		StateMachine();
-		std::this_thread::sleep_until(start_time + _params.loop_delay);
 	}
 }
 
