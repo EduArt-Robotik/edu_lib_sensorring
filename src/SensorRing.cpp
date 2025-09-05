@@ -106,7 +106,7 @@ bool SensorRing::waitForAllTofMeasurementsReady() const{
 			ready &= sensor_bus->allTofMeasurementsReady();
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 	
 	return ready;
@@ -123,7 +123,7 @@ bool SensorRing::waitForAllThermalMeasurementsReady() const{
 	// 	}
 
 	// 	watchdog += 100;
-	// 	std::this_thread::sleep_for(std::chrono::microseconds(100);
+	// 	std::this_thread::sleep_for(std::chrono::microseconds(1);
 	// }
 	
 	// return ready; // ToDo: Check if a thermal frame is actually available
@@ -140,7 +140,7 @@ bool SensorRing::waitForAllTofDataTransmissionsComplete() const{
 			ready &= sensor_bus->allTofDataTransmissionsComplete();
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 	
 	return ready;
@@ -156,7 +156,7 @@ bool SensorRing::waitForAllThermalDataTransmissionsComplete() const{
 			ready &= sensor_bus->allThermalDataTransmissionsComplete();
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 	
 	return ready;

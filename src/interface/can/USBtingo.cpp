@@ -115,7 +115,7 @@ bool USBtingo::listener()
 		
 		}
 
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 	
  	logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
