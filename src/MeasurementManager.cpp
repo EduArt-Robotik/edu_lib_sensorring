@@ -430,7 +430,6 @@ void MeasurementManager::StateMachine(){
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
-			std::this_thread::sleep_for(std::chrono::seconds(1)); // sleep 1 second
 			
 			// state transition
 			_measurement_state = MeasurementState::set_lights;
