@@ -80,8 +80,8 @@ namespace bus{
  * @brief Parameter structure of a communication bus. A bus is one communication interface e.g. can bus and has an arbitrary number of sensor boards connected.
  */
 struct BusParams{
-    com::DeviceType type = com::DeviceType::UNDEFINED;
     std::string interface_name;
+    com::DeviceType type = com::DeviceType::UNDEFINED;
     std::vector<sensor::SensorBoardParams> board_param_vec;
 };
 
@@ -109,6 +109,7 @@ namespace manager{
  * @brief Meta parameter structure of the MeasurementManager. The MeasurementManager handles the timing and communication of the whole system by running a looping state machine. One measurement manager manages exactly one sensor ring.
  */
 struct ManagerParams{
+    bool enable_brs = false;
     bool print_topology = false;
     double frequency_tof_hz = 0.0;
     double frequency_thermal_hz = 1.0;

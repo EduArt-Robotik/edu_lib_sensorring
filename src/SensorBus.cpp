@@ -77,6 +77,12 @@ size_t SensorBus::getEnumerationCount() const{
     return _enumerate_count;
 }
 
+void SensorBus::setBRS(bool brs_enable){
+
+    std::vector<uint8_t> tx_buf = {CMD_SET_BRS, 0xFF, 0xFF, brs_enable ? std::uint8_t(0x01) : std::uint8_t(0x00)};
+    _interface->send(com::ComEndpoint("broadcast"), tx_buf);
+}
+
 void SensorBus::syncLight(){
 
     std::vector<uint8_t> tx_buf = {CAN_LIGHT_BEAT, 0x00};

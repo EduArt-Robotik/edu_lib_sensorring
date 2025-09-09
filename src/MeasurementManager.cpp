@@ -427,6 +427,9 @@ void MeasurementManager::StateMachine(){
 
 		case MeasurementState::pre_loop_init:
 		{
+			// enable bit rate switching
+			_sensor_ring->setBRS(_params.enable_brs);
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
