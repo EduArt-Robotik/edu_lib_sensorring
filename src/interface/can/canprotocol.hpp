@@ -115,6 +115,8 @@ namespace com
 #define CMD_ACTIVE_DEVICE_RESPONSE  0x01
 #define CMD_SOFT_RESET              0x02
 #define CMD_HARD_RESET              0x03
+#define CMD_GET_FW_REV              0x04
+#define CMD_SET_BRS                 0x05
 
 /**
  * ToF commands
