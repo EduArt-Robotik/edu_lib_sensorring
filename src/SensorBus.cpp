@@ -2,6 +2,7 @@
 
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "utils/Logger.hpp"
 
 #include <string>
 #include <chrono>
@@ -14,6 +15,10 @@ SensorBus::SensorBus(BusParams params) : _params(params){
 
     auto interface = com::ComManager::getInstance()->createInterface(params.type, params.interface_name, params.board_param_vec.size());
     //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
+
+    if(!interface){
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to open com interface");
+    }
 
     std::size_t idx = 0;
     for(auto board_params : params.board_param_vec){    

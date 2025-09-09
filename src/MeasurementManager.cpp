@@ -323,11 +323,13 @@ bool MeasurementManager::stopMeasuring(){
 
 	if(_is_running){
 		_is_running = false;
-		if(_worker_thread.joinable()){
-			_worker_thread.join();
-			notifyState(WorkerState::Shutdown);
-			error = true;
+		while(!_worker_thread.joinable()){
+
 		}
+	
+		_worker_thread.join();
+		notifyState(WorkerState::Shutdown);
+		error = true;
 	}
 
 	return error;
@@ -438,7 +440,7 @@ void MeasurementManager::StateMachine(){
 
 		/* =============================================
 			Loop part of the state machine
-			Runs continuous to fetch data
+			Runs continuously to fetch data
 		============================================= */
 
 		case MeasurementState::set_lights:

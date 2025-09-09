@@ -1,4 +1,6 @@
 #include "ComManager.hpp"
+#include "utils/Logger.hpp"
+
 
 #ifdef USE_SOCKETCAN
     #include "can/SocketCANFD.hpp"
@@ -36,6 +38,7 @@ ComInterface* ComManager::createInterface(DeviceType type, std::string interface
                 _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count));
                 break;
             #else
+                logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a SocketCan interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
                 return nullptr;
             #endif
 
@@ -44,10 +47,12 @@ ComInterface* ComManager::createInterface(DeviceType type, std::string interface
                 _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name, sensor_count));
                 break;
             #else
+                logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
                 return nullptr;
             #endif
             
         default:
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open an unknown interface type.");
             return nullptr;
     }
 
