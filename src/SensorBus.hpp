@@ -36,6 +36,7 @@ class SensorBus : public com::ComObserver{
 
         void resetDevices();
         int enumerateDevices();
+        void setBRS(bool brs_enable);
         void syncLight();
         void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
         void requestEEPROM();

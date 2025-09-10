@@ -56,8 +56,8 @@ bool USBtingo::openInterface(std::string interface_name)
 	if(	!_dev ) return false;
 	if(	!_dev->is_alive() ) return false;
 	if(	!_dev->set_mode(usbtingo::device::Mode::OFF) ) return false;
-	if(	!_dev->set_baudrate(1000000) ) return false;
-	if(	!_dev->set_protocol(usbtingo::device::Protocol::CAN_FD) ) return false;
+	if(	!_dev->set_baudrate(1000000, 5000000) ) return false;
+	if(	!_dev->set_protocol(usbtingo::device::Protocol::CAN_FD, 0b00010001) ) return false;
 	if(	!_dev->set_mode(usbtingo::device::Mode::ACTIVE) ) return false;
 
 	return true;
@@ -65,7 +65,7 @@ bool USBtingo::openInterface(std::string interface_name)
 
 bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data){
 	usbtingo::bus::Message msg(mapEndpointToId(target), data);
-	return _dev->send_can(msg.to_CanTxFrame());
+	return _dev->send_can(msg.to_CanTxFrame(true));
 }
 
 bool USBtingo::listener()
