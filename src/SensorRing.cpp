@@ -55,6 +55,12 @@ bool SensorRing::enumerateDevices(){
 	return success;
 }
 
+void SensorRing::setBRS(bool brs_enable){
+	for(auto& sensor_bus : _sensor_bus_vec){
+		sensor_bus->setBRS(brs_enable);
+	}
+}
+
 void SensorRing::syncLight(){
 	for(auto& sensor_bus : _sensor_bus_vec){
 		sensor_bus->syncLight();

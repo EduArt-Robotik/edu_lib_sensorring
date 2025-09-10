@@ -324,11 +324,13 @@ bool MeasurementManager::stopMeasuring(){
 
 	if(_is_running){
 		_is_running = false;
-		if(_worker_thread.joinable()){
-			_worker_thread.join();
-			notifyState(WorkerState::Shutdown);
-			error = true;
+		while(!_worker_thread.joinable()){
+
 		}
+	
+		_worker_thread.join();
+		notifyState(WorkerState::Shutdown);
+		error = true;
 	}
 
 	return error;
@@ -449,6 +451,9 @@ void MeasurementManager::StateMachine(){
 			// tracy profiler scope
 			EduProfilingScope("pre_loop_init");
 
+			// enable bit rate switching
+			_sensor_ring->setBRS(_params.enable_brs);
+
 			logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
 			_last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
 			_last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
@@ -460,7 +465,7 @@ void MeasurementManager::StateMachine(){
 
 		/* =============================================
 			Loop part of the state machine
-			Runs continuous to fetch data
+			Runs continuously to fetch data
 		============================================= */
 
 		case MeasurementState::set_lights:

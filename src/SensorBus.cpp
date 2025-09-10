@@ -2,7 +2,7 @@
 
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "profiling/Profiling.hpp"
+#include "utils/Logger.hpp"
 
 #include <string>
 #include <chrono>
@@ -15,6 +15,10 @@ SensorBus::SensorBus(BusParams params) : _params(params){
 
     auto interface = com::ComManager::getInstance()->createInterface(params.type, params.interface_name, params.board_param_vec.size());
     //auto interface = com::ComManager::getInstance()->getInterface(params.interface_name);
+
+    if(!interface){
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to open com interface");
+    }
 
     std::size_t idx = 0;
     for(auto board_params : params.board_param_vec){    
@@ -76,6 +80,12 @@ size_t SensorBus::getSensorCount() const{
 
 size_t SensorBus::getEnumerationCount() const{
     return _enumerate_count;
+}
+
+void SensorBus::setBRS(bool brs_enable){
+
+    std::vector<uint8_t> tx_buf = {CMD_SET_BRS, 0xFF, 0xFF, brs_enable ? std::uint8_t(0x01) : std::uint8_t(0x00)};
+    _interface->send(com::ComEndpoint("broadcast"), tx_buf);
 }
 
 void SensorBus::syncLight(){
