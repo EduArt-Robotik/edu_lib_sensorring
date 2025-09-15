@@ -2,6 +2,7 @@
 
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "profiling/Profiling.hpp"
 #include "utils/Logger.hpp"
 
 #include <string>

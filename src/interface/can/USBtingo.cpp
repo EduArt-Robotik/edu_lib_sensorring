@@ -119,7 +119,7 @@ bool USBtingo::listener()
 		}
 
 		{
-			EduProfilingScope("USBtingo::sleep");
+			//EduProfilingScope("USBtingo::sleep");
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 	}

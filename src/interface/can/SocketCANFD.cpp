@@ -165,7 +165,7 @@ bool SocketCANFD::listener()
 		}
 
 		{
-			EduProfilingScope("SocketCANFD::sleep");
+			//EduProfilingScope("SocketCANFD::sleep");
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 	}
