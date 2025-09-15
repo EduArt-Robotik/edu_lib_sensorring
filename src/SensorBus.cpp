@@ -226,7 +226,8 @@ void SensorBus::fetchThermalData(){
 bool SensorBus::allTofMeasurementsReady() const{
     bool ready = true;
     for(auto& sensor : _sensor_board_vec){
-        ready &= sensor->getTof()->newDataAvailable();
+        auto tof = sensor->getTof();
+        ready &= tof->getParams().enable ? tof->newDataAvailable() : true;
     }
     return ready;
 }
@@ -242,10 +243,12 @@ bool SensorBus::allTofMeasurementsReady(int &ready_sensors_count) const{
 }
 
 bool SensorBus::allThermalMeasurementsReady() const{
+    // ToDo: Needs actual implementation when more than one thermal sensor is used on one bus
     return _active_thermal_sensors == _thermal_measurement_count;
 }
 
 bool SensorBus::allThermalMeasurementsReady(int &ready_sensors_count) const{
+    // ToDo: Needs actual implementation when more than one thermal sensor is used on one bus
     ready_sensors_count = _thermal_measurement_count;
     return _active_thermal_sensors == _thermal_measurement_count;
 }
