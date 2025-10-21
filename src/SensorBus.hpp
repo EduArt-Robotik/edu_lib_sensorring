@@ -6,6 +6,7 @@
 
 #include "Parameters.hpp"
 #include "SensorBoard.hpp"
+#include "interface/ComInterface.hpp"
 #include "interface/ComObserver.hpp"
 
 namespace eduart{
@@ -14,15 +15,17 @@ namespace bus{
 
 class SensorBus : public com::ComObserver{
     public:
-        SensorBus(BusParams params);
+        SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<sensor::SensorBoard>> board_vec);
         ~SensorBus();
 
-        const std::string getInterfaceName() const;
+        size_t getSensorCount() const;
+        size_t getEnumerationCount() const;
+
+        com::ComInterface* getInterface() const;
+
         std::vector<const sensor::SensorBoard*> getSensorBoards() const;
         bool isTofEnabled(int idx) const;
         bool isThermalEnabled(int idx) const;
-        size_t getSensorCount() const;
-        size_t getEnumerationCount() const;
 
         bool allTofMeasurementsReady() const;
         bool allTofMeasurementsReady(int &ready_sensors_count) const;
@@ -51,8 +54,8 @@ class SensorBus : public com::ComObserver{
         void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
     private:
-        const BusParams _params;
-        std::vector<std::unique_ptr<sensor::SensorBoard>> _sensor_board_vec;
+        com::ComInterface* _interface;    
+        std::vector<std::unique_ptr<sensor::SensorBoard>> _sensor_vec;
         
         volatile bool _enumerate_flag;
         volatile size_t _enumerate_count;
@@ -61,8 +64,6 @@ class SensorBus : public com::ComObserver{
         size_t _active_thermal_sensors;
         size_t _tof_measurement_count;
         size_t _thermal_measurement_count;
-
-        com::ComInterface* _interface;
 };
 
 }

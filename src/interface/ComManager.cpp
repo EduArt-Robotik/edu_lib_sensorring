@@ -1,5 +1,5 @@
 #include "ComManager.hpp"
-#include "utils/Logger.hpp"
+#include "logger/Logger.hpp"
 
 
 #ifdef USE_SOCKETCAN
@@ -16,14 +16,14 @@ namespace eduart{
 
 namespace com{
 
-ComInterface* ComManager::createInterface(DeviceType type, std::string interface_name, std::size_t sensor_count){
+ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type){
 
     // Default behaviour
-    if (type == DeviceType::UNDEFINED){
+    if (type == InterfaceType::UNDEFINED){
 #if defined(WIN32) || defined(USE_USBTINGO)
-    type = DeviceType::USBTINGO;
+    type = InterfaceType::USBTINGO;
 #else
-    type = DeviceType::SOCKETCAN;
+    type = InterfaceType::SOCKETCAN;
 #endif
     }
 
@@ -33,18 +33,18 @@ ComInterface* ComManager::createInterface(DeviceType type, std::string interface
 
     // Interface does not exist, create a new one
     switch(type){
-        case DeviceType::SOCKETCAN:
+        case InterfaceType::SOCKETCAN:
             #ifdef USE_SOCKETCAN
-                _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count));
+                _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
                 break;
             #else
                 logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a SocketCan interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
                 return nullptr;
             #endif
 
-        case DeviceType::USBTINGO:
+        case InterfaceType::USBTINGO:
             #ifdef USE_USBTINGO
-                _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name, sensor_count));
+                _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
                 break;
             #else
                 logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");

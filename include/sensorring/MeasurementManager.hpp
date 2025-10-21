@@ -1,23 +1,23 @@
 #pragma once
 
-#include "Parameters.hpp"
-#include "MeasurementObserver.hpp"
-
-#include <vector>
-#include <string>
 #include <atomic>
-#include <thread>
 #include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
-namespace eduart{
+#include "MeasurementClient.hpp"
+#include "Parameters.hpp"
+
+namespace eduart {
 
 // Forward declaration
-namespace ring{
-    class SensorRing;
+namespace ring {
+class SensorRing;
 }
 
-
-namespace manager{
+namespace manager {
 
 // Forward declaration
 enum class MeasurementState;
@@ -28,145 +28,144 @@ enum class MeasurementState;
  * @author Hannes Duske
  * @date 25.12.2024
  */
-class MeasurementManager{
-public:
-    /**
-     * Constructor
-     * @param[in] params Parameter structure of the MeasurementManager
-     */
-    MeasurementManager(ManagerParams params);
+class MeasurementManager {
+ public:
+  /**
+   * Constructor
+   * @param[in] params Parameter structure of the MeasurementManager
+   */
+  MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
-    /**
-     * Constructor
-     * @param[in] params Parameter structure of the MeasurementManager
-     * @param[in] observer Observer that is automatically registered before any other internal action. This ensures that no callbacks are missed.
-     */
-    MeasurementManager(ManagerParams params, MeasurementObserver* observer);
+  /**
+   * Destructor
+   */
+  ~MeasurementManager();
 
-    /**
-     * Destructor
-     */
-    ~MeasurementManager();
-    
-    /**
-     * Run one processing cycle of the state machine worker
-     * @return error code
-     */
-    bool measureSome();
+  /**
+   * Run one processing cycle of the state machine worker
+   * @return error code
+   */
+  bool measureSome();
 
-    /**
-     * Start running the state machine worker loop in a thread
-     * @return error code
-     */
-    bool startMeasuring();
+  /**
+   * Start running the state machine worker loop in a thread
+   * @return error code
+   */
+  bool startMeasuring();
 
-    /**
-     * Stop the state machine worker loop and close the thread
-     * @return error code
-     */
-    bool stopMeasuring();
+  /**
+   * Stop the state machine worker loop and close the thread
+   * @return error code
+   */
+  bool stopMeasuring();
 
-    /**
-     * Register an observer with the MeasurementManager object
-     * @param[in] observer Observer that is registered and gets notified on future events
-     */
-    void registerObserver(MeasurementObserver* observer);
+  /**
+   * Register an observer with the MeasurementManager object
+   * @param[in] observer Observer that is registered and gets notified on future events
+   */
+  void registerClient(MeasurementClient* observer);
 
-    /**
-     * Unregister an observer with the MeasurementManager object
-     * @param[in] observer Observer that is unregistered and will not be notified on future events
-     */
-    void unregisterObserver(MeasurementObserver* observer);
-    
-    /**
-     * Get a string representation of the topology of the connected sensors
-     * @return Formatted string describing the topology
-     */
-    std::string printTopology() const;
+  /**
+   * Unregister an observer with the MeasurementManager object
+   * @param[in] observer Observer that is unregistered and will not be notified on future events
+   */
+  void unregisterClient(MeasurementClient* observer);
 
-    /**
-     * Get the health status of the state machine
-     * @return Current worker state
-     */
-    WorkerState getWorkerState() const;
+  /**
+   * Get a string representation of the topology of the connected sensors
+   * @return Formatted string describing the topology
+   */
+  std::string printTopology() const;
 
-    /**
-     * Get the parameters with which the MeasurementManager was initialized
-     * @return Initial parameter struct
-     */
-    ManagerParams getParams() const;
+  /**
+   * Get the health status of the state machine
+   * @return Current worker state
+   */
+  WorkerState getWorkerState() const;
 
-    /**
-     * Enable or disable the Time-of-Flight sensor measurements
-     * @param[in] state enable signal
-     */
-    void enableTofMeasurement(bool state);
+  /**
+   * Get the parameters with which the MeasurementManager was initialized
+   * @return Initial parameter struct
+   */
+  ManagerParams getParams() const;
 
-    /**
-     * Enable or disable the thermal sensor measurements
-     * @param[in] state enable signal
-     */
-    void enableThermalMeasurement(bool state);
+  /**
+   * Enable or disable the Time-of-Flight sensor measurements
+   * @param[in] state enable signal
+   */
+  void enableTofMeasurement(bool state);
 
-    /**
-     * Start a thermal calibration
-     * @param[in] window number of thermal frames used for averaging
-     * @return error code
-     */
-    bool startThermalCalibration(std::size_t window);
+  /**
+   * Enable or disable the thermal sensor measurements
+   * @param[in] state enable signal
+   */
+  void enableThermalMeasurement(bool state);
 
-    /**
-     * Stop any ongoing thermal calibration
-     * @return error code
-     */
-    bool stopThermalCalibration();
+  /**
+   * Start a thermal calibration
+   * @param[in] window number of thermal frames used for averaging
+   * @return error code
+   */
+  bool startThermalCalibration(std::size_t window);
 
-    /**
-     * Set the light mode and color of the sensor ring
-     * @param[in] mode Light mode to set
-     * @param[in] red Red color value
-     * @param[in] green Green color value
-     * @param[in] blue Blue color value
-     * @return true if successful, false otherwise
-     */
-    void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
+  /**
+   * Stop any ongoing thermal calibration
+   * @return error code
+   */
+  bool stopThermalCalibration();
 
-private:
-    void init();
-    void StateMachine();
-    void StateMachineWorker();
-    
-    int  notifyToFData();
-    int  notifyThermalData();
-    void notifyState(const WorkerState state);
-    
-    WorkerState _manager_state;
-    MeasurementState _measurement_state;
-    ManagerParams _params;
-    std::unique_ptr<ring::SensorRing> _sensor_ring;
+  /**
+   * Set the light mode and color of the sensor ring
+   * @param[in] mode Light mode to set
+   * @param[in] red Red color value
+   * @param[in] green Green color value
+   * @param[in] blue Blue color value
+   * @return true if successful, false otherwise
+   */
+  void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
 
-    bool _tof_enabled;
-    bool _thermal_enabled;
-    bool _first_measurement;
-    std::chrono::time_point<std::chrono::steady_clock>  _last_tof_measurement_timestamp_s;
-    std::chrono::time_point<std::chrono::steady_clock>  _last_thermal_measurement_timestamp_s;
+  /**
+   * Factory method to build a MeasurementManager object
+   * @param[in] params Parameter set for the MeasurementManager
+   * @return Fully assembled MeasurementManager object
+   */
+  static std::unique_ptr<MeasurementManager> buildManager(ManagerParams params);
 
-    bool _is_tof_throttled;
-    bool _is_thermal_throttled;
-    bool _thermal_measurement_flag;
-	
-	light::LightMode _light_mode;
-    std::uint8_t _light_color[3];
-    std::uint8_t _light_brightness;
-    std::atomic<bool> _light_update_flag;
-	
-    std::vector<MeasurementObserver*> _observer_vec;
+ private:
+  void init(std::unique_ptr<ring::SensorRing> sensor_ring);
+  void StateMachine();
+  void StateMachineWorker();
 
-    std::atomic<bool> _is_running;
-    std::thread _worker_thread;
+  int notifyToFData();
+  int notifyThermalData();
+  void notifyState(const WorkerState state);
 
+  WorkerState _manager_state;
+  MeasurementState _measurement_state;
+  ManagerParams _params;
+  std::unique_ptr<ring::SensorRing> _sensor_ring;
+
+  bool _tof_enabled;
+  bool _thermal_enabled;
+  bool _first_measurement;
+  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp_s;
+  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp_s;
+
+  bool _is_tof_throttled;
+  bool _is_thermal_throttled;
+  bool _thermal_measurement_flag;
+
+  light::LightMode _light_mode;
+  std::uint8_t _light_color[3];
+  std::uint8_t _light_brightness;
+  std::atomic<bool> _light_update_flag;
+
+  std::vector<MeasurementClient*> _observer_vec;
+
+  std::atomic<bool> _is_running;
+  std::thread _worker_thread;
 };
 
-}
+}  // namespace manager
 
-}
+}  // namespace eduart

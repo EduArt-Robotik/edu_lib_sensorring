@@ -12,6 +12,7 @@ TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::
     _params(params){
 
     _rx_buffer_offset = 0;
+    _interface->addToFSensorToEndpointMap(idx);
     std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 }
 

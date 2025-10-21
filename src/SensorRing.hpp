@@ -13,7 +13,7 @@ namespace ring{
 class SensorRing{
 
 public:
-    SensorRing(RingParams params);
+    SensorRing(RingParams params, std::vector<std::unique_ptr<bus::SensorBus>> bus_vec);
     ~SensorRing();
     
     std::vector<const bus::SensorBus*> getInterfaces() const;
@@ -39,7 +39,7 @@ public:
 private:
 
     const RingParams _params;
-    std::vector<std::unique_ptr<bus::SensorBus>> _sensor_bus_vec;
+    std::vector<std::unique_ptr<bus::SensorBus>> _bus_vec;
 };
 
 }

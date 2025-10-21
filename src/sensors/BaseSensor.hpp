@@ -34,16 +34,13 @@ class BaseSensor : public com::ComObserver{
     protected:
         std::size_t _idx;
         SensorState _error;
+        com::ComEndpoint _target;
+        com::ComInterface* _interface;
 
+        bool _enable_flag;
         bool _new_data_available_flag;
         bool _new_data_in_buffer_flag;
         bool _new_measurement_ready_flag;
-        
-    private:
-        bool _enable_flag;
-
-        com::ComEndpoint _target;
-        com::ComInterface* _interface;
 };
 
 }

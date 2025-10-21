@@ -28,9 +28,8 @@ public:
   /**
    * Constructor
    * @param[in] serial serial number of the USBtingo to use
-   * @param[in] sensor_count number of sensor boards that are connected on this interface
    */
-  USBtingo(std::string serial, std::size_t sensor_count);
+  USBtingo(std::string serial);
 
   /**
    * Destructor
@@ -58,9 +57,20 @@ public:
    */
   bool closeInterface() override;
 
+  /**
+   * Add endpoint for a new tof sensor
+   * @param[in] idx index of the sensor
+   */
+  void addToFSensorToEndpointMap(std::size_t idx) override;
+
+  /**
+   * Add endpoint for a new thermal sensor
+   * @param[in] idx index of the sensor
+   */
+  void addThermalSensorToEndpointMap(std::size_t idx) override;
 private:
 
-  void fillMap(std::size_t sensor_count);
+  void fillEndpointMap();
 
   std::uint32_t mapEndpointToId(ComEndpoint ep);
   

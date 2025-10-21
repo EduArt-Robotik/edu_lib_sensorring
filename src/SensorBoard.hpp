@@ -22,7 +22,7 @@ enum class SensorBoardType{
 
 class SensorBoard{
     public:
-        SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx);
+        SensorBoard(SensorBoardParams params, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
         ~SensorBoard();
 
         SensorBoardType getType() const;
@@ -41,6 +41,7 @@ class SensorBoard{
         const LedLight* getLed() const;
     
     private:
+        SensorBoardParams _params;
         SensorBoardType _sensor_type;
 
         std::unique_ptr<TofSensor>      _tof;

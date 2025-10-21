@@ -29,7 +29,7 @@ class ThermalSensor : public BaseSensor{
 		std::pair<measurement::FalseColorImage, SensorState> getLatestFalseColorImage() const;
 		std::pair<measurement::ThermalMeasurement, SensorState> getLatestMeasurement() const;
 		
-        void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+    void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 		void onClearDataFlag() override;
 
     private:

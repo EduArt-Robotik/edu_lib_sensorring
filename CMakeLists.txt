@@ -160,11 +160,17 @@ install(TARGETS sensorring
 
 # install headers
 install(FILES
+  include/${PROJECT_NAME}/MeasurementClient.hpp  
   include/${PROJECT_NAME}/MeasurementManager.hpp
-  include/${PROJECT_NAME}/MeasurementObserver.hpp
-  include/${PROJECT_NAME}/CustomTypes.hpp
   include/${PROJECT_NAME}/Parameters.hpp
-  include/${PROJECT_NAME}/Math.hpp
+
+  include/${PROJECT_NAME}/logger/Logger.hpp
+  include/${PROJECT_NAME}/logger/LoggerClient.hpp
+
+  include/${PROJECT_NAME}/utils/CustomTypes.hpp
+  include/${PROJECT_NAME}/utils/Math.hpp
+  include/${PROJECT_NAME}/utils/SingletonTemplate.hpp
+  
   DESTINATION include/${PROJECT_NAME}
 )
 

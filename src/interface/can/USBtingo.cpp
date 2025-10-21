@@ -1,7 +1,7 @@
 #include "USBtingo.hpp"
 
 #include "canprotocol.hpp"
-#include "utils/Logger.hpp"
+#include "logger/Logger.hpp"
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 #include <usbtingo/can/Dlc.hpp>
@@ -14,15 +14,15 @@ namespace eduart{
 namespace com
 {
 
-USBtingo::USBtingo(std::string interface_name, std::size_t sensor_count)
+USBtingo::USBtingo(std::string interface_name)
 	: ComInterface(interface_name)
 {
 	if(!openInterface(interface_name)){
 		logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Cannot open interface: " + interface_name);
 	}
 
-	_endpoints = ComEndpoint::createEndpoints(sensor_count);
-	fillMap(sensor_count);
+	_endpoints = ComEndpoint::createEndpoints();
+	fillEndpointMap();
 	startListener();
 }
 
@@ -131,30 +131,37 @@ bool USBtingo::closeInterface()
 	return true;
 }
 
-void USBtingo::fillMap(std::size_t sensor_count){
-	std::uint32_t canid_tof_status, canid_tof_request, canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+void USBtingo::fillEndpointMap(){
+	std::uint32_t canid_tof_status, canid_tof_request, canid_broadcast;
 	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status,  canid_tof_request,  canid_broadcast);
-	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
-	std::uint32_t canid_thermal_status, canid_thermal_request, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+	std::uint32_t canid_thermal_status, canid_thermal_request, canid_thermal_broadcast;
 	CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status,  canid_thermal_request,  canid_thermal_broadcast);
-	CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA,   canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
 	std::uint32_t canid_light_in, canid_light_out, canid_light;
 	CanProtocol::makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
 
-	_id_map[ComEndpoint("tof_status")] 		= canid_tof_status;
-    _id_map[ComEndpoint("tof_request")]		= canid_tof_request;
-    _id_map[ComEndpoint("thermal_status")]	= canid_thermal_status;
-    _id_map[ComEndpoint("thermal_request")]	= canid_thermal_request;
-    _id_map[ComEndpoint("light")]			= canid_light;
-    _id_map[ComEndpoint("broadcast")]		= canid_broadcast;
+	_id_map[ComEndpoint("tof_status")]      = canid_tof_status;
+	_id_map[ComEndpoint("tof_request")]     = canid_tof_request;
+	_id_map[ComEndpoint("thermal_status")]	= canid_thermal_status;
+	_id_map[ComEndpoint("thermal_request")]	= canid_thermal_request;
+	_id_map[ComEndpoint("light")]           = canid_light;
+	_id_map[ComEndpoint("broadcast")]       = canid_broadcast;
 
-	for(std::size_t idx=0; idx<sensor_count; idx++){
-		_id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + idx;
-		_id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + idx;
+}
 
-	}
+void USBtingo::addToFSensorToEndpointMap(std::size_t idx){
+	canid_t canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+	CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA,   canid_tof_data_in, canid_tof_data_out, canid_broadcast);
+
+	_id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + idx;
+}
+
+void USBtingo::addThermalSensorToEndpointMap(std::size_t idx){
+	canid_t canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+	CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA,   canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
+
+	_id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + idx;
 }
 
 std::uint32_t USBtingo::mapEndpointToId(ComEndpoint ep){
