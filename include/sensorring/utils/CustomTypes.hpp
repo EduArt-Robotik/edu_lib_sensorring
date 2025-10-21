@@ -50,22 +50,22 @@ enum class LightMode {
 namespace measurement {
 
 template <typename T, std::size_t RESOLUTION> struct GenericGrayscaleImage {
-  static_assert (std::is_arithmetic<T>::value, "T must be an arithmetic type");
+  static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
   std::array<T, RESOLUTION> data = {};
 
-  double avg ();
-  GenericGrayscaleImage &round ();
-  GenericGrayscaleImage &operator/= (const T other);
-  GenericGrayscaleImage &operator+= (const T other);
-  GenericGrayscaleImage &operator-= (const T other);
-  GenericGrayscaleImage &operator+= (const GenericGrayscaleImage &other);
-  GenericGrayscaleImage &operator-= (const GenericGrayscaleImage &other);
-  template <typename U> GenericGrayscaleImage &operator+= (const GenericGrayscaleImage<U, RESOLUTION> &other);
-  template <typename U> GenericGrayscaleImage &operator-= (const GenericGrayscaleImage<U, RESOLUTION> &other);
+  double avg();
+  GenericGrayscaleImage& round();
+  GenericGrayscaleImage& operator/=(const T other);
+  GenericGrayscaleImage& operator+=(const T other);
+  GenericGrayscaleImage& operator-=(const T other);
+  GenericGrayscaleImage& operator+=(const GenericGrayscaleImage& other);
+  GenericGrayscaleImage& operator-=(const GenericGrayscaleImage& other);
+  template <typename U> GenericGrayscaleImage& operator+=(const GenericGrayscaleImage<U, RESOLUTION>& other);
+  template <typename U> GenericGrayscaleImage& operator-=(const GenericGrayscaleImage<U, RESOLUTION>& other);
 };
 
 template <typename T, std::size_t RESOLUTION> struct GenericRGBImage {
-  static_assert (std::is_arithmetic<T>::value, "T must be an arithmetic type");
+  static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
   std::array<std::array<T, 3>, RESOLUTION> data = {};
 };
 

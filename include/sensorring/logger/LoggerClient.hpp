@@ -33,7 +33,7 @@ public:
    * @param[in] verbosity verbosity level of the log message
    * @param[in] msg       log message string
    */
-  virtual void onOutputLog ([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
+  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
 };
 
 } // namespace logger

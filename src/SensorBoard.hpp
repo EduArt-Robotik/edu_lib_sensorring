@@ -2,10 +2,11 @@
 
 #include <memory>
 
-#include "Parameters.hpp"
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
+
+#include "Parameters.hpp"
 
 namespace eduart {
 
@@ -29,7 +30,7 @@ public:
 
   TofSensor* getTof() const;
   ThermalSensor* getThermal() const;
-  LedLight* getLed()  const;
+  LedLight* getLed() const;
 
 private:
   SensorBoardParams _params;
@@ -48,15 +49,15 @@ inline void SensorBoard::setType(SensorBoardType type) {
   _sensor_type = type;
 }
 
-inline TofSensor* SensorBoard::getTof()  const{
+inline TofSensor* SensorBoard::getTof() const {
   return _tof.get();
 }
 
-inline ThermalSensor* SensorBoard::getThermal()  const{
+inline ThermalSensor* SensorBoard::getThermal() const {
   return _thermal.get();
 }
 
-inline LedLight* SensorBoard::getLed() const{
+inline LedLight* SensorBoard::getLed() const {
   return _leds.get();
 }
 

@@ -9,10 +9,10 @@ namespace sensor {
 
 class LedLight {
 public:
-  LedLight (LightParams params);
-  ~LedLight ();
+  LedLight(LightParams params);
+  ~LedLight();
 
-  const LightParams &getParams () const;
+  const LightParams& getParams() const;
 
 private:
   LightParams _params;

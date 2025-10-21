@@ -13,28 +13,28 @@ namespace ring {
 class SensorRing {
 
 public:
-  SensorRing (RingParams params, std::vector<std::unique_ptr<bus::SensorBus> > bus_vec);
-  ~SensorRing ();
+  SensorRing(RingParams params, std::vector<std::unique_ptr<bus::SensorBus> > bus_vec);
+  ~SensorRing();
 
-  std::vector<const bus::SensorBus *> getInterfaces () const;
+  std::vector<const bus::SensorBus*> getInterfaces() const;
 
-  void setBRS (bool brs_enable);
-  void syncLight ();
-  void setLight (light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
-  void resetDevices ();
-  bool enumerateDevices ();
-  bool getEEPROM ();
-  void requestTofMeasurement ();
-  void fetchTofData ();
-  void requestThermalMeasurement ();
-  void fetchThermalData ();
-  bool stopThermalCalibration ();
-  bool startThermalCalibration (size_t window);
+  void setBRS(bool brs_enable);
+  void syncLight();
+  void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  void resetDevices();
+  bool enumerateDevices();
+  bool getEEPROM();
+  void requestTofMeasurement();
+  void fetchTofData();
+  void requestThermalMeasurement();
+  void fetchThermalData();
+  bool stopThermalCalibration();
+  bool startThermalCalibration(size_t window);
 
-  bool waitForAllTofMeasurementsReady () const;
-  bool waitForAllTofDataTransmissionsComplete () const;
-  bool waitForAllThermalMeasurementsReady () const;
-  bool waitForAllThermalDataTransmissionsComplete () const;
+  bool waitForAllTofMeasurementsReady() const;
+  bool waitForAllTofDataTransmissionsComplete() const;
+  bool waitForAllThermalMeasurementsReady() const;
+  bool waitForAllThermalDataTransmissionsComplete() const;
 
 private:
   const RingParams _params;

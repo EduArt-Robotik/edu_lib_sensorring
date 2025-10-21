@@ -56,29 +56,29 @@ constexpr SensorBoard sensor_taillight = { tof_vl53l8, thermal_none, { 8 } };
 constexpr SensorBoard sensor_sidepanel = { tof_vl53l8, thermal_none, { 2 } };
 constexpr SensorBoard sensor_minipanel = { tof_vl53l8, thermal_none, { 0 } };
 
-inline Tof getToFParameters (TofType tofType) {
+inline Tof getToFParameters(TofType tofType) {
   switch (tofType) {
   case TofType::None:
     return tof_none;
   case TofType::VL53L8:
     return tof_vl53l8;
   default:
-    throw std::invalid_argument ("Unknown ToF sensor type");
+    throw std::invalid_argument("Unknown ToF sensor type");
   }
 }
 
-inline Thermal getThermalParameters (ThermalType thermalType) {
+inline Thermal getThermalParameters(ThermalType thermalType) {
   switch (thermalType) {
   case ThermalType::None:
     return thermal_none;
   case ThermalType::HTPA32:
     return thermal_htpa32;
   default:
-    throw std::invalid_argument ("Unknown thermal sensor type");
+    throw std::invalid_argument("Unknown thermal sensor type");
   }
 }
 
-inline SensorBoard getBoardParameters (BoardType boardType) {
+inline SensorBoard getBoardParameters(BoardType boardType) {
   switch (boardType) {
   case BoardType::Undefined:
     return sensor_undefined;
@@ -96,7 +96,7 @@ inline SensorBoard getBoardParameters (BoardType boardType) {
     return sensor_minipanel;
 
   default:
-    throw std::invalid_argument ("Unknown sensor board type");
+    throw std::invalid_argument("Unknown sensor board type");
   }
 };
 

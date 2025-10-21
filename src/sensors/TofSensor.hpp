@@ -1,11 +1,12 @@
 #pragma once
 
+#include <utility>
+#include <vector>
+
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
 #include "Math.hpp"
 #include "Parameters.hpp"
-#include <utility>
-#include <vector>
 
 #define TOF_RESOLUTION 64
 
@@ -41,20 +42,20 @@ static const double lut_tan_y[] = {
 
 class TofSensor : public BaseSensor {
 public:
-  TofSensor (TofSensorParams params, com::ComInterface *interface, std::size_t idx);
-  ~TofSensor ();
+  TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
+  ~TofSensor();
 
-  const TofSensorParams &getParams () const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestRawMeasurement () const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement () const;
+  const TofSensorParams& getParams() const;
+  std::pair<measurement::TofMeasurement, SensorState> getLatestRawMeasurement() const;
+  std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement() const;
 
-  void canCallback (const com::ComEndpoint source, const std::vector<uint8_t> &data) override;
-  void onClearDataFlag () override;
+  void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void onClearDataFlag() override;
 
-  static measurement::TofMeasurement transformTofMeasurements (const measurement::TofMeasurement &measurement, const math::Matrix3 rotation, const math::Vector3 translation);
+  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
-  measurement::TofMeasurement processMeasurement (int frame_id, uint8_t *data, int len) const;
+  measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
   const math::Matrix3 _rot_m;
   const TofSensorParams _params;

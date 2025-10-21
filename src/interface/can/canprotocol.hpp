@@ -129,8 +129,8 @@ namespace com {
 
 class CanProtocol {
 public:
-  CanProtocol () = delete;
-  static void makeCanStdID (canid_t sysID, canid_t nodeID, canid_t &inputAddress, canid_t &outputAddress, canid_t &broadcastAddress);
+  CanProtocol() = delete;
+  static void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
 };
 
 }
