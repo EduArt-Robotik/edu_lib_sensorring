@@ -28,7 +28,7 @@ enum class Orientation {
  * @brief Parameter structure of the sensor lights of a sensor board.
  */
 struct LightParams {
-  bool enable = false;
+  bool enable             = false;
   Orientation orientation = Orientation::none;
 };
 
@@ -38,18 +38,18 @@ struct LightParams {
  * sensor boards have thermal sensors.
  */
 struct ThermalSensorParams {
-  int user_idx = 0;
-  bool enable = false;
-  double t_min_deg_c = 0;
-  double t_max_deg_c = 0;
-  bool auto_min_max = false;
-  bool use_eeprom_file = false;
-  bool use_calibration_file = false;
-  std::string eeprom_dir = "";
+  int user_idx                = 0;
+  bool enable                 = false;
+  double t_min_deg_c          = 0;
+  double t_max_deg_c          = 0;
+  bool auto_min_max           = false;
+  bool use_eeprom_file        = false;
+  bool use_calibration_file   = false;
+  std::string eeprom_dir      = "";
   std::string calibration_dir = "";
-  math::Vector3 rotation = {0, 0, 0};
-  math::Vector3 translation = {0, 0, 0};
-  Orientation orientation = Orientation::none;
+  math::Vector3 rotation      = { 0, 0, 0 };
+  math::Vector3 translation   = { 0, 0, 0 };
+  Orientation orientation     = Orientation::none;
 };
 
 /**
@@ -57,10 +57,10 @@ struct ThermalSensorParams {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct TofSensorParams {
-  int user_idx = 0;
-  bool enable = false;
-  math::Vector3 rotation = {0, 0, 0};
-  math::Vector3 translation = {0, 0, 0};
+  int user_idx              = 0;
+  bool enable               = false;
+  math::Vector3 rotation    = { 0, 0, 0 };
+  math::Vector3 translation = { 0, 0, 0 };
 };
 
 /**
@@ -69,14 +69,14 @@ struct TofSensorParams {
  * board.
  */
 struct SensorBoardParams {
-  math::Vector3 rotation = {0, 0, 0};
-  math::Vector3 translation = {0, 0, 0};
+  math::Vector3 rotation    = { 0, 0, 0 };
+  math::Vector3 translation = { 0, 0, 0 };
   LightParams led_params;
   TofSensorParams tof_params;
   ThermalSensorParams thermal_params;
 };
 
-}  // namespace sensor
+} // namespace sensor
 
 namespace bus {
 
@@ -92,7 +92,7 @@ struct BusParams {
   std::vector<sensor::SensorBoardParams> board_param_vec;
 };
 
-}  // namespace bus
+} // namespace bus
 
 namespace ring {
 
@@ -107,7 +107,7 @@ struct RingParams {
   std::vector<bus::BusParams> bus_param_vec;
 };
 
-}  // namespace ring
+} // namespace ring
 
 namespace manager {
 
@@ -118,13 +118,13 @@ namespace manager {
  * state machine. One measurement manager manages exactly one sensor ring.
  */
 struct ManagerParams {
-  bool enable_brs = false;
-  bool print_topology = false;
-  double frequency_tof_hz = 0.0;
+  bool enable_brs             = false;
+  bool print_topology         = false;
+  double frequency_tof_hz     = 0.0;
   double frequency_thermal_hz = 1.0;
   ring::RingParams ring_params;
 };
 
-}  // namespace manager
+} // namespace manager
 
-}  // namespace eduart
+} // namespace eduart

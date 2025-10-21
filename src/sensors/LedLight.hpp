@@ -3,22 +3,22 @@
 #include "BaseSensor.hpp"
 #include "Parameters.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace sensor{
+namespace sensor {
 
-class LedLight{
-    public:
-        LedLight(LightParams params);
-        ~LedLight();
-    
-        const LightParams& getParams() const;
+class LedLight {
+public:
+  LedLight (LightParams params);
+  ~LedLight ();
 
-    private:
-        LightParams _params;
+  const LightParams &getParams () const;
 
-        int _canid_in;
-        int _canid_out;
+private:
+  LightParams _params;
+
+  int _canid_in;
+  int _canid_out;
 };
 
 }

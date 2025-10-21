@@ -12,7 +12,12 @@ namespace logger {
  * @author Hannes Duske
  * @date 25.12.2024
  */
-enum class LogVerbosity { Debug, Info, Warning, Error };
+enum class LogVerbosity {
+  Debug,
+  Info,
+  Warning,
+  Error
+};
 
 /**
  * @class LoggerClient
@@ -22,15 +27,15 @@ enum class LogVerbosity { Debug, Info, Warning, Error };
  * @date 25.12.2024
  */
 class LoggerClient {
- public:
+public:
   /**
    * Callback method for the log output of the sensorring library
    * @param[in] verbosity verbosity level of the log message
    * @param[in] msg       log message string
    */
-  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
+  virtual void onOutputLog ([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
 };
 
-}  // namespace logger
+} // namespace logger
 
-}  // namespace eduart
+} // namespace eduart

@@ -1,19 +1,18 @@
 #include "LedLight.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace sensor{
+namespace sensor {
 
-LedLight::LedLight(LightParams params){
-    _params = params;
+LedLight::LedLight (LightParams params) {
+  _params = params;
 }
 
-LedLight::~LedLight(){
-
+LedLight::~LedLight () {
 }
 
-const LightParams& LedLight::getParams() const{
-    return _params;
+const LightParams &LedLight::getParams () const {
+  return _params;
 }
 
 }

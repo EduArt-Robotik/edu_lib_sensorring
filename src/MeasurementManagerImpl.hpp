@@ -27,88 +27,85 @@ public:
    * Constructor
    * @param[in] params Parameter structure of the MeasurementManager
    */
-  MeasurementManagerImpl(ManagerParams params,
-                         std::unique_ptr<ring::SensorRing> sensor_ring);
+  MeasurementManagerImpl (ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
   /**
    * Destructor
    */
-  ~MeasurementManagerImpl();
+  ~MeasurementManagerImpl ();
 
   /**
    * Run one processing cycle of the state machine worker
    * @return error code
    */
-  bool measureSome();
+  bool measureSome ();
 
   /**
    * Start running the state machine worker loop in a thread
    * @return error code
    */
-  bool startMeasuring();
+  bool startMeasuring ();
 
   /**
    * Stop the state machine worker loop and close the thread
    * @return error code
    */
-  bool stopMeasuring();
+  bool stopMeasuring ();
 
   /**
    * Register an observer with the MeasurementManager object
-   * @param[in] observer Observer that is registered and gets notified on future
-   * events
+   * @param[in] observer Observer that is registered and gets notified on future events
    */
-  void registerClient(MeasurementClient *observer);
+  void registerClient (MeasurementClient *observer);
 
   /**
    * Unregister an observer with the MeasurementManager object
-   * @param[in] observer Observer that is unregistered and will not be notified
-   * on future events
+   * @param[in] observer Observer that is unregistered and will not be notified on future events
    */
-  void unregisterClient(MeasurementClient *observer);
+  void unregisterClient (MeasurementClient *observer);
 
   /**
    * Get a string representation of the topology of the connected sensors
    * @return Formatted string describing the topology
    */
-  std::string printTopology() const;
+  std::string printTopology () const;
 
   /**
    * Get the health status of the state machine
    * @return Current worker state
    */
-  WorkerState getWorkerState() const;
+  WorkerState getWorkerState () const;
 
   /**
    * Get the parameters with which the MeasurementManager was initialized
    * @return Initial parameter struct
    */
-  ManagerParams getParams() const;
+  ManagerParams getParams () const;
 
   /**
    * Enable or disable the Time-of-Flight sensor measurements
    * @param[in] state enable signal
    */
-  void enableTofMeasurement(bool state);
+  void enableTofMeasurement (bool state);
 
   /**
    * Enable or disable the thermal sensor measurements
    * @param[in] state enable signal
    */
-  void enableThermalMeasurement(bool state);
+  void enableThermalMeasurement (bool state);
 
   /**
    * Start a thermal calibration
    * @param[in] window number of thermal frames used for averaging
    * @return error code
    */
-  bool startThermalCalibration(std::size_t window);
+  bool startThermalCalibration (std::size_t window);
 
   /**
    * Stop any ongoing thermal calibration
    * @return error code
    */
-  bool stopThermalCalibration();
+  bool stopThermalCalibration ();
 
   /**
    * Set the light mode and color of the sensor ring
@@ -118,8 +115,7 @@ public:
    * @param[in] blue Blue color value
    * @return true if successful, false otherwise
    */
-  void setLight(light::LightMode mode, std::uint8_t red = 0,
-                std::uint8_t green = 0, std::uint8_t blue = 0);
+  void setLight (light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
 
 private:
   enum class MeasurementState {
@@ -140,13 +136,13 @@ private:
     shutdown
   };
 
-  void init(std::unique_ptr<ring::SensorRing> sensor_ring);
-  void StateMachine();
-  void StateMachineWorker();
+  void init (std::unique_ptr<ring::SensorRing> sensor_ring);
+  void StateMachine ();
+  void StateMachineWorker ();
 
-  int notifyToFData();
-  int notifyThermalData();
-  void notifyState(const WorkerState state);
+  int notifyToFData ();
+  int notifyThermalData ();
+  void notifyState (const WorkerState state);
 
   WorkerState _manager_state;
   MeasurementState _measurement_state;
@@ -156,10 +152,8 @@ private:
   bool _tof_enabled;
   bool _thermal_enabled;
   bool _first_measurement;
-  std::chrono::time_point<std::chrono::steady_clock>
-      _last_tof_measurement_timestamp_s;
-  std::chrono::time_point<std::chrono::steady_clock>
-      _last_thermal_measurement_timestamp_s;
+  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp_s;
+  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp_s;
 
   bool _is_tof_throttled;
   bool _is_thermal_throttled;

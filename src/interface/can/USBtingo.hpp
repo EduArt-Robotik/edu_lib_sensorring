@@ -1,20 +1,20 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <memory>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include <usbtingo/basic_bus/BasicBus.hpp>
 
 #include "interface/ComInterface.hpp"
 #include "interface/ComObserver.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace com{
+namespace com {
 
 /**
  * @class USBtingo
@@ -22,26 +22,25 @@ namespace com{
  * @author Hannes Duske
  * @date 29.01.2025
  */
-class USBtingo : public ComInterface
-{
+class USBtingo : public ComInterface {
 public:
   /**
    * Constructor
    * @param[in] serial serial number of the USBtingo to use
    */
-  USBtingo(std::string serial);
+  USBtingo (std::string serial);
 
   /**
    * Destructor
    */
-  ~USBtingo();
+  ~USBtingo ();
 
   /**
    * Open CAN interface.
    * @param[in] interface_name CAN interface name specified with slcand.
    * @return success==true
    */
-  bool openInterface(std::string interface_name) override;
+  bool openInterface (std::string interface_name) override;
 
   /**
    * Send generic communication messsage.
@@ -49,36 +48,36 @@ public:
    * @param[in] data Message payload.
    * @return success==true
    */
-  bool send(ComEndpoint target, const std::vector<uint8_t>& data) override;
+  bool send (ComEndpoint target, const std::vector<uint8_t> &data) override;
 
   /**
    * Close device file link.
    * @return success==true
    */
-  bool closeInterface() override;
+  bool closeInterface () override;
 
   /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
-  void addToFSensorToEndpointMap(std::size_t idx) override;
+  void addToFSensorToEndpointMap (std::size_t idx) override;
 
   /**
    * Add endpoint for a new thermal sensor
    * @param[in] idx index of the sensor
    */
-  void addThermalSensorToEndpointMap(std::size_t idx) override;
+  void addThermalSensorToEndpointMap (std::size_t idx) override;
+
 private:
+  void fillEndpointMap ();
 
-  void fillEndpointMap();
+  std::uint32_t mapEndpointToId (ComEndpoint ep);
 
-  std::uint32_t mapEndpointToId(ComEndpoint ep);
-  
-  ComEndpoint mapIdToEndpoint(std::uint32_t id);
+  ComEndpoint mapIdToEndpoint (std::uint32_t id);
 
   std::map<ComEndpoint, std::uint32_t> _id_map;
 
-  bool listener() override;
+  bool listener () override;
 
   std::unique_ptr<usbtingo::device::Device> _dev;
 };
