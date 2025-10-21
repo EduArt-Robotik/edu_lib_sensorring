@@ -76,6 +76,7 @@ find_package(Threads REQUIRED)
 # declare library
 add_library(sensorring
   src/MeasurementManager.cpp
+  src/MeasurementManagerImpl.cpp
   src/SensorRing.cpp
   src/SensorBus.cpp
   src/SensorBoard.cpp

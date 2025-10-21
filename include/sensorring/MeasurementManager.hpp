@@ -1,23 +1,22 @@
 #pragma once
 
-#include <atomic>
-#include <chrono>
 #include <memory>
 #include <string>
-#include <thread>
-#include <vector>
 
 #include "MeasurementClient.hpp"
+#include "CustomTypes.hpp"
 #include "Parameters.hpp"
 
 namespace eduart {
 
-// Forward declaration
 namespace ring {
 class SensorRing;
 }
 
 namespace manager {
+
+// Forward declaration of implementation class
+class MeasurementManagerImpl;
 
 // Forward declaration
 enum class MeasurementState;
@@ -30,12 +29,6 @@ enum class MeasurementState;
  */
 class MeasurementManager {
  public:
-  /**
-   * Constructor
-   * @param[in] params Parameter structure of the MeasurementManager
-   */
-  MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
-
   /**
    * Destructor
    */
@@ -132,38 +125,9 @@ class MeasurementManager {
   static std::unique_ptr<MeasurementManager> buildManager(ManagerParams params);
 
  private:
-  void init(std::unique_ptr<ring::SensorRing> sensor_ring);
-  void StateMachine();
-  void StateMachineWorker();
+  MeasurementManager(std::unique_ptr<MeasurementManagerImpl> mm_impl);
 
-  int notifyToFData();
-  int notifyThermalData();
-  void notifyState(const WorkerState state);
-
-  WorkerState _manager_state;
-  MeasurementState _measurement_state;
-  ManagerParams _params;
-  std::unique_ptr<ring::SensorRing> _sensor_ring;
-
-  bool _tof_enabled;
-  bool _thermal_enabled;
-  bool _first_measurement;
-  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp_s;
-  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp_s;
-
-  bool _is_tof_throttled;
-  bool _is_thermal_throttled;
-  bool _thermal_measurement_flag;
-
-  light::LightMode _light_mode;
-  std::uint8_t _light_color[3];
-  std::uint8_t _light_brightness;
-  std::atomic<bool> _light_update_flag;
-
-  std::vector<MeasurementClient*> _observer_vec;
-
-  std::atomic<bool> _is_running;
-  std::thread _worker_thread;
+  std::unique_ptr<MeasurementManagerImpl> _mm_impl;
 };
 
 }  // namespace manager
