@@ -2,21 +2,21 @@
 
 #include "ComEndpoints.hpp"
 #include "ComObserver.hpp"
-#include "utils/SingletonTemplate.hpp"
 
 #include <vector>
 #include <cstdint>
 #include <thread>
 #include <string>
 #include <atomic>
+#include <mutex>
 
-using LockGuard = std::lock_guard<std::mutex>;
 
 namespace eduart{
 
 namespace com{
 
-class ComInterface/* : public Singleton<ComInterface>*/{
+class ComInterface{
+
 public:
 
 	/**
@@ -91,7 +91,22 @@ public:
 	 */
   	virtual bool closeInterface() = 0;
 
+  /**
+   * Add endpoint for a new tof sensor
+   * @param[in] idx index of the sensor
+   */
+  virtual void addToFSensorToEndpointMap(std::size_t idx) = 0;
+
+  /**
+   * Add endpoint for a new thermal sensor
+   * @param[in] idx index of the sensor
+   */
+  virtual void addThermalSensorToEndpointMap(std::size_t idx) = 0;
+
 protected:
+
+	using LockGuard = std::lock_guard<std::mutex>;
+
 	virtual bool listener() = 0;
 
 	std::atomic<bool> _listenerIsRunning;

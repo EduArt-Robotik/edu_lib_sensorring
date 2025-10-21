@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "SingletonTemplate.hpp"
-#include "MeasurementObserver.hpp"
+#include "LoggerClient.hpp"
 
 namespace eduart{
 
@@ -15,8 +15,8 @@ class Logger : public Singleton<Logger>{
     public:
         ~Logger() = default;
 
-        void registerObserver(manager::MeasurementObserver* observer);
-        void unregisterObserver(manager::MeasurementObserver* observer);
+        void registerClient(logger::LoggerClient* observer);
+        void unregisterClient(logger::LoggerClient* observer);
 
         void log(const LogVerbosity verbosity, const std::string msg);
         void log(const LogVerbosity verbosity, const std::stringstream msg);
@@ -25,7 +25,7 @@ class Logger : public Singleton<Logger>{
         friend class Singleton<Logger>;
         Logger() = default;
 
-        std::vector<manager::MeasurementObserver*> _observer_vec;
+        std::vector<logger::LoggerClient*> _observer_vec;
 
 };
 

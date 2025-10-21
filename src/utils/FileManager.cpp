@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <cstdlib>
 
-#include "Logger.hpp"
+#include "logger/Logger.hpp"
 
 namespace eduart{
 

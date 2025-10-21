@@ -1,6 +1,5 @@
 #include "ComInterface.hpp"
 #include <algorithm>
-#include <iostream>
 
 namespace eduart{
 

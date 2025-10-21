@@ -1,4 +1,4 @@
-#include "Logger.hpp"
+#include "logger/Logger.hpp"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@ namespace eduart{
 
 namespace logger{
 
-void Logger::registerObserver(manager::MeasurementObserver* observer){
+void Logger::registerClient(logger::LoggerClient* observer){
     if(observer && std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end())
 	{
 		logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
@@ -16,7 +16,7 @@ void Logger::registerObserver(manager::MeasurementObserver* observer){
 	logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
 }
 
-void Logger::unregisterObserver(manager::MeasurementObserver* observer){
+void Logger::unregisterClient(logger::LoggerClient* observer){
 	if(observer)
 	{
 		const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);

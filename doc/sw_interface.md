@@ -19,7 +19,7 @@ The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp
      * @param[in] params Parameter structure of the MeasurementManager
      * @param[in] observer Observer that is automatically registered before any other internal action. This ensures that no callbacks are missed.
      */
-    MeasurementManager(ManagerParams params, MeasurementObserver* observer);
+    MeasurementManager(ManagerParams params, MeasurementClient* observer);
 ```
 
 ```
@@ -58,7 +58,7 @@ The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp
      * Register an observer with the MeasurementManager object
      * @param[in] observer Observer that is registered and gets notified on future events
      */
-    void registerObserver(MeasurementObserver* observer);
+    void registerObserver(MeasurementClient* observer);
 ```
 
 ``` 
@@ -119,8 +119,57 @@ The header [MeasurementManager.hpp](../include/sensorring/MeasurementManager.hpp
 ```
 
 
-## MeasurementObserver.hpp
-The header [MeasurementObserver.hpp](../include/sensorring/MeasurementObserver.hpp) defines the class `manager::MeasurementObserver`. This class defines virtual callback methods to handle new measurements and log messages. To receive these new values a subclass of the MeasurementObserver must implement the callback methods.
+## MeasurementClient.hpp
+The header [MeasurementClient.hpp](../include/sensorring/MeasurementClient.hpp) defines the class `manager::MeasurementClient`. This class defines virtual callback methods to handle new measurements. To receive these new values a subclass of the MeasurementClient must implement the callback methods.
+
+```
+    /**
+     * Callback method for state changes of the state machine worker
+     * @param[in] status the new status of the state machine worker
+     */
+    virtual void onStateChange([[maybe_unused]] const WorkerState status) {};
+```
+
+```
+    /**
+     * Callback method for the log output of the sensorring library
+     * @param[in] verbosity verbosity level of the log message
+     * @param[in] msg       log message string
+     */
+    virtual void onOutputLog([[maybe_unused]] const LogVerbosity verbosity, [[maybe_unused]] const std::string msg) {};
+```
+
+```
+  /**
+   * Callback method for new Time-of-Flight sensor measurements. Returns a
+   * vector of the raw measurements per sensor.
+   * @param[in] measurement_vec the most recent Time-of-Flight sensor
+   * measurements in the individual sensor coordinate frames
+   */
+  virtual void onRawTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
+```
+
+```
+  /**
+   * Callback method for new Time-of-Flight sensor measurements.  Returns a
+   * vector of the transformed measurements per sensor.
+   * @param[in] measurement_vec the most recent Time-of-Flight sensor
+   * measurements in the common transformed coordinate frame
+   */
+  virtual void onTransformedTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
+```
+
+```
+    /**
+     * Callback method for new thermal sensor measurements. Returns one individual measurements of each thermal sensor.
+     * @param[in] idx the index of the thermal sensor that that recorded the measurement. Index starts at zero (0) for the first thermal sensor and only counts active thermal sensors.
+     * @param[in] measurement the most recent thermal sensor measurement of the specified sensor
+     */
+    virtual void onThermalMeasurement([[maybe_unused]] const std::size_t idx, [[maybe_unused]] const measurement::ThermalMeasurement measurement) {};
+```
+
+## LoggerClient.hpp
+The header [LoggerClient.hpp](../include/sensorring/logger/LoggerClient.hpp) defines the class `manager::LoggerClient`. This class defines a virtual callback method to handle log messages. To receive these messages a subclass of the LoggerClient must implement the callback method.
 
 ```
     /**
