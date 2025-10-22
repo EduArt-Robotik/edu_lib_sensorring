@@ -1,19 +1,22 @@
 #pragma once
 
+#include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "LoggerClient.hpp"
-#include "SingletonTemplate.hpp"
 
 namespace eduart {
 
 namespace logger {
 
-class Logger : public Singleton<Logger> {
+class Logger {
 public:
   ~Logger() = default;
+
+  static Logger* getInstance();
 
   void registerClient(logger::LoggerClient* observer);
   void unregisterClient(logger::LoggerClient* observer);
@@ -22,8 +25,10 @@ public:
   void log(const LogVerbosity verbosity, const std::stringstream msg) const;
 
 private:
-  friend class Singleton<Logger>;
   Logger() = default;
+
+  static std::once_flag _initInstanceFlag;
+  static std::unique_ptr<Logger> _instance;
 
   std::vector<logger::LoggerClient*> _observer_vec;
 };

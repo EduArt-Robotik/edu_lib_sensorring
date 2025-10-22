@@ -165,7 +165,6 @@ install(FILES
 
   include/${PROJECT_NAME}/utils/CustomTypes.hpp
   include/${PROJECT_NAME}/utils/Math.hpp
-  include/${PROJECT_NAME}/utils/SingletonTemplate.hpp
   
   DESTINATION include/${PROJECT_NAME}
 )
