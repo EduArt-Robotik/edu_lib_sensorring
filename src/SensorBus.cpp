@@ -19,8 +19,8 @@ namespace bus {
 SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec)
     : _interface(interface)
     , _sensor_vec(std::move(board_vec))
-    , _enumerate_flag(false)
-    , _enumerate_count(0)
+    , _enumeration_flag(false)
+    , _enumeration_count(0)
     , _active_tof_sensors(0)
     , _active_thermal_sensors(0)
     , _tof_measurement_count(0)
@@ -72,7 +72,7 @@ size_t SensorBus::getSensorCount() const {
 }
 
 size_t SensorBus::getEnumerationCount() const {
-  return _enumerate_count;
+  return _enumeration_count;
 }
 
 void SensorBus::setBRS(bool brs_enable) {
@@ -102,23 +102,23 @@ void SensorBus::resetDevices() {
 }
 
 int SensorBus::enumerateDevices() {
-  _enumerate_flag  = true;
-  _enumerate_count = 0;
+  _enumeration_flag  = true;
+  _enumeration_count = 0;
 
   std::vector<uint8_t> tx_buf = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
   _interface->send(com::ComEndpoint("broadcast"), tx_buf);
 
   // wait until all sensors sent their response. 100 ms timeout
   unsigned int watchdog = 0;
-  while (_enumerate_count < getSensorCount() && watchdog < 1e3) {
+  while (_enumeration_count < getSensorCount() && watchdog < 1e3) {
     watchdog += 1;
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 
   // wait a little longer in case there are more sensors than specified
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  _enumerate_flag = false;
-  return _enumerate_count;
+  _enumeration_flag = false;
+  return _enumeration_count;
 }
 
 void SensorBus::requestEEPROM() {
@@ -305,38 +305,19 @@ bool SensorBus::startThermalCalibration(size_t window) {
   return success;
 }
 
-void SensorBus::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  // general sensor board status
-  if (source == com::ComEndpoint("broadcast")) {
-    // enumeration message
-    if (data[0] == CMD_ACTIVE_DEVICE_RESPONSE && data.size() == 3 && _enumerate_flag) {
-      _enumerate_count++;
+void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
 
-      size_t idx = data[1] - 1;
-      if (idx < getSensorCount()) {
-        if (data[2] == 0)
-          _sensor_vec[idx]->setType(sensor::SensorBoardType::sidepanel);
-        if (data[2] == 1)
-          _sensor_vec[idx]->setType(sensor::SensorBoardType::headlight);
-        if (data[2] == 2)
-          _sensor_vec[idx]->setType(sensor::SensorBoardType::taillight);
-        if (data[2] == 3)
-          _sensor_vec[idx]->setType(sensor::SensorBoardType::minipanel);
-      }
+  if (source == com::ComEndpoint("broadcast")) { // general sensor board status
+    // enumeration message
+    if (_enumeration_flag && data.size() == 3  && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
+      _enumeration_count++;
     }
 
-    // tof sensor status
-  } else if (source == com::ComEndpoint("tof_status")) {
-    // tof measurement finished
-    // if(data.size() == 1){
-    //    _tof_measurement_count ++;
-    //}
+  } else if (source == com::ComEndpoint("tof_status")) { // tof sensor status
 
-    // thermal sensor status
-  } else if (source == com::ComEndpoint("thermal_status")) {
+  } else if (source == com::ComEndpoint("thermal_status")) { // thermal sensor status
   }
 }
-
 }
 
 }
