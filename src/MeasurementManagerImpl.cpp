@@ -333,7 +333,7 @@ void MeasurementManagerImpl::StateMachine() {
     ============================================= */
 
   case MeasurementState::init: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManagerImpl state machine");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager state machine");
 
     // state transition
     _measurement_state = MeasurementState::reset_sensors;

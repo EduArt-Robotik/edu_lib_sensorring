@@ -18,8 +18,8 @@ public:
   void registerClient(logger::LoggerClient* observer);
   void unregisterClient(logger::LoggerClient* observer);
 
-  void log(const LogVerbosity verbosity, const std::string msg);
-  void log(const LogVerbosity verbosity, const std::stringstream msg);
+  void log(const LogVerbosity verbosity, const std::string msg) const;
+  void log(const LogVerbosity verbosity, const std::stringstream msg) const;
 
 private:
   friend class Singleton<Logger>;

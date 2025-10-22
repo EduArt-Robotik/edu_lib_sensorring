@@ -84,12 +84,12 @@ add_library(sensorring
   src/interface/ComManager.cpp
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
+  src/logger/Logger.cpp
   src/sensors/TofSensor.cpp
   src/sensors/ThermalSensor.cpp
   src/sensors/LedLight.cpp
   src/sensors/BaseSensor.cpp
   src/utils/Math.cpp
-  src/utils/Logger.cpp
   src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
 )
@@ -112,12 +112,7 @@ target_sources(sensorring PRIVATE ${SOURCES})
 # library includes
 target_include_directories(sensorring PRIVATE
   include/${PROJECT_NAME}
-  include/${PROJECT_NAME}/boardmanager
-  include/${PROJECT_NAME}/interface
-  include/${PROJECT_NAME}/interface/can
-  include/${PROJECT_NAME}/math
-  include/${PROJECT_NAME}/sensors
-  include/${PROJECT_NAME}/types
+  include/${PROJECT_NAME}/logger
   include/${PROJECT_NAME}/utils
 )
 
