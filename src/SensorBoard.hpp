@@ -1,52 +1,65 @@
 #pragma once
 
-#include "Parameters.hpp"
-#include "interface/ComInterface.hpp"
-#include "sensors/TofSensor.hpp"
-#include "sensors/ThermalSensor.hpp"
-#include "sensors/LedLight.hpp"
-
 #include <memory>
 
-namespace eduart{
+#include "sensors/LedLight.hpp"
+#include "sensors/ThermalSensor.hpp"
+#include "sensors/TofSensor.hpp"
 
-namespace sensor{
+#include "Parameters.hpp"
 
-enum class SensorBoardType{
-    headlight,
-    taillight,
-    sidepanel,
-    minipanel,
-    unknown
+namespace eduart {
+
+namespace sensor {
+
+enum class SensorBoardType {
+  headlight,
+  taillight,
+  sidepanel,
+  minipanel,
+  unknown
 };
 
-class SensorBoard{
-    public:
-        SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx);
-        ~SensorBoard();
+class SensorBoard {
+public:
+  SensorBoard(SensorBoardParams params, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
+  ~SensorBoard();
 
-        SensorBoardType getType() const;
-        void setType(SensorBoardType type);
+  inline SensorBoardType getType() const;
+  inline void setType(SensorBoardType type);
 
-        //void tofSetEnable(bool enable);
-        //void thermalSetEnable(bool enable);
-        void tofClearDataFlag();
-        void thermalClearDataFlag();
-        void thermalReadEEPROM();
-        bool thermalStopCalibration();
-        bool thermalStartCalibration(size_t window);
+  TofSensor* getTof() const;
+  ThermalSensor* getThermal() const;
+  LedLight* getLed() const;
 
-        const TofSensor* getTof() const;
-        const ThermalSensor* getThermal() const;
-        const LedLight* getLed() const;
-    
-    private:
-        SensorBoardType _sensor_type;
+private:
+  SensorBoardParams _params;
+  SensorBoardType _sensor_type;
 
-        std::unique_ptr<TofSensor>      _tof;
-        std::unique_ptr<ThermalSensor>  _thermal;
-        std::unique_ptr<LedLight>       _leds;
+  std::unique_ptr<TofSensor> _tof;
+  std::unique_ptr<ThermalSensor> _thermal;
+  std::unique_ptr<LedLight> _leds;
 };
+
+inline SensorBoardType SensorBoard::getType() const {
+  return _sensor_type;
+}
+
+inline void SensorBoard::setType(SensorBoardType type) {
+  _sensor_type = type;
+}
+
+inline TofSensor* SensorBoard::getTof() const {
+  return _tof.get();
+}
+
+inline ThermalSensor* SensorBoard::getThermal() const {
+  return _thermal.get();
+}
+
+inline LedLight* SensorBoard::getLed() const {
+  return _leds.get();
+}
 
 }
 

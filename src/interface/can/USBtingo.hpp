@@ -1,20 +1,16 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <memory>
 #include <map>
-
+#include <memory>
+#include <string>
 #include <usbtingo/basic_bus/BasicBus.hpp>
+#include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "interface/ComObserver.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace com{
+namespace com {
 
 /**
  * @class USBtingo
@@ -22,15 +18,13 @@ namespace com{
  * @author Hannes Duske
  * @date 29.01.2025
  */
-class USBtingo : public ComInterface
-{
+class USBtingo : public ComInterface {
 public:
   /**
    * Constructor
    * @param[in] serial serial number of the USBtingo to use
-   * @param[in] sensor_count number of sensor boards that are connected on this interface
    */
-  USBtingo(std::string serial, std::size_t sensor_count);
+  USBtingo(std::string serial);
 
   /**
    * Destructor
@@ -58,12 +52,23 @@ public:
    */
   bool closeInterface() override;
 
-private:
+  /**
+   * Add endpoint for a new tof sensor
+   * @param[in] idx index of the sensor
+   */
+  void addToFSensorToEndpointMap(std::size_t idx) override;
 
-  void fillMap(std::size_t sensor_count);
+  /**
+   * Add endpoint for a new thermal sensor
+   * @param[in] idx index of the sensor
+   */
+  void addThermalSensorToEndpointMap(std::size_t idx) override;
+
+private:
+  void fillEndpointMap();
 
   std::uint32_t mapEndpointToId(ComEndpoint ep);
-  
+
   ComEndpoint mapIdToEndpoint(std::uint32_t id);
 
   std::map<ComEndpoint, std::uint32_t> _id_map;

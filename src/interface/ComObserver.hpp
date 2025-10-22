@@ -1,14 +1,13 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <chrono>
+#include <vector>
+
 #include "ComEndpoints.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace com
-{
+namespace com {
 
 /**
  * @class ComObserver
@@ -16,8 +15,7 @@ namespace com
  * @author Hannes Duske
  * @date 11.11.2024
  */
-class ComObserver
-{
+class ComObserver {
 public:
   /**
    * Constructor
@@ -46,15 +44,15 @@ public:
    * @param timeoutInMillis timeout in milliseconds
    * @return connection status
    */
-  bool checkConnectionStatus(unsigned int timeoutInMillis=100);
-  
-   /**
+  bool checkConnectionStatus(unsigned int timeoutInMillis = 100);
+
+  /**
    * Distribute new can frame to all registered observers
    * @param[in] source ComEndpoint that sent the message
    * @param[in] data Message payload
    */
   void forwardNotification(const ComEndpoint source, const std::vector<uint8_t>& data);
-  
+
   /**
    * Interface declaration for implementation through inherited classes.
    * @param[in] source ComEndpoint that sent the message
@@ -63,7 +61,6 @@ public:
   virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
-
   std::vector<ComEndpoint> _endpoints;
 
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;

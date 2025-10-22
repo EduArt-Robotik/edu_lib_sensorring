@@ -1,31 +1,31 @@
 #pragma once
 
-#include "CustomTypes.hpp"
-#include "ComEndpoints.hpp"
-#include "ComInterface.hpp"
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "utils/SingletonTemplate.hpp"
 
-#include <vector>
-#include <string>
-#include <memory>
+#include "ComInterface.hpp"
+#include "CustomTypes.hpp"
 
-namespace eduart{
+namespace eduart {
 
-namespace com{
+namespace com {
 
-class ComManager : public Singleton<ComManager>{
-    public:
-        ComManager(const ComManager&) = delete;
-        ComManager& operator=(const ComManager&) = delete;
-        
-        ComInterface* createInterface(DeviceType type, std::string interface_name, std::size_t sensor_count);
-        ComInterface* getInterface(std::string interface_name);
+class ComManager : public Singleton<ComManager> {
+public:
+  ComManager(const ComManager&)            = delete;
+  ComManager& operator=(const ComManager&) = delete;
 
-    private:
-        friend class Singleton<ComManager>;
-        ComManager() = default;
+  ComInterface* createInterface(std::string interface_name, InterfaceType type);
+  ComInterface* getInterface(std::string interface_name);
 
-        std::vector<std::unique_ptr<ComInterface>> _interfaces;
+private:
+  friend class Singleton<ComManager>;
+  ComManager() = default;
+
+  std::vector<std::unique_ptr<ComInterface> > _interfaces;
 };
 
 }
