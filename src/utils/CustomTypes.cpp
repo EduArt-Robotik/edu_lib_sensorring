@@ -1,7 +1,5 @@
 #include "CustomTypes.hpp"
 
-#include "Math.hpp"
-
 namespace eduart {
 
 namespace measurement {

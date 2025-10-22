@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <chrono>
 #include <fcntl.h>
-#include <iostream>
 #include <net/if.h>
 #include <stdexcept>
 #include <string.h>

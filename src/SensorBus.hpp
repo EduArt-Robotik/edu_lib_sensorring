@@ -1,13 +1,11 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
 #include "interface/ComObserver.hpp"
 
-#include "Parameters.hpp"
 #include "SensorBoard.hpp"
 
 namespace eduart {

@@ -2,14 +2,11 @@
 
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
-#include <thread>
 #include <usbtingo/basic_bus/BasicBus.hpp>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "interface/ComObserver.hpp"
 
 namespace eduart {
 

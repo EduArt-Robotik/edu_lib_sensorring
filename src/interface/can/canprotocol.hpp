@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <linux/can.h>
 
 namespace eduart {

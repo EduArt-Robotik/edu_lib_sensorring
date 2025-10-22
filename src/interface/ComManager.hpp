@@ -6,7 +6,6 @@
 
 #include "utils/SingletonTemplate.hpp"
 
-#include "ComEndpoints.hpp"
 #include "ComInterface.hpp"
 #include "CustomTypes.hpp"
 
