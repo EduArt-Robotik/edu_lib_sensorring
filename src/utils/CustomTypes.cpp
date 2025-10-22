@@ -5,8 +5,8 @@ namespace eduart {
 namespace measurement {
 
 // Explicit template instantiation for the used types
-template class GenericGrayscaleImage<uint8_t, THERMAL_RESOLUTION>;
-template class GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
+template struct GenericGrayscaleImage<uint8_t, THERMAL_RESOLUTION>;
+template struct GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 
 template <typename T, std::size_t RESOLUTION> double GenericGrayscaleImage<T, RESOLUTION>::avg() {
   double result = 0;
