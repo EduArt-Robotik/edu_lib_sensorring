@@ -3,6 +3,7 @@
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "Math.hpp"
 
 namespace eduart {
 
@@ -52,11 +53,11 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
       const auto board_infos = SensorBoardManager::getSensorBoardInfo(_board_type);
 
       const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
-      const auto tof_rotation = _params.rotation + board_infos.tof.board_center_rotation_offset;
+      const auto tof_rotation = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
       _tof->setPose(tof_translation, tof_rotation);
 
       const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
-      const auto thermal_rotation = _params.rotation + board_infos.thermal.board_center_rotation_offset;
+      const auto thermal_rotation = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
       _thermal->setPose(thermal_translation, thermal_rotation);
     }
   }
