@@ -30,28 +30,41 @@ SensorBoard::~SensorBoard() {
 }
 
 SensorBoardType SensorBoard::getType() const {
+  LockGuard lock(_com_mutex);
   return _board_type;
 }
 
-FwRevision SensorBoard::getFwRevision() const {
+Version SensorBoard::getFwRevision() const {
+  LockGuard lock(_com_mutex);
   return _fw_rev;
 }
 
+CommitHash SensorBoard::getFwHash() const {
+  LockGuard lock(_com_mutex);
+  return _fw_hash;
+}
+
 TofSensor* SensorBoard::getTof() const {
+  LockGuard lock(_com_mutex);
   return _tof.get();
 }
 
 ThermalSensor* SensorBoard::getThermal() const {
+  LockGuard lock(_com_mutex);
   return _thermal.get();
 }
 
 LedLight* SensorBoard::getLed() const {
+  LockGuard lock(_com_mutex);
   return _leds.get();
 }
 
 void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   // ToDo: Eliminate offset of index
   if (data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
+
+    LockGuard lock(_com_mutex);
+
     if (_board_type == SensorBoardType::Undefined) {
       _board_type = static_cast<SensorBoardType>(data.at(2));
 
@@ -71,10 +84,11 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
     }
   }
 
-  if (data.size() == 8 && data.at(0) == _idx + 1) {
+  else if (data.size() == 8 && data.at(0) == _idx + 1) {
+    LockGuard lock(_com_mutex);
+
     _fw_rev  = { data.at(1), data.at(2), data.at(3) };
-    _fw_hash = (static_cast<std::uint32_t>(data.at(4)) << 24) | (static_cast<std::uint32_t>(data.at(5)) << 16)
-               | (static_cast<std::uint32_t>(data.at(6)) << 8) | (static_cast<std::uint32_t>(data.at(7)) << 0);
+    _fw_hash = {data.at(4), data.at(5), data.at(6), data.at(7)};
   }
 }
 

@@ -75,20 +75,18 @@ ManagerParams MeasurementManagerImpl::getParams() const {
 
 std::string MeasurementManagerImpl::printTopology() const {
   std::stringstream ss;
-  for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
+  for (const auto& bus : _sensor_ring->getInterfaces()) {
     ss << std::endl;
     ss << "=================================================" << std::endl;
-    ss << "Topology of the sensors on " << sensor_bus->getInterface()->getInterfaceName() << ":" << std::endl;
+    ss << "Topology of the sensors on " << bus->getInterface()->getInterfaceName() << ":" << std::endl;
     ss << std::endl;
 
-    for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
-      auto fw_rev      = sensor_board->getFwRevision();
-      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(sensor_board->getType());
+    for (const auto& board : bus->getSensorBoards()) {
+      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(board->getType());
 
-      ss << "sensor " << sensor_board->getTof()->getIdx() << ":" << std::endl;
+      ss << "sensor " << board->getTof()->getIdx() << ":" << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    FW revision:    " << std::to_string(fw_rev.at(0)) << "." << std::to_string(fw_rev.at(1)) << "."
-         << std::to_string(fw_rev.at(2)) << std::endl;
+      ss << "    FW revision:    " << board->getFwRevision() << " (" << board->getFwHash() << ")" << std::endl;
       ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
       ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
       ss << "    Nr of LEDs:     " << board_infos.leds.name << std::endl;

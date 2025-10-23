@@ -108,6 +108,9 @@ int SensorBus::enumerateDevices() {
   std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
   _interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
 
+  std::vector<uint8_t> tx_buf_fw_rev = { CMD_GET_FW_REV, 0xFF, 0xFF };
+  _interface->send(com::ComEndpoint("broadcast"), tx_buf_fw_rev);
+
   // wait until all sensors sent their response. 100 ms timeout
   unsigned int watchdog = 0;
   while (_enumeration_count < getSensorCount() && watchdog < 1e3) {
@@ -117,9 +120,6 @@ int SensorBus::enumerateDevices() {
 
   // wait a little longer in case there are more sensors than specified
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-  std::vector<uint8_t> tx_buf_fw_rev = { CMD_GET_FW_REV, 0xFF, 0xFF };
-  _interface->send(com::ComEndpoint("broadcast"), tx_buf_fw_rev);
 
   _enumeration_flag = false;
   return _enumeration_count;
@@ -131,7 +131,8 @@ void SensorBus::requestEEPROM() {
     // enable eeprom reading in thermal sensors
     sensor->getThermal()->readEEPROM();
     // check which boards have an active thermal sensor
-    active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
+    active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM())
+                      << sensor->getThermal()->getIdx();
   }
 
   if (active_devices != 0) {
@@ -309,11 +310,12 @@ bool SensorBus::startThermalCalibration(size_t window) {
   return success;
 }
 
-void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
+void SensorBus::notify(
+    [[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
 
   if (source == com::ComEndpoint("broadcast")) { // general sensor board status
     // enumeration message
-    if (_enumeration_flag && data.size() == 3  && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
+    if (_enumeration_flag && data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
       _enumeration_count++;
     }
 
@@ -322,6 +324,6 @@ void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_u
   } else if (source == com::ComEndpoint("thermal_status")) { // thermal sensor status
   }
 }
-}
+} // namespace bus
 
-}
+} // namespace eduart
