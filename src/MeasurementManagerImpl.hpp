@@ -27,7 +27,7 @@ public:
    * Constructor
    * @param[in] params Parameter structure of the MeasurementManager
    */
-  MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
+  MeasurementManagerImpl(ManagerParams params);
 
   /**
    * Destructor
@@ -136,7 +136,7 @@ private:
     shutdown
   };
 
-  void init(std::unique_ptr<ring::SensorRing> sensor_ring);
+  void init();
   void StateMachine();
   void StateMachineWorker();
 

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "boardmanager/SensorBoardManager.hpp"
+#include "interface/ComManager.hpp"
 #include "logger/Logger.hpp"
 
 #include "Parameters.hpp"
@@ -17,18 +18,36 @@ namespace eduart {
 
 namespace manager {
 
-MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
+MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
     : _params(params) {
-  init(std::move(sensor_ring));
+
+  std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
+  for (const auto& bus_params : params.ring_params.bus_param_vec) {
+    auto interface = com::ComManager::getInstance()->createInterface(bus_params.interface_name, bus_params.type);
+
+    std::size_t idx = 0;
+    std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec;
+    for (const auto& board_params : bus_params.board_param_vec) {
+      auto tof     = std::make_unique<sensor::TofSensor>(board_params.tof_params, interface, idx);
+      auto thermal = std::make_unique<sensor::ThermalSensor>(board_params.thermal_params, interface, idx);
+      auto light   = std::make_unique<sensor::LedLight>(board_params.led_params);
+
+      board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
+      idx++;
+    }
+
+    bus_vec.push_back(std::make_unique<bus::SensorBus>(interface, std::move(board_vec)));
+  }
+
+  _sensor_ring = std::make_unique<ring::SensorRing>(params.ring_params, std::move(bus_vec));
+  init();
 }
 
 MeasurementManagerImpl::~MeasurementManagerImpl() {
   stopMeasuring();
 }
 
-void MeasurementManagerImpl::init(std::unique_ptr<ring::SensorRing> sensor_ring) {
-  _sensor_ring = std::move(sensor_ring);
-
+void MeasurementManagerImpl::init() {
   _is_tof_throttled     = _params.frequency_tof_hz > 0.0;
   _is_thermal_throttled = _params.frequency_thermal_hz > 0.0;
 
