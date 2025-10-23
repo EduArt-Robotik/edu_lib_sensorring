@@ -1,12 +1,13 @@
 #pragma once
 
-#include <stdexcept>
 #include <string_view>
+#include <unordered_map>
 
 namespace eduart {
 
 namespace sensor {
 
+// Numbers match the definition in the sensor board firmware
 enum class SensorBoardType {
   Headlight = 0,
   Taillight = 1,
@@ -25,6 +26,13 @@ enum class ThermalType {
   HTPA32
 };
 
+enum class LightType {
+  None,
+  WS2812b_11,
+  WS2812b_8,
+  WS2812b_2
+};
+
 struct TofSensorInfo {
   std::string_view name;
   double fov_x;
@@ -41,7 +49,7 @@ struct ThermalSensorInfo {
   double max_rate;
 };
 
-struct LedLightInfo {
+struct LightInfo {
   std::string_view name;
   unsigned int count;
 };
@@ -50,77 +58,46 @@ struct SensorBoardInfo {
   std::string_view name;
   TofSensorInfo tof;
   ThermalSensorInfo thermal;
-  LedLightInfo leds;
+  LightInfo leds;
 };
 
 class SensorBoardManager {
 public:
-  static inline TofSensorInfo getToFSensorInfo(TofType tofType) {
-    switch (tofType) {
-    case TofType::None:
-      return tof_none;
-    case TofType::VL53L8:
-      return tof_vl53l8;
-    default:
-      throw std::invalid_argument("Unknown ToF sensor type");
-    }
-  }
+  static inline LightInfo geLightInfo(LightType ledType) { return lightDatabase.at(ledType); }
 
-  static inline ThermalSensorInfo getThermalSensorInfo(ThermalType thermalType) {
-    switch (thermalType) {
-    case ThermalType::None:
-      return thermal_none;
-    case ThermalType::HTPA32:
-      return thermal_htpa32;
-    default:
-      throw std::invalid_argument("Unknown thermal sensor type");
-    }
-  }
+  static inline TofSensorInfo getToFSensorInfo(TofType tofType) { return tofSensorDatabase.at(tofType); }
 
-  static inline SensorBoardInfo getSensorBoardInfo(SensorBoardType boardType) {
-    switch (boardType) {
-    case SensorBoardType::Unknown:
-      return board_unknown;
+  static inline ThermalSensorInfo getThermalSensorInfo(ThermalType thermalType) { return thermalSensorDatabase.at(thermalType); }
 
-    case SensorBoardType::Headlight:
-      return board_headlight;
-
-    case SensorBoardType::Taillight:
-      return board_taillight;
-
-    case SensorBoardType::Sidepanel:
-      return board_sidepanel;
-
-    case SensorBoardType::Minipanel:
-      return board_minipanel;
-
-    default:
-      throw std::invalid_argument("Unknown sensor board type");
-    }
-  }
+  static inline SensorBoardInfo getSensorBoardInfo(SensorBoardType boardType) { return sensorBoardDatabase.at(boardType); }
 
 private:
-  static constexpr TofSensorInfo tof_none    = { "none", 0.0, 0.0, 0, 0, 0.0 };
-  static constexpr TofSensorInfo tof_unknown = { "n.a.", 0.0, 0.0, 0, 0, 0.0 };
-  static constexpr TofSensorInfo tof_vl53l8  = { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0 };
+  static inline const std::unordered_map<LightType, LightInfo> lightDatabase = {
+    { LightType::None,       { "none", 0 }     },
+    { LightType::WS2812b_11, { "WS2812b", 11 } },
+    { LightType::WS2812b_8,  { "WS2812b", 8 }  },
+    { LightType::WS2812b_2,  { "WS2812b", 2 }  }
+  };
 
-  static constexpr ThermalSensorInfo thermal_none    = { "none", 0, 0, 0.0 };
-  static constexpr ThermalSensorInfo thermal_unknown = { "n.a.", 0, 0, 0.0 };
-  static constexpr ThermalSensorInfo thermal_htpa32  = { "Heimann HTPA32", 32, 32, 15.0 };
+  static inline const std::unordered_map<TofType, TofSensorInfo> tofSensorDatabase = {
+    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0 }           },
+    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0 } }
+  };
 
-  static constexpr LedLightInfo leds_none      = { "none", 0 };
-  static constexpr LedLightInfo leds_unknown   = { "n.a.", 0 };
-  static constexpr LedLightInfo leds_headlight = { "WS2812b", 11 };
-  static constexpr LedLightInfo leds_taillight = { "WS2812b", 8 };
-  static constexpr LedLightInfo leds_sidepanel = { "WS2812b", 2 };
+  static inline const std::unordered_map<ThermalType, ThermalSensorInfo> thermalSensorDatabase = {
+    { ThermalType::None,   { "none", 0, 0, 0.0 }              },
+    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0 } }
+  };
 
-  static constexpr SensorBoardInfo board_unknown   = { "Unknown", tof_unknown, thermal_unknown, leds_unknown };
-  static constexpr SensorBoardInfo board_headlight = { "Headlight", tof_vl53l8, thermal_htpa32, leds_headlight };
-  static constexpr SensorBoardInfo board_taillight = { "Taillight", tof_vl53l8, thermal_none, leds_taillight };
-  static constexpr SensorBoardInfo board_sidepanel = { "Sidepanel", tof_vl53l8, thermal_none, leds_sidepanel };
-  static constexpr SensorBoardInfo board_minipanel = { "Minipanel", tof_vl53l8, thermal_none, leds_none };
+  static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
+    { SensorBoardType::Unknown,   { "Unknown", tofSensorDatabase.at(TofType::None), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::None) }             },
+    { SensorBoardType::Headlight, { "Headlight", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::HTPA32), lightDatabase.at(LightType::WS2812b_11) } },
+    { SensorBoardType::Taillight, { "Taillight", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_8) }    },
+    { SensorBoardType::Sidepanel, { "Sidepanel", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_2) }    },
+    { SensorBoardType::Minipanel, { "Minipanel", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::None) }         }
+  };
 };
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart
