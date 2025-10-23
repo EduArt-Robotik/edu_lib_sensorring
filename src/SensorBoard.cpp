@@ -51,11 +51,13 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
 
       const auto board_infos = SensorBoardManager::getSensorBoardInfo(_board_type);
 
-      auto tof_translation = _params.translation + board_infos.tof.board_center_offset;
-      _tof->setPose(tof_translation, _params.rotation);
+      const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
+      const auto tof_rotation = _params.rotation + board_infos.tof.board_center_rotation_offset;
+      _tof->setPose(tof_translation, tof_rotation);
 
-      auto thermal_translation = _params.translation + board_infos.thermal.board_center_offset;
-      _thermal->setPose(thermal_translation, _params.rotation);
+      const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
+      const auto thermal_rotation = _params.rotation + board_infos.thermal.board_center_rotation_offset;
+      _thermal->setPose(thermal_translation, thermal_rotation);
     }
   }
 }

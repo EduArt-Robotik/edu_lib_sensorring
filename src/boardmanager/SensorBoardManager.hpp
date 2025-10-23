@@ -42,7 +42,8 @@ struct TofSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
-  math::Vector3 board_center_offset;
+  math::Vector3 board_center_translation_offset;
+  math::Vector3 board_center_rotation_offset;
 };
 
 struct ThermalSensorInfo {
@@ -50,7 +51,8 @@ struct ThermalSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
-  math::Vector3 board_center_offset;
+  math::Vector3 board_center_translation_offset;
+  math::Vector3 board_center_rotation_offset;
 };
 
 struct LightInfo {
@@ -84,13 +86,13 @@ private:
   };
 
   static inline const std::unordered_map<TofType, TofSensorInfo> tofSensorDatabase = {
-    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0, { 0, 0, 0 } }           },
-    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0, { 0, 0, 0 } } }
+    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0, { 0, 0, 0 }, { 0, 0, 0 } }           },
+    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0, { 0, 0, 0 }, { 0, 0, 0 } } }
   };
 
   static inline const std::unordered_map<ThermalType, ThermalSensorInfo> thermalSensorDatabase = {
-    { ThermalType::None,   { "none", 0, 0, 0.0, { 0, 0, 0 } }              },
-    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0, { 0, 0, 0 } } }
+    { ThermalType::None,   { "none", 0, 0, 0.0, { 0, 0, 0 }, { 0, 0, 0 } }                  },
+    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0, { 0.013, 0, 0 }, { 0, 0, 0 } } }
   };
 
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
