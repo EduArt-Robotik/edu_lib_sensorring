@@ -30,6 +30,11 @@ enum class MeasurementState;
 class MeasurementManager {
 public:
   /**
+   * Constructor
+   */
+  MeasurementManager(ManagerParams params);
+
+  /**
    * Destructor
    */
   ~MeasurementManager();
@@ -125,8 +130,6 @@ public:
   static std::unique_ptr<MeasurementManager> buildManager(ManagerParams params);
 
 private:
-  MeasurementManager(std::unique_ptr<MeasurementManagerImpl> mm_impl);
-
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;
 };
 
