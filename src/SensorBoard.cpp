@@ -1,5 +1,6 @@
 #include "SensorBoard.hpp"
 
+#include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
 
@@ -9,8 +10,8 @@ namespace sensor {
 
 SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
     : _idx(idx)
+    , _board_type(SensorBoardType::Unknown)
     , _params{ params }
-    , _sensor_type(SensorBoardType::Unknown)
     , _tof(std::move(tof))
     , _thermal(std::move(thermal))
     , _leds(std::move(leds))
@@ -24,11 +25,11 @@ SensorBoard::~SensorBoard() {
 }
 
 SensorBoardType SensorBoard::getType() const {
-  return _sensor_type;
+  return _board_type;
 }
 
 void SensorBoard::setType(SensorBoardType type) {
-  _sensor_type = type;
+  _board_type = type;
 }
 
 TofSensor* SensorBoard::getTof() const {
@@ -45,11 +46,20 @@ LedLight* SensorBoard::getLed() const {
 
 void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   if (data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) { // ToDo: Eliminate offset
-    if (_sensor_type == SensorBoardType::Unknown)
-      _sensor_type = static_cast<SensorBoardType>(data.at(2));
+    if (_board_type == SensorBoardType::Unknown) {
+      _board_type = static_cast<SensorBoardType>(data.at(2));
+
+      const auto board_infos = SensorBoardManager::getSensorBoardInfo(_board_type);
+
+      auto tof_translation = _params.translation + board_infos.tof.board_center_offset;
+      _tof->setPose(tof_translation, _params.rotation);
+
+      auto thermal_translation = _params.translation + board_infos.thermal.board_center_offset;
+      _thermal->setPose(thermal_translation, _params.rotation);
+    }
   }
 }
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

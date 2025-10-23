@@ -31,8 +31,8 @@ public:
 
 private:
   int _idx;
-  SensorBoardParams _params;
-  SensorBoardType _sensor_type;
+  SensorBoardType _board_type;
+  const SensorBoardParams _params;
 
   std::unique_ptr<TofSensor> _tof;
   std::unique_ptr<ThermalSensor> _thermal;

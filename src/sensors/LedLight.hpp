@@ -15,7 +15,7 @@ public:
   const LightParams& getParams() const;
 
 private:
-  LightParams _params;
+  const LightParams _params;
 
   int _canid_in;
   int _canid_out;

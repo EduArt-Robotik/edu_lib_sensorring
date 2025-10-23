@@ -47,8 +47,6 @@ struct ThermalSensorParams {
   bool use_calibration_file   = false;
   std::string eeprom_dir      = "";
   std::string calibration_dir = "";
-  math::Vector3 rotation      = { 0, 0, 0 };
-  math::Vector3 translation   = { 0, 0, 0 };
   Orientation orientation     = Orientation::none;
 };
 
@@ -57,10 +55,8 @@ struct ThermalSensorParams {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct TofSensorParams {
-  int user_idx              = 0;
-  bool enable               = false;
-  math::Vector3 rotation    = { 0, 0, 0 };
-  math::Vector3 translation = { 0, 0, 0 };
+  int user_idx = 0;
+  bool enable  = false;
 };
 
 /**

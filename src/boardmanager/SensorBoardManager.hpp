@@ -3,6 +3,8 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "Math.hpp"
+
 namespace eduart {
 
 namespace sensor {
@@ -40,6 +42,7 @@ struct TofSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
+  math::Vector3 board_center_offset;
 };
 
 struct ThermalSensorInfo {
@@ -47,6 +50,7 @@ struct ThermalSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
+  math::Vector3 board_center_offset;
 };
 
 struct LightInfo {
@@ -63,13 +67,13 @@ struct SensorBoardInfo {
 
 class SensorBoardManager {
 public:
-  static inline LightInfo geLightInfo(LightType ledType) { return lightDatabase.at(ledType); }
+  static inline LightInfo geLightInfo(LightType type) { return lightDatabase.at(type); }
 
-  static inline TofSensorInfo getToFSensorInfo(TofType tofType) { return tofSensorDatabase.at(tofType); }
+  static inline TofSensorInfo getToFSensorInfo(TofType type) { return tofSensorDatabase.at(type); }
 
-  static inline ThermalSensorInfo getThermalSensorInfo(ThermalType thermalType) { return thermalSensorDatabase.at(thermalType); }
+  static inline ThermalSensorInfo getThermalSensorInfo(ThermalType type) { return thermalSensorDatabase.at(type); }
 
-  static inline SensorBoardInfo getSensorBoardInfo(SensorBoardType boardType) { return sensorBoardDatabase.at(boardType); }
+  static inline SensorBoardInfo getSensorBoardInfo(SensorBoardType type) { return sensorBoardDatabase.at(type); }
 
 private:
   static inline const std::unordered_map<LightType, LightInfo> lightDatabase = {
@@ -80,13 +84,13 @@ private:
   };
 
   static inline const std::unordered_map<TofType, TofSensorInfo> tofSensorDatabase = {
-    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0 }           },
-    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0 } }
+    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0, { 0, 0, 0 } }           },
+    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0, { 0, 0, 0 } } }
   };
 
   static inline const std::unordered_map<ThermalType, ThermalSensorInfo> thermalSensorDatabase = {
-    { ThermalType::None,   { "none", 0, 0, 0.0 }              },
-    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0 } }
+    { ThermalType::None,   { "none", 0, 0, 0.0, { 0, 0, 0 } }              },
+    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0, { 0, 0, 0 } } }
   };
 
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
