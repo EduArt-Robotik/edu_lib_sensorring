@@ -9,7 +9,6 @@ namespace sensor {
 
 TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx)
     : BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable)
-    , _rot_m(math::MiniMath::rotation_matrix_from_euler_degrees(params.rotation))
     , _params(params) {
 
   _rx_buffer_offset = 0;
@@ -60,7 +59,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
   } else if (msg_size == 2) {
     if (_new_data_in_buffer_flag) {
       _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
-      _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _params.translation);
+      _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
       _new_data_in_buffer_flag        = false;
       _new_measurement_ready_flag     = true;
     }

@@ -144,9 +144,9 @@ private:
   int notifyThermalData();
   void notifyState(const WorkerState state);
 
+  const ManagerParams _params;
   WorkerState _manager_state;
   MeasurementState _measurement_state;
-  ManagerParams _params;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 
   bool _tof_enabled;

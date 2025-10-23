@@ -57,7 +57,6 @@ public:
 private:
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
-  const math::Matrix3 _rot_m;
   const TofSensorParams _params;
   measurement::TofMeasurement _latest_raw_measurement;
   measurement::TofMeasurement _latest_transformed_measurement;

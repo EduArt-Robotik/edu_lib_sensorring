@@ -98,7 +98,7 @@ std::unique_ptr<MeasurementManager> MeasurementManager::buildManager(ManagerPara
       auto thermal = std::make_unique<sensor::ThermalSensor>(board_params.thermal_params, interface, idx);
       auto light   = std::make_unique<sensor::LedLight>(board_params.led_params);
 
-      board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, std::move(tof), std::move(thermal), std::move(light)));
+      board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
       idx++;
     }
 

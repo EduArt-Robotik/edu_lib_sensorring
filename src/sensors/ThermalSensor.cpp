@@ -294,6 +294,6 @@ void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

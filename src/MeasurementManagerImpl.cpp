@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 
+#include "boardmanager/SensorBoardManager.hpp"
 #include "logger/Logger.hpp"
 
 #include "Parameters.hpp"
@@ -54,10 +55,6 @@ void MeasurementManagerImpl::init(std::unique_ptr<ring::SensorRing> sensor_ring)
   _last_tof_measurement_timestamp_s     = std::chrono::steady_clock::now();
   _last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
 
-  if (_params.print_topology) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
-  }
-
   // prepare state machine
   notifyState(WorkerState::Initialized);
   _measurement_state = MeasurementState::init;
@@ -78,57 +75,22 @@ ManagerParams MeasurementManagerImpl::getParams() const {
 std::string MeasurementManagerImpl::printTopology() const {
   std::stringstream ss;
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
-    ss << "";
-    ss << "=================================================";
-    ss << "Topology of the sensors on " << sensor_bus->getInterface()->getInterfaceName() << ":";
-    ss << "";
-    for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
-      std::string board_type     = "";
-      std::string tof_sensor     = "";
-      std::string thermal_sensor = "";
-      std::string led_count      = "";
-      switch (sensor_board->getType()) {
-      case sensor::SensorBoardType::headlight:
-        board_type     = "Headlight";
-        tof_sensor     = "VL53L8CX";
-        thermal_sensor = "HTPA32";
-        led_count      = "11";
-        break;
-      case sensor::SensorBoardType::taillight:
-        board_type     = "Taillight";
-        tof_sensor     = "VL53L8CX";
-        thermal_sensor = "none";
-        led_count      = "8";
-        break;
-      case sensor::SensorBoardType::sidepanel:
-        board_type     = "Sidepanel";
-        tof_sensor     = "VL53L8CX";
-        thermal_sensor = "none";
-        led_count      = "2";
-        break;
-      case sensor::SensorBoardType::minipanel:
-        board_type     = "Minipanel";
-        tof_sensor     = "VL53L8CX";
-        thermal_sensor = "none";
-        led_count      = "none";
-        break;
-      case sensor::SensorBoardType::unknown:
-      default:
-        board_type     = "unknown";
-        tof_sensor     = "n.a.";
-        thermal_sensor = "n.a.";
-        led_count      = "n.a.";
-        break;
-      }
+    ss << std::endl;
+    ss << "=================================================" << std::endl;
+    ss << "Topology of the sensors on " << sensor_bus->getInterface()->getInterfaceName() << ":" << std::endl;
+    ss << std::endl;
 
-      ss << "sensor " << sensor_board->getTof()->getIdx() << " is a " << board_type;
-      ss << "		ToF sensor: " << tof_sensor;
-      ss << "		Thermal sensor: " << thermal_sensor;
-      ss << "		Nr of LEDs: " << led_count;
+    for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
+      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(sensor_board->getType());
+      ss << "sensor " << sensor_board->getTof()->getIdx() << ":" << std::endl;
+      ss << "    Type:           " << board_infos.name << std::endl;
+      ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
+      ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
+      ss << "    Nr of LEDs:     " << board_infos.leds.name << std::endl;
     }
-    ss << "=================================================";
+
+    ss << "=================================================" << std::endl;
   }
-  ss << "";
   return ss.str();
 }
 
@@ -370,6 +332,10 @@ void MeasurementManagerImpl::StateMachine() {
       if (sensor_bus->getSensorCount() == sensor_bus->getEnumerationCount()) {
         logger::Logger::getInstance()->log(
             logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());
+
+        if (_params.print_topology) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
+        }
       } else {
         logger::Logger::getInstance()->log(
             logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());

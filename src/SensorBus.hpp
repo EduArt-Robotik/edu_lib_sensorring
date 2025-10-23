@@ -56,8 +56,8 @@ private:
   com::ComInterface* _interface;
   std::vector<std::unique_ptr<sensor::SensorBoard> > _sensor_vec;
 
-  volatile bool _enumerate_flag;
-  volatile size_t _enumerate_count;
+  std::atomic<bool> _enumeration_flag;
+  std::atomic<size_t> _enumeration_count;
 
   size_t _active_tof_sensors;
   size_t _active_thermal_sensors;
