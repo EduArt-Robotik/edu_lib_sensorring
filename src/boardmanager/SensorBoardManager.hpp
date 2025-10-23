@@ -15,7 +15,7 @@ enum class SensorBoardType {
   Taillight = 1,
   Sidepanel = 2,
   Minipanel = 3,
-  Unknown   = 4
+  Undefined = 255
 };
 
 enum class TofType {
@@ -96,7 +96,7 @@ private:
   };
 
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
-    { SensorBoardType::Unknown,   { "Unknown", tofSensorDatabase.at(TofType::None), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::None) }             },
+    { SensorBoardType::Undefined, { "Unknown", tofSensorDatabase.at(TofType::None), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::None) }             },
     { SensorBoardType::Headlight, { "Headlight", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::HTPA32), lightDatabase.at(LightType::WS2812b_11) } },
     { SensorBoardType::Taillight, { "Taillight", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_8) }    },
     { SensorBoardType::Sidepanel, { "Sidepanel", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_2) }    },
