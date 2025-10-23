@@ -122,13 +122,6 @@ public:
    */
   void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
 
-  /**
-   * Factory method to build a MeasurementManager object
-   * @param[in] params Parameter set for the MeasurementManager
-   * @return Fully assembled MeasurementManager object
-   */
-  static std::unique_ptr<MeasurementManager> buildManager(ManagerParams params);
-
 private:
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;
 };
