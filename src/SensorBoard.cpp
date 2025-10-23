@@ -27,6 +27,10 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
 SensorBoard::~SensorBoard() {
 }
 
+bool SensorBoard::isEnumerated() const{
+  return _board_type != SensorBoardType::Undefined && _fw_hash.hash != 0;
+}
+
 SensorBoardType SensorBoard::getType() const {
   LockGuard lock(_com_mutex);
   return _board_type;

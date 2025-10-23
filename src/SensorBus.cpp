@@ -314,6 +314,9 @@ void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_u
   if (source == com::ComEndpoint("broadcast")) { // general sensor board status
     // enumeration message
     if (_enumeration_flag && data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
+
+      // The bus has to listen to respones to register any boards that are not specified in the configuration
+      // Querying the SensorBoards if each has been enumerated can't detect additional boards
       _enumeration_count++;
     }
 
