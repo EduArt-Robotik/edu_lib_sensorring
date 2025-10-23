@@ -38,6 +38,6 @@ bool ComObserver::checkConnectionStatus(unsigned int timeoutInMillis) {
   return elapsed < std::chrono::milliseconds(timeoutInMillis);
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

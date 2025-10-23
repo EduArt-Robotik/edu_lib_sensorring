@@ -54,6 +54,6 @@ public:
 template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
 template class filemanager::StructHandler<heimannsensor::HTPA32Eeprom>;
 
-}
+} // namespace filemanager
 
-}
+} // namespace eduart

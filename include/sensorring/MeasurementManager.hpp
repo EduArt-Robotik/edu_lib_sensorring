@@ -23,7 +23,8 @@ enum class MeasurementState;
 
 /**
  * @class MeasurementManager
- * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a looping state machine.
+ * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a
+ * looping state machine.
  * @author Hannes Duske
  * @date 25.12.2024
  */

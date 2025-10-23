@@ -41,6 +41,6 @@ private:
   std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
 };
 
-}
+} // namespace ring
 
-}
+} // namespace eduart

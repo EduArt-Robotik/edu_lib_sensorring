@@ -15,6 +15,6 @@ void CanProtocol::makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddr
   broadcastAddress = sID | iBit | 0b0000000;
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

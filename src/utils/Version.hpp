@@ -12,7 +12,7 @@ struct Version {
       unsigned int major;
       unsigned int minor;
       unsigned int patch;
-    }v;
+    } v;
     unsigned int version[3];
   };
 
@@ -32,14 +32,13 @@ struct CommitHash {
       std::uint8_t b;
       std::uint8_t c;
       std::uint8_t d;
-    }h;
+    } h;
     std::uint32_t hash;
   };
 
   std::string toString() const {
     std::ostringstream oss;
-    oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(h.a) << std::setw(2) << static_cast<int>(h.b)
-        << std::setw(2) << static_cast<int>(h.c) << std::setw(2) << static_cast<int>(h.d);
+    oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(h.a) << std::setw(2) << static_cast<int>(h.b) << std::setw(2) << static_cast<int>(h.c) << std::setw(2) << static_cast<int>(h.d);
     return oss.str();
   }
 

@@ -78,6 +78,6 @@ private:
   std::unique_ptr<usbtingo::device::Device> _dev;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

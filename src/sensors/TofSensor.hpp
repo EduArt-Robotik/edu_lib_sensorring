@@ -65,6 +65,6 @@ private:
   unsigned int _rx_buffer_offset;
 };
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

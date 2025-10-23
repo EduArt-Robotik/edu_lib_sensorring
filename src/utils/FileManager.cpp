@@ -218,6 +218,6 @@ template <typename T> bool StructHandler<T>::readStructFromFile(const std::strin
   return file.good();
 }
 
-}
+} // namespace filemanager
 
-}
+} // namespace eduart

@@ -103,7 +103,8 @@ void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, 
     // check if there is still data to be written
     if ((_rx_buffer_offset + msg_size) < (int)sizeof(heimannsensor::HTPA32Eeprom) + MAX_MSG_LENGTH) {
 
-      // have to account fot last few values of the eeprom because sizeof(ETPA32Eeprom) is not dividable by 64 ( = canfd msg length)
+      // have to account fot last few values of the eeprom because sizeof(ETPA32Eeprom) is not dividable by 64 ( = canfd
+      // msg length)
       std::size_t len = (int)sizeof(heimannsensor::HTPA32Eeprom) - _rx_buffer_offset;
       if (len > msg_size)
         len = msg_size;
@@ -205,7 +206,8 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     // electrical offsets
     buffer[i] -= offset_data[idx];
 
-    // The buffer can be used as an image from here on (after subtracting the electric offsets). The following steps are only to calculate temperatures in °C.
+    // The buffer can be used as an image from here on (after subtracting the electric offsets). The following steps are
+    // only to calculate temperatures in °C.
 
     // vdd compensation
     double vdd_comp_val1 = ((double)(_eeprom.vddcomp_gradient[idx] * ptat) / std::pow(2, _eeprom.vddsc_gradient) + _eeprom.vddcomp_offset[idx]) / std::pow(2, _eeprom.vddsc_offset);

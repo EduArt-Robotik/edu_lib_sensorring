@@ -40,7 +40,8 @@ public:
   const std::vector<ComEndpoint>& getEndpoints() const;
 
   /**
-   * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific timeout.
+   * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific
+   * timeout.
    * @param timeoutInMillis timeout in milliseconds
    * @return connection status
    */
@@ -66,6 +67,6 @@ private:
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

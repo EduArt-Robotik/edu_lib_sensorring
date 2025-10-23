@@ -131,8 +131,7 @@ void SensorBus::requestEEPROM() {
     // enable eeprom reading in thermal sensors
     sensor->getThermal()->readEEPROM();
     // check which boards have an active thermal sensor
-    active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM())
-                      << sensor->getThermal()->getIdx();
+    active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
   if (active_devices != 0) {
@@ -310,8 +309,7 @@ bool SensorBus::startThermalCalibration(size_t window) {
   return success;
 }
 
-void SensorBus::notify(
-    [[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
+void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
 
   if (source == com::ComEndpoint("broadcast")) { // general sensor board status
     // enumeration message

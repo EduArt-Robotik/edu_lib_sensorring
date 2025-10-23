@@ -38,7 +38,7 @@ struct Vector3 {
   // Vector subtraction
   Vector3 operator-(const Vector3& other) const;
   Vector3& operator-=(const Vector3& other);
-  
+
   // Vector-Scalar multiplication
   Vector3 operator*(const double& other) const;
   Vector3& operator*=(const double& other);

@@ -85,6 +85,6 @@ template <typename T, std::size_t RESOLUTION> template <typename U> GenericGrays
   return *this;
 }
 
-}
+} // namespace measurement
 
-}
+} // namespace eduart

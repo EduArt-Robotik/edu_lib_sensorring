@@ -132,6 +132,6 @@ public:
   static void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

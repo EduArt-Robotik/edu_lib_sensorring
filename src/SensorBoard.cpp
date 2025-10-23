@@ -10,9 +10,7 @@ namespace eduart {
 
 namespace sensor {
 
-SensorBoard::SensorBoard(
-    SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof,
-    std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
     : _idx(idx)
     , _interface(interface)
     , _params{ params }
@@ -71,15 +69,11 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
       const auto board_infos = SensorBoardManager::getSensorBoardInfo(_board_type);
 
       const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
-      const auto tof_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(
-          math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation)
-          * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
+      const auto tof_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
       _tof->setPose(tof_translation, tof_rotation);
 
       const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
-      const auto thermal_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(
-          math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation)
-          * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
+      const auto thermal_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
       _thermal->setPose(thermal_translation, thermal_rotation);
     }
   }
@@ -88,7 +82,7 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
     LockGuard lock(_com_mutex);
 
     _fw_rev  = { data.at(1), data.at(2), data.at(3) };
-    _fw_hash = {data.at(4), data.at(5), data.at(6), data.at(7)};
+    _fw_hash = { data.at(4), data.at(5), data.at(6), data.at(7) };
   }
 }
 

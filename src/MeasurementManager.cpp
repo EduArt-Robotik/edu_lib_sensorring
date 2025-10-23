@@ -31,8 +31,8 @@ MeasurementManager::MeasurementManager(ManagerParams params) {
     bus_vec.push_back(std::make_unique<bus::SensorBus>(interface, std::move(board_vec)));
   }
 
-  auto ring    = std::make_unique<ring::SensorRing>(params.ring_params, std::move(bus_vec));
-  _mm_impl = std::make_unique<MeasurementManagerImpl>(params, std::move(ring));
+  auto ring = std::make_unique<ring::SensorRing>(params.ring_params, std::move(bus_vec));
+  _mm_impl  = std::make_unique<MeasurementManagerImpl>(params, std::move(ring));
 }
 
 MeasurementManager::~MeasurementManager() {

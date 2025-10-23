@@ -39,7 +39,9 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
     _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
     break;
 #else
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a SocketCan interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Error, "Requested to open a SocketCan interface, but the sensorring library is built "
+                                     "without -DUSE_SOCKETCAN=ON option.");
     return nullptr;
 #endif
 
@@ -48,7 +50,9 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
     _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
     break;
 #else
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built "
+                                     "without -DUSE_USBTINGO=ON option.");
     return nullptr;
 #endif
 
@@ -66,6 +70,6 @@ ComInterface* ComManager::getInterface(std::string interface_name) {
   return (it != _interfaces.end()) ? it->get() : nullptr;
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

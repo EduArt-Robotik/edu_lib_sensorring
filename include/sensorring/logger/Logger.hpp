@@ -33,6 +33,6 @@ private:
   std::vector<logger::LoggerClient*> _observer_vec;
 };
 
-}
+} // namespace logger
 
-}
+} // namespace eduart

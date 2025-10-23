@@ -45,6 +45,6 @@ void Logger::log(const LogVerbosity verbosity, const std::stringstream msg) cons
   log(verbosity, msg.str());
 }
 
-}
+} // namespace logger
 
-}
+} // namespace eduart

@@ -203,6 +203,6 @@ bool SensorRing::startThermalCalibration(size_t window) {
   return success;
 }
 
-}
+} // namespace ring
 
-}
+} // namespace eduart

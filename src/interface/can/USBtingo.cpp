@@ -172,6 +172,6 @@ ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
   }
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

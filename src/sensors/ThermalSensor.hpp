@@ -60,6 +60,6 @@ private:
   measurement::TemperatureImage _calibration_image;
 };
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

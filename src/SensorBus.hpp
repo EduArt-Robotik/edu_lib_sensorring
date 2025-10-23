@@ -65,6 +65,6 @@ private:
   size_t _thermal_measurement_count;
 };
 
-}
+} // namespace bus
 
-}
+} // namespace eduart

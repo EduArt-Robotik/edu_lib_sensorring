@@ -28,6 +28,6 @@ private:
   std::vector<std::unique_ptr<ComInterface> > _interfaces;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

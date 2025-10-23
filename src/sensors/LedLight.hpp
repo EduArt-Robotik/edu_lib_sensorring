@@ -21,6 +21,6 @@ private:
   int _canid_out;
 };
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

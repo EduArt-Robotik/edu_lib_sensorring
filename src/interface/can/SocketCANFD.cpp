@@ -214,6 +214,6 @@ ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id) {
   }
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

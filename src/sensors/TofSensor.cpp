@@ -113,6 +113,6 @@ measurement::TofMeasurement TofSensor::transformTofMeasurements(const measuremen
   return transformed_measurement;
 }
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

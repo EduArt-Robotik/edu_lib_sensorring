@@ -78,6 +78,6 @@ const std::vector<ComEndpoint>& ComInterface::getEndpoints() {
   return _endpoints;
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

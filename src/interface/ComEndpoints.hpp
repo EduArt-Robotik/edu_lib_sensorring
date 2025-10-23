@@ -10,10 +10,10 @@ namespace com {
 class ComEndpoint {
 public:
   ComEndpoint(const std::string& id)
-      : _id(id) {};
+      : _id(id){};
 
   ComEndpoint(const ComEndpoint& endpoint)
-      : _id(endpoint._id) {};
+      : _id(endpoint._id){};
 
   const std::string getId() { return _id; };
 
@@ -41,6 +41,6 @@ private:
   const std::string _id;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

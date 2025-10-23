@@ -1,4 +1,5 @@
 #include "sensors/BaseSensor.hpp"
+
 #include "Math.hpp"
 
 namespace eduart {
@@ -45,10 +46,10 @@ bool BaseSensor::newDataAvailable() const {
   return _new_data_available_flag;
 }
 
-void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation){
+void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
   _translation = translation;
-  _rotation = rotation;
-  _rot_m = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
+  _rotation    = rotation;
+  _rot_m       = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
 }
 
 /*void BaseSensor::setEnable(bool enable){
@@ -66,6 +67,6 @@ void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t
   canCallback(source, data);
 }
 
-}
+} // namespace sensor
 
-}
+} // namespace eduart

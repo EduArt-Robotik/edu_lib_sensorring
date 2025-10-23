@@ -122,6 +122,6 @@ private:
   std::unique_ptr<std::thread> _thread;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

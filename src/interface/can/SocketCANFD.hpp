@@ -14,7 +14,8 @@ namespace com {
 
 /**
  * @class SocketCANFD
- * @brief CAN communication class. This class uses a threaded listener and observer pattern notifying observer class instances.
+ * @brief CAN communication class. This class uses a threaded listener and observer pattern notifying observer class
+ * instances.
  * @author Stefan May, Hannes Duske
  * @date 13.05.2018 (modified 09.08.2024)
  */
@@ -93,6 +94,6 @@ private:
   int _soc;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart
