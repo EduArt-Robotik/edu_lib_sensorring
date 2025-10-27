@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 
+#include "LoggerClient.hpp"
+
 namespace eduart {
 
 namespace logger {
@@ -38,6 +40,9 @@ void Logger::log(const LogVerbosity verbosity, const std::string msg) const {
   for (auto& observer : _observer_vec) {
     if (observer)
       observer->onOutputLog(verbosity, msg);
+  }
+  if (verbosity == LogVerbosity::Exception) {
+    throw std::runtime_error(msg);
   }
 }
 

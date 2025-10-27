@@ -16,7 +16,8 @@ enum class LogVerbosity {
   Debug,
   Info,
   Warning,
-  Error
+  Error,
+  Exception
 };
 
 /**
