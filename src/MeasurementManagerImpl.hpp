@@ -74,7 +74,7 @@ public:
    * Get the health status of the state machine
    * @return Current worker state
    */
-  WorkerState getWorkerState() const;
+  ManagerState getWorkerState() const;
 
   /**
    * Get the parameters with which the MeasurementManager was initialized
@@ -136,16 +136,15 @@ private:
     shutdown
   };
 
-  void init();
   void StateMachine();
   void StateMachineWorker();
 
   int notifyToFData();
   int notifyThermalData();
-  void notifyState(const WorkerState state);
+  void notifyState(const ManagerState state);
 
   const ManagerParams _params;
-  WorkerState _manager_state;
+  ManagerState _manager_state;
   MeasurementState _measurement_state;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 

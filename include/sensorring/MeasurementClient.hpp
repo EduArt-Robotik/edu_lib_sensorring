@@ -7,12 +7,13 @@ namespace eduart {
 namespace manager {
 
 /**
- * @enum WorkerState
+ * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
  * @author Hannes Duske
  * @date 25.12.2024
  */
-enum class WorkerState {
+enum class ManagerState {
+  Uninitialized,
   Initialized,
   Running,
   Shutdown,
