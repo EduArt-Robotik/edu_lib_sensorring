@@ -27,13 +27,13 @@ public:
   bool isThermalEnabled(int idx) const;
 
   bool allTofMeasurementsReady() const;
-  bool allTofMeasurementsReady(int& ready_sensors_count) const;
+  bool allTofMeasurementsReady(unsigned int& ready_sensors_count) const;
   bool allThermalMeasurementsReady() const;
-  bool allThermalMeasurementsReady(int& ready_sensors_count) const;
+  bool allThermalMeasurementsReady(unsigned int& ready_sensors_count) const;
   bool allTofDataTransmissionsComplete() const;
-  bool allTofDataTransmissionsComplete(int& ready_sensors_count) const;
+  bool allTofDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
   bool allThermalDataTransmissionsComplete() const;
-  bool allThermalDataTransmissionsComplete(int& ready_sensors_count) const;
+  bool allThermalDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
   bool allEEPROMTransmissionsComplete() const;
 
   void resetDevices();
@@ -48,7 +48,7 @@ public:
   void fetchThermalMeasurement();
 
   bool stopThermalCalibration();
-  bool startThermalCalibration(size_t window);
+  bool startThermalCalibration(unsigned int window);
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
