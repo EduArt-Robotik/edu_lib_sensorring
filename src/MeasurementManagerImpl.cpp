@@ -170,7 +170,7 @@ void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
 
 int MeasurementManagerImpl::notifyToFData() {
   int error_frames = 0;
-  std::vector<measurement::TofMeasurement> raw_measurement_vec, tansformed_measurement_vec;
+  std::vector<measurement::TofMeasurement> raw_measurement_vec, transformed_measurement_vec;
 
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
@@ -183,10 +183,10 @@ int MeasurementManagerImpl::notifyToFData() {
           error_frames++;
         }
 
-        auto [tansformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
+        auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
         if (transformed_error == sensor::SensorState::SensorOK) {
-          if (!tansformed_measurement.point_cloud.empty())
-            tansformed_measurement_vec.push_back(tansformed_measurement);
+          if (!transformed_measurement.point_cloud.empty())
+            transformed_measurement_vec.push_back(transformed_measurement);
         }
       }
     }
@@ -199,10 +199,10 @@ int MeasurementManagerImpl::notifyToFData() {
     }
   }
 
-  if (!tansformed_measurement_vec.empty()) {
+  if (!transformed_measurement_vec.empty()) {
     for (auto observer : _observers) {
       if (observer)
-        observer->onTransformedTofMeasurement(tansformed_measurement_vec);
+        observer->onTransformedTofMeasurement(transformed_measurement_vec);
     }
   }
 
