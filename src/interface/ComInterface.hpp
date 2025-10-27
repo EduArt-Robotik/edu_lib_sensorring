@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <set>
 #include <string>
 #include <thread>
 #include <vector>
@@ -116,7 +117,7 @@ protected:
 
   std::vector<ComEndpoint> _endpoints;
 
-  std::vector<ComObserver*> _observers;
+  std::set<ComObserver*> _observers;
 
 private:
   std::unique_ptr<std::thread> _thread;

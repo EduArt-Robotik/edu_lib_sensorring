@@ -23,9 +23,12 @@ std::string ComInterface::getInterfaceName() {
 
 bool ComInterface::registerObserver(ComObserver* observer) {
   LockGuard guard(_mutex);
-  if (observer && std::find(_observers.begin(), _observers.end(), observer) == _observers.end()) {
-    _observers.push_back(observer);
-    return true;
+  if (observer) {
+    auto result = _observers.insert(observer);
+
+    if (result.second) {
+      return true;
+    }
   }
   return false;
 }
@@ -33,13 +36,12 @@ bool ComInterface::registerObserver(ComObserver* observer) {
 bool ComInterface::unregisterObserver(ComObserver* observer) {
   LockGuard guard(_mutex);
   if (observer) {
-    const auto& it = std::find(_observers.begin(), _observers.end(), observer);
-    if (it != _observers.end()) {
-      _observers.erase(it);
+    auto result = _observers.erase(observer);
+
+    if (result > 0) {
       return true;
     }
   }
-
   return false;
 }
 
