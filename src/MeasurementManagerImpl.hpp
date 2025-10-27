@@ -3,9 +3,9 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <set>
 #include <string>
 #include <thread>
-#include <vector>
 
 #include "MeasurementClient.hpp"
 #include "Parameters.hpp"
@@ -74,7 +74,7 @@ public:
    * Get the health status of the state machine
    * @return Current worker state
    */
-  WorkerState getWorkerState() const;
+  ManagerState getManagerState() const;
 
   /**
    * Get the parameters with which the MeasurementManager was initialized
@@ -136,24 +136,25 @@ private:
     shutdown
   };
 
-  void init();
   void StateMachine();
   void StateMachineWorker();
 
   int notifyToFData();
   int notifyThermalData();
-  void notifyState(const WorkerState state);
+  void notifyState(const ManagerState state);
 
   const ManagerParams _params;
-  WorkerState _manager_state;
+  ManagerState _manager_state;
   MeasurementState _measurement_state;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 
   bool _tof_enabled;
   bool _thermal_enabled;
   bool _first_measurement;
-  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp_s;
-  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp_s;
+  std::chrono::duration<double> _tof_measurement_period;
+  std::chrono::duration<double> _thermal_measurement_period;
+  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp;
+  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp;
 
   bool _is_tof_throttled;
   bool _is_thermal_throttled;
@@ -164,7 +165,7 @@ private:
   std::uint8_t _light_brightness;
   std::atomic<bool> _light_update_flag;
 
-  std::vector<MeasurementClient*> _observer_vec;
+  std::set<MeasurementClient*> _observers;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;

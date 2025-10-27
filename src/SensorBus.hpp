@@ -27,28 +27,28 @@ public:
   bool isThermalEnabled(int idx) const;
 
   bool allTofMeasurementsReady() const;
-  bool allTofMeasurementsReady(int& ready_sensors_count) const;
+  bool allTofMeasurementsReady(unsigned int& ready_sensors_count) const;
   bool allThermalMeasurementsReady() const;
-  bool allThermalMeasurementsReady(int& ready_sensors_count) const;
+  bool allThermalMeasurementsReady(unsigned int& ready_sensors_count) const;
   bool allTofDataTransmissionsComplete() const;
-  bool allTofDataTransmissionsComplete(int& ready_sensors_count) const;
+  bool allTofDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
   bool allThermalDataTransmissionsComplete() const;
-  bool allThermalDataTransmissionsComplete(int& ready_sensors_count) const;
+  bool allThermalDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
   bool allEEPROMTransmissionsComplete() const;
 
   void resetDevices();
   int enumerateDevices();
-  void setBRS(bool brs_enable);
+  void setBrs(bool brs_enable);
   void syncLight();
   void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   void requestEEPROM();
   void requestTofMeasurement();
-  void fetchTofData();
+  void fetchTofMeasurement();
   void requestThermalMeasurement();
-  void fetchThermalData();
+  void fetchThermalMeasurement();
 
   bool stopThermalCalibration();
-  bool startThermalCalibration(size_t window);
+  bool startThermalCalibration(unsigned int window);
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
@@ -57,12 +57,12 @@ private:
   std::vector<std::unique_ptr<sensor::SensorBoard> > _sensor_vec;
 
   std::atomic<bool> _enumeration_flag;
-  std::atomic<size_t> _enumeration_count;
+  std::atomic<unsigned int> _enumeration_count;
 
-  size_t _active_tof_sensors;
-  size_t _active_thermal_sensors;
-  size_t _tof_measurement_count;
-  size_t _thermal_measurement_count;
+  unsigned int _active_tof_sensors;
+  unsigned int _active_thermal_sensors;
+  unsigned int _tof_measurement_count;
+  unsigned int _thermal_measurement_count;
 };
 
 } // namespace bus

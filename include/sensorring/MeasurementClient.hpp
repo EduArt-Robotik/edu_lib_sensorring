@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "CustomTypes.hpp"
 
 namespace eduart {
@@ -7,17 +9,32 @@ namespace eduart {
 namespace manager {
 
 /**
- * @enum WorkerState
+ * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
  * @author Hannes Duske
  * @date 25.12.2024
  */
-enum class WorkerState {
+enum class ManagerState {
+  Uninitialized,
   Initialized,
   Running,
   Shutdown,
   Error
 };
+
+/**
+ * @brief Function to convert the ManagerState enum class members to string
+ * @param[in] state to be converted to a string
+ * @return Name of the state written out as string
+ */
+std::string to_string(ManagerState state);
+
+/**
+ * @brief  Output stream operator for the ManagerState enum class members
+ * @param[in] state to be printed as stream
+ * @return Stream of the states name written out
+ */
+std::ostream& operator<<(std::ostream& os, ManagerState state);
 
 /**
  * @class MeasurementClient
@@ -31,9 +48,9 @@ class MeasurementClient {
 public:
   /**
    * Callback method for state changes of the state machine worker
-   * @param[in] status the new status of the state machine worker
+   * @param[in] state the new state of the state machine worker
    */
-  virtual void onStateChange([[maybe_unused]] const WorkerState status) {};
+  virtual void onStateChange([[maybe_unused]] const ManagerState state) {};
 
   /**
    * Callback method for new Time-of-Flight sensor measurements. Returns a

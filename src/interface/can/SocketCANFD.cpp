@@ -4,12 +4,12 @@
 #include <chrono>
 #include <fcntl.h>
 #include <net/if.h>
-#include <stdexcept>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "interface/ComEndpoints.hpp"
 #include "logger/Logger.hpp"
 
 #include "canprotocol.hpp"
@@ -23,10 +23,11 @@ SocketCANFD::SocketCANFD(std::string interface_name)
     , _soc(0) {
 
   if (!openInterface(interface_name)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Cannot open interface: " + interface_name);
+    closeInterface();
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + interface_name);
   }
 
-  _endpoints = ComEndpoint::createEndpoints();
+  _endpoints = ComEndpoint::createStaticEndpoints();
   fillEndpointMap();
   startListener();
 }
@@ -47,22 +48,40 @@ bool SocketCANFD::openInterface(std::string interface_name) {
 
   int canfd_enable = 1;
   if (setsockopt(_soc, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enable, sizeof(canfd_enable)) < 0) {
-    perror("Cannot set CAN FD frames");
-    return -1;
-  }
-
-  addr.can_family = AF_CAN;
-  strcpy(ifr.ifr_name, interface_name.c_str());
-
-  if (ioctl(_soc, SIOCGIFINDEX, &ifr) < 0) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to set CAN FD mode");
     return false;
   }
 
-  addr.can_ifindex = ifr.ifr_ifindex;
+  strcpy(ifr.ifr_name, interface_name.c_str());
+  ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 
+  // Get interface flags
+  if (ioctl(_soc, SIOCGIFFLAGS, &ifr) < 0) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to get interface flags");
+    return false;
+  }
+
+  if (!(ifr.ifr_flags & IFF_UP)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "CAN interface \"" + interface_name + "\" is DOWN");
+    return false;
+  }
+
+  if (!(ifr.ifr_flags & IFF_RUNNING)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "CAN interface \"" + interface_name + "\" is UP but not RUNNING (no carrier)");
+    return false;
+  }
+
+  // Get interface index
+  if (ioctl(_soc, SIOCGIFINDEX, &ifr) < 0) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to get interface index");
+    return false;
+  }
+  addr.can_family  = AF_CAN;
+  addr.can_ifindex = ifr.ifr_ifindex;
   fcntl(_soc, F_SETFL, O_NONBLOCK);
 
   if (bind(_soc, (sockaddr*)&addr, sizeof(addr)) < 0) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to bind socket: " + std::string(strerror(errno)) + " [" + std::to_string(errno) + "]");
     return false;
   }
 
@@ -189,14 +208,18 @@ void SocketCANFD::addToFSensorToEndpointMap(std::size_t idx) {
   canid_t canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
-  _id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = canid_tof_data_in + idx;
+  auto value                  = "tof" + std::to_string(idx) + "_data";
+  _id_map[ComEndpoint(value)] = canid_tof_data_in + idx;
+  _endpoints.emplace(value);
 }
 
 void SocketCANFD::addThermalSensorToEndpointMap(std::size_t idx) {
   canid_t canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
-  _id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = canid_thermal_data_in + idx;
+  auto value                  = "thermal" + std::to_string(idx) + "_data";
+  _id_map[ComEndpoint(value)] = canid_thermal_data_in + idx;
+  _endpoints.emplace(value);
 }
 
 canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint) {
@@ -210,7 +233,8 @@ ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id) {
   if (it != _id_map.end()) {
     return it->first;
   } else {
-    throw std::runtime_error("No Endpoint found for given CAN ID");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
+    return ComEndpoint("");
   }
 };
 

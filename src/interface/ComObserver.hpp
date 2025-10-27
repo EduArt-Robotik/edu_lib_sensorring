@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <set>
 #include <vector>
 
 #include "ComEndpoints.hpp"
@@ -30,14 +31,22 @@ public:
   /**
    * Add a ComEndpoint to the list of observed endpoints.
    * @param[in] target ComEndpoint which will trigger the notify callback on future messages.
+   * @return returns true if the new endpoint was added successfully
    */
-  void addEndpoint(const ComEndpoint target);
+  bool addEndpoint(const ComEndpoint target);
+
+  /**
+   * Remove a ComEndpoint to the list of observed endpoints.
+   * @param[in] target ComEndpoint which will no longer trigger the notify callback on future messages.
+   * @return returns true if the new endpoint was removed successfully
+   */
+  bool removeEndpoint(const ComEndpoint target);
 
   /**
    * Get a list of all ComEndpoints that currently trigger the notify callback.
    * @return Vector of all subscribed endpoints.
    */
-  const std::vector<ComEndpoint>& getEndpoints() const;
+  const std::set<ComEndpoint>& getEndpoints() const;
 
   /**
    * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific
@@ -62,7 +71,7 @@ public:
   virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
-  std::vector<ComEndpoint> _endpoints;
+  std::set<ComEndpoint> _endpoints;
 
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };

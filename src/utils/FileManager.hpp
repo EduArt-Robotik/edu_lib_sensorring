@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "sensors/hardware/heimann_htpa32.hpp"
+
 #include "CustomTypes.hpp"
-#include "heimann_htpa32.hpp"
 
 namespace eduart {
 
@@ -52,7 +53,7 @@ public:
 
 // concrete types that are used in the program
 template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
-template class filemanager::StructHandler<heimannsensor::HTPA32Eeprom>;
+template class filemanager::StructHandler<sensor::htpa32::HTPA32Eeprom>;
 
 } // namespace filemanager
 

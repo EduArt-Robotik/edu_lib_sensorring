@@ -1,6 +1,5 @@
 #include "MeasurementManagerImpl.hpp"
 
-#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -9,6 +8,7 @@
 #include "interface/ComManager.hpp"
 #include "logger/Logger.hpp"
 
+#include "MeasurementClient.hpp"
 #include "Parameters.hpp"
 #include "SensorBoard.hpp"
 #include "SensorBus.hpp"
@@ -19,8 +19,26 @@ namespace eduart {
 namespace manager {
 
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
-    : _params(params) {
+    : _params(params)
+    , _manager_state(ManagerState::Uninitialized)
+    , _measurement_state(MeasurementState::init)
+    , _tof_enabled(false)
+    , _thermal_enabled(false)
+    , _first_measurement(true)
+    , _tof_measurement_period(1.0F / params.frequency_tof_hz)
+    , _thermal_measurement_period(1.0F / params.frequency_thermal_hz)
+    , _last_tof_measurement_timestamp(std::chrono::steady_clock::now())
+    , _last_thermal_measurement_timestamp(std::chrono::steady_clock::now())
+    , _is_tof_throttled(params.frequency_tof_hz > 0.0)
+    , _is_thermal_throttled(params.frequency_thermal_hz > 0.0)
+    , _thermal_measurement_flag(false)
+    , _light_mode(light::LightMode::Off)
+    , _light_color{ 0, 0, 0 }
+    , _light_brightness(0)
+    , _light_update_flag(false)
+    , _is_running(false) {
 
+  // Assemble the sensor ring
   std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
   for (const auto& bus_params : params.ring_params.bus_param_vec) {
     auto interface = com::ComManager::getInstance()->createInterface(bus_params.interface_name, bus_params.type);
@@ -38,22 +56,9 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
 
     bus_vec.push_back(std::make_unique<bus::SensorBus>(interface, std::move(board_vec)));
   }
-
   _sensor_ring = std::make_unique<ring::SensorRing>(params.ring_params, std::move(bus_vec));
-  init();
-}
-
-MeasurementManagerImpl::~MeasurementManagerImpl() {
-  stopMeasuring();
-}
-
-void MeasurementManagerImpl::init() {
-  _is_tof_throttled     = _params.frequency_tof_hz > 0.0;
-  _is_thermal_throttled = _params.frequency_thermal_hz > 0.0;
 
   // check if there are active tof or thermal sensors
-  _tof_enabled     = false;
-  _thermal_enabled = false;
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (size_t j = 0; j < sensor_bus->getSensorCount(); j++) {
       _tof_enabled |= sensor_bus->isTofEnabled(j);
@@ -61,23 +66,12 @@ void MeasurementManagerImpl::init() {
     }
   }
 
-  _is_running               = false;
-  _first_measurement        = true;
-  _thermal_measurement_flag = false;
-
-  _light_mode        = light::LightMode::Off;
-  _light_brightness  = 0;
-  _light_color[0]    = 0;
-  _light_color[1]    = 0;
-  _light_color[2]    = 0;
-  _light_update_flag = false;
-
-  _last_tof_measurement_timestamp_s     = std::chrono::steady_clock::now();
-  _last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
-
   // prepare state machine
-  notifyState(WorkerState::Initialized);
-  _measurement_state = MeasurementState::init;
+  _manager_state = ManagerState::Initialized;
+}
+
+MeasurementManagerImpl::~MeasurementManagerImpl() {
+  stopMeasuring();
 }
 
 void MeasurementManagerImpl::enableTofMeasurement(bool state) {
@@ -134,38 +128,43 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 }
 
 /* =======================================================================================
-        Handle observers
+        Handle clients
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* observer) {
-  if (observer) {
-    // check if the observer is already registered
-    if (std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end()) {
-      _observer_vec.push_back(observer);
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
+  if (client) {
+    auto result = _observers.insert(client);
+
+    // Check if the client was registered
+    if (result.second) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new measurement client");
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client is already registered");
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be registered is not valid");
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* observer) {
-  if (observer) {
-    // check if the observer is already registered
-    const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
-    if (it != _observer_vec.end()) {
-      _observer_vec.erase(it);
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
+  if (client) {
+    auto result = _observers.erase(client);
+
+    // Check if the client was removed
+    if (result > 0) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Removed measurement client");
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not registered");
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
   }
 }
 
 int MeasurementManagerImpl::notifyToFData() {
   int error_frames = 0;
-  std::vector<measurement::TofMeasurement> raw_measurement_vec, tansformed_measurement_vec;
+  std::vector<measurement::TofMeasurement> raw_measurement_vec, transformed_measurement_vec;
 
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
@@ -178,26 +177,26 @@ int MeasurementManagerImpl::notifyToFData() {
           error_frames++;
         }
 
-        auto [tansformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
+        auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
         if (transformed_error == sensor::SensorState::SensorOK) {
-          if (!tansformed_measurement.point_cloud.empty())
-            tansformed_measurement_vec.push_back(tansformed_measurement);
+          if (!transformed_measurement.point_cloud.empty())
+            transformed_measurement_vec.push_back(transformed_measurement);
         }
       }
     }
   }
 
   if (!raw_measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+    for (auto observer : _observers) {
       if (observer)
         observer->onRawTofMeasurement(raw_measurement_vec);
     }
   }
 
-  if (!tansformed_measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+  if (!transformed_measurement_vec.empty()) {
+    for (auto observer : _observers) {
       if (observer)
-        observer->onTransformedTofMeasurement(tansformed_measurement_vec);
+        observer->onTransformedTofMeasurement(transformed_measurement_vec);
     }
   }
 
@@ -223,7 +222,7 @@ int MeasurementManagerImpl::notifyThermalData() {
   }
 
   if (!measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+    for (auto observer : _observers) {
       if (observer)
         observer->onThermalMeasurement(measurement_vec);
     }
@@ -232,16 +231,17 @@ int MeasurementManagerImpl::notifyThermalData() {
   return error_frames;
 }
 
-void MeasurementManagerImpl::notifyState(const WorkerState state) {
-  _manager_state = state;
-
-  for (auto observer : _observer_vec) {
-    if (observer)
-      observer->onStateChange(state);
+void MeasurementManagerImpl::notifyState(const ManagerState state) {
+  if (_manager_state != state) {
+    _manager_state = state;
+    for (auto observer : _observers) {
+      if (observer)
+        observer->onStateChange(state);
+    }
   }
 }
 
-WorkerState MeasurementManagerImpl::getWorkerState() const {
+ManagerState MeasurementManagerImpl::getManagerState() const {
   return _manager_state;
 }
 
@@ -255,7 +255,7 @@ bool MeasurementManagerImpl::measureSome() {
 
   if (!_is_running) {
     if (_tof_enabled || _thermal_enabled) {
-      notifyState(WorkerState::Running);
+      notifyState(ManagerState::Running);
       StateMachine();
       error = true;
     }
@@ -265,35 +265,29 @@ bool MeasurementManagerImpl::measureSome() {
 }
 
 bool MeasurementManagerImpl::startMeasuring() {
-  bool error = false;
-
   if (!_is_running) {
     if (_tof_enabled || _thermal_enabled) {
-      // begin state machine operation
       _is_running    = true;
       _worker_thread = std::thread(&MeasurementManagerImpl::StateMachineWorker, this);
-      notifyState(WorkerState::Running);
-      error = true;
+      notifyState(ManagerState::Running);
+      return true;
     }
   }
 
-  return error;
+  return false;
 }
 
 bool MeasurementManagerImpl::stopMeasuring() {
-  bool error = false;
-
   if (_is_running) {
     _is_running = false;
     while (!_worker_thread.joinable()) {
     }
-
     _worker_thread.join();
-    notifyState(WorkerState::Shutdown);
-    error = true;
+    notifyState(ManagerState::Shutdown);
+    return true;
   }
 
-  return error;
+  return false;
 }
 
 /* =======================================================================================
@@ -327,8 +321,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
     _sensor_ring->resetDevices();
-    std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time
-                                                          // to init their vl53l8 sensors!
+    std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors
 
     // state transition
     _measurement_state = MeasurementState::sync_lights;
@@ -396,11 +389,11 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::pre_loop_init: {
     // enable bit rate switching
-    _sensor_ring->setBRS(_params.enable_brs);
+    _sensor_ring->setBrs(_params.enable_brs);
 
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
-    _last_tof_measurement_timestamp_s     = std::chrono::steady_clock::now();
-    _last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
+    _last_tof_measurement_timestamp     = std::chrono::steady_clock::now();
+    _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
 
     // state transition
     _measurement_state = MeasurementState::set_lights;
@@ -426,7 +419,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::request_tof_measurement: {
     if (_tof_enabled)
       _sensor_ring->requestTofMeasurement();
-    _last_tof_measurement_timestamp_s = std::chrono::steady_clock::now();
+    _last_tof_measurement_timestamp = std::chrono::steady_clock::now();
 
     // state transition
     _measurement_state = MeasurementState::request_thermal_measurement;
@@ -438,15 +431,15 @@ void MeasurementManagerImpl::StateMachine() {
       if (!_thermal_measurement_flag) {
         bool measure_thermal = true;
         if (_is_thermal_throttled) {
-          if (std::chrono::duration<double>(1.0F / _params.frequency_thermal_hz) > (std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp_s)) {
+          if ((std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp) < _thermal_measurement_period) {
             measure_thermal = false;
           }
         }
 
         if (measure_thermal) {
           _sensor_ring->requestThermalMeasurement();
-          _last_thermal_measurement_timestamp_s = std::chrono::steady_clock::now();
-          _thermal_measurement_flag             = true;
+          _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
+          _thermal_measurement_flag           = true;
         }
       }
     }
@@ -475,8 +468,7 @@ void MeasurementManagerImpl::StateMachine() {
       }
     } else {
       logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Timeout occured while waiting for completion of "
-                                       "measurements.");
+          logger::LogVerbosity::Error, "Timeout occurred while waiting for completion of measurements.");
       _measurement_state = MeasurementState::error_handler;
     }
     break;
@@ -485,12 +477,12 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_tof_data: {
     // fetch and publish a tof measurement
     if (_tof_enabled) {
-      _sensor_ring->fetchTofData();
+      _sensor_ring->fetchTofMeasurement();
       success = _sensor_ring->waitForAllTofDataTransmissionsComplete();
       if (success) {
         int error = notifyToFData();
         if (error != 0)
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occured while parsing tof measurements from " + std::to_string(error) + " sensor(s)");
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while parsing tof measurements from " + std::to_string(error) + " sensor(s)");
       }
     }
 
@@ -498,7 +490,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (success) {
       _measurement_state = MeasurementState::fetch_thermal_data;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occured while fetching tof measurements.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching tof measurements.");
       _measurement_state = MeasurementState::error_handler;
     }
     break;
@@ -507,12 +499,12 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_thermal_data: {
     // fetch and publish a thermal measurement
     if (_thermal_enabled and _thermal_measurement_flag) {
-      _sensor_ring->fetchThermalData();
+      _sensor_ring->fetchThermalMeasurement();
       success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
       if (success) {
         int error = notifyThermalData();
         if (error != 0)
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occured while parsing thermal measurements from " + std::to_string(error) + " sensor(s)");
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while parsing thermal measurements from " + std::to_string(error) + " sensor(s)");
       }
       _thermal_measurement_flag = false;
     }
@@ -521,27 +513,25 @@ void MeasurementManagerImpl::StateMachine() {
     if (success) {
       _measurement_state = MeasurementState::throttle_measurement;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occured while fetching thermal measurements.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching thermal measurements.");
       _measurement_state = MeasurementState::error_handler;
     }
     break;
   }
 
   case MeasurementState::throttle_measurement: {
-    if (_is_tof_throttled) {
+    if (_tof_enabled && _is_tof_throttled) {
       // throttled mode: wait until next measurement period
-      std::this_thread::sleep_until(_last_tof_measurement_timestamp_s + std::chrono::duration<double>(1.0F / _params.frequency_tof_hz));
-    } else {
-      // free running mode: wait until current measurements are finished
-      if (_tof_enabled)
-        success &= _sensor_ring->waitForAllTofMeasurementsReady();
+      std::this_thread::sleep_until(_last_tof_measurement_timestamp + _tof_measurement_period);
     }
+
+    success &= _sensor_ring->waitForAllTofMeasurementsReady();
 
     // state transition
     if (success) {
       _measurement_state = MeasurementState::set_lights;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occured while taking tof measurements.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while taking tof measurements.");
       _measurement_state = MeasurementState::error_handler;
     }
     break;
@@ -553,7 +543,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::error_handler: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler called.");
-    notifyState(WorkerState::Error);
+    notifyState(ManagerState::Error);
     _measurement_state = MeasurementState::shutdown;
     break;
   }
@@ -564,7 +554,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::shutdown: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down state machine.");
-    notifyState(WorkerState::Shutdown);
+    notifyState(ManagerState::Shutdown);
     _is_running = false;
     break;
   }

@@ -33,6 +33,10 @@ public:
   ThermalSensor* getThermal() const;
   LedLight* getLed() const;
 
+  static void cmdReset(com::ComInterface* interface);
+  static void cmdSetBrs(com::ComInterface* interface, bool enable);
+  static void cmdEnumerateBoards(com::ComInterface* interface);
+
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:

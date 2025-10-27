@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interface/ComInterface.hpp"
 #include "BaseSensor.hpp"
 #include "Parameters.hpp"
 
@@ -13,6 +14,9 @@ public:
   ~LedLight();
 
   const LightParams& getParams() const;
+
+  static void cmdSyncLight(com::ComInterface* interface);
+  static void cmdSetLight(com::ComInterface* interface, light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
 
 private:
   const LightParams _params;

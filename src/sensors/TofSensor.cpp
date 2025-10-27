@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <cstring>
 
+#include "interface/can/canprotocol.hpp"
+#include "logger/Logger.hpp"
+
 namespace eduart {
 
 namespace sensor {
@@ -58,7 +61,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
     // transmission complete message
   } else if (msg_size == 2) {
     if (_new_data_in_buffer_flag) {
-      _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
+      _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, vl53l8::TOF_RESOLUTION);
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
       _new_data_in_buffer_flag        = false;
       _new_measurement_ready_flag     = true;
@@ -72,7 +75,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
 
 measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const {
   measurement::TofMeasurement measurement;
-  measurement.point_cloud.reserve(TOF_RESOLUTION);
+  measurement.point_cloud.reserve(vl53l8::TOF_RESOLUTION);
   measurement.frame_id = frame_id;
 
   uint16_t distance_raw = 0;
@@ -90,8 +93,8 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
       point_distance = (float)distance_raw / 4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
       point_sigma    = (float)sigma_raw / 128.0 / 1000.0F;   // Factor 128 for fixed point conversion, Factor 1000 from mm to m
 
-      point.x() = point_distance * lut_tan_x[i];
-      point.y() = point_distance * lut_tan_y[i];
+      point.x() = point_distance * vl53l8::lut_tan_x[i];
+      point.y() = point_distance * vl53l8::lut_tan_y[i];
       point.z() = point_distance;
     }
 
@@ -100,6 +103,28 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
 
   measurement.point_cloud.shrink_to_fit();
   return measurement;
+}
+
+void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
+  }
+}
+
+void TofSensor::fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
+  }
 }
 
 measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {

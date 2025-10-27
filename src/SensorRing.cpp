@@ -16,7 +16,7 @@ SensorRing::SensorRing(RingParams params, std::vector<std::unique_ptr<bus::Senso
   if (_params.timeout == std::chrono::milliseconds(0)) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
   } else if (_params.timeout < std::chrono::milliseconds(200)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 }
 
@@ -51,9 +51,9 @@ bool SensorRing::enumerateDevices() {
   return success;
 }
 
-void SensorRing::setBRS(bool brs_enable) {
+void SensorRing::setBrs(bool brs_enable) {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->setBRS(brs_enable);
+    sensor_bus->setBrs(brs_enable);
   }
 }
 
@@ -76,18 +76,19 @@ bool SensorRing::getEEPROM() {
     sensor_bus->requestEEPROM();
   }
 
-  // wait until all sensors sent their response. 1 sec timeout
+  // wait until all sensors sent their response. Timeout protected
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allEEPROMTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(100));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -103,14 +104,15 @@ bool SensorRing::waitForAllTofMeasurementsReady() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allTofMeasurementsReady();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -137,14 +139,15 @@ bool SensorRing::waitForAllTofDataTransmissionsComplete() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allTofDataTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -153,21 +156,22 @@ bool SensorRing::waitForAllThermalDataTransmissionsComplete() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allThermalDataTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
 
-void SensorRing::fetchTofData() {
+void SensorRing::fetchTofMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->fetchTofData();
+    sensor_bus->fetchTofMeasurement();
   }
 }
 
@@ -177,9 +181,9 @@ void SensorRing::requestThermalMeasurement() {
   }
 }
 
-void SensorRing::fetchThermalData() {
+void SensorRing::fetchThermalMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->fetchThermalData();
+    sensor_bus->fetchThermalMeasurement();
   }
 }
 
