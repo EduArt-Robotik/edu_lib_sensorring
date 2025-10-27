@@ -151,8 +151,10 @@ private:
   bool _tof_enabled;
   bool _thermal_enabled;
   bool _first_measurement;
-  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp_s;
-  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp_s;
+  std::chrono::duration<double> _tof_measurement_period;
+  std::chrono::duration<double> _thermal_measurement_period;
+  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp;
+  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp;
 
   bool _is_tof_throttled;
   bool _is_thermal_throttled;

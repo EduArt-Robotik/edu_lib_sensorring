@@ -80,14 +80,15 @@ bool SensorRing::getEEPROM() {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allEEPROMTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(100));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -103,14 +104,15 @@ bool SensorRing::waitForAllTofMeasurementsReady() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allTofMeasurementsReady();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -137,14 +139,15 @@ bool SensorRing::waitForAllTofDataTransmissionsComplete() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allTofDataTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
@@ -153,14 +156,15 @@ bool SensorRing::waitForAllThermalDataTransmissionsComplete() const {
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 
-  while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout) {
+  do {
     ready = true;
     for (auto& sensor_bus : _bus_vec) {
       ready &= sensor_bus->allThermalDataTransmissionsComplete();
     }
-
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
-  }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
 
   return ready;
 }
