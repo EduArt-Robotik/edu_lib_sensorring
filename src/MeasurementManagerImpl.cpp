@@ -134,32 +134,37 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 }
 
 /* =======================================================================================
-        Handle observers
+        Handle clients
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* observer) {
-  if (observer) {
-    // check if the observer is already registered
-    if (std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end()) {
-      _observer_vec.push_back(observer);
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
+  if (client) {
+    auto result = _observers.insert(client);
+
+    // Check if the client was registered
+    if (result.second) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new measurement client");
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client is already registered");
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be registered is not valid");
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* observer) {
-  if (observer) {
-    // check if the observer is already registered
-    const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
-    if (it != _observer_vec.end()) {
-      _observer_vec.erase(it);
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new observer");
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
+  if (client) {
+    auto result = _observers.erase(client);
+
+    // Check if the client was removed
+    if (result > 0) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Removed measurement client");
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Observer already registered");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not registered");
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
   }
 }
 
@@ -188,14 +193,14 @@ int MeasurementManagerImpl::notifyToFData() {
   }
 
   if (!raw_measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+    for (auto observer : _observers) {
       if (observer)
         observer->onRawTofMeasurement(raw_measurement_vec);
     }
   }
 
   if (!tansformed_measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+    for (auto observer : _observers) {
       if (observer)
         observer->onTransformedTofMeasurement(tansformed_measurement_vec);
     }
@@ -223,7 +228,7 @@ int MeasurementManagerImpl::notifyThermalData() {
   }
 
   if (!measurement_vec.empty()) {
-    for (auto observer : _observer_vec) {
+    for (auto observer : _observers) {
       if (observer)
         observer->onThermalMeasurement(measurement_vec);
     }
@@ -235,7 +240,7 @@ int MeasurementManagerImpl::notifyThermalData() {
 void MeasurementManagerImpl::notifyState(const WorkerState state) {
   _manager_state = state;
 
-  for (auto observer : _observer_vec) {
+  for (auto observer : _observers) {
     if (observer)
       observer->onStateChange(state);
   }

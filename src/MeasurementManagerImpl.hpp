@@ -3,9 +3,9 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <set>
 #include <string>
 #include <thread>
-#include <vector>
 
 #include "MeasurementClient.hpp"
 #include "Parameters.hpp"
@@ -164,7 +164,7 @@ private:
   std::uint8_t _light_brightness;
   std::atomic<bool> _light_update_flag;
 
-  std::vector<MeasurementClient*> _observer_vec;
+  std::set<MeasurementClient*> _observers;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
