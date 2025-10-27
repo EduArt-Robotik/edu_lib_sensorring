@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "CustomTypes.hpp"
 
 namespace eduart {
@@ -21,6 +23,20 @@ enum class ManagerState {
 };
 
 /**
+ * @brief Function to convert the ManagerState enum class members to string
+ * @param[in] state to be converted to a string
+ * @return Name of the state written out as string
+ */
+std::string to_string(ManagerState state);
+
+/**
+ * @brief  Output stream operator for the ManagerState enum class members
+ * @param[in] state to be printed as stream
+ * @return Stream of the states name written out
+ */
+std::ostream& operator<<(std::ostream& os, ManagerState state);
+
+/**
  * @class MeasurementClient
  * @brief Observer interface of the MeasurementManager class. Defines the
  * callback methods that are triggered by the MeasurementManager. It is possible
@@ -32,9 +48,9 @@ class MeasurementClient {
 public:
   /**
    * Callback method for state changes of the state machine worker
-   * @param[in] status the new status of the state machine worker
+   * @param[in] state the new state of the state machine worker
    */
-  virtual void onStateChange([[maybe_unused]] const WorkerState status) {};
+  virtual void onStateChange([[maybe_unused]] const ManagerState state) {};
 
   /**
    * Callback method for new Time-of-Flight sensor measurements. Returns a

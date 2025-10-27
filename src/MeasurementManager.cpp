@@ -56,8 +56,8 @@ void MeasurementManager::unregisterClient(MeasurementClient* observer) {
   return _mm_impl->unregisterClient(observer);
 }
 
-WorkerState MeasurementManager::getWorkerState() const {
-  return _mm_impl->getWorkerState();
+ManagerState MeasurementManager::getManagerState() const {
+  return _mm_impl->getManagerState();
 }
 
 /* =======================================================================================

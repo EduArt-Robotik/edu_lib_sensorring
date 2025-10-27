@@ -78,9 +78,9 @@ public:
 
   /**
    * Get the health status of the state machine
-   * @return Current worker state
+   * @return Current manager state
    */
-  WorkerState getWorkerState() const;
+  ManagerState getManagerState() const;
 
   /**
    * Get the parameters with which the MeasurementManager was initialized
