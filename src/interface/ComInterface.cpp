@@ -76,7 +76,7 @@ void ComInterface::stopListener() {
   }
 }
 
-const std::vector<ComEndpoint>& ComInterface::getEndpoints() {
+const std::set<ComEndpoint>& ComInterface::getEndpoints() {
   return _endpoints;
 }
 

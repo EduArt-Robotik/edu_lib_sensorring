@@ -37,9 +37,9 @@ public:
 
   /**
    * Get all known ComEndpoints.
-   * @return Vector of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
+   * @return Set of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
    */
-  const std::vector<ComEndpoint>& getEndpoints();
+  const std::set<ComEndpoint>& getEndpoints();
 
   /**
    * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
@@ -115,7 +115,7 @@ protected:
 
   std::mutex _mutex;
 
-  std::vector<ComEndpoint> _endpoints;
+  std::set<ComEndpoint> _endpoints;
 
   std::set<ComObserver*> _observers;
 

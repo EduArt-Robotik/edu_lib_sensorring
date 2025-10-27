@@ -10,11 +10,23 @@ ComObserver::ComObserver() {
 ComObserver::~ComObserver() {
 }
 
-void ComObserver::addEndpoint(const ComEndpoint canid) {
-  _endpoints.push_back(canid);
+bool ComObserver::addEndpoint(const ComEndpoint canid) {
+  auto result = _endpoints.insert(canid);
+  if (result.second) {
+    return true;
+  }
+  return false;
 }
 
-const std::vector<ComEndpoint>& ComObserver::getEndpoints() const {
+bool ComObserver::removeEndpoint(const ComEndpoint canid) {
+  auto result = _endpoints.erase(canid);
+  if (result > 0) {
+    return true;
+  }
+  return false;
+}
+
+const std::set<ComEndpoint>& ComObserver::getEndpoints() const {
   return _endpoints;
 }
 
