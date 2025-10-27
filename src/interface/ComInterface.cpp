@@ -7,10 +7,9 @@ namespace eduart {
 namespace com {
 
 ComInterface::ComInterface(std::string interface_name)
-    : _interface_name(interface_name) {
-
-  _listenerIsRunning = false;
-  _shutDownListener  = false;
+    : _listenerIsRunning(false)
+    , _shutDownListener(false)
+    , _interface_name(interface_name) {
 }
 
 ComInterface::~ComInterface() {
