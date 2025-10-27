@@ -146,7 +146,7 @@ void USBtingo::addToFSensorToEndpointMap(std::size_t idx) {
   canid_t canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
-  auto value = "tof" + std::to_string(idx) + "_data";
+  auto value                  = "tof" + std::to_string(idx) + "_data";
   _id_map[ComEndpoint(value)] = canid_tof_data_in + idx;
   _endpoints.emplace(value);
 }
@@ -155,7 +155,7 @@ void USBtingo::addThermalSensorToEndpointMap(std::size_t idx) {
   canid_t canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
-  auto value = "thermal" + std::to_string(idx) + "_data";
+  auto value                  = "thermal" + std::to_string(idx) + "_data";
   _id_map[ComEndpoint(value)] = canid_thermal_data_in + idx;
   _endpoints.emplace(value);
 }
@@ -171,7 +171,8 @@ ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
   if (it != _id_map.end()) {
     return it->first;
   } else {
-    throw std::runtime_error("No Endpoint found for given CAN ID");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
+    return ComEndpoint("");
   }
 }
 
