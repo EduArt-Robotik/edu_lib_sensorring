@@ -36,7 +36,7 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* inte
   _calibration_filename = "sensor" + std::to_string(_idx) + "_hpta32_calibration.txt";
 
   if (_params.use_eeprom_file) {
-    _got_eeprom = filemanager::StructHandler<heimannsensor::HTPA32Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+    _got_eeprom = filemanager::StructHandler<htpa32::HTPA32Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
   }
 
   if (_params.use_calibration_file) {
@@ -103,20 +103,20 @@ void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, 
   if (!_got_eeprom) {
 
     // check if there is still data to be written
-    if ((_rx_buffer_offset + msg_size) < (int)sizeof(heimannsensor::HTPA32Eeprom) + MAX_MSG_LENGTH) {
+    if ((_rx_buffer_offset + msg_size) < (int)sizeof(htpa32::HTPA32Eeprom) + MAX_MSG_LENGTH) {
 
       // have to account fot last few values of the eeprom because sizeof(ETPA32Eeprom) is not dividable by 64 ( = canfd
       // msg length)
-      std::size_t len = (int)sizeof(heimannsensor::HTPA32Eeprom) - _rx_buffer_offset;
+      std::size_t len = (int)sizeof(htpa32::HTPA32Eeprom) - _rx_buffer_offset;
       if (len > msg_size)
         len = msg_size;
 
       std::copy_n(data.begin(), len, (uint8_t*)&_eeprom + _rx_buffer_offset);
       _rx_buffer_offset += len;
 
-      if (_rx_buffer_offset >= (int)sizeof(heimannsensor::HTPA32Eeprom)) {
+      if (_rx_buffer_offset >= (int)sizeof(htpa32::HTPA32Eeprom)) {
         _got_eeprom = true;
-        filemanager::StructHandler<heimannsensor::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+        filemanager::StructHandler<htpa32::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
       }
     }
 
@@ -178,7 +178,7 @@ void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, 
   }
 }
 
-const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
+const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
   uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
   uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
@@ -219,7 +219,7 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     // look-up table and bilinear interpolation
     unsigned int table_col = 0;
     for (int j = 0; j < NROFTAELEMENTS; j++) {
-      if (t_ambient > heimannsensor::XTATemps[j]) {
+      if (t_ambient > htpa32::XTATemps[j]) {
         table_col = j;
       }
     }
@@ -228,13 +228,11 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     table_row              = table_row >> ADEXPBITS; // ToDo: Table row too large. Causes Segfault when accessing the TempTable
 
     if ((table_row < NROFADELEMENTS) && (table_col < NROFTAELEMENTS)) {
-      int dta = t_ambient - heimannsensor::XTATemps[table_col];
+      int dta = t_ambient - htpa32::XTATemps[table_col];
 
-      double vx
-          = ((((int32_t)heimannsensor::TempTable[table_row][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)heimannsensor::TempTable[table_row][table_col];
-      double vy = ((((int32_t)heimannsensor::TempTable[table_row + 1][table_col + 1] - (int32_t)heimannsensor::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE)
-                  + (int32_t)heimannsensor::TempTable[table_row + 1][table_col];
-      buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)heimannsensor::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
+      double vx = ((((int32_t)htpa32::TempTable[table_row][table_col + 1] - (int32_t)htpa32::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)htpa32::TempTable[table_row][table_col];
+      double vy = ((((int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (int32_t)htpa32::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)htpa32::TempTable[table_row + 1][table_col];
+      buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)htpa32::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
 
       // apply global offset
       // buffer[i] += _eeprom.global_offset;

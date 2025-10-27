@@ -2,45 +2,49 @@
 
 #include <cstdint>
 
-namespace heimannsensor {
+namespace eduart {
+
+namespace sensor {
+
+namespace htpa32 {
 
 // Needs to be packed because µC memory is directly copied in this struct
 struct __attribute__((__packed__)) HTPA32Eeprom {
   float pixc_min;
   float pixc_max;
-  uint8_t grad_scale;
-  uint16_t tablenumber;
-  uint8_t epsilon;
-  uint8_t mbit_calib;
-  uint8_t bias_calib;
-  uint8_t clk_calib;
-  uint8_t bpa_calib;
-  uint8_t pu_calib;
-  uint8_t arraytype;
-  uint16_t vddth1;
-  uint16_t vddth2;
+  std::uint8_t grad_scale;
+  std::uint16_t tablenumber;
+  std::uint8_t epsilon;
+  std::uint8_t mbit_calib;
+  std::uint8_t bias_calib;
+  std::uint8_t clk_calib;
+  std::uint8_t bpa_calib;
+  std::uint8_t pu_calib;
+  std::uint8_t arraytype;
+  std::uint16_t vddth1;
+  std::uint16_t vddth2;
   float ptat_gradient;
   float ptat_offset;
-  uint16_t ptat_th1;
-  uint16_t ptat_th2;
-  uint8_t vddsc_gradient;
-  uint8_t vddsc_offset;
-  uint8_t global_offset;
-  uint16_t global_gain;
-  uint8_t mbit_user;
-  uint8_t bias_user;
-  uint8_t clk_user;
-  uint8_t bpa_user;
-  uint8_t pu_user;
-  uint32_t device_id;
-  uint8_t norof_deadpix;
-  uint16_t deadpix_addr[24];
-  uint16_t deadpix_mask[12];
-  int16_t vddcomp_gradient[256];
-  int16_t vddcomp_offset[256];
-  int16_t th_gradient[1024];
-  int16_t th_offset[1024];
-  uint16_t p[1024];
+  std::uint16_t ptat_th1;
+  std::uint16_t ptat_th2;
+  std::uint8_t vddsc_gradient;
+  std::uint8_t vddsc_offset;
+  std::uint8_t global_offset;
+  std::uint16_t global_gain;
+  std::uint8_t mbit_user;
+  std::uint8_t bias_user;
+  std::uint8_t clk_user;
+  std::uint8_t bpa_user;
+  std::uint8_t pu_user;
+  std::uint32_t device_id;
+  std::uint8_t norof_deadpix;
+  std::uint16_t deadpix_addr[24];
+  std::uint16_t deadpix_mask[12];
+  std::int16_t vddcomp_gradient[256];
+  std::int16_t vddcomp_offset[256];
+  std::int16_t th_gradient[1024];
+  std::int16_t th_offset[1024];
+  std::uint16_t p[1024];
 };
 
 // DEVICE ADDRESS
@@ -181,7 +185,7 @@ struct __attribute__((__packed__)) HTPA32Eeprom {
 #define E_PIJ          0x1740 // first register of pixel constants (PixC)
 #define EEPROM_SIZE    0x2000 // total number of EEPROM bytes
 
-const unsigned char LUTshape[8][8] = {
+static const unsigned char LUTshape[8][8] = {
   { 0, 0, 0, 0, 0, 0, 0, 0 },
   { 1, 1, 1, 1, 0, 0, 0, 1 },
   { 0, 1, 0, 0, 0, 0, 0, 1 },
@@ -192,7 +196,7 @@ const unsigned char LUTshape[8][8] = {
   { 0, 1, 0, 1, 1, 1, 1, 1 },
 };
 
-const unsigned int TempTable[NROFADELEMENTS][NROFTAELEMENTS] = {
+static const unsigned int TempTable[NROFADELEMENTS][NROFTAELEMENTS] = {
   { 0x0000, 0x0000, 1210,  1841,  2175,  2427,  2638  },
   { 0x0000, 0x0000, 1586,  2001,  2282,  2508,  2703  },
   { 0x0000, 1222,   1810,  2132,  2377,  2582,  2765  },
@@ -1790,8 +1794,9 @@ const unsigned int TempTable[NROFADELEMENTS][NROFTAELEMENTS] = {
   { 11966,  11972,  11978, 11985, 11992, 12000, 12008 }
 };
 
-const unsigned int XTATemps[NROFTAELEMENTS]  = { 2782, 2882, 2982, 3082, 3182, 3282, 3382 };
-const unsigned int YADValues[NROFADELEMENTS] = {
+static const unsigned int XTATemps[NROFTAELEMENTS] = { 2782, 2882, 2982, 3082, 3182, 3282, 3382 };
+
+static const unsigned int YADValues[NROFADELEMENTS] = {
   0,      64,     128,    192,    256,    320,    384,    448,    512,    576,    640,    704,    768,    832,    896,    960,    1024,   1088,   1152,   1216,   1280,   1344,   1408,   1472,   1536,   1600,   1664,   1728,   1792,
   1856,   1920,   1984,   2048,   2112,   2176,   2240,   2304,   2368,   2432,   2496,   2560,   2624,   2688,   2752,   2816,   2880,   2944,   3008,   3072,   3136,   3200,   3264,   3328,   3392,   3456,   3520,   3584,   3648,
   3712,   3776,   3840,   3904,   3968,   4032,   4096,   4160,   4224,   4288,   4352,   4416,   4480,   4544,   4608,   4672,   4736,   4800,   4864,   4928,   4992,   5056,   5120,   5184,   5248,   5312,   5376,   5440,   5504,
@@ -1849,4 +1854,8 @@ const unsigned int YADValues[NROFADELEMENTS] = {
   100224, 100288, 100352, 100416, 100480, 100544, 100608, 100672, 100736, 100800, 100864, 100928, 100992, 101056, 101120, 101184, 101248, 101312, 101376, 101440, 101504, 101568, 101632, 101696, 101760, 101824, 101888, 101952, 102016
 };
 
-} // namespace heimannsensor
+} // namespace htpa32
+
+} // namespace sensor
+
+} // namespace eduart

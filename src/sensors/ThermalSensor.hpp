@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "utils/heimann_htpa32.hpp"
+#include "hardware/heimann_htpa32.hpp"
 
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
@@ -39,10 +39,10 @@ private:
   void rotateLeftImage(measurement::GrayscaleImage& image) const;
   const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
   const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;
-  const measurement::ThermalMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const heimannsensor::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
+  const measurement::ThermalMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
 
   const ThermalSensorParams _params;
-  heimannsensor::HTPA32Eeprom _eeprom;
+  htpa32::HTPA32Eeprom _eeprom;
 
   uint16_t _vdd;
   uint16_t _ptat;

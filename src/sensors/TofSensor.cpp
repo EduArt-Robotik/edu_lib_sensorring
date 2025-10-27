@@ -61,7 +61,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
     // transmission complete message
   } else if (msg_size == 2) {
     if (_new_data_in_buffer_flag) {
-      _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, TOF_RESOLUTION);
+      _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, vl53l8::TOF_RESOLUTION);
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
       _new_data_in_buffer_flag        = false;
       _new_measurement_ready_flag     = true;
@@ -75,7 +75,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
 
 measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const {
   measurement::TofMeasurement measurement;
-  measurement.point_cloud.reserve(TOF_RESOLUTION);
+  measurement.point_cloud.reserve(vl53l8::TOF_RESOLUTION);
   measurement.frame_id = frame_id;
 
   uint16_t distance_raw = 0;
@@ -93,8 +93,8 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
       point_distance = (float)distance_raw / 4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
       point_sigma    = (float)sigma_raw / 128.0 / 1000.0F;   // Factor 128 for fixed point conversion, Factor 1000 from mm to m
 
-      point.x() = point_distance * lut_tan_x[i];
-      point.y() = point_distance * lut_tan_y[i];
+      point.x() = point_distance * vl53l8::lut_tan_x[i];
+      point.y() = point_distance * vl53l8::lut_tan_y[i];
       point.z() = point_distance;
     }
 
