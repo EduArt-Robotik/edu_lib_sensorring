@@ -51,9 +51,9 @@ bool SensorRing::enumerateDevices() {
   return success;
 }
 
-void SensorRing::setBRS(bool brs_enable) {
+void SensorRing::setBrs(bool brs_enable) {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->setBRS(brs_enable);
+    sensor_bus->setBrs(brs_enable);
   }
 }
 
@@ -76,7 +76,7 @@ bool SensorRing::getEEPROM() {
     sensor_bus->requestEEPROM();
   }
 
-  // wait until all sensors sent their response. 1 sec timeout
+  // wait until all sensors sent their response. Timeout protected
   bool ready     = false;
   auto timestamp = std::chrono::steady_clock::now();
 

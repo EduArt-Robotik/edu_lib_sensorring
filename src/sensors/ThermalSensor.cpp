@@ -298,7 +298,7 @@ void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-void ThermalSensor::requestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors) {
+void ThermalSensor::cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
@@ -309,7 +309,7 @@ void ThermalSensor::requestEEPROM(com::ComInterface* interface, std::uint16_t ac
   }
 }
 
-void ThermalSensor::requestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void ThermalSensor::cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
@@ -320,7 +320,7 @@ void ThermalSensor::requestThermalMeasurement(com::ComInterface* interface, std:
   }
 }
 
-void ThermalSensor::fetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void ThermalSensor::cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);

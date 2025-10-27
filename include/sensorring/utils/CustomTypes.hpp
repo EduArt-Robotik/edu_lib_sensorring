@@ -34,16 +34,16 @@ enum class SensorState {
 
 namespace light {
 enum class LightMode {
-  Off,
-  Dimmed,
-  HighBeam,
-  FlashAll,
-  FlashLeft,
-  FlashRight,
-  Pulsation,
-  Rotation,
-  Running,
-  MapDistance
+  Off         = 2,
+  Dimmed      = 3,
+  HighBeam    = 4,
+  FlashAll    = 5,
+  FlashLeft   = 6,
+  FlashRight  = 7,
+  Pulsation   = 8,
+  Rotation    = 9,
+  Running     = 10,
+  MapDistance = 11
 };
 } // namespace light
 

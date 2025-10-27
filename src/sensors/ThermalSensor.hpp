@@ -31,9 +31,9 @@ public:
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
   void onClearDataFlag() override;
 
-  static void requestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void requestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void fetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
 private:
   void rotateLeftImage(measurement::GrayscaleImage& image) const;

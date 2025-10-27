@@ -7,6 +7,7 @@
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "logger/Logger.hpp"
+#include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
 
@@ -75,41 +76,27 @@ size_t SensorBus::getEnumerationCount() const {
   return _enumeration_count;
 }
 
-void SensorBus::setBRS(bool brs_enable) {
-
-  std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, brs_enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
-  _interface->send(com::ComEndpoint("broadcast"), tx_buf);
+void SensorBus::setBrs(bool brs_enable) {
+  sensor::SensorBoard::cmdSetBrs(_interface, brs_enable);
 }
 
 void SensorBus::syncLight() {
-
-  std::vector<uint8_t> tx_buf = { CAN_LIGHT_BEAT, 0x00 };
-  _interface->send(com::ComEndpoint("light"), tx_buf);
+  sensor::LedLight::cmdSyncLight(_interface);
 }
 
 void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-
-  // Map the enum class value to the corresponding index in the command
-  std::uint8_t mode_idx = static_cast<uint8_t>(mode) + 2;
-
-  std::vector<uint8_t> tx_buf = { mode_idx, red, green, blue };
-  _interface->send(com::ComEndpoint("light"), tx_buf);
+  sensor::LedLight::cmdSetLight(_interface, mode, red, green, blue);
 }
 
 void SensorBus::resetDevices() {
-  std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
-  _interface->send(com::ComEndpoint("broadcast"), tx_buf);
+  sensor::SensorBoard::cmdReset(_interface);
 }
 
 int SensorBus::enumerateDevices() {
   _enumeration_flag  = true;
   _enumeration_count = 0;
 
-  std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
-  _interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
-
-  std::vector<uint8_t> tx_buf_fw_rev = { CMD_GET_FW_REV, 0xFF, 0xFF };
-  _interface->send(com::ComEndpoint("broadcast"), tx_buf_fw_rev);
+  sensor::SensorBoard::cmdEnumerateBoards(_interface);
 
   // wait until all sensors sent their response. 100 ms timeout
   unsigned int watchdog = 0;
@@ -132,7 +119,7 @@ void SensorBus::requestEEPROM() {
     active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
-  sensor::ThermalSensor::requestEEPROM(_interface, active_devices);
+  sensor::ThermalSensor::cmdRequestEEPROM(_interface, active_devices);
 }
 
 bool SensorBus::allEEPROMTransmissionsComplete() const {
@@ -153,9 +140,7 @@ void SensorBus::requestTofMeasurement() {
   _tof_measurement_count      = 0;
 
   for (auto& sensor : _sensor_vec) {
-    // check which boards have an active tof sensor
     if (sensor->getTof()->isEnabled()) {
-      // Always request ToF measurements from all boards, so they update their rgb led's color in the map-distance mode
       active_devices |= 1 << sensor->getTof()->getIdx();
       _active_tof_sensors++;
     }
@@ -181,25 +166,23 @@ void SensorBus::requestThermalMeasurement() {
   _thermal_measurement_count  = 0;
 
   for (auto& sensor : _sensor_vec) {
-    // check which boards have an active thermal sensor
     if (sensor->getThermal()->isEnabled()) {
       active_devices |= 1 << sensor->getThermal()->getIdx();
       _active_thermal_sensors++;
     }
   }
 
-  sensor::ThermalSensor::requestThermalMeasurement(_interface, active_devices);
+  sensor::ThermalSensor::cmdRequestThermalMeasurement(_interface, active_devices);
 }
 
 void SensorBus::fetchThermalMeasurement() {
   unsigned int active_devices = 0;
   for (auto& sensor : _sensor_vec) {
     sensor->getThermal()->clearDataFlag();
-    // check which boards have an active tof sensor
     active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getIdx();
   }
 
-  sensor::ThermalSensor::fetchThermalMeasurement(_interface, active_devices);
+  sensor::ThermalSensor::cmdFetchThermalMeasurement(_interface, active_devices);
 }
 
 bool SensorBus::allTofMeasurementsReady() const {
