@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
@@ -8,7 +7,6 @@
 
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
-#include "Math.hpp"
 #include "Parameters.hpp"
 
 namespace eduart {
@@ -32,6 +30,10 @@ public:
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
   void onClearDataFlag() override;
+
+  static void requestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void requestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void fetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
 private:
   void rotateLeftImage(measurement::GrayscaleImage& image) const;

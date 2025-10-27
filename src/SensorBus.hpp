@@ -43,9 +43,9 @@ public:
   void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   void requestEEPROM();
   void requestTofMeasurement();
-  void fetchTofData();
+  void fetchTofMeasurement();
   void requestThermalMeasurement();
-  void fetchThermalData();
+  void fetchThermalMeasurement();
 
   bool stopThermalCalibration();
   bool startThermalCalibration(size_t window);

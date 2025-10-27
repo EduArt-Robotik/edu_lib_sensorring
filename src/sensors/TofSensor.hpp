@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <vector>
+#include "interface/ComInterface.hpp"
 
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
@@ -25,6 +26,9 @@ public:
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
   void onClearDataFlag() override;
+
+  static void requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
   static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 

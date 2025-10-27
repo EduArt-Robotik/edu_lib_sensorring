@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <cstring>
 
+#include "interface/can/canprotocol.hpp"
+#include "logger/Logger.hpp"
+
 namespace eduart {
 
 namespace sensor {
@@ -100,6 +103,28 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
 
   measurement.point_cloud.shrink_to_fit();
   return measurement;
+}
+
+void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
+  }
+}
+
+void TofSensor::fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
+  }
 }
 
 measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {

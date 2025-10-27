@@ -5,9 +5,10 @@
 #include <string>
 
 #include "interface/ComInterface.hpp"
-#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "logger/Logger.hpp"
+#include "sensors/ThermalSensor.hpp"
+#include "sensors/TofSensor.hpp"
 
 #include "Parameters.hpp"
 #include "SensorBoard.hpp"
@@ -134,12 +135,7 @@ void SensorBus::requestEEPROM() {
     active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
-  if (active_devices != 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_devices >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_devices >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
-    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  }
+  sensor::ThermalSensor::requestEEPROM(_interface, active_devices);
 }
 
 bool SensorBus::allEEPROMTransmissionsComplete() const {
@@ -167,13 +163,10 @@ void SensorBus::requestTofMeasurement() {
     }
   }
 
-  uint8_t sensor_select_high  = (uint8_t)((active_devices >> 8) & 0xFF);
-  uint8_t sensor_select_low   = (uint8_t)((active_devices >> 0) & 0xFF);
-  std::vector<uint8_t> tx_buf = { CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-  _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  sensor::TofSensor::requestTofMeasurement(_interface, active_devices);
 }
 
-void SensorBus::fetchTofData() {
+void SensorBus::fetchTofMeasurement() {
   int active_devices = 0;
   for (auto& sensor : _sensor_vec) {
     sensor->getTof()->clearDataFlag();
@@ -181,10 +174,7 @@ void SensorBus::fetchTofData() {
     active_devices |= sensor->getTof()->isEnabled() << sensor->getTof()->getIdx();
   }
 
-  uint8_t sensor_select_high  = (uint8_t)((active_devices >> 8) & 0xFF);
-  uint8_t sensor_select_low   = (uint8_t)((active_devices >> 0) & 0xFF);
-  std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
-  _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  sensor::TofSensor::fetchTofMeasurement(_interface, active_devices);
 }
 
 void SensorBus::requestThermalMeasurement() {
@@ -200,13 +190,10 @@ void SensorBus::requestThermalMeasurement() {
     }
   }
 
-  uint8_t sensor_select_high  = (uint8_t)((active_devices >> 8) & 0xFF);
-  uint8_t sensor_select_low   = (uint8_t)((active_devices >> 0) & 0xFF);
-  std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-  _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+  sensor::ThermalSensor::requestThermalMeasurement(_interface, active_devices);
 }
 
-void SensorBus::fetchThermalData() {
+void SensorBus::fetchThermalMeasurement() {
   int active_devices = 0;
   for (auto& sensor : _sensor_vec) {
     sensor->getThermal()->clearDataFlag();
@@ -214,10 +201,7 @@ void SensorBus::fetchThermalData() {
     active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getIdx();
   }
 
-  uint8_t sensor_select_high  = (uint8_t)((active_devices >> 8) & 0xFF);
-  uint8_t sensor_select_low   = (uint8_t)((active_devices >> 0) & 0xFF);
-  std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
-  _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+  sensor::ThermalSensor::fetchThermalMeasurement(_interface, active_devices);
 }
 
 bool SensorBus::allTofMeasurementsReady() const {
@@ -319,10 +303,6 @@ void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_u
       // Querying the SensorBoards if each has been enumerated can't detect additional boards
       _enumeration_count++;
     }
-
-  } else if (source == com::ComEndpoint("tof_status")) { // tof sensor status
-
-  } else if (source == com::ComEndpoint("thermal_status")) { // thermal sensor status
   }
 }
 } // namespace bus

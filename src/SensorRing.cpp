@@ -16,7 +16,7 @@ SensorRing::SensorRing(RingParams params, std::vector<std::unique_ptr<bus::Senso
   if (_params.timeout == std::chrono::milliseconds(0)) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
   } else if (_params.timeout < std::chrono::milliseconds(200)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 }
 
@@ -165,9 +165,9 @@ bool SensorRing::waitForAllThermalDataTransmissionsComplete() const {
   return ready;
 }
 
-void SensorRing::fetchTofData() {
+void SensorRing::fetchTofMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->fetchTofData();
+    sensor_bus->fetchTofMeasurement();
   }
 }
 
@@ -177,9 +177,9 @@ void SensorRing::requestThermalMeasurement() {
   }
 }
 
-void SensorRing::fetchThermalData() {
+void SensorRing::fetchThermalMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->fetchThermalData();
+    sensor_bus->fetchThermalMeasurement();
   }
 }
 

@@ -25,9 +25,9 @@ public:
   bool enumerateDevices();
   bool getEEPROM();
   void requestTofMeasurement();
-  void fetchTofData();
+  void fetchTofMeasurement();
   void requestThermalMeasurement();
-  void fetchThermalData();
+  void fetchThermalMeasurement();
   bool stopThermalCalibration();
   bool startThermalCalibration(size_t window);
 

@@ -332,8 +332,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
     _sensor_ring->resetDevices();
-    std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time
-                                                          // to init their vl53l8 sensors!
+    std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors!
 
     // state transition
     _measurement_state = MeasurementState::sync_lights;
@@ -490,7 +489,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_tof_data: {
     // fetch and publish a tof measurement
     if (_tof_enabled) {
-      _sensor_ring->fetchTofData();
+      _sensor_ring->fetchTofMeasurement();
       success = _sensor_ring->waitForAllTofDataTransmissionsComplete();
       if (success) {
         int error = notifyToFData();
@@ -512,7 +511,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_thermal_data: {
     // fetch and publish a thermal measurement
     if (_thermal_enabled and _thermal_measurement_flag) {
-      _sensor_ring->fetchThermalData();
+      _sensor_ring->fetchThermalMeasurement();
       success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
       if (success) {
         int error = notifyThermalData();

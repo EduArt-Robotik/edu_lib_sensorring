@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstring>
 
+#include "interface/ComInterface.hpp"
+#include "interface/can/canprotocol.hpp"
 #include "logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
@@ -293,6 +295,39 @@ const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
 void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
   if (_params.orientation == sensor::Orientation::left) {
     std::reverse(image.data.begin(), image.data.end());
+  }
+}
+
+void ThermalSensor::requestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested transmission of EEPROM from thermal sensors but no boards have been selected");
+  }
+}
+
+void ThermalSensor::requestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
+  }
+}
+
+void ThermalSensor::fetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  if (active_sensors > 0) {
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
+    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
   }
 }
 
