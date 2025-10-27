@@ -17,7 +17,7 @@ namespace com {
 USBtingo::USBtingo(std::string interface_name)
     : ComInterface(interface_name) {
   if (!openInterface(interface_name)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Cannot open interface: " + interface_name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + interface_name);
   }
 
   _endpoints = ComEndpoint::createStaticEndpoints();
@@ -42,7 +42,7 @@ bool USBtingo::openInterface(std::string interface_name) {
       serial_number = static_cast<std::uint32_t>(std::stoul(interface_name));
     }
   } catch (...) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid interface name for interface type USBtingo. The interface name must be an unsigned integer." + interface_name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "The USBtingo interface name must be an unsigned integer but got \"" + interface_name + "\" instead.");
     return false;
   }
 
@@ -71,7 +71,7 @@ bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data) {
 
 bool USBtingo::listener() {
   if (!_dev || !_dev->is_alive()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error starting can listener on interface " + _interface_name + ". Interface not initialized.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Error starting can listener on interface " + _interface_name + ". Interface not initialized.");
     return false;
   }
 
@@ -166,7 +166,9 @@ std::uint32_t USBtingo::mapEndpointToId(ComEndpoint ep) {
 }
 
 ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
-  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) { return pair.second == id; });
+  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) {
+    return pair.second == id;
+  });
 
   if (it != _id_map.end()) {
     return it->first;

@@ -1,5 +1,6 @@
 #include "SensorBus.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <memory>
 #include <string>
