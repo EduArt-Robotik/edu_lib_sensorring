@@ -1,16 +1,13 @@
 #pragma once
 
-#include <array>
 #include <memory>
 #include <mutex>
-
-#include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComObserver.hpp"
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
-#include "utils/Version.hpp"
+#include "utils/EnumerationInformation.hpp"
 
 #include "Parameters.hpp"
 
@@ -24,10 +21,7 @@ public:
   ~SensorBoard();
 
   bool isEnumerated() const;
-
-  SensorBoardType getType() const;
-  Version getFwRevision() const;
-  CommitHash getFwHash() const;
+  const EnumerationInformation& getEnumInfo() const;
 
   TofSensor* getTof() const;
   ThermalSensor* getThermal() const;
@@ -43,10 +37,7 @@ private:
   int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
-
-  SensorBoardType _board_type;
-  Version _fw_rev;
-  CommitHash _fw_hash;
+  EnumerationInformation _enum_info;
 
   std::unique_ptr<TofSensor> _tof;
   std::unique_ptr<ThermalSensor> _thermal;

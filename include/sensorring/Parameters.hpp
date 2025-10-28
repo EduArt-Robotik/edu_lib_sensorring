@@ -114,8 +114,9 @@ namespace manager {
  * state machine. One measurement manager manages exactly one sensor ring.
  */
 struct ManagerParams {
-  bool enable_brs             = false;
-  bool print_topology         = false;
+  bool enable_brs             = true;
+  bool print_topology         = true;
+  bool enforce_topology       = false;
   double frequency_tof_hz     = 0.0;
   double frequency_thermal_hz = 1.0;
   ring::RingParams ring_params;

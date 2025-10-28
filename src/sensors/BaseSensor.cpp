@@ -30,9 +30,9 @@ std::size_t BaseSensor::getIdx() const {
   return _idx;
 }
 
-/*void BaseSensor::enableCallback(){
-    _can_interface->registerObserver(this);
-};*/
+void BaseSensor::setEnable(bool enable) {
+  _enable_flag = enable;
+}
 
 bool BaseSensor::isEnabled() const {
   return _enable_flag;
@@ -51,10 +51,6 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
   _rotation    = rotation;
   _rot_m       = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
 }
-
-/*void BaseSensor::setEnable(bool enable){
-    _enable_flag = enable;
-};*/
 
 void BaseSensor::clearDataFlag() {
   _error                      = SensorState::SensorOK;

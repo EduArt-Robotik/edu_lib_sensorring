@@ -14,8 +14,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
     : _idx(idx)
     , _interface(interface)
     , _params{ params }
-    , _board_type(SensorBoardType::Undefined)
-    , _fw_rev({ 0, 0, 0 })
+    , _enum_info()
     , _tof(std::move(tof))
     , _thermal(std::move(thermal))
     , _leds(std::move(leds)) {
@@ -28,22 +27,11 @@ SensorBoard::~SensorBoard() {
 }
 
 bool SensorBoard::isEnumerated() const {
-  return _board_type != SensorBoardType::Undefined && _fw_hash.hash != 0;
+  return _enum_info.type != SensorBoardType::Undefined && _enum_info.hash.hash != 0;
 }
 
-SensorBoardType SensorBoard::getType() const {
-  LockGuard lock(_com_mutex);
-  return _board_type;
-}
-
-Version SensorBoard::getFwRevision() const {
-  LockGuard lock(_com_mutex);
-  return _fw_rev;
-}
-
-CommitHash SensorBoard::getFwHash() const {
-  LockGuard lock(_com_mutex);
-  return _fw_hash;
+const EnumerationInformation& SensorBoard::getEnumInfo() const {
+  return _enum_info;
 }
 
 TofSensor* SensorBoard::getTof() const {
@@ -74,21 +62,19 @@ void SensorBoard::cmdSetBrs(com::ComInterface* interface, bool enable) {
 void SensorBoard::cmdEnumerateBoards(com::ComInterface* interface) {
   std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
   interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
-
-  std::vector<uint8_t> tx_buf_fw_rev = { CMD_GET_FW_REV, 0xFF, 0xFF };
-  interface->send(com::ComEndpoint("broadcast"), tx_buf_fw_rev);
 }
 
 void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   // ToDo: Eliminate offset of index
-  if (data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
+  if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
 
     LockGuard lock(_com_mutex);
 
-    if (_board_type == SensorBoardType::Undefined) {
-      _board_type = static_cast<SensorBoardType>(data.at(2));
+    if (_enum_info.isUndefined()) {
+      _enum_info       = EnumerationInformation::fromBuffer(data);
+      _enum_info.state = EnumerationState::ConfiguredAndConnected;
 
-      const auto board_infos = SensorBoardManager::getSensorBoardInfo(_board_type);
+      const auto board_infos = SensorBoardManager::getSensorBoardInfo(_enum_info.type);
 
       const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
       const auto tof_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
@@ -98,13 +84,6 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
       const auto thermal_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
       _thermal->setPose(thermal_translation, thermal_rotation);
     }
-  }
-
-  else if (data.size() == 8 && data.at(0) == _idx + 1) {
-    LockGuard lock(_com_mutex);
-
-    _fw_rev  = { { { data.at(1), data.at(2), data.at(3) } } };
-    _fw_hash = { { { data.at(4), data.at(5), data.at(6), data.at(7) } } };
   }
 }
 

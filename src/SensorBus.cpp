@@ -1,6 +1,5 @@
 #include "SensorBus.hpp"
 
-#include <algorithm>
 #include <chrono>
 #include <memory>
 #include <string>
@@ -11,6 +10,7 @@
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
+#include "utils/EnumerationInformation.hpp"
 
 #include "SensorBoard.hpp"
 
@@ -20,7 +20,7 @@ namespace bus {
 
 SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec)
     : _interface(interface)
-    , _sensor_vec(std::move(board_vec))
+    , _board_vec(std::move(board_vec))
     , _enumeration_flag(false)
     , _enumeration_count(0)
     , _active_tof_sensors(0)
@@ -48,7 +48,7 @@ com::ComInterface* SensorBus::getInterface() const {
 std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const {
 
   std::vector<const sensor::SensorBoard*> ref_vec;
-  for (const auto& sensor : _sensor_vec) {
+  for (const auto& sensor : _board_vec) {
     ref_vec.push_back(sensor.get());
   }
 
@@ -56,25 +56,29 @@ std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const {
 }
 
 bool SensorBus::isTofEnabled(int idx) const {
-  if (idx >= 0 && idx < (int)_sensor_vec.size()) {
-    return _sensor_vec[idx]->getTof()->isEnabled();
+  if (idx >= 0 && idx < (int)_board_vec.size()) {
+    return _board_vec[idx]->getTof()->isEnabled();
   }
   return false;
 }
 
 bool SensorBus::isThermalEnabled(int idx) const {
-  if (idx >= 0 && idx < (int)_sensor_vec.size()) {
-    return _sensor_vec[idx]->getThermal()->isEnabled();
+  if (idx >= 0 && idx < (int)_board_vec.size()) {
+    return _board_vec[idx]->getThermal()->isEnabled();
   }
   return false;
 }
 
 size_t SensorBus::getSensorCount() const {
-  return _sensor_vec.size();
+  return _board_vec.size();
 }
 
 size_t SensorBus::getEnumerationCount() const {
   return _enumeration_count;
+}
+
+const std::vector<sensor::EnumerationInformation>& SensorBus::getEnumerationInfo() const {
+  return _enumeration_vec;
 }
 
 void SensorBus::setBrs(bool brs_enable) {
@@ -108,14 +112,26 @@ int SensorBus::enumerateDevices() {
 
   // wait a little longer in case there are more sensors than specified
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
   _enumeration_flag = false;
+
+  for (size_t i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+    // Add configured but unconnected sensors to the enumeration list
+    sensor::EnumerationInformation info;
+    info.idx   = i + 1;
+    info.state = sensor::EnumerationState::ConfiguredNotConnected;
+    _enumeration_vec.push_back(std::move(info));
+
+    // Disable sensors that are configured but unconnected
+    _board_vec.at(i)->getTof()->setEnable(false);
+    _board_vec.at(i)->getThermal()->setEnable(false);
+  }
+
   return _enumeration_count;
 }
 
 void SensorBus::requestEEPROM() {
   unsigned int active_devices = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     sensor->getThermal()->readEEPROM();
     active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
@@ -126,7 +142,7 @@ void SensorBus::requestEEPROM() {
 bool SensorBus::allEEPROMTransmissionsComplete() const {
   bool ready = true;
 
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     if (sensor->getThermal()->isEnabled()) {
       ready &= sensor->getThermal()->gotEEPROM();
     }
@@ -140,7 +156,7 @@ void SensorBus::requestTofMeasurement() {
   _active_tof_sensors         = 0;
   _tof_measurement_count      = 0;
 
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     if (sensor->getTof()->isEnabled()) {
       active_devices |= 1 << sensor->getTof()->getIdx();
       _active_tof_sensors++;
@@ -152,7 +168,7 @@ void SensorBus::requestTofMeasurement() {
 
 void SensorBus::fetchTofMeasurement() {
   unsigned int active_devices = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     sensor->getTof()->clearDataFlag();
     // check which boards have an active tof sensor
     active_devices |= sensor->getTof()->isEnabled() << sensor->getTof()->getIdx();
@@ -166,7 +182,7 @@ void SensorBus::requestThermalMeasurement() {
   _active_thermal_sensors     = 0;
   _thermal_measurement_count  = 0;
 
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     if (sensor->getThermal()->isEnabled()) {
       active_devices |= 1 << sensor->getThermal()->getIdx();
       _active_thermal_sensors++;
@@ -178,7 +194,7 @@ void SensorBus::requestThermalMeasurement() {
 
 void SensorBus::fetchThermalMeasurement() {
   unsigned int active_devices = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     sensor->getThermal()->clearDataFlag();
     active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getIdx();
   }
@@ -193,7 +209,7 @@ bool SensorBus::allTofMeasurementsReady() const {
 
 bool SensorBus::allTofMeasurementsReady(unsigned int& ready_sensors_count) const {
   ready_sensors_count = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     ready_sensors_count += sensor->getTof()->newDataAvailable();
   }
   return _active_tof_sensors == ready_sensors_count;
@@ -217,7 +233,7 @@ bool SensorBus::allTofDataTransmissionsComplete() const {
 
 bool SensorBus::allTofDataTransmissionsComplete(unsigned int& ready_sensors_count) const {
   ready_sensors_count = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     ready_sensors_count += sensor->getTof()->gotNewData();
   }
 
@@ -231,7 +247,7 @@ bool SensorBus::allThermalDataTransmissionsComplete() const {
 
 bool SensorBus::allThermalDataTransmissionsComplete(unsigned int& ready_sensors_count) const {
   ready_sensors_count = 0;
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     ready_sensors_count += sensor->getThermal()->gotNewData();
   }
 
@@ -241,7 +257,7 @@ bool SensorBus::allThermalDataTransmissionsComplete(unsigned int& ready_sensors_
 bool SensorBus::stopThermalCalibration() {
   bool success = true;
 
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     success &= sensor->getThermal()->stopCalibration();
   }
 
@@ -251,7 +267,7 @@ bool SensorBus::stopThermalCalibration() {
 bool SensorBus::startThermalCalibration(unsigned int window) {
   bool success = true;
 
-  for (auto& sensor : _sensor_vec) {
+  for (auto& sensor : _board_vec) {
     success &= sensor->getThermal()->startCalibration(window);
   }
 
@@ -262,14 +278,19 @@ void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_u
 
   if (source == com::ComEndpoint("broadcast")) { // general sensor board status
     // enumeration message
-    if (_enumeration_flag && data.size() == 3 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
+    if (_enumeration_flag && data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
 
       // The bus has to listen to respones to register any boards that are not specified in the configuration
       // Querying the SensorBoards if each has been enumerated can't detect additional boards
       _enumeration_count++;
+
+      auto info  = sensor::EnumerationInformation::fromBuffer(data);
+      info.state = _enumeration_count <= _board_vec.size() ? sensor::EnumerationState::ConfiguredAndConnected : sensor::EnumerationState::ConnectedNotConfigured;
+      _enumeration_vec.push_back(std::move(info));
     }
   }
 }
+
 } // namespace bus
 
 } // namespace eduart

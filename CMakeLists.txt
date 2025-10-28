@@ -93,6 +93,7 @@ add_library(sensorring
   src/utils/Math.cpp
   src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
+  src/utils/EnumerationInformation.cpp
 )
 
 if(USE_SOCKETCAN)

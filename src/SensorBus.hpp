@@ -19,6 +19,7 @@ public:
 
   size_t getSensorCount() const;
   size_t getEnumerationCount() const;
+  const std::vector<sensor::EnumerationInformation>& getEnumerationInfo() const;
 
   com::ComInterface* getInterface() const;
 
@@ -54,8 +55,9 @@ public:
 
 private:
   com::ComInterface* _interface;
-  std::vector<std::unique_ptr<sensor::SensorBoard> > _sensor_vec;
-
+  std::vector<sensor::EnumerationInformation> _enumeration_vec;
+  std::vector<std::unique_ptr<sensor::SensorBoard> > _board_vec;
+  
   std::atomic<bool> _enumeration_flag;
   std::atomic<unsigned int> _enumeration_count;
 
