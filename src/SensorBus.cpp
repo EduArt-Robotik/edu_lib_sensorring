@@ -77,10 +77,9 @@ size_t SensorBus::getEnumerationCount() const {
   return _enumeration_count;
 }
 
-const std::vector<sensor::EnumerationInformation>& SensorBus::getEnumerationInfo() const{
+const std::vector<sensor::EnumerationInformation>& SensorBus::getEnumerationInfo() const {
   return _enumeration_vec;
 }
-
 
 void SensorBus::setBrs(bool brs_enable) {
   sensor::SensorBoard::cmdSetBrs(_interface, brs_enable);
@@ -115,12 +114,16 @@ int SensorBus::enumerateDevices() {
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   _enumeration_flag = false;
 
-  // check output to determine enumeration state of each board
   for (size_t i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+    // Add configured but unconnected sensors to the enumeration list
     sensor::EnumerationInformation info;
     info.idx   = i + 1;
     info.state = sensor::EnumerationState::ConfiguredNotConnected;
     _enumeration_vec.push_back(std::move(info));
+
+    // Disable sensors that are configured but unconnected
+    _board_vec.at(i)->getTof()->setEnable(false);
+    _board_vec.at(i)->getThermal()->setEnable(false);
   }
 
   return _enumeration_count;

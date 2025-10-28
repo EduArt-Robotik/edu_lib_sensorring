@@ -348,13 +348,20 @@ void MeasurementManagerImpl::StateMachine() {
 
     for (auto sensor_bus : _sensor_ring->getInterfaces()) {
       logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());
+          logger::LogVerbosity::Info,
+          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ". " + std::to_string(sensor_bus->getSensorCount()) + " are specified.");
       if (_params.print_topology) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
       }
 
       if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount()) + " sensors are specified in the parameters. Check topology and restart.");
+        if (_params.enforce_topology) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted the wrong number of sensors and the parameter \"enforce_topology\" is set to \"true\". Check topology and restart.");
+          success = false;
+        } else {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Counted the wrong number of sensors but the parameter \"enforce_topology\" is set to \"false\". Measurements will only include the configured sensors.");
+          success = true;
+        }
       }
     }
 

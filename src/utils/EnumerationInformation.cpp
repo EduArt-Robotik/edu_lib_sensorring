@@ -46,9 +46,9 @@ std::string to_string(EnumerationState state) {
   case EnumerationState::ConfiguredAndConnected:
     return "Configured and connected";
   case EnumerationState::ConfiguredNotConnected:
-    return "Configured not connected";
+    return "Configured but unconnected";
   case EnumerationState::ConnectedNotConfigured:
-    return "Connected not configured";
+    return "Connected but unconfigured";
   default:
     return "Unknown";
   }

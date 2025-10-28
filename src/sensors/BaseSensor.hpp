@@ -16,14 +16,14 @@ public:
   ~BaseSensor();
 
   std::size_t getIdx() const;
-  bool isEnabled() const;
+
   bool gotNewData() const;
   bool newDataAvailable() const;
 
-  void setPose(math::Vector3 translation, math::Vector3 rotation);
+  bool isEnabled() const;
+  void setEnable(bool enable);
 
-  // void setEnable(bool enable);
-  // void enableCallback();
+  void setPose(math::Vector3 translation, math::Vector3 rotation);
 
   void clearDataFlag();
   virtual void onClearDataFlag() = 0;
