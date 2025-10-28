@@ -89,20 +89,23 @@ ManagerParams MeasurementManagerImpl::getParams() const {
 std::string MeasurementManagerImpl::printTopology() const {
   std::stringstream ss;
   for (const auto& bus : _sensor_ring->getInterfaces()) {
-    ss << std::endl;
+    ss << std::endl << std::endl;
     ss << "=================================================" << std::endl;
     ss << "Topology of the sensors on " << bus->getInterface()->getInterfaceName() << ":" << std::endl;
     ss << std::endl;
 
-    for (const auto& board : bus->getSensorBoards()) {
-      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(board->getType());
+    auto enum_info_vec = bus->getEnumerationInfo();
+    for (const auto& enum_info : enum_info_vec) {
+      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(enum_info.type);
 
-      ss << "sensor " << board->getTof()->getIdx() << ":" << std::endl;
+      ss << "sensor " << enum_info.idx << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    FW revision:    " << board->getFwRevision() << " (" << board->getFwHash() << ")" << std::endl;
+      ss << "    State:          " << to_string(enum_info.state) << std::endl;
+      ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
       ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
       ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
       ss << "    Nr of LEDs:     " << board_infos.leds.name << std::endl;
+      ss << std::endl;
     }
 
     ss << "=================================================" << std::endl;
@@ -344,20 +347,14 @@ void MeasurementManagerImpl::StateMachine() {
     success = _sensor_ring->enumerateDevices();
 
     for (auto sensor_bus : _sensor_ring->getInterfaces()) {
-      if (sensor_bus->getSensorCount() == sensor_bus->getEnumerationCount()) {
-        logger::Logger::getInstance()->log(
-            logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());
+      if (_params.print_topology) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
+      }
 
-        if (_params.print_topology) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
-        }
-      } else {
-        logger::Logger::getInstance()->log(
-            logger::LogVerbosity::Info, "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " of " + std::to_string(sensor_bus->getSensorCount()) + " sensors on interface " + sensor_bus->getInterface()->getInterfaceName());
-        logger::Logger::getInstance()->log(
-            logger::LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount())
-                                             + " sensors are specified in the parameters. Check topology and "
-                                               "restart.");
+      if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, std::to_string(sensor_bus->getSensorCount()) + " sensors are specified in the parameters. Check topology and restart.");
       }
     }
 
@@ -467,8 +464,7 @@ void MeasurementManagerImpl::StateMachine() {
         _measurement_state = MeasurementState::fetch_tof_data;
       }
     } else {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Timeout occurred while waiting for completion of measurements.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while waiting for completion of measurements.");
       _measurement_state = MeasurementState::error_handler;
     }
     break;
