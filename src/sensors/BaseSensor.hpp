@@ -12,15 +12,15 @@ namespace sensor {
 
 class BaseSensor : public com::ComObserver {
 public:
-  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
+  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
   ~BaseSensor();
 
-  std::size_t getIdx() const;
+  unsigned int getIdx() const;
 
   bool gotNewData() const;
   bool newDataAvailable() const;
 
-  bool isEnabled() const;
+  bool getEnable() const;
   void setEnable(bool enable);
 
   void setPose(math::Vector3 translation, math::Vector3 rotation);
@@ -32,9 +32,8 @@ public:
   virtual void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 protected:
-  std::size_t _idx;
+  unsigned int _idx;
   SensorState _error;
-  com::ComEndpoint _target;
   com::ComInterface* _interface;
 
   math::Vector3 _translation;

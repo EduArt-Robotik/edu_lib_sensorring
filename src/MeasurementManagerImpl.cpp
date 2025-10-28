@@ -171,7 +171,7 @@ int MeasurementManagerImpl::notifyToFData() {
 
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
-      if (sensor_board->getTof()->isEnabled()) {
+      if (sensor_board->getTof()->getEnable()) {
         auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
         if (raw_error == sensor::SensorState::SensorOK) {
           if (!raw_measurement.point_cloud.empty())
@@ -212,7 +212,7 @@ int MeasurementManagerImpl::notifyThermalData() {
 
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
-      if (sensor_board->getThermal()->isEnabled()) {
+      if (sensor_board->getThermal()->getEnable()) {
         auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
 
         if (error == sensor::SensorState::SensorOK) {
@@ -350,18 +350,22 @@ void MeasurementManagerImpl::StateMachine() {
       logger::Logger::getInstance()->log(
           logger::LogVerbosity::Info,
           "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ". " + std::to_string(sensor_bus->getSensorCount()) + " are specified.");
-      if (_params.print_topology) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
-      }
 
-      if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
-        if (_params.enforce_topology) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted the wrong number of sensors and the parameter \"enforce_topology\" is set to \"true\". Check topology and restart.");
-          success = false;
-        } else {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Counted the wrong number of sensors but the parameter \"enforce_topology\" is set to \"false\". Measurements will only include the configured sensors.");
-          success = true;
+      if (sensor_bus->getEnumerationCount() > 0) {
+        if (_params.print_topology) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
         }
+
+        if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
+          if (_params.enforce_topology) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted the wrong number of sensors and the parameter \"enforce_topology\" is set to \"true\". Check topology and restart.");
+          } else {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Counted the wrong number of sensors but the parameter \"enforce_topology\" is set to \"false\". Measurements will only include the configured sensors.");
+            success = true;
+          }
+        }
+      } else {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted zero sensor boards, no work to do here. Check topology and restart.");
       }
     }
 

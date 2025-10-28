@@ -57,14 +57,14 @@ std::vector<const sensor::SensorBoard*> SensorBus::getSensorBoards() const {
 
 bool SensorBus::isTofEnabled(int idx) const {
   if (idx >= 0 && idx < (int)_board_vec.size()) {
-    return _board_vec[idx]->getTof()->isEnabled();
+    return _board_vec[idx]->getTof()->getEnable();
   }
   return false;
 }
 
 bool SensorBus::isThermalEnabled(int idx) const {
   if (idx >= 0 && idx < (int)_board_vec.size()) {
-    return _board_vec[idx]->getThermal()->isEnabled();
+    return _board_vec[idx]->getThermal()->getEnable();
   }
   return false;
 }
@@ -133,7 +133,7 @@ void SensorBus::requestEEPROM() {
   unsigned int active_devices = 0;
   for (auto& sensor : _board_vec) {
     sensor->getThermal()->readEEPROM();
-    active_devices |= (sensor->getThermal()->isEnabled() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
+    active_devices |= (sensor->getThermal()->getEnable() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
   sensor::ThermalSensor::cmdRequestEEPROM(_interface, active_devices);
@@ -143,7 +143,7 @@ bool SensorBus::allEEPROMTransmissionsComplete() const {
   bool ready = true;
 
   for (auto& sensor : _board_vec) {
-    if (sensor->getThermal()->isEnabled()) {
+    if (sensor->getThermal()->getEnable()) {
       ready &= sensor->getThermal()->gotEEPROM();
     }
   }
@@ -157,7 +157,7 @@ void SensorBus::requestTofMeasurement() {
   _tof_measurement_count      = 0;
 
   for (auto& sensor : _board_vec) {
-    if (sensor->getTof()->isEnabled()) {
+    if (sensor->getTof()->getEnable()) {
       active_devices |= 1 << sensor->getTof()->getIdx();
       _active_tof_sensors++;
     }
@@ -171,7 +171,7 @@ void SensorBus::fetchTofMeasurement() {
   for (auto& sensor : _board_vec) {
     sensor->getTof()->clearDataFlag();
     // check which boards have an active tof sensor
-    active_devices |= sensor->getTof()->isEnabled() << sensor->getTof()->getIdx();
+    active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
   }
 
   sensor::TofSensor::fetchTofMeasurement(_interface, active_devices);
@@ -183,7 +183,7 @@ void SensorBus::requestThermalMeasurement() {
   _thermal_measurement_count  = 0;
 
   for (auto& sensor : _board_vec) {
-    if (sensor->getThermal()->isEnabled()) {
+    if (sensor->getThermal()->getEnable()) {
       active_devices |= 1 << sensor->getThermal()->getIdx();
       _active_thermal_sensors++;
     }
@@ -196,7 +196,7 @@ void SensorBus::fetchThermalMeasurement() {
   unsigned int active_devices = 0;
   for (auto& sensor : _board_vec) {
     sensor->getThermal()->clearDataFlag();
-    active_devices |= sensor->getThermal()->isEnabled() << sensor->getThermal()->getIdx();
+    active_devices |= sensor->getThermal()->getEnable() << sensor->getThermal()->getIdx();
   }
 
   sensor::ThermalSensor::cmdFetchThermalMeasurement(_interface, active_devices);

@@ -6,11 +6,10 @@ namespace eduart {
 
 namespace sensor {
 
-BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable)
+BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
     : ComObserver()
     , _idx(idx)
     , _error(SensorState::SensorInit)
-    , _target(target)
     , _interface(interface)
     , _enable_flag(enable)
     , _new_data_available_flag(false)
@@ -26,7 +25,7 @@ BaseSensor::~BaseSensor() {
   _interface->unregisterObserver(this);
 }
 
-std::size_t BaseSensor::getIdx() const {
+unsigned int BaseSensor::getIdx() const {
   return _idx;
 }
 
@@ -34,7 +33,7 @@ void BaseSensor::setEnable(bool enable) {
   _enable_flag = enable;
 }
 
-bool BaseSensor::isEnabled() const {
+bool BaseSensor::getEnable() const {
   return _enable_flag;
 }
 
