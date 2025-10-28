@@ -1,117 +1,128 @@
 #pragma once
 
+#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <set>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "ComEndpoints.hpp"
 #include "ComObserver.hpp"
-#include "utils/SingletonTemplate.hpp"
 
-#include <vector>
-#include <cstdint>
-#include <thread>
-#include <string>
-#include <atomic>
+namespace eduart {
 
-using LockGuard = std::lock_guard<std::mutex>;
+namespace com {
 
-namespace eduart{
+class ComInterface {
 
-namespace com{
-
-class ComInterface/* : public Singleton<ComInterface>*/{
 public:
+  /**
+   * Constructor
+   * @param[in] std::string name of the interface to be opened
+   */
+  ComInterface(std::string interface_name);
 
-	/**
-	 * Constructor
-	 * @param[in] std::string name of the interface to be opened
-	 */
-	ComInterface(std::string interface_name);
+  /**
+   * Destructor
+   */
+  ~ComInterface();
 
-	/**
-	 * Destructor
-	 */
-	~ComInterface();
+  /**
+   * Get the interface name of the ComInterface object
+   * @return name of the interface
+   */
+  std::string getInterfaceName();
 
-	/**
-	 * Get the interface name of the ComInterface object
-	 * @return name of the interface
-	 */
-	std::string getInterfaceName();
+  /**
+   * Get all known ComEndpoints.
+   * @return Set of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
+   */
+  const std::set<ComEndpoint>& getEndpoints();
 
-	/**
-	 * Get all known ComEndpoints.
-	 * @return Vector of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
-	 */
-	const std::vector<ComEndpoint>& getEndpoints();
+  /**
+   * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
+   * @param[in] observer Observer instance, which should be notified when data is available.
+   * @return success==true
+   */
+  bool registerObserver(ComObserver* observer);
 
-	/**
-	 * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
-	 * @param[in] observer Observer instance, which should be notified when data is available.
-	 * @return success==true
-	 */
-	bool registerObserver(ComObserver* observer);
+  /**
+   * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
+   * @param[in] observer Observer instance, which should be notified when data is available.
+   * @return success==true
+   */
+  bool unregisterObserver(ComObserver* observer);
 
-	/**
-	 * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
-	 * @param[in] observer Observer instance, which should be notified when data is available.
-	 * @return success==true
-	 */
-	bool unregisterObserver(ComObserver* observer);
+  /**
+   * Remove all registered observers
+   */
+  void clearObservers();
 
-	/**
-	 * Remove all registered observers
-	 */
-	void clearObservers();
+  /**
+   * Start listener thread.
+   * @return success==true, failure==false (e.g. when listener is already running)
+   */
+  bool startListener();
 
-	/**
-	 * Start listener thread.
-	 * @return success==true, failure==false (e.g. when listener is already running)
-	 */
-	bool startListener();
+  /**
+   * Terminate listener thread
+   */
+  void stopListener();
 
-	/**
-	 * Terminate listener thread
-	 */
-  	void stopListener();
+  /**
+   * Send a generic communication message.
+   * @param[in] target ComEndpoint to which the message is sent.
+   * @param[in] data Vector holding the message payload.
+   */
+  virtual bool send(ComEndpoint target, const std::vector<std::uint8_t>& data) = 0;
 
-	/**
-	 * Send a generic communication message.
-	 * @param[in] target ComEndpoint to which the message is sent.
-	 * @param[in] data Vector holding the message payload.
-	 */
-	virtual bool send(ComEndpoint target, const std::vector<std::uint8_t>& data) = 0;
+  /**
+   * Open the communication interface.
+   * @return success==true
+   */
+  virtual bool openInterface(std::string interface_name) = 0;
 
-	/**
-	 * Open the communication interface.
-	 * @return success==true
-	 */
-  	virtual bool openInterface(std::string interface_name) = 0;
+  /**
+   * Close the communication interface.
+   * @return success==true
+   */
+  virtual bool closeInterface() = 0;
 
-	/**
-	 * Close the communication interface.
-	 * @return success==true
-	 */
-  	virtual bool closeInterface() = 0;
+  /**
+   * Add endpoint for a new tof sensor
+   * @param[in] idx index of the sensor
+   */
+  virtual void addToFSensorToEndpointMap(std::size_t idx) = 0;
+
+  /**
+   * Add endpoint for a new thermal sensor
+   * @param[in] idx index of the sensor
+   */
+  virtual void addThermalSensorToEndpointMap(std::size_t idx) = 0;
 
 protected:
-	virtual bool listener() = 0;
+  using LockGuard = std::lock_guard<std::mutex>;
 
-	std::atomic<bool> _listenerIsRunning;
+  virtual bool listener() = 0;
 
-	std::atomic<bool> _shutDownListener;
+  std::atomic<bool> _listenerIsRunning;
 
-	std::string _interface_name;
+  std::atomic<bool> _shutDownListener;
 
-	std::mutex _mutex;
+  std::string _interface_name;
 
-	std::vector<ComEndpoint> _endpoints;
+  std::mutex _mutex;
 
-	std::vector<ComObserver*> _observers;
+  std::set<ComEndpoint> _endpoints;
+
+  std::set<ComObserver*> _observers;
 
 private:
-
-	std::unique_ptr<std::thread> _thread;
-
+  std::unique_ptr<std::thread> _thread;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

@@ -1,63 +1,92 @@
 #include "SensorBoard.hpp"
 
-namespace eduart{
+#include "boardmanager/SensorBoardManager.hpp"
+#include "interface/ComEndpoints.hpp"
+#include "interface/can/canprotocol.hpp"
 
-namespace sensor{
+#include "Math.hpp"
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx){
-	_tof        = std::make_unique<TofSensor>(params.tof_params, interface, idx);
-	_thermal    = std::make_unique<ThermalSensor>(params.thermal_params, interface, idx);
-	_leds       = std::make_unique<LedLight>(params.led_params);
+namespace eduart {
 
-	_sensor_type = SensorBoardType::unknown;
+namespace sensor {
+
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
+    : _idx(idx)
+    , _interface(interface)
+    , _params{ params }
+    , _enum_info()
+    , _tof(std::move(tof))
+    , _thermal(std::move(thermal))
+    , _leds(std::move(leds)) {
+
+  addEndpoint(com::ComEndpoint("broadcast"));
+  _interface->registerObserver(this);
 }
 
-SensorBoard::~SensorBoard(){
-
+SensorBoard::~SensorBoard() {
 }
 
-SensorBoardType SensorBoard::getType() const{
-	return _sensor_type;
+bool SensorBoard::isEnumerated() const {
+  return _enum_info.type != SensorBoardType::Undefined && _enum_info.hash.hash != 0;
 }
 
-void SensorBoard::setType(SensorBoardType type){
-	if(_sensor_type == SensorBoardType::unknown){
-		_sensor_type = type;
-	}
+const EnumerationInformation& SensorBoard::getEnumInfo() const {
+  return _enum_info;
 }
 
-void SensorBoard::tofClearDataFlag(){
-	_tof->clearDataFlag();
+TofSensor* SensorBoard::getTof() const {
+  LockGuard lock(_com_mutex);
+  return _tof.get();
 }
 
-void SensorBoard::thermalClearDataFlag(){
-	_thermal->clearDataFlag();
+ThermalSensor* SensorBoard::getThermal() const {
+  LockGuard lock(_com_mutex);
+  return _thermal.get();
 }
 
-void SensorBoard::thermalReadEEPROM(){
-	_thermal->readEEPROM();
+LedLight* SensorBoard::getLed() const {
+  LockGuard lock(_com_mutex);
+  return _leds.get();
 }
 
-bool SensorBoard::thermalStopCalibration(){
-	return _thermal->stopCalibration();
+void SensorBoard::cmdReset(com::ComInterface* interface) {
+  std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
+  interface->send(com::ComEndpoint("broadcast"), tx_buf);
 }
 
-bool SensorBoard::thermalStartCalibration(size_t window){
-	return _thermal->startCalibration(window);
+void SensorBoard::cmdSetBrs(com::ComInterface* interface, bool enable) {
+  std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
+  interface->send(com::ComEndpoint("broadcast"), tx_buf);
 }
 
-const TofSensor* SensorBoard::getTof() const{
-	return _tof.get();
+void SensorBoard::cmdEnumerateBoards(com::ComInterface* interface) {
+  std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
+  interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
 }
 
-const ThermalSensor* SensorBoard::getThermal() const{
-	return _thermal.get();
+void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+  // ToDo: Eliminate offset of index
+  if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
+
+    LockGuard lock(_com_mutex);
+
+    if (_enum_info.isUndefined()) {
+      _enum_info       = EnumerationInformation::fromBuffer(data);
+      _enum_info.state = EnumerationState::ConfiguredAndConnected;
+
+      const auto board_infos = SensorBoardManager::getSensorBoardInfo(_enum_info.type);
+
+      const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
+      const auto tof_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
+      _tof->setPose(tof_translation, tof_rotation);
+
+      const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
+      const auto thermal_rotation    = math::Vector3::eulerDegreesFromRotationMatrix(math::Matrix3::rotMatrixFromEulerDegrees(_params.rotation) * math::Matrix3::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
+      _thermal->setPose(thermal_translation, thermal_rotation);
+    }
+  }
 }
 
-const LedLight* SensorBoard::getLed() const{
-	return _leds.get();
-}
+} // namespace sensor
 
-}
-
-}
+} // namespace eduart

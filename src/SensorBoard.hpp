@@ -1,53 +1,52 @@
 #pragma once
 
-#include "Parameters.hpp"
-#include "interface/ComInterface.hpp"
-#include "sensors/TofSensor.hpp"
-#include "sensors/ThermalSensor.hpp"
-#include "sensors/LedLight.hpp"
-
 #include <memory>
+#include <mutex>
+#include "interface/ComInterface.hpp"
+#include "interface/ComObserver.hpp"
+#include "sensors/LedLight.hpp"
+#include "sensors/ThermalSensor.hpp"
+#include "sensors/TofSensor.hpp"
+#include "utils/EnumerationInformation.hpp"
 
-namespace eduart{
+#include "Parameters.hpp"
 
-namespace sensor{
+namespace eduart {
 
-enum class SensorBoardType{
-    headlight,
-    taillight,
-    sidepanel,
-    minipanel,
-    unknown
+namespace sensor {
+
+class SensorBoard : public com::ComObserver {
+public:
+  SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
+  ~SensorBoard();
+
+  bool isEnumerated() const;
+  const EnumerationInformation& getEnumInfo() const;
+
+  TofSensor* getTof() const;
+  ThermalSensor* getThermal() const;
+  LedLight* getLed() const;
+
+  static void cmdReset(com::ComInterface* interface);
+  static void cmdSetBrs(com::ComInterface* interface, bool enable);
+  static void cmdEnumerateBoards(com::ComInterface* interface);
+
+  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+
+private:
+  int _idx;
+  com::ComInterface* _interface;
+  const SensorBoardParams _params;
+  EnumerationInformation _enum_info;
+
+  std::unique_ptr<TofSensor> _tof;
+  std::unique_ptr<ThermalSensor> _thermal;
+  std::unique_ptr<LedLight> _leds;
+
+  mutable std::mutex _com_mutex;
+  using LockGuard = std::lock_guard<std::mutex>;
 };
 
-class SensorBoard{
-    public:
-        SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx);
-        ~SensorBoard();
+} // namespace sensor
 
-        SensorBoardType getType() const;
-        void setType(SensorBoardType type);
-
-        //void tofSetEnable(bool enable);
-        //void thermalSetEnable(bool enable);
-        void tofClearDataFlag();
-        void thermalClearDataFlag();
-        void thermalReadEEPROM();
-        bool thermalStopCalibration();
-        bool thermalStartCalibration(size_t window);
-
-        const TofSensor* getTof() const;
-        const ThermalSensor* getThermal() const;
-        const LedLight* getLed() const;
-    
-    private:
-        SensorBoardType _sensor_type;
-
-        std::unique_ptr<TofSensor>      _tof;
-        std::unique_ptr<ThermalSensor>  _thermal;
-        std::unique_ptr<LedLight>       _leds;
-};
-
-}
-
-}
+} // namespace eduart

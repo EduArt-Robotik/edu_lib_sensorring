@@ -1,70 +1,93 @@
 #include "ComManager.hpp"
-#include "utils/Logger.hpp"
 
+#include "logger/Logger.hpp"
+
+#include "CustomTypes.hpp"
 
 #ifdef USE_SOCKETCAN
-    #include "can/SocketCANFD.hpp"
+#include "can/SocketCANFD.hpp"
 #endif
 
 #ifdef USE_USBTINGO
-    #include "can/USBtingo.hpp"
+#include "can/USBtingo.hpp"
 #endif
 
 #include <algorithm>
 
-namespace eduart{
+namespace eduart {
 
-namespace com{
+namespace com {
 
-ComInterface* ComManager::createInterface(DeviceType type, std::string interface_name, std::size_t sensor_count){
+ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
 
-    // Default behaviour
-    if (type == DeviceType::UNDEFINED){
-#if defined(WIN32) || defined(USE_USBTINGO)
-    type = DeviceType::USBTINGO;
-#else
-    type = DeviceType::SOCKETCAN;
+  // Check if interface altready exists
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
+    return interface->getInterfaceName() == interface_name;
+  });
+  if (it != _interfaces.end())
+    return it->get();
+
+  // No interface options specified
+#if !(defined(USE_SOCKETCAN) || defined(USE_USBTINGO))
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Built sensorring library without any interface options. Unable to open any communication interface.");
 #endif
+
+  // Interface does not exist, create a new one
+  switch (type) {
+  case InterfaceType::SOCKETCAN:
+#ifdef USE_SOCKETCAN
+    _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+    break;
+#else
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a SocketCAN interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
+    return nullptr;
+#endif
+
+  case InterfaceType::USBTINGO:
+#ifdef USE_USBTINGO
+    _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+    break;
+#else
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
+    return nullptr;
+#endif
+
+  case InterfaceType::UNDEFINED:
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Got an undefined interface type. Trying to open a the interface by its name.");
+    try {
+#ifdef USE_SOCKETCAN
+      _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened SocketCAN interface by name. Please correct the interface type in the parameters.");
+      break;
+#endif
+    } catch (...) {
     }
 
-    // Check if interface altready exists
-    const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface){return interface->getInterfaceName() == interface_name;});
-    if(it != _interfaces.end()) return it->get();
-
-    // Interface does not exist, create a new one
-    switch(type){
-        case DeviceType::SOCKETCAN:
-            #ifdef USE_SOCKETCAN
-                _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name, sensor_count));
-                break;
-            #else
-                logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a SocketCan interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
-                return nullptr;
-            #endif
-
-        case DeviceType::USBTINGO:
-            #ifdef USE_USBTINGO
-                _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name, sensor_count));
-                break;
-            #else
-                logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
-                return nullptr;
-            #endif
-            
-        default:
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Requested to open an unknown interface type.");
-            return nullptr;
+    try {
+#ifdef USE_USBTINGO
+      _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened USBtingo interface by name. Please correct the interface type in the parameters.");
+      break;
+#endif
+    } catch (...) {
     }
 
-    return _interfaces.back().get();
+  default:
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open unknown interface type.");
+    return nullptr;
+  }
+
+  return _interfaces.back().get();
 }
 
-ComInterface* ComManager::getInterface(std::string interface_name){
+ComInterface* ComManager::getInterface(std::string interface_name) {
 
-    const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface){return interface->getInterfaceName() == interface_name;});
-    return (it != _interfaces.end()) ? it->get() : nullptr;
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
+    return interface->getInterfaceName() == interface_name;
+  });
+  return (it != _interfaces.end()) ? it->get() : nullptr;
 }
 
-}
+} // namespace com
 
-}
+} // namespace eduart

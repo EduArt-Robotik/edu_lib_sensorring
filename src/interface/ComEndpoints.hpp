@@ -1,45 +1,41 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <set>
 
-namespace eduart{
+namespace eduart {
 
-namespace com{
+namespace com {
 
-class ComEndpoint{
-	public:
-		ComEndpoint(const std::string& id) : _id(id) {};
+class ComEndpoint {
+public:
+  ComEndpoint(const std::string& id)
+      : _id(id){};
 
-		ComEndpoint(const ComEndpoint& endpoint) : _id(endpoint._id) {};
-		
-		const std::string getId() {return _id; };
+  ComEndpoint(const ComEndpoint& endpoint)
+      : _id(endpoint._id){};
 
-		static std::vector<ComEndpoint> createEndpoints(std::size_t sensor_count){
-			std::vector<ComEndpoint> endpoints;
-			endpoints.emplace_back("tof_status");
-			endpoints.emplace_back("tof_request");
-			endpoints.emplace_back("thermal_status");
-			endpoints.emplace_back("thermal_request");
-			endpoints.emplace_back("light");
-			endpoints.emplace_back("broadcast");
+  const std::string getId() { return _id; };
 
-			for(size_t i=0; i<sensor_count; i++){
-				endpoints.emplace_back("tof" + std::to_string(i) + "_data");
-				endpoints.emplace_back("thermal" + std::to_string(i) + "_data");
-			}
+  static std::set<ComEndpoint> createStaticEndpoints() {
+    std::set<ComEndpoint> endpoints;
+    endpoints.emplace("tof_status");
+    endpoints.emplace("tof_request");
+    endpoints.emplace("thermal_status");
+    endpoints.emplace("thermal_request");
+    endpoints.emplace("light");
+    endpoints.emplace("broadcast");
 
-			return endpoints;
-		}
+    return endpoints;
+  }
 
-		bool operator==(const ComEndpoint& other) const { return _id == other._id; }
-		bool operator< (const ComEndpoint& other) const { return _id <  other._id; }
+  bool operator==(const ComEndpoint& other) const { return _id == other._id; }
+  bool operator<(const ComEndpoint& other) const { return _id < other._id; }
 
-	private:
-		const std::string _id;
-
+private:
+  const std::string _id;
 };
 
-}
+} // namespace com
 
-}
+} // namespace eduart

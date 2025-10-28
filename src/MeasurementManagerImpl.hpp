@@ -1,44 +1,38 @@
 #pragma once
 
+#include <atomic>
+#include <chrono>
 #include <memory>
+#include <set>
 #include <string>
+#include <thread>
 
-#include "CustomTypes.hpp"
 #include "MeasurementClient.hpp"
 #include "Parameters.hpp"
+#include "SensorRing.hpp"
 
 namespace eduart {
 
-namespace ring {
-class SensorRing;
-}
-
 namespace manager {
 
-// Forward declaration of implementation class
-class MeasurementManagerImpl;
-
-// Forward declaration
-enum class MeasurementState;
-
 /**
- * @class MeasurementManager
- * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a
- * looping state machine.
+ * @class MeasurementManagerImpl
+ * @brief Implementation class of the MeasurementManager to hide private members.
  * @author Hannes Duske
- * @date 25.12.2024
+ * @date 21.10.2025
  */
-class MeasurementManager {
+class MeasurementManagerImpl {
 public:
   /**
    * Constructor
+   * @param[in] params Parameter structure of the MeasurementManager
    */
-  MeasurementManager(ManagerParams params);
+  MeasurementManagerImpl(ManagerParams params);
 
   /**
    * Destructor
    */
-  ~MeasurementManager();
+  ~MeasurementManagerImpl();
 
   /**
    * Run one processing cycle of the state machine worker
@@ -78,7 +72,7 @@ public:
 
   /**
    * Get the health status of the state machine
-   * @return Current manager state
+   * @return Current worker state
    */
   ManagerState getManagerState() const;
 
@@ -124,7 +118,57 @@ public:
   void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
 
 private:
-  std::unique_ptr<MeasurementManagerImpl> _mm_impl;
+  enum class MeasurementState {
+    init,
+    reset_sensors,
+    enumerate_sensors,
+    sync_lights,
+    get_eeprom,
+    pre_loop_init,
+    set_lights,
+    request_tof_measurement,
+    fetch_tof_data,
+    request_thermal_measurement,
+    fetch_thermal_data,
+    wait_for_data,
+    throttle_measurement,
+    error_handler,
+    shutdown
+  };
+
+  void StateMachine();
+  void StateMachineWorker();
+
+  int notifyToFData();
+  int notifyThermalData();
+  void notifyState(const ManagerState state);
+
+  const ManagerParams _params;
+  ManagerState _manager_state;
+  MeasurementState _measurement_state;
+  std::unique_ptr<ring::SensorRing> _sensor_ring;
+
+  bool _tof_enabled;
+  bool _thermal_enabled;
+  bool _first_measurement;
+  std::chrono::duration<double> _tof_measurement_period;
+  std::chrono::duration<double> _thermal_measurement_period;
+  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp;
+  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp;
+
+  bool _is_tof_throttled;
+  bool _is_thermal_throttled;
+  bool _thermal_measurement_flag;
+
+  light::LightMode _light_mode;
+  std::uint8_t _light_color[3];
+  std::uint8_t _light_brightness;
+  std::atomic<bool> _light_update_flag;
+
+  std::set<MeasurementClient*> _observers;
+
+  std::atomic<bool> _is_running;
+  std::thread _worker_thread;
 };
 
 } // namespace manager

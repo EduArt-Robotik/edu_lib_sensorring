@@ -25,7 +25,7 @@ project(sensorring
 # Require out-of-source builds
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
 if(EXISTS "${LOC_PATH}")
-    message(FATAL_ERROR "You cannot build in a source directory (or any directory with a CMakeLists.txt file). Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles directory.")
+    message(FATAL_ERROR "You can't build in a source directory (or any directory with a CMakeLists.txt file). Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles directory.")
 endif()
 
 #########################################################
@@ -76,6 +76,8 @@ find_package(Threads REQUIRED)
 # declare library
 add_library(sensorring
   src/MeasurementManager.cpp
+  src/MeasurementClient.cpp
+  src/MeasurementManagerImpl.cpp
   src/SensorRing.cpp
   src/SensorBus.cpp
   src/SensorBoard.cpp
@@ -83,14 +85,15 @@ add_library(sensorring
   src/interface/ComManager.cpp
   src/interface/ComObserver.cpp
   src/interface/can/canprotocol.cpp
+  src/logger/Logger.cpp
   src/sensors/TofSensor.cpp
   src/sensors/ThermalSensor.cpp
   src/sensors/LedLight.cpp
   src/sensors/BaseSensor.cpp
   src/utils/Math.cpp
-  src/utils/Logger.cpp
   src/utils/CustomTypes.cpp
   src/utils/FileManager.cpp
+  src/utils/EnumerationInformation.cpp
 )
 
 if(USE_SOCKETCAN)
@@ -111,12 +114,7 @@ target_sources(sensorring PRIVATE ${SOURCES})
 # library includes
 target_include_directories(sensorring PRIVATE
   include/${PROJECT_NAME}
-  include/${PROJECT_NAME}/boardmanager
-  include/${PROJECT_NAME}/interface
-  include/${PROJECT_NAME}/interface/can
-  include/${PROJECT_NAME}/math
-  include/${PROJECT_NAME}/sensors
-  include/${PROJECT_NAME}/types
+  include/${PROJECT_NAME}/logger
   include/${PROJECT_NAME}/utils
 )
 
@@ -160,11 +158,16 @@ install(TARGETS sensorring
 
 # install headers
 install(FILES
+  include/${PROJECT_NAME}/MeasurementClient.hpp  
   include/${PROJECT_NAME}/MeasurementManager.hpp
-  include/${PROJECT_NAME}/MeasurementObserver.hpp
-  include/${PROJECT_NAME}/CustomTypes.hpp
   include/${PROJECT_NAME}/Parameters.hpp
-  include/${PROJECT_NAME}/Math.hpp
+
+  include/${PROJECT_NAME}/logger/Logger.hpp
+  include/${PROJECT_NAME}/logger/LoggerClient.hpp
+
+  include/${PROJECT_NAME}/utils/CustomTypes.hpp
+  include/${PROJECT_NAME}/utils/Math.hpp
+  
   DESTINATION include/${PROJECT_NAME}
 )
 
