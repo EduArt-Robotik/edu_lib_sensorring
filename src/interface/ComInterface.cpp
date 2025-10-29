@@ -1,7 +1,5 @@
 #include "ComInterface.hpp"
 
-#include <algorithm>
-
 namespace eduart {
 
 namespace com {
@@ -62,14 +60,7 @@ bool ComInterface::startListener() {
 }
 
 void ComInterface::stopListener() {
-  if (!_listenerIsRunning)
-    return;
-
   _shutDownListener = true;
-  while (!_listenerIsRunning) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  }
-
   if (_thread->joinable()) {
     _thread->join();
   }

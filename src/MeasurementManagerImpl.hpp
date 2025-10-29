@@ -150,8 +150,8 @@ private:
   void notifyState(const ManagerState state);
 
   const ManagerParams _params;
-  ManagerState _manager_state;
-  MeasurementState _measurement_state;
+  std::atomic<ManagerState> _manager_state;
+  std::atomic<MeasurementState> _measurement_state;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 
   bool _tof_enabled;

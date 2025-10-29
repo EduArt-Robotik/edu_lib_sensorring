@@ -71,8 +71,8 @@ template <typename T, std::size_t RESOLUTION> struct GenericRGBImage {
 
 struct PointData {
   math::Vector3 point = { 0.0, 0.0, 0.0 };
-  float sigma         = 0.0;
-  float raw_distance  = 0.0;
+  double sigma        = 0.0;
+  double raw_distance = 0.0;
   int user_idx        = 0;
 };
 

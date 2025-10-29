@@ -24,6 +24,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
 }
 
 SensorBoard::~SensorBoard() {
+  _interface->unregisterObserver(this);
 }
 
 bool SensorBoard::isEnumerated() const {

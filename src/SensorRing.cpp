@@ -112,7 +112,7 @@ bool SensorRing::waitForAllTofMeasurementsReady() const {
     if (!ready) {
       std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
-  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
+  } while (!ready && ((std::chrono::steady_clock::now() - timestamp) < _params.timeout));
 
   return ready;
 }

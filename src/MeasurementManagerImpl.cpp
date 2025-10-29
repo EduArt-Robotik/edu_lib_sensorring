@@ -283,10 +283,11 @@ bool MeasurementManagerImpl::startMeasuring() {
 bool MeasurementManagerImpl::stopMeasuring() {
   if (_is_running) {
     _is_running = false;
-    while (!_worker_thread.joinable()) {
-    }
-    _worker_thread.join();
     notifyState(ManagerState::Shutdown);
+  }
+
+  if (_worker_thread.joinable()) {
+    _worker_thread.join();
     return true;
   }
 
@@ -353,7 +354,7 @@ void MeasurementManagerImpl::StateMachine() {
     for (auto sensor_bus : _sensor_ring->getInterfaces()) {
       logger::Logger::getInstance()->log(
           logger::LogVerbosity::Info,
-          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ". " + std::to_string(sensor_bus->getSensorCount()) + " are specified.");
+          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
 
       if (sensor_bus->getEnumerationCount() > 0) {
         if (_params.print_topology) {

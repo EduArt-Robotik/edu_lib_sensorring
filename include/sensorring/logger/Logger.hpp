@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -27,8 +26,8 @@ public:
 private:
   Logger() = default;
 
-  static std::once_flag _initInstanceFlag;
-  static std::unique_ptr<Logger> _instance;
+  mutable std::mutex _client_mutex;
+  using LockGuard = std::lock_guard<std::mutex>;
 
   std::vector<logger::LoggerClient*> _observer_vec;
 };
