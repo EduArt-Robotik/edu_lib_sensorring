@@ -85,13 +85,13 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
     distance_raw = (*((uint32_t*)(data + i * 3)) >> 10) & 0x3FFF; // 14 bit
     sigma_raw    = (*((uint32_t*)(data + i * 3)) >> 0) & 0x03FF;  // 10 bit
 
-    math::Vector3 point  = { 0, 0, 0 };
-    float point_distance = -1;
-    float point_sigma    = -1;
+    math::Vector3 point   = { 0, 0, 0 };
+    double point_distance = -1;
+    double point_sigma    = -1;
 
     if (distance_raw != 0) {
-      point_distance = (float)distance_raw / 4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
-      point_sigma    = (float)sigma_raw / 128.0 / 1000.0F;   // Factor 128 for fixed point conversion, Factor 1000 from mm to m
+      point_distance = (double)distance_raw / 4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
+      point_sigma    = (double)sigma_raw / 128.0 / 1000.0F;   // Factor 128 for fixed point conversion, Factor 1000 from mm to m
 
       point.x() = point_distance * vl53l8::lut_tan_x[i];
       point.y() = point_distance * vl53l8::lut_tan_y[i];

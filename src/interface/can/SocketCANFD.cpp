@@ -236,7 +236,7 @@ ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
     return ComEndpoint("");
   }
-};
+}
 
 } // namespace com
 
