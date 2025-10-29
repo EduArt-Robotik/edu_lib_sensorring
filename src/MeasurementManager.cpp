@@ -77,6 +77,10 @@ bool MeasurementManager::stopMeasuring() {
   return _mm_impl->stopMeasuring();
 }
 
+bool MeasurementManager::isMeasuring(){
+  return _mm_impl->isMeasuring();
+}
+
 } // namespace manager
 
 } // namespace eduart

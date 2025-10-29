@@ -293,6 +293,10 @@ bool MeasurementManagerImpl::stopMeasuring() {
   return false;
 }
 
+bool MeasurementManagerImpl::isMeasuring() {
+  return _is_running;
+}
+
 /* =======================================================================================
         State machine function
 ==========================================================================================

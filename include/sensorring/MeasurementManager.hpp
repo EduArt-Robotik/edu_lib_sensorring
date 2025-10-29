@@ -59,6 +59,12 @@ public:
   bool stopMeasuring();
 
   /**
+   * Query if the measurement thread is currently running
+   * @return true if the measurement thread is running
+   */
+  bool isMeasuring();
+
+  /**
    * Register an observer with the MeasurementManager object
    * @param[in] observer Observer that is registered and gets notified on future events
    */
