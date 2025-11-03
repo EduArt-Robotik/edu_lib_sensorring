@@ -138,7 +138,8 @@ private:
     fetch_thermal_data,
     wait_for_data,
     throttle_measurement,
-    error_handler,
+    error_handler_measurement,
+    error_handler_communication,
     shutdown
   };
 
