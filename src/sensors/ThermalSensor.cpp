@@ -92,6 +92,11 @@ bool ThermalSensor::startCalibration(size_t window) {
   }
 }
 
+void ThermalSensor::onResetSensorState() {
+  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
+  _rx_buffer_offset = 0;
+}
+
 void ThermalSensor::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;

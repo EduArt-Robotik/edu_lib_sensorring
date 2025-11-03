@@ -69,6 +69,12 @@ public:
   bool closeInterface() override;
 
   /**
+   * Repair the connection in case of an error.
+   * @return success==true
+   */
+  bool repairInterface() override;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */

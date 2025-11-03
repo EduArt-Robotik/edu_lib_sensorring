@@ -5,8 +5,9 @@ namespace eduart {
 namespace com {
 
 ComInterface::ComInterface(std::string interface_name)
-    : _listenerIsRunning(false)
-    , _shutDownListener(false)
+    : _communication_error(false)
+    , _listener_is_running(false)
+    , _shut_down_listener(false)
     , _interface_name(interface_name) {
 }
 
@@ -14,7 +15,7 @@ ComInterface::~ComInterface() {
   stopListener();
 }
 
-std::string ComInterface::getInterfaceName() {
+std::string ComInterface::getInterfaceName() const {
   return _interface_name;
 }
 
@@ -48,26 +49,30 @@ void ComInterface::clearObservers() {
 }
 
 bool ComInterface::startListener() {
-  if (_listenerIsRunning)
+  if (_listener_is_running)
     return false;
 
   _thread = std::make_unique<std::thread>(&ComInterface::listener, this);
 
-  while (!_listenerIsRunning)
+  while (!_listener_is_running)
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
   return true;
 }
 
 void ComInterface::stopListener() {
-  _shutDownListener = true;
+  _shut_down_listener = true;
   if (_thread->joinable()) {
     _thread->join();
   }
 }
 
-const std::set<ComEndpoint>& ComInterface::getEndpoints() {
+const std::set<ComEndpoint>& ComInterface::getEndpoints() const {
   return _endpoints;
+}
+
+bool ComInterface::hasError() const {
+  return _communication_error;
 }
 
 } // namespace com

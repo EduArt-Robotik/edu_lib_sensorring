@@ -34,6 +34,11 @@ std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestTransfor
   return { _latest_transformed_measurement, _error };
 }
 
+void TofSensor::onResetSensorState() {
+  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
+  _rx_buffer_offset = 0;
+}
+
 void TofSensor::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
@@ -105,7 +110,7 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
   return measurement;
 }
 
-void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void TofSensor::cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
@@ -116,7 +121,7 @@ void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_
   }
 }
 
-void TofSensor::fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void TofSensor::cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);

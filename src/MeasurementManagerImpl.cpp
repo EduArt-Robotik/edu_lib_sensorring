@@ -306,7 +306,12 @@ void MeasurementManagerImpl::StateMachineWorker() {
   while (_is_running) {
     // no wait command here, the individual states of the state machine
     // provide natural throttling
-    StateMachine();
+    try {
+      StateMachine();
+    } catch (std::runtime_error& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught communication error.");
+      _measurement_state = MeasurementState::error_handler_communication;
+    }
   }
 }
 
@@ -370,7 +375,7 @@ void MeasurementManagerImpl::StateMachine() {
           }
         }
       } else {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted zero sensor boards, no work to do here. Check topology and restart.");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted 0 sensor boards, no work to do here. Check topology and restart.");
       }
     }
 
@@ -379,7 +384,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::get_eeprom;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to enumerate sensors");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::shutdown;
     }
     break;
   }
@@ -395,7 +400,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::pre_loop_init;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::error_handler_measurement;
     }
     break;
   }
@@ -404,7 +409,7 @@ void MeasurementManagerImpl::StateMachine() {
     // enable bit rate switching
     _sensor_ring->setBrs(_params.enable_brs);
 
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now ...");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now.");
     _last_tof_measurement_timestamp     = std::chrono::steady_clock::now();
     _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
 
@@ -481,7 +486,7 @@ void MeasurementManagerImpl::StateMachine() {
       }
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while waiting for completion of measurements.");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::error_handler_measurement;
     }
     break;
   }
@@ -503,7 +508,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::fetch_thermal_data;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching tof measurements.");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::error_handler_measurement;
     }
     break;
   }
@@ -526,7 +531,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::throttle_measurement;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching thermal measurements.");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::error_handler_measurement;
     }
     break;
   }
@@ -544,7 +549,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::set_lights;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while taking tof measurements.");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::error_handler_measurement;
     }
     break;
   }
@@ -553,10 +558,96 @@ void MeasurementManagerImpl::StateMachine() {
             Error handler
     ============================================= */
 
-  case MeasurementState::error_handler: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler called.");
+  case MeasurementState::error_handler_measurement: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler for measurement errors called.");
     notifyState(ManagerState::Error);
-    _measurement_state = MeasurementState::shutdown;
+
+    unsigned int attempts = 0;
+
+    if (_params.repair_errors) {
+      // Try to fix the error
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Trying to restart measurements.");
+
+      if (success) {
+        attempts = 0;
+        _sensor_ring->resetSensorState();
+        do {
+          attempts++;
+          _sensor_ring->requestTofMeasurement();
+          success = _sensor_ring->waitForAllTofMeasurementsReady();
+        } while (!success && _is_running && (attempts < 10));
+      }
+    }
+
+    // state transition
+    if (_params.repair_errors) {
+      if (success) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting measurements succeeded after " + std::to_string(attempts) + " attempts.");
+        _measurement_state = MeasurementState::set_lights;
+        _light_update_flag = true;
+        notifyState(ManagerState::Running);
+      } else {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart measurements. Resetting all sensors.");
+        _measurement_state = MeasurementState::reset_sensors;
+      }
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"repair_errors\" is set to \"false\".");
+      _measurement_state = MeasurementState::shutdown;
+    }
+    break;
+  }
+
+  case MeasurementState::error_handler_communication: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler for communication errors called.");
+    notifyState(ManagerState::Error);
+
+    unsigned int attempts = 0;
+
+    if (_params.repair_errors) {
+      // Try to fix the error
+
+      bool communication_error = false;
+      for (auto& bus : _sensor_ring->getInterfaces()) {
+        auto interface = bus->getInterface();
+        communication_error |= interface->hasError();
+      }
+
+      if (communication_error) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Communication error detected. Trying to restart affected interfaces.");
+
+        do {
+          attempts++;
+          success = true;
+          for (auto& bus : _sensor_ring->getInterfaces()) {
+            auto interface = bus->getInterface();
+            if (interface->hasError()) {
+              try {
+                success &= interface->repairInterface();
+              } catch (std::runtime_error& e) {
+                success = false;
+              }
+            }
+          }
+          std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        } while (!success && _is_running && (attempts < 40));
+      }
+    }
+
+    // state transition
+    if (_params.repair_errors) {
+      if (success) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting communication succeeded after " + std::to_string(attempts) + " attempts.");
+        _measurement_state = MeasurementState::set_lights;
+        _light_update_flag = true;
+        notifyState(ManagerState::Running);
+      } else {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart communication. Please check the interfaces.");
+        _measurement_state = MeasurementState::shutdown;
+      }
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"repair_errors\" is set to \"false\".");
+      _measurement_state = MeasurementState::shutdown;
+    }
     break;
   }
 

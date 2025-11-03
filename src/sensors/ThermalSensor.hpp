@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "interface/ComInterface.hpp"
 #include "hardware/heimann_htpa32.hpp"
+#include "interface/ComInterface.hpp"
 
 #include "BaseSensor.hpp"
 #include "CustomTypes.hpp"
@@ -29,13 +29,15 @@ public:
   std::pair<measurement::ThermalMeasurement, SensorState> getLatestMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  void onClearDataFlag() override;
 
   static void cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
   static void cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
   static void cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
 private:
+  void onResetSensorState() override;
+  void onClearDataFlag() override;
+
   void rotateLeftImage(measurement::GrayscaleImage& image) const;
   const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
   const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;

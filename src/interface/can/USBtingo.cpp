@@ -61,21 +61,27 @@ bool USBtingo::openInterface(std::string interface_name) {
   if (!_dev->set_mode(usbtingo::device::Mode::ACTIVE))
     return false;
 
+  _communication_error = false;
   return true;
 }
 
 bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data) {
   usbtingo::bus::Message msg(mapEndpointToId(target), data);
-  return _dev->send_can(msg.to_CanTxFrame(true));
+  if(!_dev->send_can(msg.to_CanTxFrame(true))){
+    _communication_error = true;
+    throw std::runtime_error("Unable to send message on interface " + _interface_name);
+  }
+  _communication_error = false;
+  return true;
 }
 
 bool USBtingo::listener() {
   if (!_dev || !_dev->is_alive()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Error starting can listener on interface " + _interface_name + ". Interface not initialized.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Error starting listener on interface " + _interface_name + ". Interface not initialized.");
     return false;
   }
 
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting listener on interface " + _interface_name);
 
   std::vector<usbtingo::device::CanRxFrame> rx_frames;
   std::vector<usbtingo::device::TxEventFrame> tx_event_frames;
@@ -83,9 +89,9 @@ bool USBtingo::listener() {
   auto zero_timeout = std::chrono::microseconds(0);
   auto can_future   = _dev->request_can_async();
 
-  _shutDownListener  = false;
-  _listenerIsRunning = true;
-  while (!_shutDownListener) {
+  _shut_down_listener  = false;
+  _listener_is_running = true;
+  while (!_shut_down_listener) {
     {
       LockGuard guard(_mutex);
 
@@ -116,12 +122,23 @@ bool USBtingo::listener() {
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
 
   _dev->cancel_async_can_request();
-  _listenerIsRunning = false;
+  _listener_is_running = false;
   return true;
 }
 
 bool USBtingo::closeInterface() {
   return true;
+}
+
+bool USBtingo::repairInterface() {
+  stopListener();
+  closeInterface();
+
+  if (openInterface(_interface_name)) {
+    if (startListener())
+      return true;
+  }
+  return false;
 }
 
 void USBtingo::fillEndpointMap() {

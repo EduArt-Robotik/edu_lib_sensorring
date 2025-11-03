@@ -33,13 +33,13 @@ public:
    * Get the interface name of the ComInterface object
    * @return name of the interface
    */
-  std::string getInterfaceName();
+  std::string getInterfaceName() const;
 
   /**
    * Get all known ComEndpoints.
    * @return Set of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
    */
-  const std::set<ComEndpoint>& getEndpoints();
+  const std::set<ComEndpoint>& getEndpoints() const;
 
   /**
    * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
@@ -91,6 +91,18 @@ public:
   virtual bool closeInterface() = 0;
 
   /**
+   * Repair the connection in case of an error.
+   * @return success==true
+   */
+  virtual bool repairInterface() = 0;
+
+  /**
+   * Check if a communication error has occurred.
+   * @return error==true
+   */
+  bool hasError() const;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
@@ -107,9 +119,11 @@ protected:
 
   virtual bool listener() = 0;
 
-  std::atomic<bool> _listenerIsRunning;
+  std::atomic<bool> _communication_error;
 
-  std::atomic<bool> _shutDownListener;
+  std::atomic<bool> _listener_is_running;
+
+  std::atomic<bool> _shut_down_listener;
 
   std::string _interface_name;
 

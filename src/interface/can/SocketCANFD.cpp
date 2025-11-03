@@ -22,9 +22,11 @@ SocketCANFD::SocketCANFD(std::string interface_name)
     : ComInterface(interface_name)
     , _soc(0) {
 
-  if (!openInterface(interface_name)) {
+  try {
+    openInterface(interface_name);
+  } catch (std::runtime_error& e) {
     closeInterface();
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + interface_name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface " + _interface_name + ": " + e.what());
   }
 
   _endpoints = ComEndpoint::createStaticEndpoints();
@@ -48,8 +50,7 @@ bool SocketCANFD::openInterface(std::string interface_name) {
 
   int canfd_enable = 1;
   if (setsockopt(_soc, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enable, sizeof(canfd_enable)) < 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to set CAN FD mode");
-    return false;
+    throw std::runtime_error("Unable to set CAN FD mode");
   }
 
   strcpy(ifr.ifr_name, interface_name.c_str());
@@ -57,34 +58,30 @@ bool SocketCANFD::openInterface(std::string interface_name) {
 
   // Get interface flags
   if (ioctl(_soc, SIOCGIFFLAGS, &ifr) < 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to get interface flags");
-    return false;
+    throw std::runtime_error("Unable to get interface flags. Is the hardware connected?");
   }
 
   if (!(ifr.ifr_flags & IFF_UP)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "CAN interface \"" + interface_name + "\" is DOWN");
-    return false;
+    throw std::runtime_error("CAN interface \"" + interface_name + "\" is DOWN");
   }
 
   if (!(ifr.ifr_flags & IFF_RUNNING)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "CAN interface \"" + interface_name + "\" is UP but not RUNNING (no carrier)");
-    return false;
+    throw std::runtime_error("CAN interface \"" + interface_name + "\" is UP but not RUNNING (no carrier)");
   }
 
   // Get interface index
   if (ioctl(_soc, SIOCGIFINDEX, &ifr) < 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to get interface index");
-    return false;
+    throw std::runtime_error("Unable to get interface index");
   }
   addr.can_family  = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
   fcntl(_soc, F_SETFL, O_NONBLOCK);
 
   if (bind(_soc, (sockaddr*)&addr, sizeof(addr)) < 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unable to bind socket: " + std::string(strerror(errno)) + " [" + std::to_string(errno) + "]");
-    return false;
+    throw std::runtime_error("Unable to bind socket: " + std::string(strerror(errno)) + " [" + std::to_string(errno) + "]");
   }
 
+  _communication_error = false;
   return true;
 }
 
@@ -127,19 +124,19 @@ bool SocketCANFD::send(const canfd_frame* frame) {
     }
 
     if (retval != sizeof(canfd_frame)) {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Can transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
+      _communication_error = true;
+      throw std::runtime_error("CAN transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
       return false;
-    } else {
-      return true;
     }
-  } else {
-    return false;
+
+    _communication_error = false;
+    return true;
   }
+  return false;
 }
 
 bool SocketCANFD::listener() {
-  _shutDownListener = false;
+  _shut_down_listener = false;
 
   canfd_frame frame_rd;
   int recvbytes = 0;
@@ -149,8 +146,8 @@ bool SocketCANFD::listener() {
 
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
 
-  _listenerIsRunning = true;
-  while (!_shutDownListener) {
+  _listener_is_running = true;
+  while (!_shut_down_listener) {
     FD_ZERO(&readSet);
 
     {
@@ -174,7 +171,7 @@ bool SocketCANFD::listener() {
   }
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
 
-  _listenerIsRunning = false;
+  _listener_is_running = false;
   return true;
 }
 
@@ -184,6 +181,17 @@ bool SocketCANFD::closeInterface() {
     retval = (close(_soc) == 0);
   }
   return retval;
+}
+
+bool SocketCANFD::repairInterface() {
+  stopListener();
+  closeInterface();
+
+  if (openInterface(_interface_name)) {
+    if (startListener())
+      return true;
+  }
+  return false;
 }
 
 void SocketCANFD::fillEndpointMap() {
@@ -228,7 +236,9 @@ canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint) {
 }
 
 ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id) {
-  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) { return pair.second == id; });
+  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) {
+    return pair.second == id;
+  });
 
   if (it != _id_map.end()) {
     return it->first;

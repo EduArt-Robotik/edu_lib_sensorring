@@ -116,6 +116,7 @@ namespace manager {
 struct ManagerParams {
   bool enable_brs             = true;
   bool print_topology         = true;
+  bool repair_errors          = true;
   bool enforce_topology       = false;
   double frequency_tof_hz     = 0.0;
   double frequency_thermal_hz = 1.0;

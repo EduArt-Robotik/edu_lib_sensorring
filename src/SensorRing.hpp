@@ -22,6 +22,7 @@ public:
   void syncLight();
   void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   void resetDevices();
+  void resetSensorState();
   bool enumerateDevices();
   bool getEEPROM();
   void requestTofMeasurement();
