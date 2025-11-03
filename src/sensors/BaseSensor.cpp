@@ -51,6 +51,14 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
   _rot_m       = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
 }
 
+void BaseSensor::resetSensorState() {
+  _error                      = SensorState::SensorOK;
+  _new_data_available_flag    = false;
+  _new_data_in_buffer_flag    = false;
+  _new_measurement_ready_flag = false;
+  onResetSensorState();
+}
+
 void BaseSensor::clearDataFlag() {
   _error                      = SensorState::SensorOK;
   _new_data_in_buffer_flag    = false;

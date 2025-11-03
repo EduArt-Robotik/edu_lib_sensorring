@@ -15,6 +15,7 @@ public:
   BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
   ~BaseSensor();
 
+  
   unsigned int getIdx() const;
 
   bool gotNewData() const;
@@ -25,13 +26,16 @@ public:
 
   void setPose(math::Vector3 translation, math::Vector3 rotation);
 
+  void resetSensorState();
   void clearDataFlag();
-  virtual void onClearDataFlag() = 0;
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
   virtual void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 protected:
+  virtual void onResetSensorState() = 0;
+  virtual void onClearDataFlag() = 0;
+
   unsigned int _idx;
   SensorState _error;
   com::ComInterface* _interface;

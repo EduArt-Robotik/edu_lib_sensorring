@@ -25,14 +25,16 @@ public:
   std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  void onClearDataFlag() override;
 
-  static void requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
+  static void cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
   static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
+  void onResetSensorState() override;  
+  void onClearDataFlag() override;
+
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
   const TofSensorParams _params;

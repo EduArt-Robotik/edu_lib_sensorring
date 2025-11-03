@@ -97,6 +97,13 @@ void SensorBus::resetDevices() {
   sensor::SensorBoard::cmdReset(_interface);
 }
 
+void SensorBus::resetSensorState() {
+  for (auto& sensor : _board_vec) {
+    sensor->getTof()->resetSensorState();
+    sensor->getThermal()->resetSensorState();
+  }
+}
+
 int SensorBus::enumerateDevices() {
   _enumeration_flag  = true;
   _enumeration_count = 0;
@@ -163,7 +170,7 @@ void SensorBus::requestTofMeasurement() {
     }
   }
 
-  sensor::TofSensor::requestTofMeasurement(_interface, active_devices);
+  sensor::TofSensor::cmdRequestTofMeasurement(_interface, active_devices);
 }
 
 void SensorBus::fetchTofMeasurement() {
@@ -174,7 +181,7 @@ void SensorBus::fetchTofMeasurement() {
     active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
   }
 
-  sensor::TofSensor::fetchTofMeasurement(_interface, active_devices);
+  sensor::TofSensor::cmdFetchTofMeasurement(_interface, active_devices);
 }
 
 void SensorBus::requestThermalMeasurement() {

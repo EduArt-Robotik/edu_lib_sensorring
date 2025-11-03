@@ -33,6 +33,12 @@ std::vector<const bus::SensorBus*> SensorRing::getInterfaces() const {
   return ref_vec;
 }
 
+void SensorRing::resetSensorState() {
+  for (auto& sensor_bus : _bus_vec) {
+    sensor_bus->resetSensorState();
+  }
+}
+
 void SensorRing::resetDevices() {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->resetDevices();

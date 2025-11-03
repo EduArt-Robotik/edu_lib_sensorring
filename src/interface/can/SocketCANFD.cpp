@@ -228,7 +228,9 @@ canid_t SocketCANFD::mapEndpointToId(ComEndpoint endpoint) {
 }
 
 ComEndpoint SocketCANFD::mapIdToEndpoint(canid_t id) {
-  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) { return pair.second == id; });
+  auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) {
+    return pair.second == id;
+  });
 
   if (it != _id_map.end()) {
     return it->first;

@@ -370,7 +370,7 @@ void MeasurementManagerImpl::StateMachine() {
           }
         }
       } else {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted zero sensor boards, no work to do here. Check topology and restart.");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted 0 sensor boards, no work to do here. Check topology and restart.");
       }
     }
 
@@ -379,7 +379,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::get_eeprom;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to enumerate sensors");
-      _measurement_state = MeasurementState::error_handler;
+      _measurement_state = MeasurementState::shutdown;
     }
     break;
   }
@@ -556,7 +556,36 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::error_handler: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler called.");
     notifyState(ManagerState::Error);
-    _measurement_state = MeasurementState::shutdown;
+
+    unsigned int attempts = 0;
+
+    if (_params.repair_errors) {
+      // Try to fix the error
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Trying to restart measurements....");
+
+      _sensor_ring->resetSensorState();
+      do {
+        attempts++;
+        _sensor_ring->requestTofMeasurement();
+        success = _sensor_ring->waitForAllTofMeasurementsReady();
+      } while (!success && _is_running && (attempts < 10));
+    }
+
+    // state transition
+    if (_params.repair_errors) {
+      if (success) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting measurements succeeded after " + std::to_string(attempts) + " attempts.");
+        _measurement_state = MeasurementState::set_lights;
+        _light_update_flag = true;
+        notifyState(ManagerState::Running);
+      } else {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart measurements. Resetting all sensors.");
+        _measurement_state = MeasurementState::reset_sensors;
+      }
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"restart_on_error\" is set to \"false\".");
+      _measurement_state = MeasurementState::shutdown;
+    }
     break;
   }
 
