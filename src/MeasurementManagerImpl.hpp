@@ -7,8 +7,9 @@
 #include <string>
 #include <thread>
 
-#include "MeasurementClient.hpp"
-#include "Parameters.hpp"
+#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/Parameters.hpp"
+
 #include "SensorRing.hpp"
 
 namespace eduart {

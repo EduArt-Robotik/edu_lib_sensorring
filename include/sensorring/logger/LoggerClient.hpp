@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "SensorringExport.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 

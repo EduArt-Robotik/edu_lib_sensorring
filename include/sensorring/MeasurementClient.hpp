@@ -3,9 +3,8 @@
 #include <string>
 #include <ostream>
 
-#include "CustomTypes.hpp"
-
-#include "SensorringExport.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 

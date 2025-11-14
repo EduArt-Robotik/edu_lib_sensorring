@@ -3,11 +3,11 @@
 #include <memory>
 #include <string>
 
-#include "CustomTypes.hpp"
-#include "MeasurementClient.hpp"
-#include "Parameters.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/Parameters.hpp"
 
-#include "SensorringExport.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 

@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 

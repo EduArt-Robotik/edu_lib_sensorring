@@ -5,7 +5,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
+
 #include "platform/Platform.hpp"
 
 namespace eduart {

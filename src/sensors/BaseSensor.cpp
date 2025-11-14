@@ -1,6 +1,6 @@
 #include "sensors/BaseSensor.hpp"
 
-#include "Math.hpp"
+#include "sensorring/utils/Math.hpp"
 
 namespace eduart {
 

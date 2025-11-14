@@ -7,7 +7,7 @@
 
 #include "sensors/hardware/heimann_htpa32.hpp"
 
-#include "CustomTypes.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
 
 namespace eduart {
 

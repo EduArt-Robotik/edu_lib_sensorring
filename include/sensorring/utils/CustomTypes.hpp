@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Math.hpp"
-#include "SensorringExport.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
 static constexpr unsigned int MAX_MSG_LENGTH     = 64;

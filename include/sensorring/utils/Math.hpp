@@ -3,7 +3,7 @@
 #include <array>
 #include <cmath>
 
-#include "SensorringExport.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 

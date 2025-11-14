@@ -4,7 +4,7 @@
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
 
-#include "Math.hpp"
+#include "sensorring/utils/Math.hpp"
 
 namespace eduart {
 

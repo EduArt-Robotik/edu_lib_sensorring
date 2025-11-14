@@ -6,9 +6,10 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
+
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 

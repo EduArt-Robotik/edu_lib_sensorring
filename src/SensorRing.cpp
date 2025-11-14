@@ -3,7 +3,7 @@
 #include <cmath>
 #include <memory>
 
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 

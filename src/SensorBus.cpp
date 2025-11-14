@@ -6,7 +6,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"

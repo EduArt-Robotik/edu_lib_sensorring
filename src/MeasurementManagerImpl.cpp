@@ -6,13 +6,14 @@
 
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
-#include "MeasurementClient.hpp"
-#include "Parameters.hpp"
 #include "SensorBoard.hpp"
 #include "SensorBus.hpp"
 #include "SensorRing.hpp"
+
+#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 

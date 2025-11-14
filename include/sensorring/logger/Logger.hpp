@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "LoggerClient.hpp"
-#include "SensorringExport.hpp"
+#include "sensorring/logger/LoggerClient.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 

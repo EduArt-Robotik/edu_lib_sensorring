@@ -4,9 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "CustomTypes.hpp"
-
-#include "SensorringExport.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 using namespace std::chrono_literals;
 

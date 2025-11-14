@@ -7,7 +7,7 @@
 #include <usbtingo/can/Dlc.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 #include "canprotocol.hpp"
 

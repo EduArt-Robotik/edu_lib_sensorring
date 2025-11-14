@@ -9,7 +9,7 @@
 #include "sensors/TofSensor.hpp"
 #include "utils/EnumerationInformation.hpp"
 
-#include "Parameters.hpp"
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
