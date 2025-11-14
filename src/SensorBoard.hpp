@@ -9,7 +9,7 @@
 #include "sensors/TofSensor.hpp"
 #include "utils/EnumerationInformation.hpp"
 
-#include "Parameters.hpp"
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
@@ -17,7 +17,7 @@ namespace sensor {
 
 class SensorBoard : public com::ComObserver {
 public:
-  SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
+  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
   ~SensorBoard();
 
   bool isEnumerated() const;

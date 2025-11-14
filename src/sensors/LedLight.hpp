@@ -2,7 +2,8 @@
 
 #include "interface/ComInterface.hpp"
 #include "BaseSensor.hpp"
-#include "Parameters.hpp"
+
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 

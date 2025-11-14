@@ -7,9 +7,10 @@
 #include "interface/ComInterface.hpp"
 
 #include "BaseSensor.hpp"
-#include "CustomTypes.hpp"
-#include "Math.hpp"
-#include "Parameters.hpp"
+
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/utils/Math.hpp"
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
@@ -42,7 +43,7 @@ private:
   measurement::TofMeasurement _latest_transformed_measurement;
 
   uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
-  unsigned int _rx_buffer_offset;
+  std::size_t _rx_buffer_offset;
 };
 
 } // namespace sensor

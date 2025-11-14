@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
-#include "CustomTypes.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -14,7 +16,7 @@ namespace manager {
  * @author Hannes Duske
  * @date 25.12.2024
  */
-enum class ManagerState {
+enum class SENSORRING_API ManagerState {
   Uninitialized,
   Initialized,
   Running,
@@ -27,14 +29,14 @@ enum class ManagerState {
  * @param[in] state to be converted to a string
  * @return Name of the state written out as string
  */
-std::string to_string(ManagerState state);
+static std::string to_string(ManagerState state);
 
 /**
  * @brief  Output stream operator for the ManagerState enum class members
  * @param[in] state to be printed as stream
  * @return Stream of the states name written out
  */
-std::ostream& operator<<(std::ostream& os, ManagerState state);
+static std::ostream& operator<<(std::ostream& os, ManagerState state);
 
 /**
  * @class MeasurementClient
@@ -44,7 +46,7 @@ std::ostream& operator<<(std::ostream& os, ManagerState state);
  * @author Hannes Duske
  * @date 25.12.2024
  */
-class MeasurementClient {
+class SENSORRING_API MeasurementClient {
 public:
   /**
    * Callback method for state changes of the state machine worker

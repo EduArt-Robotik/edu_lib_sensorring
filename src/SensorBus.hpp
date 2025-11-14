@@ -50,7 +50,7 @@ public:
   void fetchThermalMeasurement();
 
   bool stopThermalCalibration();
-  bool startThermalCalibration(unsigned int window);
+  bool startThermalCalibration(std::size_t window);
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

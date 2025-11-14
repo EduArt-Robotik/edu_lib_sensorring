@@ -6,7 +6,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
@@ -121,16 +121,18 @@ int SensorBus::enumerateDevices() {
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   _enumeration_flag = false;
 
-  for (size_t i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+  for (auto i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+    auto idx = static_cast<unsigned int>(i + 1);
+    
     // Add configured but unconnected sensors to the enumeration list
     sensor::EnumerationInformation info;
-    info.idx   = i + 1;
+    info.idx   = idx;
     info.state = sensor::EnumerationState::ConfiguredNotConnected;
     _enumeration_vec.push_back(std::move(info));
 
     // Disable sensors that are configured but unconnected
-    _board_vec.at(i)->getTof()->setEnable(false);
-    _board_vec.at(i)->getThermal()->setEnable(false);
+    _board_vec.at(idx)->getTof()->setEnable(false);
+    _board_vec.at(idx)->getThermal()->setEnable(false);
   }
 
   return _enumeration_count;
@@ -271,7 +273,7 @@ bool SensorBus::stopThermalCalibration() {
   return success;
 }
 
-bool SensorBus::startThermalCalibration(unsigned int window) {
+bool SensorBus::startThermalCalibration(std::size_t window) {
   bool success = true;
 
   for (auto& sensor : _board_vec) {

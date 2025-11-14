@@ -4,13 +4,13 @@
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
 
-#include "Math.hpp"
+#include "sensorring/utils/Math.hpp"
 
 namespace eduart {
 
 namespace sensor {
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, std::size_t idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
     : _idx(idx)
     , _interface(interface)
     , _params{ params }

@@ -6,9 +6,10 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
+
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 
@@ -81,7 +82,7 @@ bool ThermalSensor::stopCalibration() {
   return result;
 }
 
-bool ThermalSensor::startCalibration(size_t window) {
+bool ThermalSensor::startCalibration(std::size_t window) {
   if (!_calibration_active) {
     _calibration_active        = true;
     _calibration_count_goal    = window;
@@ -148,7 +149,7 @@ void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, 
                 _calibration_count_current++;
               }
               if (_calibration_count_current >= _calibration_count_goal) {
-                _calibration_image /= _calibration_count_current;
+                _calibration_image /= static_cast<double>(_calibration_count_current);
                 _calibration_average = _calibration_image.avg();
                 _calibration_active  = false;
                 _got_calibration     = true;
@@ -222,22 +223,22 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     buffer[i]            = buffer[i] - (vdd_comp_val1 * vdd_comp_val2);
 
     // look-up table and bilinear interpolation
-    unsigned int table_col = 0;
+    std::size_t table_col = 0;
     for (int j = 0; j < NROFTAELEMENTS; j++) {
       if (t_ambient > htpa32::XTATemps[j]) {
         table_col = j;
       }
     }
 
-    unsigned int table_row = buffer[i] + TABLEOFFSET;
+    std::size_t table_row = std::lround(buffer[i] + TABLEOFFSET);
     table_row              = table_row >> ADEXPBITS; // ToDo: Table row too large. Causes Segfault when accessing the TempTable
 
     if ((table_row < NROFADELEMENTS) && (table_col < NROFTAELEMENTS)) {
-      int dta = t_ambient - htpa32::XTATemps[table_col];
+      std::int32_t dta = std::lround(t_ambient - htpa32::XTATemps[table_col]);
 
-      double vx = ((((int32_t)htpa32::TempTable[table_row][table_col + 1] - (int32_t)htpa32::TempTable[table_row][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)htpa32::TempTable[table_row][table_col];
-      double vy = ((((int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (int32_t)htpa32::TempTable[table_row + 1][table_col]) * (int32_t)dta) / (int32_t)TAEQUIDISTANCE) + (int32_t)htpa32::TempTable[table_row + 1][table_col];
-      buffer[i] = (uint32_t)((vy - vx) * ((int32_t)(buffer[i] + TABLEOFFSET) - (int32_t)htpa32::YADValues[table_row]) / (int32_t)ADEQUIDISTANCE + (int32_t)vx);
+      double vx = ((((std::int32_t)htpa32::TempTable[table_row][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row][table_col];
+      double vy = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
+      buffer[i] = (std::uint32_t)((vy - vx) * ((std::int32_t)(buffer[i] + TABLEOFFSET) - (std::int32_t)htpa32::YADValues[table_row]) / (std::int32_t)ADEQUIDISTANCE + (std::int32_t)vx);
 
       // apply global offset
       // buffer[i] += _eeprom.global_offset;

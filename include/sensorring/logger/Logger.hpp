@@ -5,13 +5,14 @@
 #include <string>
 #include <vector>
 
-#include "LoggerClient.hpp"
+#include "sensorring/logger/LoggerClient.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
 namespace logger {
 
-class Logger {
+class SENSORRING_API Logger {
 public:
   ~Logger() = default;
 

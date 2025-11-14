@@ -3,9 +3,11 @@
 #include <memory>
 #include <string>
 
-#include "CustomTypes.hpp"
-#include "MeasurementClient.hpp"
-#include "Parameters.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/Parameters.hpp"
+
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -16,10 +18,10 @@ class SensorRing;
 namespace manager {
 
 // Forward declaration of implementation class
-class MeasurementManagerImpl;
+class SENSORRING_API MeasurementManagerImpl;
 
 // Forward declaration
-enum class MeasurementState;
+enum class SENSORRING_API MeasurementState;
 
 /**
  * @class MeasurementManager
@@ -28,7 +30,7 @@ enum class MeasurementState;
  * @author Hannes Duske
  * @date 25.12.2024
  */
-class MeasurementManager {
+class SENSORRING_API MeasurementManager {
 public:
   /**
    * Constructor

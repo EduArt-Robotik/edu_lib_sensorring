@@ -6,8 +6,8 @@
 #include "interface/ComInterface.hpp"
 
 #include "BaseSensor.hpp"
-#include "CustomTypes.hpp"
-#include "Parameters.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
@@ -21,7 +21,7 @@ public:
   void readEEPROM();
   bool gotEEPROM() const;
   bool stopCalibration();
-  bool startCalibration(size_t window);
+  bool startCalibration(std::size_t window);
   ThermalSensorParams getParams() const;
 
   std::pair<measurement::GrayscaleImage, SensorState> getLatestGrayscaleImage() const;
@@ -51,14 +51,14 @@ private:
   measurement::ThermalMeasurement _latest_measurement;
 
   uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2];
-  unsigned int _rx_buffer_offset;
+  std::size_t _rx_buffer_offset;
 
   bool _got_eeprom;
   bool _got_calibration;
   bool _calibration_active;
   double _calibration_average;
-  size_t _calibration_count_current;
-  size_t _calibration_count_goal;
+  std::size_t _calibration_count_current;
+  std::size_t _calibration_count_goal;
   std::string _eeprom_filename;
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;

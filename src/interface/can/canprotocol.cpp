@@ -4,11 +4,11 @@ namespace eduart {
 
 namespace com {
 
-void CanProtocol::makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress) {
-  canid_t sID  = sysID << 8;
-  canid_t iBit = INPUTBIT << 7;
-  canid_t oBit = OUTPUTBIT << 7;
-  canid_t nID  = nodeID;
+void CanProtocol::makeCanStdID(canid sysID, canid nodeID, canid& inputAddress, canid& outputAddress, canid& broadcastAddress) {
+  canid sID  = sysID << 8;
+  canid iBit = INPUTBIT << 7;
+  canid oBit = OUTPUTBIT << 7;
+  canid nID  = nodeID;
 
   inputAddress     = sID | iBit | nID;
   outputAddress    = sID | oBit | nID;

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Math.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
 static constexpr unsigned int MAX_MSG_LENGTH     = 64;
@@ -14,7 +15,7 @@ namespace eduart {
 
 namespace com {
 
-enum class InterfaceType {
+enum class SENSORRING_API InterfaceType {
   UNDEFINED,
   SOCKETCAN,
   USBTINGO
@@ -24,7 +25,7 @@ enum class InterfaceType {
 
 namespace sensor {
 
-enum class SensorState {
+enum class SENSORRING_API SensorState {
   SensorInit,
   SensorOK,
   ReceiveError
@@ -33,7 +34,7 @@ enum class SensorState {
 } // namespace sensor
 
 namespace light {
-enum class LightMode {
+enum class SENSORRING_API LightMode {
   Off,
   Dimmed,
   HighBeam,
@@ -49,7 +50,7 @@ enum class LightMode {
 
 namespace measurement {
 
-template <typename T, std::size_t RESOLUTION> struct GenericGrayscaleImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_API GenericGrayscaleImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
   std::array<T, RESOLUTION> data = {};
 
@@ -64,12 +65,12 @@ template <typename T, std::size_t RESOLUTION> struct GenericGrayscaleImage {
   template <typename U> GenericGrayscaleImage& operator-=(const GenericGrayscaleImage<U, RESOLUTION>& other);
 };
 
-template <typename T, std::size_t RESOLUTION> struct GenericRGBImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_API GenericRGBImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
   std::array<std::array<T, 3>, RESOLUTION> data = {};
 };
 
-struct PointData {
+struct SENSORRING_API PointData {
   math::Vector3 point = { 0.0, 0.0, 0.0 };
   double raw_distance = 0.0;
   double sigma        = 0.0;
@@ -82,12 +83,12 @@ using GrayscaleImage   = GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>
 using TemperatureImage = GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 using FalseColorImage  = GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 
-struct TofMeasurement {
+struct SENSORRING_API TofMeasurement {
   unsigned int frame_id = 0;
   PointCloud point_cloud;
 };
 
-struct ThermalMeasurement {
+struct SENSORRING_API ThermalMeasurement {
   unsigned int frame_id  = 0;
   unsigned int user_idx  = 0;
   double t_ambient_deg_c = 0;

@@ -3,8 +3,8 @@
 #include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
 
-#include "CustomTypes.hpp"
-#include "Math.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/utils/Math.hpp"
 
 namespace eduart {
 
@@ -12,11 +12,11 @@ namespace sensor {
 
 class BaseSensor : public com::ComObserver {
 public:
-  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
+  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
   ~BaseSensor();
 
   
-  unsigned int getIdx() const;
+  std::size_t getIdx() const;
 
   bool gotNewData() const;
   bool newDataAvailable() const;
@@ -36,7 +36,7 @@ protected:
   virtual void onResetSensorState() = 0;
   virtual void onClearDataFlag() = 0;
 
-  unsigned int _idx;
+  std::size_t _idx;
   SensorState _error;
   com::ComInterface* _interface;
 

@@ -89,11 +89,11 @@ public:
 private:
   void fillEndpointMap();
 
-  canid_t mapEndpointToId(ComEndpoint endpoint);
+  CanProtocol::canid mapEndpointToId(ComEndpoint endpoint);
 
-  ComEndpoint mapIdToEndpoint(canid_t id);
+  ComEndpoint mapIdToEndpoint(CanProtocol::canid id);
 
-  std::map<ComEndpoint, canid_t> _id_map;
+  std::map<ComEndpoint, CanProtocol::canid> _id_map;
 
   bool listener() override;
 

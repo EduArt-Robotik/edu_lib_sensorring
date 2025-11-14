@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Parameters.hpp"
+#include "sensorring/Parameters.hpp"
 #include "SensorBus.hpp"
 
 namespace eduart {
@@ -30,7 +30,7 @@ public:
   void requestThermalMeasurement();
   void fetchThermalMeasurement();
   bool stopThermalCalibration();
-  bool startThermalCalibration(size_t window);
+  bool startThermalCalibration(std::size_t window);
 
   bool waitForAllTofMeasurementsReady() const;
   bool waitForAllTofDataTransmissionsComplete() const;
