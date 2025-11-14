@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "LoggerClient.hpp"
+#include "SensorringExport.hpp"
 
 namespace eduart {
 
 namespace logger {
 
-class Logger {
+class SENSORRING_API Logger {
 public:
   ~Logger() = default;
 

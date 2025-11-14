@@ -3,6 +3,8 @@
 #include <array>
 #include <cmath>
 
+#include "SensorringExport.hpp"
+
 namespace eduart {
 
 namespace math {
@@ -16,7 +18,7 @@ struct Quaternion;
 // Vector3
 //===============================
 
-struct Vector3 {
+struct SENSORRING_API Vector3 {
   std::array<double, 3> data;
 
   double& x();
@@ -61,7 +63,7 @@ struct Vector3 {
 // Matrix3
 //===============================
 
-struct Matrix3 {
+struct SENSORRING_API Matrix3 {
   std::array<Vector3, 3> data;
 
   Vector3& operator[](std::size_t idx);

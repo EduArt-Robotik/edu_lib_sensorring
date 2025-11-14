@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "SensorringExport.hpp"
 
 namespace eduart {
 
@@ -12,7 +13,7 @@ namespace logger {
  * @author Hannes Duske
  * @date 25.12.2024
  */
-enum class LogVerbosity {
+enum class SENSORRING_API LogVerbosity {
   Debug,
   Info,
   Warning,
@@ -27,7 +28,7 @@ enum class LogVerbosity {
  * @author Hannes Duske
  * @date 25.12.2024
  */
-class LoggerClient {
+class SENSORRING_API LoggerClient {
 public:
   /**
    * Callback method for the log output of the sensorring library

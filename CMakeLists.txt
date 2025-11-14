@@ -115,9 +115,16 @@ target_include_directories(sensorring PRIVATE
   include/${PROJECT_NAME}
   include/${PROJECT_NAME}/logger
   include/${PROJECT_NAME}/utils
+  include/${PROJECT_NAME}/platform
 )
 
 # build macros
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(sensorring PUBLIC
+    SENSORRING_SHARED
+  )
+endif()
+
 if(MSVC)
   target_compile_definitions(sensorring PRIVATE _USE_MATH_DEFINES)
 endif()
@@ -170,6 +177,8 @@ install(FILES
 
   include/${PROJECT_NAME}/utils/CustomTypes.hpp
   include/${PROJECT_NAME}/utils/Math.hpp
+
+  include/${PROJECT_NAME}/platform/SensorringExport.hpp
   
   DESTINATION include/${PROJECT_NAME}
 )

@@ -6,6 +6,8 @@
 
 #include "CustomTypes.hpp"
 
+#include "SensorringExport.hpp"
+
 using namespace std::chrono_literals;
 
 namespace eduart {
@@ -17,7 +19,7 @@ namespace sensor {
  * @brief Possible orientations of a sensor board. Used to rotate the thermal
  * images.
  */
-enum class Orientation {
+enum class SENSORRING_API Orientation {
   left,
   right,
   none
@@ -27,7 +29,7 @@ enum class Orientation {
  * @enum LightParams
  * @brief Parameter structure of the sensor lights of a sensor board.
  */
-struct LightParams {
+struct SENSORRING_API LightParams {
   bool enable             = false;
   Orientation orientation = Orientation::none;
 };
@@ -37,7 +39,7 @@ struct LightParams {
  * @brief Parameter structure of the thermal sensor of a sensor board. Not all
  * sensor boards have thermal sensors.
  */
-struct ThermalSensorParams {
+struct SENSORRING_API ThermalSensorParams {
   int user_idx                = 0;
   bool enable                 = false;
   double t_min_deg_c          = 0;
@@ -54,7 +56,7 @@ struct ThermalSensorParams {
  * @enum TofSensorParams
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
-struct TofSensorParams {
+struct SENSORRING_API TofSensorParams {
   int user_idx = 0;
   bool enable  = false;
 };
@@ -64,7 +66,7 @@ struct TofSensorParams {
  * @brief Parameter structure of a sensor board. A sensor board is one circuit
  * board.
  */
-struct SensorBoardParams {
+struct SENSORRING_API SensorBoardParams {
   math::Vector3 rotation    = { 0, 0, 0 };
   math::Vector3 translation = { 0, 0, 0 };
   LightParams led_params;
@@ -82,7 +84,7 @@ namespace bus {
  * interface e.g. can bus and has an arbitrary number of sensor boards
  * connected.
  */
-struct BusParams {
+struct SENSORRING_API BusParams {
   std::string interface_name;
   com::InterfaceType type = com::InterfaceType::UNDEFINED;
   std::vector<sensor::SensorBoardParams> board_param_vec;
@@ -98,7 +100,7 @@ namespace ring {
  * abstraction of the whole sensor system and consists of an arbitrary number of
  * communication interfaces.
  */
-struct RingParams {
+struct SENSORRING_API RingParams {
   std::chrono::milliseconds timeout = 1000ms;
   std::vector<bus::BusParams> bus_param_vec;
 };
@@ -113,7 +115,7 @@ namespace manager {
  * handles the timing and communication of the whole system by running a looping
  * state machine. One measurement manager manages exactly one sensor ring.
  */
-struct ManagerParams {
+struct SENSORRING_API ManagerParams {
   bool enable_brs             = true;
   bool print_topology         = true;
   bool repair_errors          = true;
