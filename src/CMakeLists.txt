@@ -12,6 +12,7 @@ add_library(sensorring
   interface/ComObserver.cpp
   interface/can/canprotocol.cpp
   logger/Logger.cpp
+  logger/LoggerClient.cpp
   sensors/TofSensor.cpp
   sensors/ThermalSensor.cpp
   sensors/LedLight.cpp

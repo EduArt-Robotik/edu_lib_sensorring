@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <ostream>
+
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -20,6 +22,20 @@ enum class SENSORRING_API LogVerbosity {
   Error,
   Exception
 };
+
+/**
+ * @brief Function to convert the LogVerbosity enum class members to string
+ * @param[in] verbosity to be converted to a string
+ * @return Name of the state written out as string
+ */
+SENSORRING_API std::string to_string(LogVerbosity verbosity);
+
+/**
+ * @brief  Output stream operator for the LogVerbosity enum class members
+ * @param[in] verbosity to be printed as stream
+ * @return Stream of the states name written out
+ */
+SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity);
 
 /**
  * @class LoggerClient
