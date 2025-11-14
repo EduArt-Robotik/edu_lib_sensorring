@@ -203,7 +203,7 @@ bool SensorRing::stopThermalCalibration() {
   return success;
 }
 
-bool SensorRing::startThermalCalibration(size_t window) {
+bool SensorRing::startThermalCalibration(std::size_t window) {
   bool success = true;
 
   for (auto& sensor_bus : _bus_vec) {

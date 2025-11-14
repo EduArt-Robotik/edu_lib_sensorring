@@ -21,7 +21,7 @@ template <typename T, std::size_t RESOLUTION> double GenericGrayscaleImage<T, RE
 
 template <typename T, std::size_t RESOLUTION> GenericGrayscaleImage<T, RESOLUTION>& GenericGrayscaleImage<T, RESOLUTION>::round() {
   for (auto& element : data) {
-    element = std::round(element);
+    element = static_cast<T>(std::round(element));
   }
   return *this;
 }
@@ -29,7 +29,7 @@ template <typename T, std::size_t RESOLUTION> GenericGrayscaleImage<T, RESOLUTIO
 template <typename T, std::size_t RESOLUTION> GenericGrayscaleImage<T, RESOLUTION>& GenericGrayscaleImage<T, RESOLUTION>::operator/=(const T other) {
   std::size_t i = 0;
   for (auto& element : data) {
-    element = static_cast<double>(element) / static_cast<double>(other);
+    element =  static_cast<T>(static_cast<double>(element) / static_cast<double>(other));
     i++;
   }
   return *this;

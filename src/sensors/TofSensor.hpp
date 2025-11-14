@@ -42,7 +42,7 @@ private:
   measurement::TofMeasurement _latest_transformed_measurement;
 
   uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
-  unsigned int _rx_buffer_offset;
+  std::size_t _rx_buffer_offset;
 };
 
 } // namespace sensor

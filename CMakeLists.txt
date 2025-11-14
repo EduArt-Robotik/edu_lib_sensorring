@@ -1,12 +1,10 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 
 #########################################################
 # build type (has to be done before project() call)
-IF(DEFINED CMAKE_BUILD_TYPE)
-   SET(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-ELSE()
-   SET(CMAKE_BUILD_TYPE Release)
-ENDIF()
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
+endif()
 
 #########################################################
 # project
@@ -41,7 +39,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   endif()
 
 elseif(MSVC)
-  add_compile_options(/Wall)
+  add_compile_options(/W3)
+  add_compile_options(/FS)
 
   if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(/O2)
@@ -119,6 +118,10 @@ target_include_directories(sensorring PRIVATE
 )
 
 # build macros
+if(MSVC)
+  target_compile_definitions(sensorring PRIVATE _USE_MATH_DEFINES)
+endif()
+
 if(USE_SOCKETCAN)
   target_compile_definitions(sensorring PRIVATE USE_SOCKETCAN)
 endif()

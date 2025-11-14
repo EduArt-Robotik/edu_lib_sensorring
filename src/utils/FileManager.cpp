@@ -6,10 +6,18 @@
 #include <iostream>
 
 #include "logger/Logger.hpp"
+#include "platform/Platform.hpp"
 
 namespace eduart {
 
 namespace filemanager {
+
+//==================================================
+// concrete types that are used in the program
+//==================================================
+
+template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
+template class filemanager::StructHandler<sensor::htpa32::HTPA32Eeprom>;
 
 //==================================================
 // PathHandler
@@ -44,15 +52,15 @@ std::filesystem::path PathHandler::resolvePath(const std::string path) {
   } else {
 
     // relative path -> resolve it against home directory
-    const char* home = std::getenv("HOME");
-    if (home != nullptr) {
+    auto home = getEnvVar("HOME");
+    if (!home.empty()) {
       // unix
       std::filesystem::path home_dir(home);
       resolved_path = home_dir / path;
     } else {
       // windows
-      const char* user_profile = std::getenv("USERPROFILE");
-      if (user_profile != nullptr) {
+      auto user_profile = getEnvVar("USERPROFILE");
+      if (!user_profile.empty()) {
         std::filesystem::path user_profile_dir(user_profile);
         resolved_path = user_profile_dir / path;
       } else {

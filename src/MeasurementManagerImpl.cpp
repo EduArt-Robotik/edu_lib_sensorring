@@ -43,7 +43,7 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
   for (const auto& bus_params : params.ring_params.bus_param_vec) {
     auto interface = com::ComManager::getInstance()->createInterface(bus_params.interface_name, bus_params.type);
 
-    std::size_t idx = 0;
+    unsigned int idx = 0;
     std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec;
     for (const auto& board_params : bus_params.board_param_vec) {
       auto tof     = std::make_unique<sensor::TofSensor>(board_params.tof_params, interface, idx);
@@ -60,7 +60,7 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
 
   // check if there are active tof or thermal sensors
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
-    for (size_t j = 0; j < sensor_bus->getSensorCount(); j++) {
+    for (unsigned int j = 0; j < sensor_bus->getSensorCount(); j++) {
       _tof_enabled |= sensor_bus->isTofEnabled(j);
       _thermal_enabled |= sensor_bus->isThermalEnabled(j);
     }
@@ -309,7 +309,7 @@ void MeasurementManagerImpl::StateMachineWorker() {
     try {
       StateMachine();
     } catch (std::runtime_error& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught communication error.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught communication error: " + std::string(e.what()));
       _measurement_state = MeasurementState::error_handler_communication;
     }
   }
@@ -515,7 +515,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::fetch_thermal_data: {
     // fetch and publish a thermal measurement
-    if (_thermal_enabled and _thermal_measurement_flag) {
+    if (_thermal_enabled && _thermal_measurement_flag) {
       _sensor_ring->fetchThermalMeasurement();
       success = _sensor_ring->waitForAllThermalDataTransmissionsComplete();
       if (success) {
@@ -623,7 +623,7 @@ void MeasurementManagerImpl::StateMachine() {
             if (interface->hasError()) {
               try {
                 success &= interface->repairInterface();
-              } catch (std::runtime_error& e) {
+              } catch (std::runtime_error&) {
                 success = false;
               }
             }

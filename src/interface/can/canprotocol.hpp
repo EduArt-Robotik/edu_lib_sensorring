@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <linux/can.h>
+#include <cstdint>
 
 namespace eduart {
 
@@ -128,8 +128,9 @@ namespace com {
 
 class CanProtocol {
 public:
+  using canid = std::uint32_t;
   CanProtocol() = delete;
-  static void makeCanStdID(canid_t sysID, canid_t nodeID, canid_t& inputAddress, canid_t& outputAddress, canid_t& broadcastAddress);
+  static void makeCanStdID(canid sysID, canid nodeID, canid& inputAddress, canid& outputAddress, canid& broadcastAddress);
 };
 
 } // namespace com

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <limits>
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/can/Dlc.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
@@ -160,29 +161,37 @@ void USBtingo::fillEndpointMap() {
 }
 
 void USBtingo::addToFSensorToEndpointMap(std::size_t idx) {
-  canid_t canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+  CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
+  if((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+  }
+
   auto value                  = "tof" + std::to_string(idx) + "_data";
-  _id_map[ComEndpoint(value)] = canid_tof_data_in + idx;
+  _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_tof_data_in + idx);
   _endpoints.emplace(value);
 }
 
 void USBtingo::addThermalSensorToEndpointMap(std::size_t idx) {
-  canid_t canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+  CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
+  if((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+  }
+
   auto value                  = "thermal" + std::to_string(idx) + "_data";
-  _id_map[ComEndpoint(value)] = canid_thermal_data_in + idx;
+  _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_thermal_data_in + idx);
   _endpoints.emplace(value);
 }
 
-std::uint32_t USBtingo::mapEndpointToId(ComEndpoint ep) {
-  std::uint32_t id = _id_map.at(ep); // may throw out_of_range exception
+CanProtocol::canid USBtingo::mapEndpointToId(ComEndpoint ep) {
+  CanProtocol::canid id = _id_map.at(ep); // may throw out_of_range exception
   return id;
 }
 
-ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
+ComEndpoint USBtingo::mapIdToEndpoint(CanProtocol::canid id) {
   auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) {
     return pair.second == id;
   });
