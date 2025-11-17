@@ -41,7 +41,7 @@ add_subdirectory(src)
 
 # Library
 if(BUILD_EXAMPLES)
-  add_subdirectory(apps/examples)
+  add_subdirectory(apps/examples/cpp)
 endif()
 
 # cpack packaging

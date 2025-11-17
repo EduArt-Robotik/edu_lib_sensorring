@@ -54,7 +54,11 @@ int main(char argc, char* argv[])
 
     std::cout << std::endl << "Printing measurement rate:" << std::endl;
     while(true) {
-        std::cout << "Current rate: " << std::fixed << std::setprecision(2) << proxy->getRate() << " Hz\r"  << std::flush;
+        std::cout   << "Current rate: "
+                    << std::fixed << std::setprecision(2)
+                    << std::setw(5) << proxy->getRate()
+                    << " Hz\r"
+                    << std::flush;
         std::this_thread::sleep_for(1s);
     }
 
