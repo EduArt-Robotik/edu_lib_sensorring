@@ -10,9 +10,7 @@
 #include <unistd.h>
 
 #include "interface/ComEndpoints.hpp"
-#include "logger/Logger.hpp"
-
-#include "canprotocol.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 

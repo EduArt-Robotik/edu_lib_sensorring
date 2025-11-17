@@ -14,6 +14,7 @@
 using namespace std::chrono_literals;
 
 int main(int argc, char* argv[]) {
+
   std::cout << "==========================" << std::endl;
   std::cout << "Minimal sensorring example" << std::endl;
   std::cout << "==========================" << std::endl;
@@ -49,9 +50,7 @@ int main(int argc, char* argv[]) {
   while (!proxy->gotFirstMeasurement()) {
   };
 
-  std::cout << std::endl << "Printing measurement rate:" << std::endl;
   while (manager->isMeasuring()) {
-    std::cout << "Current rate: " << std::fixed << std::setprecision(2) << std::setw(5) << proxy->getRate() << " Hz\r" << std::flush;
     std::this_thread::sleep_for(1s);
   }
 
