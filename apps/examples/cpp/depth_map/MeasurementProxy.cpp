@@ -34,25 +34,26 @@ void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosi
 }
 
 std::string MeasurementProxy::depthToColor(double depth, double min, double max) {
-  // Clamp to range
-  if (depth < min)
-    depth = min;
-  if (depth > max)
-    depth = max;
 
-  auto t = (depth - min) / (max - min);
+  if (depth > max || depth < 0) {
+    depth = max;
+  } else if (depth < min) {
+    depth = min;
+  }
+
+  auto d = (depth - min) / (max - min);
 
   // Map t to a color gradient: red (near) → yellow → green → blue (far)
-  int r = static_cast<int>(255 * (1 - t));
-  int g = static_cast<int>(255 * (1 - std::abs(0.5f - t) * 2));
-  int b = static_cast<int>(255 * t);
+  int r = static_cast<int>(255 * (1 - d));
+  int g = static_cast<int>(255 * (1 - std::abs(0.5f - d) * 2));
+  int b = static_cast<int>(255 * d);
 
   return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
 }
 
 void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
 
-  std::cout << "\033[u";
+  std::cout << "\033[u" << std::endl;
 
   for (int row = 0; row < 8; ++row) {
     for (int col = 0; col < 8; ++col) {
