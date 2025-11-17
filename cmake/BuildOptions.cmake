@@ -6,6 +6,7 @@ if(UNIX)
 endif()
 option( USE_USBTINGO "Add support for the USBtingo USB to CAN FD converter" OFF)
 option( BUILD_SHARED_LIBS "Build as shared library" OFF)
+option( BUILD_EXAMPLES "Build the example programs" OFF)
 option( VERBOSE_BUILD "Verbose build" OFF)
 
 if(WIN32)

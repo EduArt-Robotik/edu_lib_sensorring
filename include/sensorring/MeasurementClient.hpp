@@ -29,14 +29,14 @@ enum class SENSORRING_API ManagerState {
  * @param[in] state to be converted to a string
  * @return Name of the state written out as string
  */
-static std::string to_string(ManagerState state);
+SENSORRING_API std::string to_string(ManagerState state);
 
 /**
  * @brief  Output stream operator for the ManagerState enum class members
  * @param[in] state to be printed as stream
  * @return Stream of the states name written out
  */
-static std::ostream& operator<<(std::ostream& os, ManagerState state);
+SENSORRING_API std::ostream& operator<<(std::ostream& os, ManagerState state);
 
 /**
  * @class MeasurementClient

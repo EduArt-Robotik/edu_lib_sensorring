@@ -39,6 +39,11 @@ include(cmake/CollectDependencies.cmake REQUIRED)
 # Library
 add_subdirectory(src)
 
+# Library
+if(BUILD_EXAMPLES)
+  add_subdirectory(apps/examples/cpp)
+endif()
+
 # cpack packaging
 if(CMAKE_BUILD_TYPE MATCHES Release)
     include(cmake/PackageGeneration.cmake REQUIERD)    

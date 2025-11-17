@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+#include "canprotocol.hpp"
 
 namespace eduart {
 
@@ -73,7 +74,7 @@ public:
 private:
   void fillEndpointMap();
 
-  std::uint32_t mapEndpointToId(ComEndpoint ep);
+  CanProtocol::canid mapEndpointToId(ComEndpoint ep);
 
   ComEndpoint mapIdToEndpoint(std::uint32_t id);
 
