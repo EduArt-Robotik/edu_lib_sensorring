@@ -13,7 +13,7 @@
 
 using namespace std::chrono_literals;
 
-int main(int argc, char* argv[]) {
+int main(int, char* []) {
 
   std::cout << "==========================" << std::endl;
   std::cout << "Minimal sensorring example" << std::endl;

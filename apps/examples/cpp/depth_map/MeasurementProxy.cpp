@@ -27,8 +27,10 @@ void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] std::vector<measurem
 }
 
 void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {
-  std::cout << "[" << verbosity << "] " << msg << std::endl;
-  std::cout << "\033[s";
+  if (verbosity > logger::LogVerbosity::Debug) {
+    std::cout << "[" << verbosity << "] " << msg << std::endl;
+    std::cout << "\033[s";
+  }
 }
 
 std::string MeasurementProxy::depthToColor(double depth, double min, double max) {

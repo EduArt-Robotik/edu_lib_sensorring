@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "sensorring/logger/LoggerClient.hpp"
+
 namespace eduart {
 
 double MeasurementProxy::getRate() {
@@ -24,7 +26,9 @@ void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] std::vector<measurem
 }
 
 void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {
-  std::cout << "[" << verbosity << "] " << msg << std::endl;
+  if (verbosity > logger::LogVerbosity::Debug) {
+    std::cout << "[" << verbosity << "] " << msg << std::endl;
+  }
 }
 
 } // namespace eduart
