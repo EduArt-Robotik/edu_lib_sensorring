@@ -1,8 +1,9 @@
 #include "USBtingo.hpp"
 
 #include <cstdint>
-#include <string>
+#include <exception>
 #include <limits>
+#include <string>
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/can/Dlc.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
@@ -68,7 +69,7 @@ bool USBtingo::openInterface(std::string interface_name) {
 
 bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data) {
   usbtingo::bus::Message msg(mapEndpointToId(target), data);
-  if(!_dev->send_can(msg.to_CanTxFrame(true))){
+  if (!_dev->send_can(msg.to_CanTxFrame(true))) {
     _communication_error = true;
     throw std::runtime_error("Unable to send message on interface " + _interface_name);
   }
@@ -104,10 +105,14 @@ bool USBtingo::listener() {
           // forward can frames
           for (const auto& rx_frame : rx_frames) {
 
-            auto endpoint = mapIdToEndpoint(rx_frame.id);
-            for (auto observer : _observers) {
-              if (observer)
-                observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
+            try {
+              auto endpoint = mapIdToEndpoint(rx_frame.id);
+              for (auto observer : _observers) {
+                if (observer)
+                  observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
+              }
+            } catch (const std::exception&) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _interface_name);
             }
           }
           rx_frames.clear();
@@ -164,7 +169,7 @@ void USBtingo::addToFSensorToEndpointMap(std::size_t idx) {
   CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
-  if((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+  if ((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
   }
 
@@ -177,7 +182,7 @@ void USBtingo::addThermalSensorToEndpointMap(std::size_t idx) {
   CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
-  if((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+  if ((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
   }
 
@@ -199,8 +204,7 @@ ComEndpoint USBtingo::mapIdToEndpoint(CanProtocol::canid id) {
   if (it != _id_map.end()) {
     return it->first;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
-    return ComEndpoint("");
+    throw std::runtime_error("No Endpoint found for given CAN ID");
   }
 }
 

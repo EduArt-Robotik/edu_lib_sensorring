@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <exception>
 #include <fcntl.h>
 #include <net/if.h>
+#include <stdexcept>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
@@ -155,10 +157,14 @@ bool SocketCANFD::listener() {
         if (FD_ISSET(_soc, &readSet)) {
           recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
           if (recvbytes) {
-            auto endpoint = mapIdToEndpoint(frame_rd.can_id);
-            for (const auto& observer : _observers) {
-              if (observer)
-                observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
+            try {
+              auto endpoint = mapIdToEndpoint(frame_rd.can_id);
+              for (const auto& observer : _observers) {
+                if (observer)
+                  observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
+              }
+            } catch (const std::exception&) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _interface_name);
             }
           }
         }
@@ -214,7 +220,7 @@ void SocketCANFD::addToFSensorToEndpointMap(std::size_t idx) {
   CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
-  if((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+  if ((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
   }
 
@@ -227,7 +233,7 @@ void SocketCANFD::addThermalSensorToEndpointMap(std::size_t idx) {
   CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
-  if((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+  if ((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
   }
 
@@ -249,8 +255,7 @@ ComEndpoint SocketCANFD::mapIdToEndpoint(CanProtocol::canid id) {
   if (it != _id_map.end()) {
     return it->first;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
-    return ComEndpoint("");
+    throw std::runtime_error("No Endpoint found for given CAN ID");
   }
 }
 
