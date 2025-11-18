@@ -4,7 +4,7 @@ namespace eduart {
 
 namespace logger {
 
-std::string to_string(LogVerbosity verbosity) {
+std::string toString(LogVerbosity verbosity) noexcept{
   switch (verbosity) {
   case LogVerbosity::Debug:
     return "Debug";
@@ -21,8 +21,8 @@ std::string to_string(LogVerbosity verbosity) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) {
-  return os << to_string(verbosity);
+std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept{
+  return os << toString(verbosity);
 }
 
 } // namespace logger

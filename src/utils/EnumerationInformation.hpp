@@ -42,7 +42,7 @@ enum class EnumerationState {
   ConnectedNotConfigured
 };
 
-std::string to_string(EnumerationState state);
+std::string toString(EnumerationState state);
 
 struct EnumerationInformation {
   unsigned int idx       = 0;

@@ -39,7 +39,7 @@ bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept {
 
 namespace sensor {
 
-std::string to_string(EnumerationState state) {
+std::string toString(EnumerationState state) {
   switch (state) {
   case EnumerationState::Undefined:
     return "Undefined";

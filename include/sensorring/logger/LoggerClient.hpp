@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <ostream>
+#include <string>
 
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -28,14 +28,14 @@ enum class SENSORRING_API LogVerbosity {
  * @param[in] verbosity to be converted to a string
  * @return Name of the state written out as string
  */
-SENSORRING_API std::string to_string(LogVerbosity verbosity);
+SENSORRING_API std::string toString(LogVerbosity verbosity) noexcept;
 
 /**
  * @brief  Output stream operator for the LogVerbosity enum class members
  * @param[in] verbosity to be printed as stream
  * @return Stream of the states name written out
  */
-SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity);
+SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept;
 
 /**
  * @class LoggerClient
@@ -46,6 +46,9 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity
  */
 class SENSORRING_API LoggerClient {
 public:
+  /// Destructor
+  virtual ~LoggerClient() = default;
+
   /**
    * Callback method for the log output of the sensorring library
    * @param[in] verbosity verbosity level of the log message
