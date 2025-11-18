@@ -58,7 +58,9 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(MSVC)
-  target_compile_definitions(sensorring PRIVATE _USE_MATH_DEFINES)
+  target_compile_definitions(sensorring PRIVATE
+  _USE_MATH_DEFINES
+  SENSORRING_DLL_EXPORT)
 endif()
 
 if(USE_SOCKETCAN)

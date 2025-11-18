@@ -2,8 +2,11 @@
 
 #include <cmath>
 #include <memory>
+#include <chrono>
 
 #include "sensorring/logger/Logger.hpp"
+
+using namespace std::chrono_literals;
 
 namespace eduart {
 
@@ -13,9 +16,9 @@ SensorRing::SensorRing(RingParams params, std::vector<std::unique_ptr<bus::Senso
     : _params(params)
     , _bus_vec(std::move(bus_vec)) {
 
-  if (_params.timeout == std::chrono::milliseconds(0)) {
+  if (_params.timeout == 0ms) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
-  } else if (_params.timeout < std::chrono::milliseconds(200)) {
+  } else if (_params.timeout < 200ms) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 }

@@ -6,7 +6,7 @@
     // https://learn.microsoft.com/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4251
     #pragma warning(disable : 4251)
 
-    #ifdef SENSORRING_SHARED
+    #ifdef SENSORRING_DLL_EXPORT
         #define SENSORRING_API __declspec(dllexport)
     #else
         #define SENSORRING_API __declspec(dllimport)

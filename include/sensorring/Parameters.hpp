@@ -4,10 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "sensorring/utils/CustomTypes.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-
-using namespace std::chrono_literals;
+#include "sensorring/utils/CustomTypes.hpp"
 
 namespace eduart {
 
@@ -100,7 +98,7 @@ namespace ring {
  * communication interfaces.
  */
 struct SENSORRING_API RingParams {
-  std::chrono::milliseconds timeout = 1000ms;
+  std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
   std::vector<bus::BusParams> bus_param_vec;
 };
 

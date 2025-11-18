@@ -46,4 +46,6 @@ else()
   set(GENERATORS_TEXT "ZIP")
 endif()
 
+endif()
+
 include(CPack)

@@ -12,7 +12,6 @@ namespace math {
 // Forward declaration
 struct Vector3;
 struct Matrix3;
-struct Quaternion;
 
 //===============================
 // Vector3

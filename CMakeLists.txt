@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
 #########################################################
-# build type (has to be done before project() call)
+# Build type (has to be done before project() call)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
 endif()
 
 #########################################################
-# project
+# Project
 set(CMAKE_PROJECT_VERSION_MAJOR 2)
 set(CMAKE_PROJECT_VERSION_MINOR 1)
 set(CMAKE_PROJECT_VERSION_PATCH 0)
@@ -27,7 +27,7 @@ if(EXISTS "${LOC_PATH}")
 endif()
 
 #########################################################
-# build settings
+# Build settings
 include(cmake/BuildSettings.cmake REQUIRED)
 
 # options
@@ -39,7 +39,7 @@ include(cmake/CollectDependencies.cmake REQUIRED)
 # Library
 add_subdirectory(src)
 
-# Library
+# Examples
 if(BUILD_EXAMPLES)
   add_subdirectory(apps/examples/cpp)
 endif()
@@ -49,5 +49,5 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
     include(cmake/PackageGeneration.cmake REQUIERD)    
 endif()
 
-# build summary
+# Build summary
 include(cmake/ShowSummary.cmake REQUIRED)
