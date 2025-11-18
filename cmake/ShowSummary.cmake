@@ -21,6 +21,7 @@ endif(UNIX)
 message(STATUS " USE_USBTINGO                : " ${USE_USBTINGO})
 message(STATUS " BUILD_EXAMPLES              : " ${BUILD_EXAMPLES})
 message(STATUS " BUILD_SHARED_LIBS           : " ${BUILD_SHARED_LIBS})
+message(STATUS " BUILD_PYTHON_BINDINGS       : " ${BUILD_PYTHON_BINDINGS})
 message(STATUS " VERBOSE_BUILD               : " ${VERBOSE_BUILD})
 message(STATUS "")
 
