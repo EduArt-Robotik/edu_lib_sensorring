@@ -1,5 +1,8 @@
 #include "sensorring/utils/Math.hpp"
 
+#include <cmath>
+
+
 namespace eduart {
 
 namespace math {
@@ -86,6 +89,10 @@ Vector3 Vector3::operator/(const double& other) const {
 Vector3& Vector3::operator/=(const double& other) {
   *this = *this / other;
   return *this;
+}
+
+double Vector3::abs() const {
+  return std::sqrt(data[0] * data[0] + data[1] * data[1] + data[2] * data[2]);
 }
 
 const Vector3 Vector3::eulerDegreesFromRotationMatrix(const Matrix3& rot_m) {
