@@ -1,0 +1,97 @@
+"""
+Minimal Python3 example. 
+
+This example receives measurements and prints the current measurement rate to the command line.
+
+2025-11-18
+"""
+
+import time
+import eduart.sensorring as sensorring
+
+
+# Sensor setup
+SENSOR_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+SENSOR_INTERFACE_NAME = "0x1731a1f1"
+
+
+class MeasurementProxy(sensorring.SensorringClient):
+
+  def __init__(self):
+    # Required to initialize base class
+    super().__init__()
+
+    self._counter = 0
+    self._init_flag = False
+    self._last_query = time.time()
+
+
+  # Base class callback
+  def onRawTofMeasurement(self, measurement_vec):
+    self._init_flag = True
+    self._counter += 1
+
+
+  # Base class callback
+  def onOutputLog(self, verbosity, msg):
+    if verbosity > sensorring.LogVerbosity_Debug:
+      print("[" + sensorring.LogVerbosityToString(verbosity) + "] " + msg)
+
+
+  def getRate(self):
+    now = time.time()
+    rate = self._counter / (now - self._last_query)
+    self._last_query = now
+    self._counter = 0
+    return rate
+
+
+  def gotFirstMeasurement(self):
+    return self._init_flag
+
+
+def main():
+  print("==========================")
+  print("Minimal sensorring example")
+  print("==========================")
+
+  params = sensorring.ManagerParams()
+  
+  tof = sensorring.TofSensorParams()
+  tof.user_idx = 0
+  tof.enable = True
+
+  board = sensorring.SensorBoardParams()
+  board.tof_params = tof
+
+  bus = sensorring.BusParams()
+  bus.type = SENSOR_INTERFACE_TYPE
+  bus.interface_name = SENSOR_INTERFACE_NAME
+  bus.board_param_vec.append(board)
+
+  ring = sensorring.RingParams()
+  ring.bus_param_vec.append(bus)
+  ring.timeout_ms = 1000
+
+  params.ring_params = ring
+  
+  proxy = MeasurementProxy()
+  sensorring.Logger.getInstance().registerClient(proxy)
+
+  manager = sensorring.MeasurementManager(params)
+  manager.registerClient(proxy)
+  manager.startMeasuring()
+
+  while (not proxy.gotFirstMeasurement()):
+    time.sleep(0.1)
+     
+  print("Printing measurement rate:")
+  while (manager.isMeasuring()):
+    print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
+    time.sleep(1)
+
+  manager.stopMeasuring()
+
+
+if __name__ == "__main__":
+    main()
