@@ -70,23 +70,23 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
   _manager_state = ManagerState::Initialized;
 }
 
-MeasurementManagerImpl::~MeasurementManagerImpl() {
+MeasurementManagerImpl::~MeasurementManagerImpl() noexcept {
   stopMeasuring();
 }
 
-void MeasurementManagerImpl::enableTofMeasurement(bool state) {
+void MeasurementManagerImpl::enableTofMeasurement(bool state) noexcept {
   _tof_enabled = state;
 }
 
-void MeasurementManagerImpl::enableThermalMeasurement(bool state) {
+void MeasurementManagerImpl::enableThermalMeasurement(bool state) noexcept {
   _thermal_enabled = state;
 }
 
-ManagerParams MeasurementManagerImpl::getParams() const {
+ManagerParams MeasurementManagerImpl::getParams() const noexcept {
   return _params;
 }
 
-std::string MeasurementManagerImpl::printTopology() const {
+std::string MeasurementManagerImpl::printTopology() const noexcept {
   std::stringstream ss;
   for (const auto& bus : _sensor_ring->getInterfaces()) {
     ss << std::endl << std::endl;
@@ -100,7 +100,7 @@ std::string MeasurementManagerImpl::printTopology() const {
 
       ss << "sensor " << enum_info.idx << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    State:          " << to_string(enum_info.state) << std::endl;
+      ss << "    State:          " << toString(enum_info.state) << std::endl;
       ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
       ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
       ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
@@ -113,15 +113,15 @@ std::string MeasurementManagerImpl::printTopology() const {
   return ss.str();
 }
 
-bool MeasurementManagerImpl::stopThermalCalibration() {
+bool MeasurementManagerImpl::stopThermalCalibration() noexcept {
   return _sensor_ring->stopThermalCalibration();
 }
 
-bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) {
+bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) noexcept {
   return _sensor_ring->startThermalCalibration(window);
 }
 
-void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
+void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
   _light_mode     = mode;
   _light_color[0] = red;
   _light_color[1] = green;
@@ -135,7 +135,7 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept {
   if (client) {
     auto result = _observers.insert(client);
 
@@ -150,7 +150,7 @@ void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) noexcept {
   if (client) {
     auto result = _observers.erase(client);
 
@@ -244,7 +244,7 @@ void MeasurementManagerImpl::notifyState(const ManagerState state) {
   }
 }
 
-ManagerState MeasurementManagerImpl::getManagerState() const {
+ManagerState MeasurementManagerImpl::getManagerState() const noexcept {
   return _manager_state;
 }
 
@@ -253,7 +253,7 @@ ManagerState MeasurementManagerImpl::getManagerState() const {
 ==========================================================================================
 */
 
-bool MeasurementManagerImpl::measureSome() {
+bool MeasurementManagerImpl::measureSome() noexcept(false) {
   bool error = false;
 
   if (!_is_running) {
@@ -267,7 +267,7 @@ bool MeasurementManagerImpl::measureSome() {
   return error;
 }
 
-bool MeasurementManagerImpl::startMeasuring() {
+bool MeasurementManagerImpl::startMeasuring() noexcept {
   if (!_is_running) {
     if (_tof_enabled || _thermal_enabled) {
       _is_running    = true;
@@ -280,7 +280,7 @@ bool MeasurementManagerImpl::startMeasuring() {
   return false;
 }
 
-bool MeasurementManagerImpl::stopMeasuring() {
+bool MeasurementManagerImpl::stopMeasuring() noexcept {
   if (_is_running) {
     _is_running = false;
     notifyState(ManagerState::Shutdown);
@@ -294,7 +294,7 @@ bool MeasurementManagerImpl::stopMeasuring() {
   return false;
 }
 
-bool MeasurementManagerImpl::isMeasuring() {
+bool MeasurementManagerImpl::isMeasuring() noexcept {
   return _is_running;
 }
 
