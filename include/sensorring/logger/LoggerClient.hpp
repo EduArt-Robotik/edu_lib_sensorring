@@ -12,8 +12,6 @@ namespace logger {
 /**
  * @enum LogVerbosity
  * @brief Verbosity levels of the logger output
- * @author Hannes Duske
- * @date 25.12.2024
  */
 enum class SENSORRING_API LogVerbosity {
   Debug,
@@ -39,10 +37,7 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity
 
 /**
  * @class LoggerClient
- * @brief Observer interface of the Logger class. Defines the callback method
- * that is triggered by the Logger.
- * @author Hannes Duske
- * @date 25.12.2024
+ * @brief Observer interface of the Logger class. Defines the callback method that is triggered by the Logger.
  */
 class SENSORRING_API LoggerClient {
 public:
