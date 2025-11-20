@@ -137,7 +137,8 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 
 void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept {
   if (client) {
-    auto result = _observers.insert(client);
+    LockGuard lock(_client_mutex);
+    auto result = _clients.insert(client);
 
     // Check if the client was registered
     if (result.second) {
@@ -152,7 +153,8 @@ void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept 
 
 void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) noexcept {
   if (client) {
-    auto result = _observers.erase(client);
+    LockGuard lock(_client_mutex);
+    auto result = _clients.erase(client);
 
     // Check if the client was removed
     if (result > 0) {
@@ -190,16 +192,18 @@ int MeasurementManagerImpl::notifyToFData() {
   }
 
   if (!raw_measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onRawTofMeasurement(raw_measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onRawTofMeasurement(raw_measurement_vec);
     }
   }
 
   if (!transformed_measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onTransformedTofMeasurement(transformed_measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onTransformedTofMeasurement(transformed_measurement_vec);
     }
   }
 
@@ -225,9 +229,10 @@ int MeasurementManagerImpl::notifyThermalData() {
   }
 
   if (!measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onThermalMeasurement(measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onThermalMeasurement(measurement_vec);
     }
   }
 
@@ -236,10 +241,11 @@ int MeasurementManagerImpl::notifyThermalData() {
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
   if (_manager_state != state) {
+    LockGuard lock(_client_mutex);
     _manager_state = state;
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onStateChange(state);
+    for (auto client : _clients) {
+      if (client)
+        client->onStateChange(state);
     }
   }
 }

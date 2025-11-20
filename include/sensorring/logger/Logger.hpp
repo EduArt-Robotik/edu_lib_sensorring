@@ -10,9 +10,9 @@
 #pragma once
 
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
@@ -38,15 +38,15 @@ public:
 
   /**
    * @brief Register a new LoggerClient to be notified of future log messages
-   * @param[in] observer LoggerClient that will be registered
+   * @param[in] client LoggerClient that will be registered
    */
-  void registerClient(LoggerClient* observer) noexcept;
+  void registerClient(LoggerClient* client) noexcept;
 
   /**
    * @brief Unregister a new LoggerClient to no longer be notified of log messages
-   * @param[in] observer LoggerClient that will be unregistered
+   * @param[in] client LoggerClient that will be unregistered
    */
-  void unregisterClient(LoggerClient* observer) noexcept;
+  void unregisterClient(LoggerClient* client) noexcept;
 
   /**
    * @brief Log a message that will be relayed to all registered observers
@@ -68,10 +68,10 @@ private:
   /// Private constructor. The Logger is a singleton.
   Logger() = default;
 
-  mutable std::mutex _client_mutex;
-  using LockGuard = std::lock_guard<std::mutex>;
+  mutable std::recursive_mutex _client_mutex;
+  using LockGuard = std::lock_guard<std::recursive_mutex>;
 
-  std::vector<logger::LoggerClient*> _observer_vec;
+  std::set<logger::LoggerClient*> _clients;
 };
 
 } // namespace logger

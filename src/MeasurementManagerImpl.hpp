@@ -60,16 +60,16 @@ public:
   bool isMeasuring() noexcept;
 
   /**
-   * Register an observer with the MeasurementManager object
-   * @param[in] observer Observer that is registered and gets notified on future events
+   * Register an client with the MeasurementManager object
+   * @param[in] client Observer that is registered and gets notified on future events
    */
-  void registerClient(MeasurementClient* observer) noexcept;
+  void registerClient(MeasurementClient* client) noexcept;
 
   /**
-   * Unregister an observer with the MeasurementManager object
-   * @param[in] observer Observer that is unregistered and will not be notified on future events
+   * Unregister an client with the MeasurementManager object
+   * @param[in] client Observer that is unregistered and will not be notified on future events
    */
-  void unregisterClient(MeasurementClient* observer) noexcept;
+  void unregisterClient(MeasurementClient* client) noexcept;
 
   /**
    * Get a string representation of the topology of the connected sensors
@@ -173,7 +173,9 @@ private:
   std::uint8_t _light_brightness;
   std::atomic<bool> _light_update_flag;
 
-  std::set<MeasurementClient*> _observers;
+  mutable std::mutex _client_mutex;
+  using LockGuard = std::lock_guard<std::mutex>;
+  std::set<MeasurementClient*> _clients;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;

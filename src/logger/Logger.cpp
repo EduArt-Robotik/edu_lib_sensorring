@@ -8,41 +8,48 @@ namespace eduart {
 
 namespace logger {
 
-Logger* Logger::getInstance() noexcept{
+Logger* Logger::getInstance() noexcept {
   static Logger* instance = new Logger;
   return instance;
 }
 
-void Logger::registerClient(LoggerClient* observer) noexcept{
-  bool alreadyRegistered = false;
-
-  {
+void Logger::registerClient(LoggerClient* client) noexcept {
+  if (client) {
     LockGuard lock(_client_mutex);
-    if (observer && std::find(_observer_vec.begin(), _observer_vec.end(), observer) == _observer_vec.end()) {
-      _observer_vec.push_back(observer);
-    } else {
-      alreadyRegistered = true;
-    }
-  }
+    auto result = _clients.insert(client);
 
-  Logger::getInstance()->log(alreadyRegistered ? LogVerbosity::Warning : LogVerbosity::Debug, alreadyRegistered ? "Observer already registered" : "Registered new observer");
+    // Check if the client was registered
+    if (result.second) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new LoggerClient");
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "LoggerClient is already registered");
+    }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "LoggerClient to be registered is not valid");
+  }
 }
 
-void Logger::unregisterClient(LoggerClient* observer) noexcept{
-  LockGuard lock(_client_mutex);
-  if (observer) {
-    const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
-    if (it != _observer_vec.end()) {
-      _observer_vec.erase(it);
+void Logger::unregisterClient(LoggerClient* client) noexcept {
+  if (client) {
+    LockGuard lock(_client_mutex);
+    auto result = _clients.erase(client);
+
+    // Check if the client was removed
+    if (result > 0) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Removed measurement client");
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not registered");
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
   }
 }
 
 void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
   LockGuard lock(_client_mutex);
-  for (auto& observer : _observer_vec) {
-    if (observer)
-      observer->onOutputLog(verbosity, msg);
+  for (auto& client : _clients) {
+    if (client)
+      client->onOutputLog(verbosity, msg);
   }
   if (verbosity == LogVerbosity::Exception) {
     throw std::runtime_error(msg);
