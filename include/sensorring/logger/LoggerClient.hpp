@@ -3,8 +3,8 @@
 /**
  * @file   LoggerClient.hpp
  * @author EduArt Robotik GmbH
- * @brief  LoggerClient that can be registered with the Logger
- * @date 2024-11-25
+ * @brief  LoggerClient that can be registered with the Logger to receive log messages
+ * @date   2024-11-25
  */
 
 #pragma once

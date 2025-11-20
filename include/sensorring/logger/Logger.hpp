@@ -4,7 +4,7 @@
  * @file   Logger.hpp
  * @author EduArt Robotik GmbH
  * @brief  Logger of the sensorring library
- * @date 2024-11-25
+ * @date   2024-11-25
  */
 
 #pragma once

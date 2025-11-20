@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementManager.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  MeasurementClient that can be registered with the Logger to receive measurement data
+ * @date   2024-12-25
+ */
+
 #pragma once
 
 #include <ostream>
@@ -13,8 +22,6 @@ namespace manager {
 /**
  * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
- * @author Hannes Duske
- * @date 25.12.2024
  */
 enum class SENSORRING_API ManagerState {
   Uninitialized,
@@ -43,8 +50,6 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, ManagerState state) no
  * @brief Observer interface of the MeasurementManager class. Defines the
  * callback methods that are triggered by the MeasurementManager. It is possible
  * to implement only one or a selection of the callback methods.
- * @author Hannes Duske
- * @date 25.12.2024
  */
 class SENSORRING_API MeasurementClient {
 public:

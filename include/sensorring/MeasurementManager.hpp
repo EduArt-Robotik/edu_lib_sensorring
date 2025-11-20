@@ -1,13 +1,21 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementManager.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  The MeasurementManager is the main interface of the sensorring library
+ * @date   2024-12-25
+ */
+
 #pragma once
 
 #include <memory>
 #include <string>
 
-#include "sensorring/utils/CustomTypes.hpp"
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameters.hpp"
-
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/utils/CustomTypes.hpp"
 
 namespace eduart {
 
@@ -20,8 +28,6 @@ class SENSORRING_API MeasurementManagerImpl;
  * @class MeasurementManager
  * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a
  * looping state machine.
- * @author Hannes Duske
- * @date 25.12.2024
  */
 class SENSORRING_API MeasurementManager {
 public:

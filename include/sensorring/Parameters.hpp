@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   Parameter.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Parameter structure used to initialize the sensorring
+ * @date   2024-11-22
+ */
+
 #pragma once
 
 #include <chrono>
