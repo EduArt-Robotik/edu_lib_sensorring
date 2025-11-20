@@ -77,20 +77,24 @@ def main():
   
   proxy = MeasurementProxy()
   sensorring.Logger.getInstance().registerClient(proxy)
+  
+  try:
+    manager = sensorring.MeasurementManager(params)
+    manager.registerClient(proxy)
+    manager.startMeasuring()
 
-  manager = sensorring.MeasurementManager(params)
-  manager.registerClient(proxy)
-  manager.startMeasuring()
+    while (not proxy.gotFirstMeasurement()):
+      time.sleep(0.1)
+      
+    print("Printing measurement rate:")
+    while (manager.isMeasuring()):
+      print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
+      time.sleep(1)
 
-  while (not proxy.gotFirstMeasurement()):
-    time.sleep(0.1)
-     
-  print("Printing measurement rate:")
-  while (manager.isMeasuring()):
-    print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
-    time.sleep(1)
+    manager.stopMeasuring()
 
-  manager.stopMeasuring()
+  except Exception as e:
+    print("Caught: ", e)
 
 
 if __name__ == "__main__":

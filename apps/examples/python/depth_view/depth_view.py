@@ -89,34 +89,38 @@ def main():
   proxy = MeasurementProxy()
   sensorring.Logger.getInstance().registerClient(proxy)
 
-  manager = sensorring.MeasurementManager(params)
-  manager.registerClient(proxy)
-  manager.startMeasuring()
+  try:
+    manager = sensorring.MeasurementManager(params)
+    manager.registerClient(proxy)
+    manager.startMeasuring()
 
-  # Create matplotlib plot
-  fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-  d = np.tan(np.deg2rad(22.5)) * MAX_DIST
-  ax.set(xlim3d=(-d, d), xlabel='X')
-  ax.set(ylim3d=(-d, d), ylabel='Y')
-  ax.set(zlim3d=(MIN_DIST, MAX_DIST), zlabel='Z')
-  ax.set_aspect('equal')
+    # Create matplotlib plot
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    d = np.tan(np.deg2rad(22.5)) * MAX_DIST
+    ax.set(xlim3d=(-d, d), xlabel='X')
+    ax.set(ylim3d=(-d, d), ylabel='Y')
+    ax.set(zlim3d=(MIN_DIST, MAX_DIST), zlabel='Z')
+    ax.set_aspect('equal')
 
-  scatter = ax.scatter([], [], [])
-  plt.ion()
-  plt.show(block=False)
+    scatter = ax.scatter([], [], [])
+    plt.ion()
+    plt.show(block=False)
 
-  while (manager.isMeasuring()):
-    points = proxy.waitForNewMeasurement()
+    while (manager.isMeasuring()):
+      points = proxy.waitForNewMeasurement()
 
-    idx = points[:,3] > 0
-    scatter._offsets3d = (points[idx, 0], points[idx, 1], points[idx, 2])
+      idx = points[:,3] > 0
+      scatter._offsets3d = (points[idx, 0], points[idx, 1], points[idx, 2])
 
-    ax.relim()
-    ax.autoscale_view()
-    fig.canvas.draw()
-    fig.canvas.flush_events()
+      ax.relim()
+      ax.autoscale_view()
+      fig.canvas.draw()
+      fig.canvas.flush_events()
 
-  manager.stopMeasuring()
+    manager.stopMeasuring()
+
+  except Exception as e:
+    print("Caught: ", e)
 
 
 if __name__ == "__main__":

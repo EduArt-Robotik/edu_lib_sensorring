@@ -113,15 +113,18 @@ def main():
   proxy = MeasurementProxy()
   sensorring.Logger.getInstance().registerClient(proxy)
 
-  manager = sensorring.MeasurementManager(params)
-  manager.registerClient(proxy)
-  manager.startMeasuring()
-     
-  while (manager.isMeasuring()):
-    time.sleep(1)
+  try:
+    manager = sensorring.MeasurementManager(params)
+    manager.registerClient(proxy)
+    manager.startMeasuring()
+        
+    while (manager.isMeasuring()):
+      time.sleep(1)
 
-  manager.stopMeasuring()
-
+    manager.stopMeasuring()
+    
+  except Exception as e:
+    print("Caught: ", e)
 
 if __name__ == "__main__":
     main()

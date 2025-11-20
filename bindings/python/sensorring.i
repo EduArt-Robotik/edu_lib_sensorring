@@ -9,7 +9,6 @@
  *
  *  https://bugs.python.org/issue43173
  */
-#include <stdexcept>
 %define MODULEIMPORT
 "
 import platform
@@ -67,6 +66,7 @@ else:
 // Include additional SWIG functionality
 %include <stdint.i>
 %include <exception.i>
+%include <std_except.i>
 %include <std_array.i>
 %include <std_string.i>
 %include <std_vector.i>
@@ -193,8 +193,13 @@ typedef ::int64_t int64_t;
 %template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
 %include "sensorring/MeasurementClient.hpp"
 
-
-%catches(std::runtime_error) eduart::manager::MeasurementManager::MeasurementManager(eduart::manager::ManagerParams params);
+%exception eduart::manager::MeasurementManager::MeasurementManager {
+    try {
+        $action
+    } catch (const std::exception& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+}
 %catches(std::runtime_error) eduart::manager::MeasurementManager::measureSome(const LogVerbosity, const std::string);
 %include "sensorring/MeasurementManager.hpp"
 
@@ -204,7 +209,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/logger/LoggerClient.hpp"
 
 
-%catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity, const std::string);
+%catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
 %ignore Logger::log(const LogVerbosity, const std::stringstream);
 %include "sensorring/logger/Logger.hpp" 
 
