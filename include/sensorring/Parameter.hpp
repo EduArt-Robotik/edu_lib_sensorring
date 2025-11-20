@@ -123,7 +123,7 @@ namespace manager {
  * state machine. One measurement manager manages exactly one sensor ring.
  */
 struct SENSORRING_API ManagerParams {
-  bool enable_brs             = true;
+  bool enable_brs             = false;
   bool print_topology         = true;
   bool repair_errors          = true;
   bool enforce_topology       = false;
