@@ -105,6 +105,7 @@ void SensorBus::resetSensorState() {
 }
 
 int SensorBus::enumerateDevices() {
+  _enumeration_vec.clear();
   _enumeration_flag  = true;
   _enumeration_count = 0;
 
@@ -123,7 +124,7 @@ int SensorBus::enumerateDevices() {
 
   for (auto i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
     auto idx = static_cast<unsigned int>(i + 1);
-    
+
     // Add configured but unconnected sensors to the enumeration list
     sensor::EnumerationInformation info;
     info.idx   = idx;
@@ -131,8 +132,8 @@ int SensorBus::enumerateDevices() {
     _enumeration_vec.push_back(std::move(info));
 
     // Disable sensors that are configured but unconnected
-    _board_vec.at(idx)->getTof()->setEnable(false);
-    _board_vec.at(idx)->getThermal()->setEnable(false);
+    _board_vec.at(i)->getTof()->setEnable(false);
+    _board_vec.at(i)->getThermal()->setEnable(false);
   }
 
   return _enumeration_count;

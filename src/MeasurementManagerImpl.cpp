@@ -6,14 +6,13 @@
 
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
+#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/Parameters.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "SensorBoard.hpp"
 #include "SensorBus.hpp"
 #include "SensorRing.hpp"
-
-#include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
@@ -362,10 +361,11 @@ void MeasurementManagerImpl::StateMachine() {
           logger::LogVerbosity::Info,
           "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
 
+      if (sensor_bus->getSensorCount() && _params.print_topology) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
+      }
+
       if (sensor_bus->getEnumerationCount() > 0) {
-        if (_params.print_topology) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
-        }
 
         if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
           if (_params.enforce_topology) {
