@@ -21,8 +21,8 @@ public:
   ~TofSensor();
 
   const TofSensorParams& getParams() const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestRawMeasurement() const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

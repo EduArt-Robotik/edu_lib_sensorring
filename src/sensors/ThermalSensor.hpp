@@ -24,9 +24,9 @@ public:
   bool startCalibration(std::size_t window);
   ThermalSensorParams getParams() const;
 
-  std::pair<measurement::GrayscaleImage, SensorState> getLatestGrayscaleImage() const;
-  std::pair<measurement::FalseColorImage, SensorState> getLatestFalseColorImage() const;
-  std::pair<measurement::ThermalMeasurement, SensorState> getLatestMeasurement() const;
+  std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
+  std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
+  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

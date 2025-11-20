@@ -55,12 +55,11 @@ else:
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Parameter.hpp"
 #include "sensorring/types/CustomTypes.hpp"
 #include "sensorring/types/Math.hpp"
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/MeasurementManager.hpp"
-
+#include "sensorring/Parameter.hpp"
 %}
 
 
@@ -185,7 +184,7 @@ typedef ::int64_t int64_t;
 %rename(timeout_ms) eduart::ring::RingParams::timeout;
 %template (BusParamVector) std::vector<eduart::bus::BusParams>;
 %template (BoardParamVector) std::vector<eduart::sensor::SensorBoardParams>;
-%include "sensorring/types/Parameter.hpp"
+%include "sensorring/Parameter.hpp"
 
 
 %feature("director") eduart::manager::MeasurementClient;

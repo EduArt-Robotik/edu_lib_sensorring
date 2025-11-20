@@ -177,7 +177,7 @@ int MeasurementManagerImpl::notifyToFData() {
         auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
         if (raw_error == sensor::SensorState::SensorOK) {
           if (!raw_measurement.point_cloud.empty())
-            raw_measurement_vec.push_back(raw_measurement);
+            raw_measurement_vec.emplace_back(raw_measurement);
         } else {
           error_frames++;
         }
@@ -185,7 +185,7 @@ int MeasurementManagerImpl::notifyToFData() {
         auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
         if (transformed_error == sensor::SensorState::SensorOK) {
           if (!transformed_measurement.point_cloud.empty())
-            transformed_measurement_vec.push_back(transformed_measurement);
+            transformed_measurement_vec.emplace_back(transformed_measurement);
         }
       }
     }
@@ -220,7 +220,7 @@ int MeasurementManagerImpl::notifyThermalData() {
         auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
 
         if (error == sensor::SensorState::SensorOK) {
-          measurement_vec.push_back(measurement);
+          measurement_vec.emplace_back(measurement);
         } else {
           error_frames++;
         }

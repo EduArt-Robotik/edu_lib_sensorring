@@ -26,11 +26,11 @@ const TofSensorParams& TofSensor::getParams() const {
   return _params;
 }
 
-std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestRawMeasurement() const {
+std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestRawMeasurement() const {
   return { _latest_raw_measurement, _error };
 }
 
-std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestTransformedMeasurement() const {
+std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestTransformedMeasurement() const {
   return { _latest_transformed_measurement, _error };
 }
 

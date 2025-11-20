@@ -53,15 +53,15 @@ ThermalSensorParams ThermalSensor::getParams() const {
   return _params;
 }
 
-std::pair<measurement::GrayscaleImage, SensorState> ThermalSensor::getLatestGrayscaleImage() const {
+std::pair<const measurement::GrayscaleImage&, SensorState> ThermalSensor::getLatestGrayscaleImage() const {
   return { _latest_measurement.grayscale_img, _error };
 }
 
-std::pair<measurement::FalseColorImage, SensorState> ThermalSensor::getLatestFalseColorImage() const {
+std::pair<const measurement::FalseColorImage&, SensorState> ThermalSensor::getLatestFalseColorImage() const {
   return { _latest_measurement.falsecolor_img, _error };
 }
 
-std::pair<measurement::ThermalMeasurement, SensorState> ThermalSensor::getLatestMeasurement() const {
+std::pair<const measurement::ThermalMeasurement&, SensorState> ThermalSensor::getLatestMeasurement() const {
   return { _latest_measurement, _error };
 }
 
