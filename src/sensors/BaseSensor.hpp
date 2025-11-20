@@ -3,11 +3,16 @@
 #include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/math/Matrix3.hpp"
-#include "sensorring/types/CustomTypes.hpp"
 
 namespace eduart {
 
 namespace sensor {
+
+enum class SENSORRING_API SensorState {
+  SensorInit,
+  SensorOK,
+  ReceiveError
+};
 
 class BaseSensor : public com::ComObserver {
 public:

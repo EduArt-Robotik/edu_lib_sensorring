@@ -1,9 +1,9 @@
 // Copyright (c) 2025 EduArt Robotik GmbH
 
 /**
- * @file   CustomTypes.hpp
+ * @file   LightMode.hpp
  * @author EduArt Robotik GmbH
- * @brief  Custom types used by the sensorring library
+ * @brief  Light mode definition
  * @date   2025-11-20
  */
 
@@ -12,26 +12,6 @@
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
-
-namespace com {
-
-enum class SENSORRING_API InterfaceType {
-  UNDEFINED,
-  SOCKETCAN,
-  USBTINGO
-};
-
-} // namespace com
-
-namespace sensor {
-
-enum class SENSORRING_API SensorState {
-  SensorInit,
-  SensorOK,
-  ReceiveError
-};
-
-} // namespace sensor
 
 namespace light {
 

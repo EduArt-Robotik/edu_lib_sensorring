@@ -2,9 +2,9 @@
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/types/LightMode.hpp"
 
 #include "BaseSensor.hpp"
-
 
 namespace eduart {
 

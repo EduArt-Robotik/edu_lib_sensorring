@@ -15,7 +15,7 @@
 
 #include "sensorring/math/Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/InterfaceType.hpp"
 
 namespace eduart {
 

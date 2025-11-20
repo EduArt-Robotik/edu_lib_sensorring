@@ -56,8 +56,9 @@ else:
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/Image.hpp"
+#include "sensorring/types/LightMode.hpp"
+#include "sensorring/types/InterfaceType.hpp"
 #include "sensorring/types/PointCloud.hpp"
-#include "sensorring/types/CustomTypes.hpp"
 #include "sensorring/types/ToFMeasurement.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 #include "sensorring/math/Math.hpp"
@@ -182,10 +183,13 @@ typedef ::int64_t int64_t;
 %include "sensorring/types/Image.hpp"
 
 
+%include "sensorring/types/LightMode.hpp"
+
+
+%include "sensorring/types/InterfaceType.hpp"
+
+
 %include "sensorring/types/PointCloud.hpp"
-
-
-%include "sensorring/types/CustomTypes.hpp"
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;

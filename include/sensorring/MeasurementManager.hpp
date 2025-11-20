@@ -10,12 +10,11 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
 
