@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   LoggerClient.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  LoggerClient that can be registered with the Logger
+ * @date 2024-11-25
+ */
+
 #pragma once
 
 #include <ostream>
@@ -49,7 +58,7 @@ public:
    * @param[in] verbosity verbosity level of the log message
    * @param[in] msg       log message string
    */
-  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
+  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {};
 };
 
 } // namespace logger

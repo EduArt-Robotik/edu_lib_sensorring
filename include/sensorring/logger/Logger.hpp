@@ -34,19 +34,19 @@ public:
    * @brief Get a reference to the instance of the Logger singleton
    * @return Pointer to the Logger instance
    */
-  static Logger* getInstance();
+  static Logger* getInstance() noexcept;
 
   /**
    * @brief Register a new LoggerClient to be notified of future log messages
    * @param[in] observer LoggerClient that will be registered
    */
-  void registerClient(logger::LoggerClient* observer);
+  void registerClient(LoggerClient* observer) noexcept;
 
   /**
    * @brief Unregister a new LoggerClient to no longer be notified of log messages
    * @param[in] observer LoggerClient that will be unregistered
    */
-  void unregisterClient(logger::LoggerClient* observer);
+  void unregisterClient(LoggerClient* observer) noexcept;
 
   /**
    * @brief Log a message that will be relayed to all registered observers
@@ -54,7 +54,7 @@ public:
    * @param[in] msg Log message
    * @throw Throws std::runtime_error when a message with LogVerbosity::Exception is logged
    */
-  void log(const LogVerbosity verbosity, const std::string msg) const;
+  void log(const LogVerbosity verbosity, const std::string& msg) const;
 
   /**
    * @brief Log a message that will be relayed to all registered observers
@@ -62,7 +62,7 @@ public:
    * @param[in] msg Log message
    * @throw Throws std::runtime_error when a message with LogVerbosity::Exception is logged
    */
-  void log(const LogVerbosity verbosity, const std::stringstream msg) const;
+  void log(const LogVerbosity verbosity, const std::stringstream& msg) const;
 
 private:
   /// Private constructor. The Logger is a singleton.

@@ -8,12 +8,12 @@ namespace eduart {
 
 namespace logger {
 
-Logger* Logger::getInstance() {
+Logger* Logger::getInstance() noexcept{
   static Logger* instance = new Logger;
   return instance;
 }
 
-void Logger::registerClient(LoggerClient* observer) {
+void Logger::registerClient(LoggerClient* observer) noexcept{
   bool alreadyRegistered = false;
 
   {
@@ -28,7 +28,7 @@ void Logger::registerClient(LoggerClient* observer) {
   Logger::getInstance()->log(alreadyRegistered ? LogVerbosity::Warning : LogVerbosity::Debug, alreadyRegistered ? "Observer already registered" : "Registered new observer");
 }
 
-void Logger::unregisterClient(LoggerClient* observer) {
+void Logger::unregisterClient(LoggerClient* observer) noexcept{
   LockGuard lock(_client_mutex);
   if (observer) {
     const auto& it = std::find(_observer_vec.begin(), _observer_vec.end(), observer);
@@ -38,7 +38,7 @@ void Logger::unregisterClient(LoggerClient* observer) {
   }
 }
 
-void Logger::log(const LogVerbosity verbosity, const std::string msg) const {
+void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
   LockGuard lock(_client_mutex);
   for (auto& observer : _observer_vec) {
     if (observer)
@@ -49,7 +49,7 @@ void Logger::log(const LogVerbosity verbosity, const std::string msg) const {
   }
 }
 
-void Logger::log(const LogVerbosity verbosity, const std::stringstream msg) const {
+void Logger::log(const LogVerbosity verbosity, const std::stringstream& msg) const {
   log(verbosity, msg.str());
 }
 
