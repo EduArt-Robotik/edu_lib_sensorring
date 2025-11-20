@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
+cmake_policy(SET CMP0078 NEW)
+cmake_policy(SET CMP0086 NEW)
+
 #########################################################
 # Build type (has to be done before project() call)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
@@ -42,6 +45,11 @@ add_subdirectory(src)
 # Examples
 if(BUILD_EXAMPLES)
   add_subdirectory(apps/examples/cpp)
+endif()
+
+# Language bindings
+if(BUILD_PYTHON_BINDINGS) # AND CMAKE_BUILD_TYPE MATCHES Release)
+  add_subdirectory(bindings)
 endif()
 
 # cpack packaging
