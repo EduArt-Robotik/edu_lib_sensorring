@@ -5,7 +5,7 @@
 #include "hardware/heimann_htpa32.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/ThermalMeasurement.hpp"
 
 #include "BaseSensor.hpp"
 

@@ -176,7 +176,7 @@ int MeasurementManagerImpl::notifyToFData() {
       if (sensor_board->getTof()->getEnable()) {
         auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
         if (raw_error == sensor::SensorState::SensorOK) {
-          if (!raw_measurement.point_cloud.empty())
+          if (!raw_measurement.point_cloud.data.empty())
             raw_measurement_vec.emplace_back(raw_measurement);
         } else {
           error_frames++;
@@ -184,7 +184,7 @@ int MeasurementManagerImpl::notifyToFData() {
 
         auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
         if (transformed_error == sensor::SensorState::SensorOK) {
-          if (!transformed_measurement.point_cloud.empty())
+          if (!transformed_measurement.point_cloud.data.empty())
             transformed_measurement_vec.emplace_back(transformed_measurement);
         }
       }

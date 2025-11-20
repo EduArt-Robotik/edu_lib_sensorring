@@ -1,7 +1,7 @@
 // Copyright (c) 2025 EduArt Robotik GmbH
 
 /**
- * @file   Api.hpp
+ * @file   SensorringExport.hpp
  * @author EduArt Robotik GmbH
  * @brief  Control the import and export of Windows DLL symbols
  * @date   2025-11-14

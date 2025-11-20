@@ -1,13 +1,14 @@
-#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/Image.hpp"
 
-#include <algorithm>
+#include <cmath>
+#include <cstdint>
 
 namespace eduart {
 
 namespace measurement {
 
 // Explicit template instantiation for the used types
-template struct GenericGrayscaleImage<uint8_t, THERMAL_RESOLUTION>;
+template struct GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 template struct GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 
 template <typename T, std::size_t RESOLUTION> double GenericGrayscaleImage<T, RESOLUTION>::avg() {
@@ -78,24 +79,6 @@ template <typename T, std::size_t RESOLUTION> template <typename U> GenericGrays
     data[i] -= static_cast<T>(other.data[i]);
   }
   return *this;
-}
-
-void copyPointCloudTo(const PointCloud& pc, double* buffer, int size) {
-
-  static constexpr size_t STRIDE = 6; // 6 doubles per PointData point
-  const size_t max_points        = size / STRIDE;
-  const size_t count             = std::min(pc.size(), max_points);
-
-  // double* data = reinterpret_cast<double*>(buffer);
-  for (size_t i = 0; i < count; ++i) {
-    const auto& p     = pc[i];
-    buffer[i * 6 + 0] = p.point.x();
-    buffer[i * 6 + 1] = p.point.y();
-    buffer[i * 6 + 2] = p.point.z();
-    buffer[i * 6 + 3] = p.raw_distance;
-    buffer[i * 6 + 4] = p.sigma;
-    buffer[i * 6 + 5] = (double)p.user_idx;
-  }
 }
 
 } // namespace measurement

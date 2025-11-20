@@ -3,7 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "sensorring/types/Math.hpp"
+#include "sensorring/math/Math.hpp"
 
 namespace eduart {
 

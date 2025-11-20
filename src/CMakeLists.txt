@@ -17,10 +17,13 @@ add_library(sensorring
   sensors/ThermalSensor.cpp
   sensors/LedLight.cpp
   sensors/BaseSensor.cpp
-  types/Math.cpp
-  types/CustomTypes.cpp
+  types/Image.cpp
+  types/PointCloud.cpp
   types/EnumerationInformation.cpp
   utils/FileManager.cpp
+  math/Math.cpp
+  math/Vector3.cpp
+  math/Matrix3.cpp
 )
 
 if(USE_SOCKETCAN)

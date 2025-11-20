@@ -2,8 +2,8 @@
 
 #include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
+#include "sensorring/math/Matrix3.hpp"
 #include "sensorring/types/CustomTypes.hpp"
-#include "sensorring/types/Math.hpp"
 
 namespace eduart {
 

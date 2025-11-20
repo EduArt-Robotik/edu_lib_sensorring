@@ -1,6 +1,6 @@
 #include "sensors/BaseSensor.hpp"
 
-#include "sensorring/types/Math.hpp"
+#include "sensorring/math/Math.hpp"
 
 namespace eduart {
 
@@ -48,7 +48,7 @@ bool BaseSensor::newDataAvailable() const {
 void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
   _translation = translation;
   _rotation    = rotation;
-  _rot_m       = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
+  _rot_m       = math::rotMatrixFromEulerDegrees(_rotation);
 }
 
 void BaseSensor::resetSensorState() {

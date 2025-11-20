@@ -66,7 +66,7 @@ void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
   for (int row = 0; row < 8; ++row) {
     for (int col = 0; col < 8; ++col) {
       int idx = row * 8 + col;
-      std::cout << depthToColor(points[idx].raw_distance, MIN_DIST, MAX_DIST) << "██";
+      std::cout << depthToColor(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) << "██";
     }
     std::cout << "\033[0m\n";
   }

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 EduArt Robotik GmbH
 
 /**
- * @file   MeasurementManager.hpp
+ * @file   MeasurementClient.hpp
  * @author EduArt Robotik GmbH
  * @brief  MeasurementClient that can be registered with the Logger to receive measurement data
  * @date   2024-12-25
@@ -13,7 +13,8 @@
 #include <string>
 
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/ThermalMeasurement.hpp"
+#include "sensorring/types/ToFMeasurement.hpp"
 
 namespace eduart {
 

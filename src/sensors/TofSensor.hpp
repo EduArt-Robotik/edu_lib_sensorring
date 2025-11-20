@@ -6,8 +6,8 @@
 #include "hardware/st_vl53l8cx.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensorring/types/CustomTypes.hpp"
-#include "sensorring/types/Math.hpp"
+#include "sensorring/math/Math.hpp"
+#include "sensorring/types/ToFMeasurement.hpp"
 
 #include "BaseSensor.hpp"
 

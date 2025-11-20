@@ -5,6 +5,9 @@
 #include <fstream>
 #include <iostream>
 
+#include "sensorring/types/Image.hpp"
+#include "sensors/hardware/heimann_htpa32.hpp"
+
 #include "sensorring/logger/Logger.hpp"
 
 #include "platform/Platform.hpp"

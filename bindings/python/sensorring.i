@@ -55,8 +55,14 @@ else:
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/types/Image.hpp"
+#include "sensorring/types/PointCloud.hpp"
 #include "sensorring/types/CustomTypes.hpp"
-#include "sensorring/types/Math.hpp"
+#include "sensorring/types/ToFMeasurement.hpp"
+#include "sensorring/types/ThermalMeasurement.hpp"
+#include "sensorring/math/Math.hpp"
+#include "sensorring/math/Vector3.hpp"
+#include "sensorring/math/Matrix3.hpp"
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/MeasurementManager.hpp"
 #include "sensorring/Parameter.hpp"
@@ -143,6 +149,7 @@ typedef ::int64_t int64_t;
 
 %import "sensorring/platform/SensorringExport.hpp"
 
+
 %ignore eduart::math::Vector3::operator[];
 %extend eduart::math::Vector3 {
     double __getitem__(int idx) {
@@ -152,6 +159,10 @@ typedef ::int64_t int64_t;
         $self->operator[](idx) = value;
     }
 }
+%template (VectorDataArray) std::array<double, 3>;
+%include "sensorring/math/Vector3.hpp"
+
+
 %ignore eduart::math::Matrix3::operator[];
 %extend eduart::math::Matrix3 {
     eduart::math::Vector3& __getitem__(int idx) {
@@ -161,13 +172,29 @@ typedef ::int64_t int64_t;
         $self->operator[](idx) = value;
     }
 }
-%template (VectorDataArray) std::array<double, 3>;
 %template (MatrixDataArray) std::array<eduart::math::Vector3, 3>;
-%include "sensorring/types/Math.hpp"
+%include "sensorring/math/Matrix3.hpp"
+
+
+%include "sensorring/math/Math.hpp"
+
+
+%include "sensorring/types/Image.hpp"
+
+
+%include "sensorring/types/PointCloud.hpp"
+
+
+%include "sensorring/types/CustomTypes.hpp"
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;
-%include "sensorring/types/CustomTypes.hpp"
+%include "sensorring/types/ToFMeasurement.hpp"
+
+%template (TemperatureImageTemplate) eduart::measurement::GenericGrayscaleImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
+%template (GrayscaleImageTemplate) eduart::measurement::GenericGrayscaleImage<double, eduart::THERMAL_RESOLUTION>;
+%template (FalseColorImageTemplate) eduart::measurement::GenericRGBImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
+%include "sensorring/types/ThermalMeasurement.hpp"
 
 
 %typemap(in) std::chrono::milliseconds {
@@ -223,7 +250,7 @@ namespace eduart {
 namespace wrapper {
 
 class SensorringClient : public eduart::manager::MeasurementClient,
-                                  public eduart::logger::LoggerClient {
+                         public eduart::logger::LoggerClient {
 public:
     SensorringClient()
         : eduart::manager::MeasurementClient()
