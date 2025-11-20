@@ -5,8 +5,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+
+#include "Math.hpp"
 
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
 static constexpr unsigned int MAX_MSG_LENGTH     = 64;
@@ -82,6 +83,8 @@ using PointCloud       = std::vector<PointData>;
 using GrayscaleImage   = GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 using TemperatureImage = GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
 using FalseColorImage  = GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
+
+SENSORRING_API void copyPointCloudTo(const PointCloud& pc, double* buffer, int size);
 
 struct SENSORRING_API TofMeasurement {
   unsigned int frame_id = 0;

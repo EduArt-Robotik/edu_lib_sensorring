@@ -36,6 +36,7 @@ else:
 "
 %enddef
 
+
 /*
  * Module name
  *
@@ -70,6 +71,14 @@ else:
 %include <std_string.i>
 %include <std_vector.i>
 
+
+// NumPy support
+%include "numpy.i"
+%init %{
+  import_array();
+%}
+
+
 namespace std {
 // Aliases for integer types
 typedef ::uint8_t uint8_t;
@@ -82,6 +91,7 @@ typedef ::int32_t int32_t;
 typedef ::int64_t int64_t;
 } // namespace std
 
+
 // Ignore functionality that is too C/C++ specific
 // Operators
 %ignore* ::operator<<;
@@ -91,9 +101,15 @@ typedef ::int64_t int64_t;
 %ignore* ::operator<;
 %ignore* ::operator=;
 
+
 // Iterators
 %ignore* ::begin;
 %ignore* ::end;
+
+
+// Type mappings for methods coping data to NumPy
+%apply (double*  INPLACE_ARRAY_FLAT, int DIM_FLAT) {(double*  buffer, int size)};
+
 
 // Type mappings for methods coping data to NumPy
 //%apply (unsigned char*  INPLACE_ARRAY_FLAT, int DIM_FLAT) {(unsigned char*  destination, int size)};
@@ -128,12 +144,30 @@ typedef ::int64_t int64_t;
 %import "sensorring/platform/SensorringExport.hpp"
 
 %ignore eduart::math::Vector3::operator[];
+%extend eduart::math::Vector3 {
+    double __getitem__(int idx) {
+        return $self->operator[](idx);
+    }
+    void __setitem__(int idx, double value) {
+        $self->operator[](idx) = value;
+    }
+}
 %ignore eduart::math::Matrix3::operator[];
-%include "sensorring/utils/Math.hpp"
+%extend eduart::math::Matrix3 {
+    eduart::math::Vector3& __getitem__(int idx) {
+        return $self->operator[](idx);
+    }
+    void __setitem__(int idx, const eduart::math::Vector3 &value) {
+        $self->operator[](idx) = value;
+    }
+}
 %template (VectorDataArray) std::array<double, 3>;
+%template (MatrixDataArray) std::array<eduart::math::Vector3, 3>;
+%include "sensorring/utils/Math.hpp"
 
+
+%template (PointDataVector) std::vector<eduart::measurement::PointData>;
 %include "sensorring/utils/CustomTypes.hpp"
-%template (PointCloudVector) std::vector<eduart::measurement::PointData>;
 
 
 %typemap(in) std::chrono::milliseconds {
@@ -144,44 +178,35 @@ typedef ::int64_t int64_t;
         SWIG_exception_fail(SWIG_TypeError, "Expected integer for milliseconds");
     }
 }
-
 %typemap(out) std::chrono::milliseconds {
     $result = PyLong_FromLongLong($1.count());
 }
 %rename(timeout_ms) eduart::ring::RingParams::timeout;
+%template (BusParamVector) std::vector<eduart::bus::BusParams>;
+%template (BoardParamVector) std::vector<eduart::sensor::SensorBoardParams>;
 %include "sensorring/Parameters.hpp"
-%template (SensorBusParamVector) std::vector<eduart::bus::BusParams>;
-%template (SensorBoardParamVector) std::vector<eduart::sensor::SensorBoardParams>;
 
 
 %feature("director") eduart::manager::MeasurementClient;
-%extend eduart::manager::MeasurementClient {
-    eduart::manager::MeasurementClient *asLoggerClientasMeasurementClient() {
-        return dynamic_cast<eduart::manager::MeasurementClient *>(self);
-    }
-}
 %rename (ManagerStateToString) eduart::manager::toString(ManagerState);
-%include "sensorring/MeasurementClient.hpp"
 %template (TofMeasurementVector) std::vector<eduart::measurement::TofMeasurement>;
 %template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
+%include "sensorring/MeasurementClient.hpp"
 
+
+%catches(std::runtime_error) eduart::manager::MeasurementManager::MeasurementManager(eduart::manager::ManagerParams params);
 %catches(std::runtime_error) eduart::manager::MeasurementManager::measureSome(const LogVerbosity, const std::string);
 %include "sensorring/MeasurementManager.hpp"
 
 
 %feature("director") eduart::logger::LoggerClient;
-%extend eduart::logger::LoggerClient {
-    eduart::logger::LoggerClient *asLoggerClient() {
-        return dynamic_cast<eduart::logger::LoggerClient *>(self);
-    }
-}
 %rename (LogVerbosityToString) toString(LogVerbosity);
 %include "sensorring/logger/LoggerClient.hpp"
+
 
 %catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity, const std::string);
 %ignore Logger::log(const LogVerbosity, const std::stringstream);
 %include "sensorring/logger/Logger.hpp" 
-
 
 
 %feature("director") eduart::wrapper::SensorringClient;
@@ -202,11 +227,12 @@ public:
     virtual ~SensorringClient() {}
 
     virtual void onStateChange([[maybe_unused]] const eduart::manager::ManagerState state) {};
-    virtual void onRawTofMeasurement([[maybe_unused]] std::vector<eduart::measurement::TofMeasurement> measurement_vec) {};
-    virtual void onTransformedTofMeasurement([[maybe_unused]] std::vector<eduart::measurement::TofMeasurement> measurement_vec) {};
-    virtual void onThermalMeasurement([[maybe_unused]] std::vector<eduart::measurement::ThermalMeasurement> measurement_vec) {};
-    virtual void onOutputLog([[maybe_unused]] eduart::logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
+    virtual void onRawTofMeasurement([[maybe_unused]] const std::vector<eduart::measurement::TofMeasurement>& measurement_vec) {};
+    virtual void onTransformedTofMeasurement([[maybe_unused]] const std::vector<eduart::measurement::TofMeasurement>& measurement_vec) {};
+    virtual void onThermalMeasurement([[maybe_unused]] const std::vector<eduart::measurement::ThermalMeasurement>& measurement_vec) {};
+    virtual void onOutputLog([[maybe_unused]] eduart::logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {};
 };
 } // namespace wrapper
 } // namespace eduart
+
 %}
