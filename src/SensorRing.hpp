@@ -3,8 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
+
 #include "SensorBus.hpp"
+
 
 namespace eduart {
 

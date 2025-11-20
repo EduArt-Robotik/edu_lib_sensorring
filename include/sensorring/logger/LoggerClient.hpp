@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   LoggerClient.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  LoggerClient that can be registered with the Logger to receive log messages
+ * @date   2024-11-25
+ */
+
 #pragma once
 
 #include <ostream>
@@ -12,8 +21,6 @@ namespace logger {
 /**
  * @enum LogVerbosity
  * @brief Verbosity levels of the logger output
- * @author Hannes Duske
- * @date 25.12.2024
  */
 enum class SENSORRING_API LogVerbosity {
   Debug,
@@ -39,10 +46,7 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity
 
 /**
  * @class LoggerClient
- * @brief Observer interface of the Logger class. Defines the callback method
- * that is triggered by the Logger.
- * @author Hannes Duske
- * @date 25.12.2024
+ * @brief Observer interface of the Logger class. Defines the callback method that is triggered by the Logger.
  */
 class SENSORRING_API LoggerClient {
 public:
@@ -54,7 +58,7 @@ public:
    * @param[in] verbosity verbosity level of the log message
    * @param[in] msg       log message string
    */
-  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {};
+  virtual void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {};
 };
 
 } // namespace logger

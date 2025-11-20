@@ -5,12 +5,11 @@
 
 #include "hardware/st_vl53l8cx.hpp"
 #include "interface/ComInterface.hpp"
+#include "sensorring/Parameter.hpp"
+#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/Math.hpp"
 
 #include "BaseSensor.hpp"
-
-#include "sensorring/utils/CustomTypes.hpp"
-#include "sensorring/utils/Math.hpp"
-#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 
@@ -22,8 +21,8 @@ public:
   ~TofSensor();
 
   const TofSensorParams& getParams() const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestRawMeasurement() const;
-  std::pair<measurement::TofMeasurement, SensorState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
@@ -33,7 +32,7 @@ public:
   static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
-  void onResetSensorState() override;  
+  void onResetSensorState() override;
   void onClearDataFlag() override;
 
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;

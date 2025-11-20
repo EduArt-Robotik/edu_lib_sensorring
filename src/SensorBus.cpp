@@ -10,7 +10,7 @@
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
-#include "utils/EnumerationInformation.hpp"
+#include "types/EnumerationInformation.hpp"
 
 #include "SensorBoard.hpp"
 

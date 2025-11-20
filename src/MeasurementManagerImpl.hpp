@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 
 #include "SensorRing.hpp"
 
@@ -33,86 +33,86 @@ public:
   /**
    * Destructor
    */
-  ~MeasurementManagerImpl();
+  ~MeasurementManagerImpl() noexcept;
 
   /**
    * Run one processing cycle of the state machine worker
    * @return error code
    */
-  bool measureSome();
+  bool measureSome() noexcept(false);
 
   /**
    * Start running the state machine worker loop in a thread
    * @return error code
    */
-  bool startMeasuring();
+  bool startMeasuring() noexcept;
 
   /**
    * Stop the state machine worker loop and close the thread
    * @return error code
    */
-  bool stopMeasuring();
+  bool stopMeasuring() noexcept;
 
   /**
    * Query if the measurement thread is currently running
    * @return true if the measurement thread is running
    */
-  bool isMeasuring();
+  bool isMeasuring() noexcept;
 
   /**
-   * Register an observer with the MeasurementManager object
-   * @param[in] observer Observer that is registered and gets notified on future events
+   * Register an client with the MeasurementManager object
+   * @param[in] client Observer that is registered and gets notified on future events
    */
-  void registerClient(MeasurementClient* observer);
+  void registerClient(MeasurementClient* client) noexcept;
 
   /**
-   * Unregister an observer with the MeasurementManager object
-   * @param[in] observer Observer that is unregistered and will not be notified on future events
+   * Unregister an client with the MeasurementManager object
+   * @param[in] client Observer that is unregistered and will not be notified on future events
    */
-  void unregisterClient(MeasurementClient* observer);
+  void unregisterClient(MeasurementClient* client) noexcept;
 
   /**
    * Get a string representation of the topology of the connected sensors
    * @return Formatted string describing the topology
    */
-  std::string printTopology() const;
+  std::string printTopology() const noexcept;
 
   /**
    * Get the health status of the state machine
    * @return Current worker state
    */
-  ManagerState getManagerState() const;
+  ManagerState getManagerState() const noexcept;
 
   /**
    * Get the parameters with which the MeasurementManager was initialized
    * @return Initial parameter struct
    */
-  ManagerParams getParams() const;
+  ManagerParams getParams() const noexcept;
 
   /**
    * Enable or disable the Time-of-Flight sensor measurements
    * @param[in] state enable signal
    */
-  void enableTofMeasurement(bool state);
+  void enableTofMeasurement(bool state) noexcept;
 
   /**
    * Enable or disable the thermal sensor measurements
    * @param[in] state enable signal
    */
-  void enableThermalMeasurement(bool state);
+  void enableThermalMeasurement(bool state) noexcept;
 
   /**
    * Start a thermal calibration
    * @param[in] window number of thermal frames used for averaging
    * @return error code
    */
-  bool startThermalCalibration(std::size_t window);
+  bool startThermalCalibration(std::size_t window) noexcept;
 
   /**
    * Stop any ongoing thermal calibration
    * @return error code
    */
-  bool stopThermalCalibration();
+  bool stopThermalCalibration() noexcept;
 
   /**
    * Set the light mode and color of the sensor ring
@@ -122,7 +122,7 @@ public:
    * @param[in] blue Blue color value
    * @return true if successful, false otherwise
    */
-  void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0);
+  void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0) noexcept;
 
 private:
   enum class MeasurementState {
@@ -173,7 +173,9 @@ private:
   std::uint8_t _light_brightness;
   std::atomic<bool> _light_update_flag;
 
-  std::set<MeasurementClient*> _observers;
+  mutable std::mutex _client_mutex;
+  using LockGuard = std::lock_guard<std::mutex>;
+  std::set<MeasurementClient*> _clients;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;

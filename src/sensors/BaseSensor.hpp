@@ -2,9 +2,8 @@
 
 #include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
-
-#include "sensorring/utils/CustomTypes.hpp"
-#include "sensorring/utils/Math.hpp"
+#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/Math.hpp"
 
 namespace eduart {
 
@@ -15,7 +14,6 @@ public:
   BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
   ~BaseSensor();
 
-  
   std::size_t getIdx() const;
 
   bool gotNewData() const;
@@ -34,7 +32,7 @@ public:
 
 protected:
   virtual void onResetSensorState() = 0;
-  virtual void onClearDataFlag() = 0;
+  virtual void onClearDataFlag()    = 0;
 
   std::size_t _idx;
   SensorState _error;

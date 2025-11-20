@@ -46,10 +46,12 @@ public:
 
 private:
   using Clock     = std::chrono::steady_clock;
+  using Duration  = Clock::duration;
   using TimePoint = Clock::time_point;
   using toSeconds = std::chrono::duration<double>;
 
-  TimePoint _lastQuery;
+  Duration _duration;
+  TimePoint _last_measurement;
   std::atomic<bool> _init_flag;
   std::atomic<unsigned int> _counter;
 };

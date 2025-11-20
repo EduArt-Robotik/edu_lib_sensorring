@@ -1,4 +1,4 @@
-#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
 #include <algorithm>
 

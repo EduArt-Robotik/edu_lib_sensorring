@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   Math.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Vector and Matrix types used by the sensorring library
+ * @date   2024-11-06
+ */
+
 #pragma once
 
 #include <array>
@@ -10,13 +19,12 @@ namespace eduart {
 namespace math {
 
 // Forward declaration
-struct Vector3;
 struct Matrix3;
 
-//===============================
-// Vector3
-//===============================
-
+/**
+ * @class Vector3
+ * @brief Implementation of a vector with length 3
+ */
 struct SENSORRING_API Vector3 {
   std::array<double, 3> data;
 
@@ -58,10 +66,10 @@ struct SENSORRING_API Vector3 {
   static const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m);
 };
 
-//===============================
-// Matrix3
-//===============================
-
+/**
+ * @class Matrix3
+ * @brief Implementation of a matrix of size 3 × 3
+ */
 struct SENSORRING_API Matrix3 {
   std::array<Vector3, 3> data;
 

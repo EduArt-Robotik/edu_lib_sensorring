@@ -55,11 +55,11 @@ else:
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/utils/CustomTypes.hpp"
-#include "sensorring/utils/Math.hpp"
+#include "sensorring/types/CustomTypes.hpp"
+#include "sensorring/types/Math.hpp"
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/MeasurementManager.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 %}
 
 
@@ -163,11 +163,11 @@ typedef ::int64_t int64_t;
 }
 %template (VectorDataArray) std::array<double, 3>;
 %template (MatrixDataArray) std::array<eduart::math::Vector3, 3>;
-%include "sensorring/utils/Math.hpp"
+%include "sensorring/types/Math.hpp"
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;
-%include "sensorring/utils/CustomTypes.hpp"
+%include "sensorring/types/CustomTypes.hpp"
 
 
 %typemap(in) std::chrono::milliseconds {
@@ -184,7 +184,7 @@ typedef ::int64_t int64_t;
 %rename(timeout_ms) eduart::ring::RingParams::timeout;
 %template (BusParamVector) std::vector<eduart::bus::BusParams>;
 %template (BoardParamVector) std::vector<eduart::sensor::SensorBoardParams>;
-%include "sensorring/Parameters.hpp"
+%include "sensorring/Parameter.hpp"
 
 
 %feature("director") eduart::manager::MeasurementClient;

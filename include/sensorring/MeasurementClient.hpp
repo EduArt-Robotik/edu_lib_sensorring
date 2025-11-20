@@ -1,10 +1,19 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementManager.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  MeasurementClient that can be registered with the Logger to receive measurement data
+ * @date   2024-12-25
+ */
+
 #pragma once
 
 #include <ostream>
 #include <string>
 
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
 namespace eduart {
 
@@ -13,8 +22,6 @@ namespace manager {
 /**
  * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
- * @author Hannes Duske
- * @date 25.12.2024
  */
 enum class SENSORRING_API ManagerState {
   Uninitialized,
@@ -43,8 +50,6 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, ManagerState state) no
  * @brief Observer interface of the MeasurementManager class. Defines the
  * callback methods that are triggered by the MeasurementManager. It is possible
  * to implement only one or a selection of the callback methods.
- * @author Hannes Duske
- * @date 25.12.2024
  */
 class SENSORRING_API MeasurementClient {
 public:
@@ -63,7 +68,7 @@ public:
    * @param[in] measurement_vec the most recent Time-of-Flight sensor
    * measurements in the individual sensor coordinate frames
    */
-  virtual void onRawTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
+  virtual void onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
    * Callback method for new Time-of-Flight sensor measurements.  Returns a
@@ -71,7 +76,7 @@ public:
    * @param[in] measurement_vec the most recent Time-of-Flight sensor
    * measurements in the common transformed coordinate frame
    */
-  virtual void onTransformedTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {};
+  virtual void onTransformedTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
    * Callback method for new thermal sensor measurements. Returns one individual
@@ -82,7 +87,7 @@ public:
    * @param[in] measurement the most recent thermal sensor measurement of the
    * specified sensor
    */
-  virtual void onThermalMeasurement([[maybe_unused]] std::vector<measurement::ThermalMeasurement> measurement_vec) {};
+  virtual void onThermalMeasurement([[maybe_unused]] const std::vector<measurement::ThermalMeasurement>& measurement_vec) {};
 };
 
 } // namespace manager

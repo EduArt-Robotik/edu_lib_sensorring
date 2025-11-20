@@ -7,7 +7,7 @@
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "SensorBoard.hpp"
@@ -70,23 +70,23 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
   _manager_state = ManagerState::Initialized;
 }
 
-MeasurementManagerImpl::~MeasurementManagerImpl() {
+MeasurementManagerImpl::~MeasurementManagerImpl() noexcept {
   stopMeasuring();
 }
 
-void MeasurementManagerImpl::enableTofMeasurement(bool state) {
+void MeasurementManagerImpl::enableTofMeasurement(bool state) noexcept {
   _tof_enabled = state;
 }
 
-void MeasurementManagerImpl::enableThermalMeasurement(bool state) {
+void MeasurementManagerImpl::enableThermalMeasurement(bool state) noexcept {
   _thermal_enabled = state;
 }
 
-ManagerParams MeasurementManagerImpl::getParams() const {
+ManagerParams MeasurementManagerImpl::getParams() const noexcept {
   return _params;
 }
 
-std::string MeasurementManagerImpl::printTopology() const {
+std::string MeasurementManagerImpl::printTopology() const noexcept {
   std::stringstream ss;
   for (const auto& bus : _sensor_ring->getInterfaces()) {
     ss << std::endl << std::endl;
@@ -100,7 +100,7 @@ std::string MeasurementManagerImpl::printTopology() const {
 
       ss << "sensor " << enum_info.idx << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    State:          " << to_string(enum_info.state) << std::endl;
+      ss << "    State:          " << toString(enum_info.state) << std::endl;
       ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
       ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
       ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
@@ -113,15 +113,15 @@ std::string MeasurementManagerImpl::printTopology() const {
   return ss.str();
 }
 
-bool MeasurementManagerImpl::stopThermalCalibration() {
+bool MeasurementManagerImpl::stopThermalCalibration() noexcept {
   return _sensor_ring->stopThermalCalibration();
 }
 
-bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) {
+bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) noexcept {
   return _sensor_ring->startThermalCalibration(window);
 }
 
-void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
+void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
   _light_mode     = mode;
   _light_color[0] = red;
   _light_color[1] = green;
@@ -135,9 +135,10 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept {
   if (client) {
-    auto result = _observers.insert(client);
+    LockGuard lock(_client_mutex);
+    auto result = _clients.insert(client);
 
     // Check if the client was registered
     if (result.second) {
@@ -150,9 +151,10 @@ void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) noexcept {
   if (client) {
-    auto result = _observers.erase(client);
+    LockGuard lock(_client_mutex);
+    auto result = _clients.erase(client);
 
     // Check if the client was removed
     if (result > 0) {
@@ -175,7 +177,7 @@ int MeasurementManagerImpl::notifyToFData() {
         auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
         if (raw_error == sensor::SensorState::SensorOK) {
           if (!raw_measurement.point_cloud.empty())
-            raw_measurement_vec.push_back(raw_measurement);
+            raw_measurement_vec.emplace_back(raw_measurement);
         } else {
           error_frames++;
         }
@@ -183,23 +185,25 @@ int MeasurementManagerImpl::notifyToFData() {
         auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
         if (transformed_error == sensor::SensorState::SensorOK) {
           if (!transformed_measurement.point_cloud.empty())
-            transformed_measurement_vec.push_back(transformed_measurement);
+            transformed_measurement_vec.emplace_back(transformed_measurement);
         }
       }
     }
   }
 
   if (!raw_measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onRawTofMeasurement(raw_measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onRawTofMeasurement(raw_measurement_vec);
     }
   }
 
   if (!transformed_measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onTransformedTofMeasurement(transformed_measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onTransformedTofMeasurement(transformed_measurement_vec);
     }
   }
 
@@ -216,7 +220,7 @@ int MeasurementManagerImpl::notifyThermalData() {
         auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
 
         if (error == sensor::SensorState::SensorOK) {
-          measurement_vec.push_back(measurement);
+          measurement_vec.emplace_back(measurement);
         } else {
           error_frames++;
         }
@@ -225,9 +229,10 @@ int MeasurementManagerImpl::notifyThermalData() {
   }
 
   if (!measurement_vec.empty()) {
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onThermalMeasurement(measurement_vec);
+    LockGuard lock(_client_mutex);
+    for (auto client : _clients) {
+      if (client)
+        client->onThermalMeasurement(measurement_vec);
     }
   }
 
@@ -236,15 +241,16 @@ int MeasurementManagerImpl::notifyThermalData() {
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
   if (_manager_state != state) {
+    LockGuard lock(_client_mutex);
     _manager_state = state;
-    for (auto observer : _observers) {
-      if (observer)
-        observer->onStateChange(state);
+    for (auto client : _clients) {
+      if (client)
+        client->onStateChange(state);
     }
   }
 }
 
-ManagerState MeasurementManagerImpl::getManagerState() const {
+ManagerState MeasurementManagerImpl::getManagerState() const noexcept {
   return _manager_state;
 }
 
@@ -253,7 +259,7 @@ ManagerState MeasurementManagerImpl::getManagerState() const {
 ==========================================================================================
 */
 
-bool MeasurementManagerImpl::measureSome() {
+bool MeasurementManagerImpl::measureSome() noexcept(false) {
   bool error = false;
 
   if (!_is_running) {
@@ -267,7 +273,7 @@ bool MeasurementManagerImpl::measureSome() {
   return error;
 }
 
-bool MeasurementManagerImpl::startMeasuring() {
+bool MeasurementManagerImpl::startMeasuring() noexcept {
   if (!_is_running) {
     if (_tof_enabled || _thermal_enabled) {
       _is_running    = true;
@@ -280,7 +286,7 @@ bool MeasurementManagerImpl::startMeasuring() {
   return false;
 }
 
-bool MeasurementManagerImpl::stopMeasuring() {
+bool MeasurementManagerImpl::stopMeasuring() noexcept {
   if (_is_running) {
     _is_running = false;
     notifyState(ManagerState::Shutdown);
@@ -294,7 +300,7 @@ bool MeasurementManagerImpl::stopMeasuring() {
   return false;
 }
 
-bool MeasurementManagerImpl::isMeasuring() {
+bool MeasurementManagerImpl::isMeasuring() noexcept {
   return _is_running;
 }
 

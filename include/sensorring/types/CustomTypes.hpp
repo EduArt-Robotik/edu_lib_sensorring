@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   CustomTypes.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Custom types used by the sensorring library
+ * @date   2024-11-06
+ */
+
 #pragma once
 
 #include <array>
@@ -9,10 +18,10 @@
 
 #include "Math.hpp"
 
+namespace eduart {
+
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
 static constexpr unsigned int MAX_MSG_LENGTH     = 64;
-
-namespace eduart {
 
 namespace com {
 

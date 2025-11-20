@@ -1,8 +1,8 @@
 #include "ComManager.hpp"
 
 #include "sensorring/logger/Logger.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
-#include "sensorring/utils/CustomTypes.hpp"
 
 #ifdef USE_SOCKETCAN
 #include "can/SocketCANFD.hpp"
