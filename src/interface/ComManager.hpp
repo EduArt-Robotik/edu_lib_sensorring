@@ -4,10 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "ComInterface.hpp"
-#include "utils/SingletonTemplate.hpp"
+#include "sensorring/types/CustomTypes.hpp"
+#include "types/SingletonTemplate.hpp"
 
-#include "sensorring/utils/CustomTypes.hpp"
+#include "ComInterface.hpp"
+
 
 namespace eduart {
 

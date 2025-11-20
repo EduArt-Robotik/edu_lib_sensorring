@@ -3,8 +3,8 @@
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/types/Math.hpp"
 
-#include "sensorring/utils/Math.hpp"
 
 namespace eduart {
 

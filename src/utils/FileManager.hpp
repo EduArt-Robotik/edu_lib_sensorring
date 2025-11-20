@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "sensorring/types/CustomTypes.hpp"
 #include "sensors/hardware/heimann_htpa32.hpp"
 
-#include "sensorring/utils/CustomTypes.hpp"
 
 namespace eduart {
 

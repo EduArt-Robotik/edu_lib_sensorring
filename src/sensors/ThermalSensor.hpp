@@ -4,10 +4,10 @@
 
 #include "hardware/heimann_htpa32.hpp"
 #include "interface/ComInterface.hpp"
+#include "sensorring/Parameter.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
 #include "BaseSensor.hpp"
-#include "sensorring/utils/CustomTypes.hpp"
-#include "sensorring/Parameters.hpp"
 
 namespace eduart {
 

@@ -13,7 +13,7 @@
 #include <string>
 
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
 namespace eduart {
 

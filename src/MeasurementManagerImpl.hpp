@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 
 #include "SensorRing.hpp"
 

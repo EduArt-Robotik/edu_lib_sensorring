@@ -13,9 +13,9 @@
 #include <string>
 
 #include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/utils/CustomTypes.hpp"
+#include "sensorring/types/CustomTypes.hpp"
 
 namespace eduart {
 

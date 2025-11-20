@@ -1,4 +1,4 @@
-#include "sensorring/utils/Math.hpp"
+#include "sensorring/types/Math.hpp"
 
 #include <cmath>
 

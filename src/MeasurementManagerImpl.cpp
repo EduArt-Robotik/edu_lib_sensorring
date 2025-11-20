@@ -7,7 +7,7 @@
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameters.hpp"
+#include "sensorring/Parameter.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "SensorBoard.hpp"
