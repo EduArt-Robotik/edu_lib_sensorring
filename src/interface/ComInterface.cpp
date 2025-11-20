@@ -8,7 +8,8 @@ ComInterface::ComInterface(std::string interface_name)
     : _communication_error(false)
     , _listener_is_running(false)
     , _shut_down_listener(false)
-    , _interface_name(interface_name) {
+    , _interface_name(interface_name)
+    , _thread{nullptr} {
 }
 
 ComInterface::~ComInterface() {
@@ -62,7 +63,7 @@ bool ComInterface::startListener() {
 
 void ComInterface::stopListener() {
   _shut_down_listener = true;
-  if (_thread->joinable()) {
+  if (_thread && _thread->joinable()) {
     _thread->join();
   }
 }
