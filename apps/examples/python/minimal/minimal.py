@@ -15,10 +15,12 @@ SENSOR_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
 SENSOR_INTERFACE_NAME = "0x1731a1f1"
 
 
+# Proxy class that implements the sensorring callbacks to get
+# measurements and the log output of the sensorring library
 class MeasurementProxy(sensorring.SensorringClient):
 
   def __init__(self):
-    # Required to initialize base class
+    # Initialize base class
     super().__init__()
 
     self._counter = 0
@@ -55,6 +57,7 @@ def main():
   print("Minimal sensorring example")
   print("==========================")
 
+  # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
   
   tof = sensorring.TofSensorParams()
@@ -75,23 +78,34 @@ def main():
 
   params.ring_params = ring
   
+  # Instantiate a Measurement proxy
   proxy = MeasurementProxy()
+
+  # Register the proxy with the Logger to get the log output
   sensorring.Logger.getInstance().registerClient(proxy)
   
   try:
+    # Instantiate a MeasurementManager with the parameters from above
     manager = sensorring.MeasurementManager(params)
+
+    # Register the proxy with the LogMeasurementManager to get the measurements
     manager.registerClient(proxy)
+
+    # Start the measurements
     manager.startMeasuring()
 
-    while (not proxy.gotFirstMeasurement()):
+    while (not proxy.gotFirstMeasurement() and manager.isMeasuring()):
       time.sleep(0.1)
-      
-    print("Printing measurement rate:")
-    while (manager.isMeasuring()):
-      print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
-      time.sleep(1)
 
-    manager.stopMeasuring()
+    if(manager.isMeasuring()):
+      
+      print("Printing measurement rate:")
+      while (manager.isMeasuring()):
+        print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
+        time.sleep(1)
+
+      # Stop the measurements
+      manager.stopMeasuring()
 
   except Exception as e:
     print("Caught: ", e)

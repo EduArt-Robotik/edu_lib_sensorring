@@ -24,6 +24,8 @@ MIN_DIST = 0.0
 MAX_DIST = 2.0
 
 
+# Proxy class that implements the sensorring callbacks to get
+# measurements and the log output of the sensorring library
 class MeasurementProxy(sensorring.SensorringClient):
 
   def __init__(self):
@@ -66,6 +68,7 @@ def main():
   print("Minimal sensorring example")
   print("==========================")
 
+  # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
   
   tof = sensorring.TofSensorParams()
@@ -86,12 +89,20 @@ def main():
 
   params.ring_params = ring
   
+  # Instantiate a Measurement proxy
   proxy = MeasurementProxy()
+
+  # Register the proxy with the Logger to get the log output
   sensorring.Logger.getInstance().registerClient(proxy)
 
   try:
+    # Instantiate a MeasurementManager with the parameters from above
     manager = sensorring.MeasurementManager(params)
+
+    # Register the proxy with the LogMeasurementManager to get the measurements
     manager.registerClient(proxy)
+
+    # Start the measurements
     manager.startMeasuring()
 
     # Create matplotlib plot
@@ -117,6 +128,7 @@ def main():
       fig.canvas.draw()
       fig.canvas.flush_events()
 
+    # Stop the measurements
     manager.stopMeasuring()
 
   except Exception as e:

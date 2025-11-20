@@ -20,6 +20,8 @@ MIN_DIST = 0.0
 MAX_DIST = 1.0
 
 
+# Proxy class that implements the sensorring callbacks to get
+# measurements and the log output of the sensorring library
 class MeasurementProxy(sensorring.SensorringClient):
 
   def __init__(self):
@@ -27,15 +29,12 @@ class MeasurementProxy(sensorring.SensorringClient):
     super().__init__()
 
     # class members
-    self._counter = 0
     self._init_flag = False
-    self._last_query = time.time()
     
 
   # Base class callback
   def onRawTofMeasurement(self, measurement_vec):
     self._init_flag = True
-    self._counter += 1
     self.printDepthMap(measurement_vec[0].point_cloud)
 
 
@@ -44,15 +43,6 @@ class MeasurementProxy(sensorring.SensorringClient):
     if verbosity > sensorring.LogVerbosity_Debug:
       print("[" + sensorring.LogVerbosityToString(verbosity) + "] " + msg)
       print("\033[s", end="")
-
-
-  def getRate(self):
-    now = time.time()
-    rate = self._counter / (now - self._last_query)
-
-    self._last_query = now
-    self._counter = 0
-    return rate
 
 
   def gotFirstMeasurement(self):
@@ -90,6 +80,7 @@ def main():
   print("Minimal sensorring example")
   print("==========================")
 
+  # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
   
   tof = sensorring.TofSensorParams()
@@ -110,17 +101,26 @@ def main():
 
   params.ring_params = ring
   
+  # Instantiate a Measurement proxy
   proxy = MeasurementProxy()
+
+  # Register the proxy with the Logger to get the log output
   sensorring.Logger.getInstance().registerClient(proxy)
 
   try:
+    # Instantiate a MeasurementManager with the parameters from above
     manager = sensorring.MeasurementManager(params)
+
+    # Register the proxy with the LogMeasurementManager to get the measurements
     manager.registerClient(proxy)
+
+    # Start the measurements
     manager.startMeasuring()
         
     while (manager.isMeasuring()):
       time.sleep(1)
 
+    # Stop the measurements
     manager.stopMeasuring()
     
   except Exception as e:
