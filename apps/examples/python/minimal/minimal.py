@@ -25,12 +25,15 @@ class MeasurementProxy(sensorring.SensorringClient):
     super().__init__()
 
     self._counter = 0
+    self._duration = 0.0
     self._init_flag = False
-    self._last_query = time.time()
+    self._last_measurement = time.time()
 
 
   # Base class callback
   def onRawTofMeasurement(self, measurement_vec):
+    self._duration += (time.time() - self._last_measurement)
+    self._last_measurement = time.time()
     self._init_flag = True
     self._counter += 1
 
@@ -42,9 +45,8 @@ class MeasurementProxy(sensorring.SensorringClient):
 
 
   def getRate(self):
-    now = time.time()
-    rate = self._counter / (now - self._last_query)
-    self._last_query = now
+    rate = self._counter / self._duration
+    self._duration = 0.0
     self._counter = 0
     return rate
 
@@ -100,7 +102,7 @@ def main():
 
     if(manager.isMeasuring()):
       
-      print("Printing measurement rate:")
+      print("\nPrinting measurement rate:")
       while (manager.isMeasuring()):
         print(f"\rCurrent rate: {proxy.getRate():5.2f} Hz", end="", flush=True)
         time.sleep(1)

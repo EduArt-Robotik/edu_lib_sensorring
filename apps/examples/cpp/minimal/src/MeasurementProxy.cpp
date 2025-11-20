@@ -16,12 +16,9 @@
 namespace eduart {
 
 double MeasurementProxy::getRate() {
-  auto now  = Clock::now();
-  auto rate = static_cast<double>(_counter) / toSeconds(now - _lastQuery).count();
-
-  _lastQuery = now;
-  _counter   = 0;
-
+  auto rate = static_cast<double>(_counter) / toSeconds(_duration).count();
+  _duration = Duration::zero();
+  _counter  = 0;
   return rate;
 }
 
@@ -30,7 +27,9 @@ bool MeasurementProxy::gotFirstMeasurement() {
 }
 
 void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {
-  _init_flag = true;
+  _duration += Clock::now() - _last_measurement;
+  _last_measurement = Clock::now();
+  _init_flag        = true;
   _counter++;
 }
 
