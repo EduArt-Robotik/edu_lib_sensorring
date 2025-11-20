@@ -1,9 +1,10 @@
+# Copyright (c) 2025 EduArt Robotik GmbH
+
 """
-Depth Map Python3 example.
-
-This example prints a depth map of the first connected ToF Sensor on the command line.
-
-2025-11-18
+ @file   depth_map.py
+ @author EduArt Robotik GmbH
+ @brief  This example prints a depth map of the first connected ToF Sensor on the command line.
+ @date 2025-11-18
 """
 
 import time

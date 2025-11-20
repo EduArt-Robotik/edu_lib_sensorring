@@ -1,6 +1,6 @@
 add_executable(minimal
-    main.cpp
-    MeasurementProxy.cpp
+    src/main.cpp
+    src/MeasurementProxy.cpp
 )
 
 target_link_libraries(minimal

@@ -1,9 +1,10 @@
+# Copyright (c) 2025 EduArt Robotik GmbH
+
 """
-Minimal Python3 example. 
-
-This example receives measurements and prints the current measurement rate to the command line.
-
-2025-11-18
+ @file   minimal.py
+ @author EduArt Robotik GmbH
+ @brief  This example receives measurements and prints the current measurement rate to the command line.
+ @date 2025-11-18
 """
 
 import time

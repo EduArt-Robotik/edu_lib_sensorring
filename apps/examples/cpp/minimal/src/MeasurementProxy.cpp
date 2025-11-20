@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementProxy.cpp
+ * @author EduArt Robotik GmbH
+ * @brief  Proxy class for the minimal C++ example
+ * @date 2025-11-18
+ */
+
 #include "MeasurementProxy.hpp"
 
 #include <iostream>
@@ -20,12 +29,12 @@ bool MeasurementProxy::gotFirstMeasurement() {
   return _init_flag;
 }
 
-void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) {
+void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {
   _init_flag = true;
   _counter++;
 }
 
-void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) {
+void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {
   if (verbosity > logger::LogVerbosity::Debug) {
     std::cout << "[" << verbosity << "] " << msg << std::endl;
   }

@@ -1,6 +1,6 @@
 add_executable(depth_map
-    main.cpp
-    MeasurementProxy.cpp
+    src/main.cpp
+    src/MeasurementProxy.cpp
 )
 
 target_link_libraries(depth_map

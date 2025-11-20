@@ -1,9 +1,10 @@
+# Copyright (c) 2025 EduArt Robotik GmbH
+
 """
-Depth View Python3 example.
-
-This example shows the measurement of the first connected ToF Sensor in a 3D plot.
-
-2025-11-18
+ @file   depth_view.py
+ @author EduArt Robotik GmbH
+ @brief  This example shows the measurement of the first connected ToF Sensor in a 3D plot.
+ @date 2025-11-18
 """
 
 import time

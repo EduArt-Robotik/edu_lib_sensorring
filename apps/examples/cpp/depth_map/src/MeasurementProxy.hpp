@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementProxy.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Proxy class for the depth map C++ example
+ * @date 2025-11-18
+ */
+
 #pragma once
 
 #include <atomic>
@@ -7,6 +16,10 @@
 
 namespace eduart {
 
+/**
+ * @class Proxy class that implements the sensorring callbacks to get
+ * measurements and the log output of the sensorring library
+ */
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
   /**
@@ -24,12 +37,12 @@ public:
   /**
    * @brief Implement onRawTofMeasurement callback method
    */
-  void onRawTofMeasurement([[maybe_unused]] std::vector<measurement::TofMeasurement> measurement_vec) override;
+  void onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) override;
 
   /**
    * @brief Implement onRawTofMeasurement callback method
    */
-  void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] std::string msg) override;
+  void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) override;
 
 private:
   using Clock     = std::chrono::steady_clock;
