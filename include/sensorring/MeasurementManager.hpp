@@ -11,17 +11,10 @@
 
 namespace eduart {
 
-namespace ring {
-class SensorRing;
-}
-
 namespace manager {
 
 // Forward declaration of implementation class
 class SENSORRING_API MeasurementManagerImpl;
-
-// Forward declaration
-enum class SENSORRING_API MeasurementState;
 
 /**
  * @class MeasurementManager
