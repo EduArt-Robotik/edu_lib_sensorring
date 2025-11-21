@@ -31,7 +31,7 @@ struct SENSORRING_API PointData {
 
 /**
  * @class  PointCloud
- * @brief  Stores a vector of point in 3D space
+ * @brief  Stores a vector of points in 3D space
  */
 struct SENSORRING_API PointCloud {
   std::vector<PointData> data;
