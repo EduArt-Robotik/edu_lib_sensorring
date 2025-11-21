@@ -47,8 +47,13 @@ if(BUILD_EXAMPLES)
   add_subdirectory(apps/examples/cpp)
 endif()
 
+# Documentation
+if(BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
+  add_subdirectory(doc)
+endif()
+
 # Language bindings
-if(BUILD_PYTHON_BINDINGS) # AND CMAKE_BUILD_TYPE MATCHES Release)
+if(BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(bindings)
 endif()
 

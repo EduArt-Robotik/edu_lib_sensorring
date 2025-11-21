@@ -51,7 +51,7 @@ The EduArt Sensorring is a sensor system that collects and combines measurements
 
 ## 3. Input Parameters
 
-Each of the core classes of the library has its own parameter set which is shown in the above class diagram. The parameters have to be initialized externally and passed to the MeasurementManager upon initialization. The individual parameters are described [here](doc/parameters.md). See section _3. Software interface of the library_ for details on how the parameter structures are implemented.
+Each of the core classes of the library has its own parameter set which is shown in the above class diagram. The parameters have to be initialized externally and passed to the MeasurementManager upon initialization. The individual parameters are described [here](doc/pages/parameters.md). See section _3. Software interface of the library_ for details on how the parameter structures are implemented.
 
 ## 4. Software interface of the library
 
@@ -61,7 +61,7 @@ The software interface of the Sensorring library is defined in four header files
 - [Parameters.hpp](include/sensorring/types/Parameters.hpp)
 - [CustomTypes.hpp](include/sensorring/types/install_types/CustomTypes.hpp)
 
-Implementation details of the interface are explained [here](doc/sw_interface.md).
+Implementation details of the interface are explained [here](doc/pages/sw_interface.md).
 
 ## 5. Building and installing the library
 
@@ -110,4 +110,4 @@ cmake/remove_installation.bash
 Please refer to to the [Ros](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [Ros2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) wrappers of this library for examples on how to use the library in your own project.
 
 ## 7. Developer documentation
-Refer to the [developer documentation](doc/dev_doc.md) for more details on how the library is implemented.
+Refer to the [developer documentation](doc/pages/dev_doc.md) for more details on how the library is implemented.

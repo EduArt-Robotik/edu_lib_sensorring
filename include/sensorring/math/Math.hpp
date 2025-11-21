@@ -17,16 +17,32 @@ namespace eduart {
 
 namespace math {
 
-// Calculate euler angles in degrees of a rotation from a rotation matrix
+/**
+ * Calculate euler angles of a rotation from a rotation matrix (RPY-convention)
+ * @param[in] rot_m Rotation matrix to be converted to euler angles
+ * @return Euler angles in degrees
+ */
 SENSORRING_API const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m);
 
-// Calculate euler angles in radians of a rotation from a rotation matrix
+/**
+ * Calculate euler angles of a rotation from a rotation matrix (RPY-convention)
+ * @param[in] rot_m Rotation matrix to be converted to euler angles
+ * @return Euler angles in radians
+ */
 SENSORRING_API const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m);
 
-// Calculate a rotation matrix from euler angles given in degrees
+/**
+ * Calculate a rotation matrix from euler angles (RPY-convention)
+ * @param[in] rotation_deg Euler angles in degrees to be converted to a rotation matrix
+ * @return Rotation matrix
+ */
 SENSORRING_API const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotation_deg);
 
-// Calculate a rotation matrix from euler angles given in radians
+/**
+ * Calculate a rotation matrix from euler angles (RPY-convention)
+ * @param[in] rotation_deg Euler angles in radians to be converted to a rotation matrix
+ * @return Rotation matrix
+ */
 SENSORRING_API const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad);
 
 } // namespace math
