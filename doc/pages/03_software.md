@@ -1,3 +1,43 @@
+# Software
+
+## 2. Sensor topology
+
+The EduArt Sensorring is a sensor system that collects and combines measurements from multiple individual sensors. The individual sensors are daisy chained together in series and share a communication interface and a power supply. The chain of sensor is terminated by a master device at one end e.g. a Raspberry Pi or a CAN to USB converter. It is possible to use multiple communication interfaces to distribute the sensor data and enable the use of more sensors simultaneously. The following class diagram illustrates the topology and the reflection of the hardware layers in the library.
+
+<img src="doc/images/class_diagram_simple.png" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.png';">
+
+## 3. Input Parameters
+
+Each of the core classes of the library has its own parameter set which is shown in the above class diagram. The parameters have to be initialized externally and passed to the MeasurementManager upon initialization. The individual parameters are described [here](doc/pages/parameters.md). See section _3. Software interface of the library_ for details on how the parameter structures are implemented.
+
+## 4. Software interface of the library
+
+The main software interface of the Sensorring library is defined in three header files which are installed with the library.
+- [MeasurementManger.hpp](include/sensorring/MeasurementManager.hpp)
+- [MeasurementClient.hpp](include/sensorring/MeasurementClient.hpp)
+- [Parameters.hpp](include/sensorring/Parameters.hpp)
+
+
+
+
+## 6. Supported languages
+
+### C++
+The library is written in c++ and primarily designed to be used as such.
+
+### Python
+The library can be built with `-DBUILD_PYTHON_BINDINGS=ON` option to generate python bindings.
+
+
+## 7. Using the library in a custom project
+The library includes both C++ and Python [examples](https://github.com/EduArt-Robotik/edu_lib_sensorring/tree/master/apps/examples) that show how to create a minimal program using the Sensor Ring.
+For further references on how to use the library in custom projects refer to the [Ros](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [Ros2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) wrappers of this library.
+Both show how to include the library in larger CMake projects.
+
+
+
+
+
 # Input parameters
 
 ## MeasurementManager
@@ -71,3 +111,12 @@ The light functionality is not fully implemented yet and there is currently no i
 |---|---|---|---|
 | bool | enable | Enable flag for the lights. Used to disable the lights. *(Currently not implemented)* | `true`, `false` |
 |sensor::SensorOrientation | orientation | Specifies the orientation of a sensor board. Used to run light animations in the right direction. | `left`, `right`, `none` |
+
+
+<div class="section_buttons"> 
+
+| Read Previous | Read Next |
+|:--|--:|
+| [Installation](02_installation.md) | [Developer Documentation](04_dev_doc.md) |
+
+</div>

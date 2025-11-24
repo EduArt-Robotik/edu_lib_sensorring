@@ -15,7 +15,6 @@ file(GLOB DOXYGEN_IMAGES "${CMAKE_CURRENT_SOURCE_DIR}/images/*")
 # Convert the full paths to relative paths for Doxygen
 set(DOXYGEN_IMAGES_REL "")
 foreach(img ${DOXYGEN_IMAGES})
-    # Assuming your Doxygen config is in the source dir
     file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_SOURCE_DIR}" "${img}")
     list(APPEND DOXYGEN_IMAGES_REL "${rel_path}")
 endforeach()
@@ -23,6 +22,24 @@ endforeach()
 # Join into a single string with spaces
 string(JOIN " " DOXYGEN_IMAGES_LIST ${DOXYGEN_IMAGES_REL})
 
+#=====================================
+# Fetch doxygen-awesome-css
+#=====================================
+include(FetchContent)
+FetchContent_Declare(
+    doxygen-awesome-css
+    URL https://github.com/jothepro/doxygen-awesome-css/archive/refs/heads/main.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+)
+FetchContent_MakeAvailable(doxygen-awesome-css)
+
+# Save the location the files were cloned into
+# This allows us to get the path to doxygen-awesome.css
+FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+
+#=====================================
+# Generate doxygen configuration
+#=====================================
 configure_file(${DOXYGEN_CONFIG_IN_FILE} ${DOXYGEN_CONFIG_FILE} @ONLY)
 
 add_custom_target(

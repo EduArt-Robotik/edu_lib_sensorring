@@ -1,4 +1,4 @@
-#include "sensorring/types/ToFMeasurement.hpp"
+#include "sensorring/types/TofMeasurement.hpp"
 
 #include <algorithm>
 

@@ -1,11 +1,12 @@
-# Developer documentation
+# Developer Documentation
 
 ## State machine
 
 Part of the Sensorring library is a state machine that handles the timing of all actions.
-It is implemented in the class [MeasurementManager](../include/sensorring/MeasurementManager.hpp) class.
+It is implemented in the class [MeasurementManager](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/src/MeasurementManager.cpp) class.
 The class either runs an internal thread that processes the state machine or the state machine is run in an external process with repeated calls of the `measureSome()` method.
 The internal thread processes the state machine at a hard coded frequency of 2000 Hz.
+
 
 The state machine starts with an initialization part that is executed once and then enters a loop.
 Measurements are repeatedly requested in the loop and processed as they are received.
@@ -36,3 +37,12 @@ The SocketCAN interface can be used on most Linux machines by using a CAN FD ada
 The library has implemented a communication interface to the USBtingo CAN FD to USB adapter.
 The USBtingo can be used from any operating system including Linux and Windows.
 To use this interface the library [libusbtingo](https://github.com/hannesduske/libusbtingo) for this adapter needs to be installed.
+
+
+<div class="section_buttons"> 
+
+| Read Previous | |
+|:--|--:|
+| [Software](03_software.md) | |
+
+</div>
