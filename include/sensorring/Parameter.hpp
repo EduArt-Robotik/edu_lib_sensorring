@@ -23,7 +23,7 @@ namespace sensor {
 
 /**
  * @enum SensorOrientation
- * @brief Possible orientations of a sensor board. Used to rotate the thermal images and to mirror the LED animations.
+ * @brief Possible orientations of a sensor board. Used to rotate the thermal images and to mirror the light animations.
  */
 enum class SENSORRING_API Orientation {
   left,
@@ -33,20 +33,19 @@ enum class SENSORRING_API Orientation {
 
 /**
  * @struct LightParams
- * @brief Parameter structure of the sensor lights of a sensor board.
+ * @brief Parameter structure of the sensor lights of a sensor board. Not all sensor boards have lights.
  */
 struct SENSORRING_API LightParams {
-  /// Enable the LED lights.
+  /// Enable the lights.
   bool enable = false;
 
-  /// Orientation of the sensor board. Used to to mirror the LED animations.
+  /// Orientation of the sensor board. Used to to mirror the light animations.
   Orientation orientation = Orientation::none;
 };
 
 /**
  * @struct ThermalSensorParams
- * @brief Parameter structure of the thermal sensor of a sensor board. Not all
- * sensor boards have thermal sensors.
+ * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
  */
 struct SENSORRING_API ThermalSensorParams {
   /// Customizable index that is returned with every measurement from this sensor.
@@ -94,8 +93,7 @@ struct SENSORRING_API TofSensorParams {
 
 /**
  * @struct SensorBoardParams
- * @brief Parameter structure of a sensor board. A sensor board is one circuit
- * board.
+ * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
 struct SENSORRING_API SensorBoardParams {
   /// Rotation part of the sensors pose. The rotation is applied in the order Roll(x) - Pitch(y) - Yaw(z). Values: Euler angles in degrees
@@ -104,8 +102,8 @@ struct SENSORRING_API SensorBoardParams {
   /// Translation part of the sensor pose. Values: XYZ coordinates in meters.
   math::Vector3 translation = { 0, 0, 0 };
 
-  /// Parameters of the LED lights on the sensor board. Only applicable if the corresponding hardware actually has LEDs.
-  LightParams led_params;
+  /// Parameters of the lights on the sensor board. Only applicable if the corresponding hardware actually has addressable lights.
+  LightParams light_params;
 
   /// Parameters of the time of flight sensor on the sensor board. Only applicable if the corresponding hardware actually has a time of flight sensor.
   TofSensorParams tof_params;
@@ -121,8 +119,7 @@ namespace bus {
 /**
  * @struct BusParams
  * @brief Parameter structure of a communication bus. A bus is one communication
- * interface e.g. can bus and has an arbitrary number of sensor boards
- * connected.
+ * interface e.g. CAN bus and has an arbitrary number of sensor boards connected.
  */
 struct SENSORRING_API BusParams {
   /// Name of the communication interface. E.g. "can0" for a CAN bus.
