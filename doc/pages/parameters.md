@@ -34,7 +34,7 @@
 |---|---|---|---|
 | sensor::TofSensorParams | thermal_params | Parameters of the thermal sensor on the sensor board. Leave empty if no thermal sensor is placed on the board. | n.a. |
 | sensor::ThermalSensorParams | tof_params | Parameters of the Time-of-Flight sensor on the sensor board. Leave empty if no Time-of-Flight sensor is placed on the board. | n.a. |
-| sensor::LightParams | led_params | Parameters of the led lights on the sensor board. Leave empty if no leds are placed on the board. | n.a. |
+| sensor::LightParams | led_params | Parameters of the lights on the sensor board. Leave empty if no leds are placed on the board. | n.a. |
 
 ### TofSensor
 
@@ -69,5 +69,5 @@ The light functionality is not fully implemented yet and there is currently no i
 **sensor::LightParams**
 | Type              | Parameter name        | Description | Valid values |
 |---|---|---|---|
-| bool | enable | Enable flag for the led lights. Used to disable the lights. *(Currently not implemented)* | `true`, `false` |
+| bool | enable | Enable flag for the lights. Used to disable the lights. *(Currently not implemented)* | `true`, `false` |
 |sensor::SensorOrientation | orientation | Specifies the orientation of a sensor board. Used to run light animations in the right direction. | `left`, `right`, `none` |

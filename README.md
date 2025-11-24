@@ -1,29 +1,30 @@
-# Sensorring Library
-Software interface of the EduArt Sensorring.
+# Sensor Ring Library
+Software interface of the EduArt Sensor Ring.
 
 ## 1. Application example
 
-A Raspberry Pi based EduBot equipped with a Sensorring consisting of 12 individual sensor boards.
+A Raspberry Pi based EduBot equipped with a sensor ring consisting of 12 individual sensor boards.
 
-<img src="doc/images/bot_front.jpg" width="600"/>
+<img src="doc/images/bot_front.jpg" width="600" onerror="this.onerror=null; this.src='bot_front.jpg';">
 
 Close-up view of the three front facing sensors of the EduBot.
 
-<img src="doc/images/bot_front_close.jpg" width="600"/>
+<img src="doc/images/bot_front_close.jpg" width="600" onerror="this.onerror=null; this.src='bot_front_close.jpg';">
 
 A 3D map of an office room recorded with the above EduBot and [Octomap](https://octomap.github.io/).
 
-<img src="doc/images/map.png" width="600"/>
+<img src="doc/images/map.png" width="600" onerror="this.onerror=null; this.src='map.png';">
 
 ## 1. Hardware
 ### 1.1 Supported Sensors
 The sensorring library supports a variety of EduArt sensor boards. See the table below for the currently supported hardware:
 
-|  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200"/></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CAN FD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
+| <p align="center">Sensor Board Type</p> | <p align="center">Description</p> |
 |---|---|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200"/></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC |
-|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - 38 × 28 mm <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
-|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200"/></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
+|  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - Optional Heimann HTPA32 thermal sensor <br> - 11 RGB Leds <br> - CAN FD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
+|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC |
+|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 RGB Leds <br> - 38 × 28 mm <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
+|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
 
 ### 1.1 Hardware setup
 The Sensorring library currently only implements the Linux SocketCAN interface for communication with the Sensors. Therefore the recommended setup is a Linux environment with a CAN FD adapter. Possible hardware configurations are:
@@ -47,7 +48,7 @@ device interrupt 170
 
 The EduArt Sensorring is a sensor system that collects and combines measurements from multiple individual sensors. The individual sensors are daisy chained together in series and share a communication interface and a power supply. The chain of sensor is terminated by a master device at one end e.g. a Raspberry Pi or a CAN to USB converter. It is possible to use multiple communication interfaces to distribute the sensor data and enable the use of more sensors simultaneously. The following class diagram illustrates the topology and the reflection of the hardware layers in the library.
 
-<img src="doc/images/class_diagram_simple.png" width="900"/>
+<img src="doc/images/class_diagram_simple.png" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.png';">
 
 ## 3. Input Parameters
 
@@ -55,18 +56,16 @@ Each of the core classes of the library has its own parameter set which is shown
 
 ## 4. Software interface of the library
 
-The software interface of the Sensorring library is defined in four header files which are installed with the library.
+The main software interface of the Sensorring library is defined in three header files which are installed with the library.
 - [MeasurementManger.hpp](include/sensorring/MeasurementManager.hpp)
-- [MeasurementObserver.hpp](include/sensorring/MeasurementObserver.hpp)
-- [Parameters.hpp](include/sensorring/types/Parameters.hpp)
-- [CustomTypes.hpp](include/sensorring/types/install_types/CustomTypes.hpp)
+- [MeasurementClient.hpp](include/sensorring/MeasurementClient.hpp)
+- [Parameters.hpp](include/sensorring/Parameters.hpp)
 
 Implementation details of the interface are explained [here](doc/pages/sw_interface.md).
 
+
 ## 5. Building and installing the library
-
-
-
+The library is built with a standard CMake workflow.
 To build the library execute the following commands starting in the root of the repository:
 ```
 mkdir build
@@ -105,9 +104,20 @@ In addition to the make and install scripts there is a [remove_installation.bash
 cmake/remove_installation.bash
 ```
 
-## 6. Using the library in a custom project
+## 6. Supported languages
 
-Please refer to to the [Ros](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [Ros2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) wrappers of this library for examples on how to use the library in your own project.
+### C++
+The library is written in c++ and primarily designed to be used as such.
 
-## 7. Developer documentation
+### Python
+The library can be built to include automatically generated python bindings.
+
+
+## 7. Using the library in a custom project
+The library includes both C++ and Python [examples](/apps/examples/) that show how to create a minimal program using the Sensor Ring.
+For further references on how to use the library in custom projects refer to the [Ros](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [Ros2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) wrappers of this library.
+Both show how to include the library in larger CMake projects.
+
+
+## 8. Developer documentation
 Refer to the [developer documentation](doc/pages/dev_doc.md) for more details on how the library is implemented.
