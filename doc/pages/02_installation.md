@@ -1,87 +1,124 @@
 # Installation
 
 
+## 1 Building the library from source
+
+The library is built with a standard CMake workflow which is almost identical for Windows and Linux. Use the following commands to build the library.
+
 <div class="tabbed">
 
-- <b class="tab-title">Base Theme</b><div class="darkmode_inverted_image">
-    ![](img/theme-variants-base.drawio.svg)
-    </div>
-    Comes with the typical Doxygen titlebar. Optionally the treeview in the sidebar can be enabled.
+- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
 
-    Required files: `doxygen-awesome.css`
-
-    Required `Doxyfile` configuration:
-    ```
-    GENERATE_TREEVIEW      = YES # optional. Also works without treeview
-    DISABLE_INDEX = NO
-    FULL_SIDEBAR = NO
-    HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/doxygen-awesome.css
-    HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
+    ```sh
+    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+    mkdir -p edu_lib_sensorring/build
+    cd edu_lib_sensorring/build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+    cmake --build . -j4
     ```
 
-- <b class="tab-title">Sidebar-Only Theme</b><div class="darkmode_inverted_image">
-    ![](img/theme-variants-sidebar-only.drawio.svg)
-    </div>
-    Hides the top titlebar to give more space to the content. The treeview must be enabled in order for this theme to work.
+    **Linux Build Options:**
 
-    Required files: `doxygen-awesome.css`, `doxygen-awesome-sidebar-only.css`
+    <table>
+      <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
+      <tr><td>BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
+      <tr><td>BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
+      <tr><td>BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
+      <tr><td>BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>USE_SOCKETCAN</td><td>ON</td><td>Compile with support for Linux SocketCAN</td></tr>
+      <tr><td>USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
+      <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
+      <tr><td>CMAKE_INSTALL_PREFIX</td><td>/usr/local</td><td>Install path prefix, prepended onto install directories</td></tr>
+    </table>
 
-    Required `Doxyfile` configuration:
+  </div>
+
+- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
+
+    ```powershell
+    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+    mkdir edu_lib_sensorring/build
+    cd edu_lib_sensorring/build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+    cmake --build . --config=Release -- -j4
     ```
 
-    GENERATE_TREEVIEW      = YES # required!
-    DISABLE_INDEX          = NO
-    FULL_SIDEBAR           = NO
-    HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/doxygen-awesome.css \
-                            doxygen-awesome-css/doxygen-awesome-sidebar-only.css
-    HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
-    ```
+    **Windows build options:**
 
+    <table>
+      <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
+      <tr><td>BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
+      <tr><td>BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
+      <tr><td>BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
+      <tr><td>BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
+      <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
+      <tr><td>CMAKE_INSTALL_PREFIX</td><td>C:\Program Files</td><td>Install path prefix, prepended onto install directories</td></tr>
+    </table>
+
+</div>
 </div>
 
 
+## 2 Installing the library
+
+You can either install the library directly with CMake or generate installable packages.
+
+### 2.1 Install it directly
+
+<div class="tabbed">
+
+- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
+
+    ```sh
+    sudo cmake --install .
+    ```
+    > ⚠️ The default installation directory is /usr/local. If another location is chosen, add your custom install path to the `CMAKE_PREFIX_PATH` environment variable for other CMake packages to find the library. Alternatively you can set `sensorring_DIR` if you don't want to manipulate `CMAKE_PREFIX_PATH`.
+    
+    ```sh
+    export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:<install-path>
+    ```
+
+  </div>
+
+- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
+
+    ```powershell
+    cmake --install . # requires terminal with admin privileges
+    ```
+    > ⚠️ The default installation directory is C:\Program Files. If another location is chosen, add your custom install path to the `CMAKE_PREFIX_PATH` environment variable for other CMake packages to find the library. Alternatively you can set `sensorring_DIR` if you don't want to manipulate `CMAKE_PREFIX_PATH`.
+
+    ```powershell
+    $env:CMAKE_PREFIX_PATH = "$($env:CMAKE_PREFIX_PATH);<install-path>"
+    ```
+
+</div>
+</div>
 
 
-## 5. Building and installing the library
-The library is built with a standard CMake workflow.
-To build the library execute the following commands starting in the root of the repository:
-```
-mkdir build
-cd build
-cmake ..
-cmake --build . -j
-```
+### 2.2 Generate an installable package
 
-Use this command to install the library to a custom location:
-```
-cmake --install . --prefix <install-path>
-```
+<div class="tabbed">
 
-If the library is installed to a non-standard location, the directory should be added to the `CMAKE_PREFIX_PATH` environment variable. This enables cmake to find and include the library automatically in other projects. Add an export command to your .bashrc script or edit the environment variable file of your OS to set the path permanently.
+- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
 
-```
-export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:<install-path>
-```
+    ```sh
+    cpack .
+    ```
+    > ℹ️ Running the command on Linux generates a .tar.gz archive and a .deb package. The .tar.gz can be extracted anywhere on the system with `tar -xvzf <package-name>.tar.gz -C /path/to/directory`. The .deb package can be installed with `dpkg -i <package name.deb>` which will install it in the `CMAKE_INSTALL_PREFIX` directory.
 
+  </div>
+
+- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
+
+    ```powershell
+    cpack .
+    ```
+    > ℹ️ Running the command on Windows generates .zip archive. The .zip archive can be be extracted anywhere on the system.
 
 
-For an automatic build and automatic installation the above commands are also available as convenience scripts [make_release.bash](cmake/make_release.bash) and [install_release.bash](cmake/install_release.bash). These scripts should be called from the root of the repository.
-
-```
-cmake/make_release.bash
-```
-```
-cmake/install_release.bash
-```
-> **Note on the convenience scripts**:<br>If the bash script does not execute it may need to be converted to a file with unix style line endings. Run `dos2unix ./cmake/*` for an automatic conversion before executing the script.
-
-> **Notes on the installation script:**<br>  - The installation script automatically runs the build script before installing the library. <br>- The installation path in the script is hard-coded and should be changed if desired. <br> - Don't forget to set the `CMAKE_PREFIX_PATH` when using the script.
-
-In addition to the make and install scripts there is a [remove_installation.bash](cmake/remove_installation.bash) cleanup script that removes the library when it is installed at the default installation location.
-```
-cmake/remove_installation.bash
-
-```
+</div>
+</div>
 
 <div class="section_buttons"> 
 

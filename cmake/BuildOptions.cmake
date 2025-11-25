@@ -2,14 +2,13 @@
 # options
 
 if(UNIX)
-  option( USE_SOCKETCAN "Add support for Linux SocketCAN" ON)
+  option( USE_SOCKETCAN "Compile with support for Linux SocketCAN" ON)
 endif()
-option( USE_USBTINGO "Add support for the USBtingo USB to CAN FD converter" OFF)
+option( USE_USBTINGO "Compile with support for the USBtingo USB adapter" OFF)
 option( BUILD_SHARED_LIBS "Build as shared library" OFF)
 option( BUILD_EXAMPLES "Build the example programs" OFF)
 option( BUILD_DOCUMENTATION "Build the documentation" OFF)
 option( BUILD_PYTHON_BINDINGS "Build python bindings" OFF)
-option( VERBOSE_BUILD "Verbose build" OFF)
 
 if(WIN32)
   set( USE_USBTINGO ON)
