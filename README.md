@@ -24,7 +24,7 @@
 
 </div>
 
-## 1. Quick Start Guide
+## 1 Quick Start Guide
 
 🔧 **Choose your target platform or target framework for a quick start guide.**
 
@@ -55,7 +55,7 @@
 
 </div>
 
-## 2. Application Example
+## 2 Application Example
 
 <div align="center">
 
@@ -72,7 +72,7 @@ Close-up view of the three front facing sensors of the EduBot.
 
 </div>
 
-## 3. Supported Hardware
+## 3 Supported Hardware
 
 > ℹ️ Have a look at the [hardware guide](doc/pages/01_hardware.md) on how to set up and use the sensors with your computer.
 
@@ -89,7 +89,7 @@ The supported sensors of the Sensor Ring library are listed in the following tab
 
 </div>
 
-## 4. Installation
+## 4 Installation
 
 > ℹ️ Have a look at the [installation guide](doc/pages/02_instatllationö.md) on how build the library on your platform.
 
@@ -122,7 +122,7 @@ The supported sensors of the Sensor Ring library are listed in the following tab
 </div>
 
 
-## 5. Software
+## 5 Software
 
 > ℹ️ Have a look at the [software guide](doc/pages/03_software.md) on how to use the library in your own projects.
 
@@ -133,7 +133,7 @@ The supported sensors of the Sensor Ring library are listed in the following tab
  */
 ```
 
-## 6. Developer documentation
+## 6 Developer documentation
 
 > ℹ️ Refer to the [developer documentation](doc/pages/04_dev_doc.md) for more details on how the library is implemented.
 

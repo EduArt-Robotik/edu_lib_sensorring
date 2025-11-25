@@ -1,6 +1,7 @@
 html {
     --content-maxwidth: 1000px;
     --side-nav-fixed-width: 400px;
+    --content-line-height: 32px;
 }
 
 html.dark-mode {
@@ -8,6 +9,8 @@ html.dark-mode {
     --primary-color: #811811;
     --primary-dark-color: #811811;
     --primary-light-color: #811811;
+    --fragment-background: #9a4641;
+    --fragment-foreground: #ffffff;
 }
 
 html.light-mode {
@@ -15,6 +18,8 @@ html.light-mode {
     --primary-color: #811811;
     --primary-dark-color: #811811;
     --primary-light-color: #811811;
+    --fragment-background: #d9bab8;
+    --fragment-foreground: #000000;
 }
 
 .github-corner svg {
@@ -33,4 +38,12 @@ html.light-mode {
     #projectnumber {
         margin-right: 22px;
     }
+}
+
+.content-wrapper {
+    padding: 100px;
+}
+
+.doc-content {
+    padding: 100px 120px;
 }

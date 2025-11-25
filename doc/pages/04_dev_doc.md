@@ -23,20 +23,9 @@ Below is a flowchart illustrating the state machine operation.
 
 The library has a generic communication layer that abstracts the actual communication interfaces.
 This allows the use of multiple interfaces and simplifies the addition of new interfaces.
-All currently implemented interfaces are listed below.
 
 <img src=../images/communication.png width=1000 onerror="this.onerror=null; this.src='communication.png';">
 
-### SocketCAN
-The library has implemented the Linux specific SocketCAN interface to communicate with the Sensorring.
-To use this interface type make sure you have a CAN interface set up on your machine.
-Use the `ifconfig` or `ip addr` command to verify that at least one CAN interface is up and running on your machine.
-The SocketCAN interface can be used on most Linux machines by using a CAN FD adapter with Linux Kernel support like the [candleLightFD](https://linux-automation.com/de/products/candlelight-fd.html) adapter.
-
-### USBtingo
-The library has implemented a communication interface to the USBtingo CAN FD to USB adapter.
-The USBtingo can be used from any operating system including Linux and Windows.
-To use this interface the library [libusbtingo](https://github.com/hannesduske/libusbtingo) for this adapter needs to be installed.
 
 
 <div class="section_buttons"> 
