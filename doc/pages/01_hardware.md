@@ -48,6 +48,12 @@ EduArt provides a [RaspberryPi adapter shield](https://eduart-robotik.com/produc
 Refer to [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/main/documentation/setup/raspberry/setup_raspberry.md) on how to set up a Raspberry Pi with the EduArt adapter shield.
 After the setup of the shield you should see three running CAN interfaces with the `ifconfig` or `ip addr` command.
 
+<div align="center">
+
+<img src="../images/raspberry_top.jpg" width=800 onerror="this.onerror=null; this.src='raspberry_top.jpg';"><br>
+A Raspberry Pi with the EduArt adapter shield and one minipanel sensor board.
+
+</div>
 
 ### 2.1.2 SocketCAN USB adapter
 
@@ -58,14 +64,21 @@ These adapters are super easy to use:
 2. Run `sudo ip link set can0 up type can bitrate 1000000 dbitrate 5000000 fd on` to start the interface.
 3. Verify that the interface is running with the `ifconfig` or `ip addr` command.
 4. Optional: Create a UDEV rule that automatically starts the interface when the adapter is connected.
-    ```sh
-    sudo bash -c 'echo "ACTION==\"add\", SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1d50\", ATTR{idProduct}==\"606f\", RUN+=\"/usr/local/bin/start_can0.sh\"" > /etc/udev/rules.d/99-candlelight.rules'
-    sudo bash -c 'echo -e "#!/bin/bash\nsleep 1\n/usr/sbin/ip link set can0 up type can bitrate 1000000 dbitrate 5000000 fd on" > /usr/local/bin/start_can0.sh'
-    sudo chmod +x /usr/local/bin/start_can0.sh
-    sudo udevadm control --reload-rules
-    sudo udevadm trigger
-    ```
 
+```sh
+sudo bash -c 'echo "ACTION==\"add\", SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1d50\", ATTR{idProduct}==\"606f\", RUN+=\"/usr/local/bin/start_can0.sh\"" > /etc/udev/rules.d/99-candlelight.rules'
+sudo bash -c 'echo -e "#!/bin/bash\nsleep 1\n/usr/sbin/ip link set can0 up type can bitrate 1000000 dbitrate 5000000 fd on" > /usr/local/bin/start_can0.sh'
+sudo chmod +x /usr/local/bin/start_can0.sh
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+<div align="center">
+
+<img src="../images/candlelight_top.jpg" width=800 onerror="this.onerror=null; this.src='candlelight_top.jpg';"><br>
+A CandlightFD CAN FD to USB adapter with one minipanel sensor board.
+
+</div>
 
 ### 2.2 USBtingo USB adapter <img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" alt="Linux"> <img src="https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white" alt="Windows">
 
@@ -75,11 +88,29 @@ To use this interface the library [libusbtingo](https://github.com/hannesduske/l
 
 > ⚠️ The USBtingo is not recognized as CAN device by the Linux Kernel. The commands from the SocketCAN compatible adapter above don't work for this device.
 
+<div align="center">
+
+<img src="../images/usbtingo_top.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_top.jpg';"><br>
+A USBtingo CAN FD to USB adapter with one minipanel sensor board.
+
+</div>
+
 ## 3 Connecting the Sensor Ring
 
 The sensor boards of the Sensor Ring are daisy chained together with Molex Pico-Lock 7 pin cables.
 The boards connectors on the boards don't have an orientation or polarity and all of the boards can be joined in any order and orientation.
 The chain of sensors then needs to be terminated by a suitable computer, i.e. a RaspberryPi with the EduArt shield or a computer with CAN FD to usb adapter.
+
+
+<div align="center">
+
+<img src="../images/usbtingo_chain_top.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_top.jpg';"><br>
+Top view of a sensor chain with two minipanels with a USBtingo as adapter.
+    
+<img src="../images/usbtingo_chain_bottom.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.jpg';"><br>
+Bottom view of a sensor chain with two minipanels with a USBtingo as adapter.
+</div>
+
 
 <div class="section_buttons"> 
 
