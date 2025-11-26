@@ -9,8 +9,8 @@ html.dark-mode {
     --primary-color: #811811;
     --primary-dark-color: #811811;
     --primary-light-color: #811811;
-    --fragment-background: #9a4641;
-    --fragment-foreground: #ffffff;
+    /*--fragment-background: #9a4641;*/
+    /*--fragment-foreground: #ffffff;*/
 }
 
 html.light-mode {
@@ -18,8 +18,8 @@ html.light-mode {
     --primary-color: #811811;
     --primary-dark-color: #811811;
     --primary-light-color: #811811;
-    --fragment-background: #d9bab8;
-    --fragment-foreground: #000000;
+    /*--fragment-background: #d9bab8;*/
+    /*--fragment-foreground: #000000;*/
 }
 
 .github-corner svg {

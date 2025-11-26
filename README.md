@@ -59,7 +59,7 @@
 
 <div align="center">
 
-<img src="doc/images/bot_front.jpg" width=600 onerror="this.onerror=null; this.src='bot_front.jpg';"><br>
+<img src="doc/images/bot_front.png" width=600 onerror="this.onerror=null; this.src='bot_front.png';"><br>
 A Raspberry Pi based EduBot equipped 12 sensor boards.
 
 

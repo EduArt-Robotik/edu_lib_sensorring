@@ -64,7 +64,7 @@ The library is built with a standard CMake workflow which is almost identical fo
 
 You can either install the library directly with CMake or generate installable packages.
 
-### 2.1 Install it directly
+### 2.1 Installing the library directly
 
 <div class="tabbed">
 
@@ -96,7 +96,7 @@ You can either install the library directly with CMake or generate installable p
 </div>
 
 
-### 2.2 Generate an installable package
+### 2.2 Generating an installable package
 
 <div class="tabbed">
 

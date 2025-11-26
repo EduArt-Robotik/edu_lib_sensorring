@@ -4,12 +4,70 @@
 
 <div align="center">
 
-| <p align="center">Sensor Board Type</p> | <p align="center">Description</p> |
-|---|---|
-|  <p align="center">Edu Headlight</p> <p align="center">  <img src="../images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - Optional Heimann HTPA32 thermal sensor <br> - 11 Addressable RGB Leds <br> - CAN FD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="../images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 Addressable RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC |
-|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="../images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 Addressable RGB Leds <br> - 38 × 28 mm <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
-|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="../images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
+<table>
+  <tr>
+    <th style="text-align:center"><p>Sensor Board Type</p></th>
+    <th style="text-align:center"><p>Description</p></th>
+  </tr>
+
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Headlight</b></p>
+      <p><img src="../images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - Headlight of the Raspberry Pi based EduBot <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - Optional Heimann HTPA32 thermal sensor <br>
+      - 11 Addressable RGB Leds <br>
+      - CAN FD Interface <br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Taillight</b></p>
+      <p><img src="../images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - Taillight of the Raspberry Pi based EduBot <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 2 Addressable RGB Leds <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Sidepanel</b></p>
+      <p><img src="../images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - General purpose sensor board <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 2 Addressable RGB Leds <br>
+      - 38 × 28 mm <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Minipanel</b></p>
+      <p><img src="../images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - General purpose sensor board <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 28 × 24 mm  <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+</table>
 
 </div>
 
@@ -48,9 +106,9 @@ EduArt provides a [RaspberryPi adapter shield](https://eduart-robotik.com/produc
 Refer to [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/main/documentation/setup/raspberry/setup_raspberry.md) on how to set up a Raspberry Pi with the EduArt adapter shield.
 After the setup of the shield you should see three running CAN interfaces with the `ifconfig` or `ip addr` command.
 
-<div align="center">
+<div style="text-align:center">
 
-<img src="../images/raspberry_top.jpg" width=800 onerror="this.onerror=null; this.src='raspberry_top.jpg';"><br>
+<img src="../images/raspberry_top.png" width=800 onerror="this.onerror=null; this.src='raspberry_top.png';"><br>
 A Raspberry Pi with the EduArt adapter shield and one minipanel sensor board.
 
 </div>
@@ -73,9 +131,9 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
 
-<div align="center">
+<div style="text-align:center">
 
-<img src="../images/candlelight_top.jpg" width=800 onerror="this.onerror=null; this.src='candlelight_top.jpg';"><br>
+<img src="../images/candlelight_top.png" width=800 onerror="this.onerror=null; this.src='candlelight_top.png';"><br>
 A CandlightFD CAN FD to USB adapter with one minipanel sensor board.
 
 </div>
@@ -88,9 +146,9 @@ To use this interface the library [libusbtingo](https://github.com/hannesduske/l
 
 > ⚠️ The USBtingo is not recognized as CAN device by the Linux Kernel. The commands from the SocketCAN compatible adapter above don't work for this device.
 
-<div align="center">
+<div style="text-align:center">
 
-<img src="../images/usbtingo_top.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_top.jpg';"><br>
+<img src="../images/usbtingo_top.png" width=800 onerror="this.onerror=null; this.src='usbtingo_top.png';"><br>
 A USBtingo CAN FD to USB adapter with one minipanel sensor board.
 
 </div>
@@ -102,12 +160,12 @@ The boards connectors on the boards don't have an orientation or polarity and al
 The chain of sensors then needs to be terminated by a suitable computer, i.e. a RaspberryPi with the EduArt shield or a computer with CAN FD to usb adapter.
 
 
-<div align="center">
+<div style="text-align:center">
 
-<img src="../images/usbtingo_chain_top.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_top.jpg';"><br>
+<img src="../images/usbtingo_chain_top.png" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_top.png';"><br>
 Top view of a sensor chain with two minipanels with a USBtingo as adapter.
     
-<img src="../images/usbtingo_chain_bottom.jpg" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.jpg';"><br>
+<img src="../images/usbtingo_chain_bottom.png" width=800 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.png';"><br>
 Bottom view of a sensor chain with two minipanels with a USBtingo as adapter.
 </div>
 
