@@ -16,7 +16,11 @@
 
 #include "MeasurementProxy.hpp"
 
+using namespace eduart;
 using namespace std::chrono_literals;
+
+static constexpr std::string_view INTERFACE_NAME = "0x1731a1f1";
+static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 int main(int, char*[]) {
   std::cout << "==========================" << std::endl;
@@ -25,35 +29,35 @@ int main(int, char*[]) {
   std::cout << std::endl;
 
   // Create the parameter structure that is used to instantiate the sensorring
-  eduart::manager::ManagerParams params;
+  manager::ManagerParams params;
   {
-    eduart::sensor::TofSensorParams tof;
+    sensor::TofSensorParams tof;
     tof.user_idx = 0;
     tof.enable   = true;
 
-    eduart::sensor::SensorBoardParams board;
+    sensor::SensorBoardParams board;
     board.tof_params = tof;
 
-    eduart::bus::BusParams bus;
-    bus.interface_name = "0x1731a1f1";
-    bus.type           = eduart::com::InterfaceType::USBTINGO;
+    bus::BusParams bus;
+    bus.interface_name = INTERFACE_NAME;
+    bus.type           = INTERFACE_TYPE;
     bus.board_param_vec.push_back(board);
 
-    eduart::ring::RingParams ring;
+    ring::RingParams ring;
     ring.bus_param_vec.push_back(bus);
 
     params.ring_params = ring;
   }
 
   // Instantiate a Measurement proxy
-  auto proxy = std::make_unique<eduart::MeasurementProxy>();
+  auto proxy = std::make_unique<MeasurementProxy>();
 
   // Register the proxy with the Logger to get the log output
-  eduart::logger::Logger::getInstance()->registerClient(proxy.get());
+  logger::Logger::getInstance()->registerClient(proxy.get());
 
   try {
     // Instantiate a MeasurementManager with the parameters from above
-    auto manager = std::make_unique<eduart::manager::MeasurementManager>(params);
+    auto manager = std::make_unique<manager::MeasurementManager>(params);
 
     // Register the proxy with the LogMeasurementManager to get the measurements
     manager->registerClient(proxy.get());
