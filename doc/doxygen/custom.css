@@ -22,6 +22,7 @@ html.light-mode {
     /*--fragment-foreground: #000000;*/
 }
 
+/* GitHub corner */
 .github-corner svg {
     fill: var(--primary-light-color);
     color: var(--page-background-color);
@@ -29,6 +30,7 @@ html.light-mode {
     height: 72px;
 }
 
+/* GitHub corner */
 @media screen and (max-width: 767px) {
     .github-corner svg {
         width: 50px;
@@ -46,4 +48,21 @@ html.light-mode {
 
 .doc-content {
     padding: 100px 120px;
+}
+
+/* Space between two blockquote elements */
+.doxtable + .doxtable {
+  margin-top: 1rem;
+}
+
+/* Justified text formatting */
+.markdown p {
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+/* Justified text formatting */
+.contents p, .textblock p {
+    text-align: justify;
+    text-justify: inter-word;
 }

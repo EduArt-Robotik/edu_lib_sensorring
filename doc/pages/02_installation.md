@@ -1,7 +1,7 @@
 # Installation
 
 
-## 1 Building the library from source
+## 1 Building the Library from Source
 
 The library is built with a standard CMake workflow which is almost identical for Windows and Linux. Use the following commands to build the library.
 
@@ -60,11 +60,11 @@ The library is built with a standard CMake workflow which is almost identical fo
 </div>
 
 
-## 2 Installing the library
+## 2 Installing the Library
 
 You can either install the library directly with CMake or generate installable packages.
 
-### 2.1 Installing the library directly
+### 2.1 Installing the Library Directly
 
 <div class="tabbed">
 
@@ -96,7 +96,7 @@ You can either install the library directly with CMake or generate installable p
 </div>
 
 
-### 2.2 Generating an installable package
+### 2.2 Generating an Installable Package
 
 <div class="tabbed">
 

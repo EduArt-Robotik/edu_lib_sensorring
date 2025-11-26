@@ -46,7 +46,7 @@
         </td>
         <td class="markdownTableBodyNone">
             <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp"><img src="https://img.shields.io/badge/C++-00599C?logo=cplusplus&logoColor=white" alt="C++"></a>
-            <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
+            <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
             <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1"><img src="https://img.shields.io/badge/ROS1-22314E?logo=ros&logoColor=white" alt="ROS"></a>
             <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2"><img src="https://img.shields.io/badge/ROS2-22314E?logo=ros&logoColor=white" alt="ROS2"></a>
         </td>
@@ -58,18 +58,18 @@
 ## 2 Application Example
 
 <div align="center">
-
-<img src="doc/images/bot_front.png" width=600 onerror="this.onerror=null; this.src='bot_front.png';"><br>
-A Raspberry Pi based EduBot equipped 12 sensor boards.
-
-
-<img src="doc/images/bot_front_close.jpg" width=600 onerror="this.onerror=null; this.src='bot_front_close.jpg';"><br>
-Close-up view of the three front facing sensors of the EduBot.
-
-
-<img src="doc/images/map.png" width=600 onerror="this.onerror=null; this.src='map.png';"><br>
-3D map of an office room recorded with the EduBot and <a href="https://octomap.github.io/">Octomap.</a>
-
+<table style="border: none;">
+  <tr>
+    <td style="text-align:center">
+      <img src="doc/images/bot_front.png" height=300 onerror="this.onerror=null; this.src='bot_front.png';"><br>
+      A Raspberry Pi based EduBot equipped 12 sensor boards.
+    </td>
+    <td style="text-align:center">
+      <img src="doc/images/map.png" height=300 onerror="this.onerror=null; this.src='map.png';"><br>
+      3D map of an office room recorded with the EduBot and <a href="https://octomap.github.io/">Octomap.</a>
+    </td>
+  </tr>
+</table>
 </div>
 
 ## 3 Supported Hardware
@@ -79,14 +79,66 @@ Close-up view of the three front facing sensors of the EduBot.
 The supported sensors of the Sensor Ring library are listed in the following table:
 
 <div align="center">
-
-| <p align="center">Sensor Board Type</p> | <p align="center">Description</p> |
-|---|---|
-|  <p align="center">Edu Headlight</p> <p align="center">  <img src="doc/images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p> | <p align="left">- Headlight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - Optional Heimann HTPA32 thermal sensor <br> - 11 Addressable RGB Leds <br> - CAN FD Interface <br> - Input voltage range 6 V - 65 V DC</p>|
-|  <p align="center">Edu Taillight</p> <p align="center">  <img src="doc/images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p> | - Taillight of the Raspberry Pi based EduBot <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 Addressable RGB Leds <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC |
-|  <p align="center">Edu Sidepanel</p> <p align="center">  <img src="doc/images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 2 Addressable RGB Leds <br> - 38 × 28 mm <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
-|  <p align="center">Edu Minipanel</p> <p align="center">  <img src="doc/images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p> | - General purpose sensor board <br> - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br> - 28 × 24 mm  <br> - CAN FD Interface<br> - Input voltage range 6 V - 65 V DC|
-
+<table>
+  <tr>
+    <th style="text-align:center"><p>Sensor Board Type</p></th>
+    <th style="text-align:center"><p>Description</p></th>
+  </tr>
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Headlight</b></p>
+      <p><img src="doc/images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - Headlight of the Raspberry Pi based EduBot <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - Optional Heimann HTPA32 thermal sensor <br>
+      - 11 Addressable RGB Leds <br>
+      - CAN FD Interface <br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Taillight</b></p>
+      <p><img src="doc/images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - Taillight of the Raspberry Pi based EduBot <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 2 Addressable RGB Leds <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Sidepanel</b></p>
+      <p><img src="doc/images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - General purpose sensor board <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 2 Addressable RGB Leds <br>
+      - 38 × 28 mm <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center">
+      <p><b>Edu Minipanel</b></p>
+      <p><img src="doc/images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p>
+    </td>
+    <td style="text-align:left">
+      - General purpose sensor board <br>
+      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
+      - 28 × 24 mm  <br>
+      - CAN FD Interface<br>
+      - Input voltage range 6 V - 65 V DC
+    </td>
+  </tr>
+</table>
 </div>
 
 ## 4 Installation
@@ -98,26 +150,26 @@ The supported sensors of the Sensor Ring library are listed in the following tab
 
 - <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
 
-    ```sh
-    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
-    mkdir -p edu_lib_sensorring/build
-    cd edu_lib_sensorring/build
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
-    cmake --build . -j4
-    sudo cmake --install
-    ```
-  </div>
+  ```sh
+  git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+  mkdir -p edu_lib_sensorring/build
+  cd edu_lib_sensorring/build
+  cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+  cmake --build . -j4
+  sudo cmake --install
+  ```
+</div>
 
 - <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
 
-    ```powershell
-    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
-    mkdir edu_lib_sensorring/build
-    cd edu_lib_sensorring/build
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
-    cmake --build . --config=Release -- -j4
-    cmake --install . --config=Release # Requires terminal with admin privileges
-    ```
+  ```powershell
+  git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+  mkdir edu_lib_sensorring/build
+  cd edu_lib_sensorring/build
+  cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+  cmake --build . --config=Release -- -j4
+  cmake --install . --config=Release # Requires terminal with admin privileges
+  ```
 </div>
 </div>
 
@@ -128,9 +180,7 @@ The supported sensors of the Sensor Ring library are listed in the following tab
 
 
 ```cpp
-/**
- * Minimal example
- */
+// Minimal example
 ```
 
 ## 6 Developer documentation

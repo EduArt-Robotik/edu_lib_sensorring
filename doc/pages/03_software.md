@@ -81,11 +81,11 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 <tr>
   <td style="text-align:center">
     <img src="../images/example_cpp1.png" height=500 onerror="this.onerror=null; this.src='example_cpp1.png';"><br>
-    The `depth_view` example shows ToF measurements as depth images.
+    The `depth_view` example
   </td>
   <td style="text-align:center">
     <img src="../images/example_py1.png" height=500 onerror="this.onerror=null; this.src='example_py1.png';"><br>
-    The Python only `depth_map` example shows ToF measurements as 3D plots.
+    The `depth_map` Python example.
   </td>
 </tr>
 </table>
