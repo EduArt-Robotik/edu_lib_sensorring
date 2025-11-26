@@ -59,7 +59,7 @@ else:
 #include "sensorring/types/LightMode.hpp"
 #include "sensorring/types/InterfaceType.hpp"
 #include "sensorring/types/PointCloud.hpp"
-#include "sensorring/types/ToFMeasurement.hpp"
+#include "sensorring/types/TofMeasurement.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Vector3.hpp"
@@ -193,7 +193,7 @@ typedef ::int64_t int64_t;
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;
-%include "sensorring/types/ToFMeasurement.hpp"
+%include "sensorring/types/TofMeasurement.hpp"
 
 %template (TemperatureImageTemplate) eduart::measurement::GenericGrayscaleImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
 %template (GrayscaleImageTemplate) eduart::measurement::GenericGrayscaleImage<double, eduart::THERMAL_RESOLUTION>;

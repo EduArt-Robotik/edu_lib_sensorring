@@ -1,12 +1,12 @@
-#include "sensorring/types/ToFMeasurement.hpp"
-
 #include <algorithm>
+
+#include "sensorring/types/TofMeasurement.hpp"
 
 namespace eduart {
 
 namespace measurement {
 
-void PointCloud::copyPointCloudTo(double* buffer, int size) {
+void PointCloud::copyTo(double* buffer, int size) {
 
   static constexpr size_t STRIDE = 6; // 6 doubles per PointData point
   const size_t max_points        = size / STRIDE;

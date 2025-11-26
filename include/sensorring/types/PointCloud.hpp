@@ -36,7 +36,12 @@ struct SENSORRING_API PointData {
 struct SENSORRING_API PointCloud {
   std::vector<PointData> data;
 
-  void copyPointCloudTo(double* buffer, int size);
+  /**
+   * @brief Copies the point cloud to a double buffer
+   * @param[in] buffer Pointer to the double buffer. Make sure it has sufficient size.
+   * @param[in] size Actual size of the buffer passed to the method. If the buffer is smaller than the point cloud only a subset of points is copied.
+   */
+  void copyTo(double* buffer, int size);
 };
 
 } // namespace measurement

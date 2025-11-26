@@ -14,7 +14,7 @@
 
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/types/ToFMeasurement.hpp"
+#include "sensorring/types/TofMeasurement.hpp"
 
 namespace eduart {
 

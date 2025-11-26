@@ -7,7 +7,7 @@
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/types/ToFMeasurement.hpp"
+#include "sensorring/types/TofMeasurement.hpp"
 
 #include "BaseSensor.hpp"
 

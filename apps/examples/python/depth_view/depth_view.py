@@ -41,7 +41,7 @@ class MeasurementProxy(sensorring.SensorringClient):
 
   # Base class callback
   def onRawTofMeasurement(self, measurement_vec):
-    sensorring.copyPointCloudTo(measurement_vec[0].point_cloud, self._points_np)
+    measurement_vec[0].point_cloud.copyTo(self._points_np)
     self._got_measurement = True
   
 
