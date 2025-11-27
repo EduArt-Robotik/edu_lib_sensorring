@@ -91,6 +91,7 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(sensorring)
+add_library(sensorring::sensorring ALIAS sensorring)
 ```
 
 

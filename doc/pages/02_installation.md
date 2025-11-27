@@ -16,6 +16,7 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(sensorring)
+add_library(sensorring::sensorring ALIAS sensorring)
 ```
 
 Here is an absolute minimum example of a `CMakeLists.txt` that includes the Sensor Ring library.
@@ -32,13 +33,14 @@ FetchContent_Declare(
 )
  
 FetchContent_MakeAvailable(sensorring)
+add_library(sensorring::sensorring ALIAS sensorring)
 
 add_executable(minimal_example
   src/main.cpp
 )
 
 target_link_libraries(minimal_example
-  sensorring
+  sensorring::sensorring
 )
 ```
 
