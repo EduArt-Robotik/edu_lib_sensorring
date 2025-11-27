@@ -205,9 +205,12 @@ A CandlightFD CAN FD to USB adapter with one minipanel sensor board.
 
 ### 3.2 USBtingo USB Adapter <img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" alt="Linux"> <img src="https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white" alt="Windows">
 
-In addition to the Linux only SocketCAN interface the Sensor Ring library also has the cross platform USBtingo CAN FD to USB interface implemented.
-The USBtingo can be used from from both Linux and Windows.
-To use this interface the library [libusbtingo](https://github.com/hannesduske/libusbtingo) for this adapter needs to be installed and the Sensor Ring library needs to be build with the `-DUSE_USBTINGO=ON` option.
+In addition to the Linux only SocketCAN interface the Sensor Ring library also implements the cross platform USBtingo CAN FD to USB interface.
+The USBtingo can be used on both Linux and Windows devices.
+The Sensor Ring Library uses [libusbtingo](https://github.com/hannesduske/libusbtingo) internally to support this interface.
+If the libusbtingo library is not previously installed it is automatically fetched while building the the Sensor Ring library.
+
+> ⚠️ The Sensor Ring library needs to be compiled with the `-DUSE_USBTINGO=ON` option to enable support for this interface.
 
 > ⚠️ The USBtingo is not recognized as CAN device by the Linux Kernel. The commands from the SocketCAN compatible adapter above don't work for this device.
 
