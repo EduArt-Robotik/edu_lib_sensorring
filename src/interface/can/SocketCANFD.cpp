@@ -19,7 +19,7 @@ namespace eduart {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface(interface_name)
+    : ComInterface()
     , _soc(0) {
 
   try {
@@ -81,6 +81,7 @@ bool SocketCANFD::openInterface(std::string interface_name) {
     throw std::runtime_error("Unable to bind socket: " + std::string(strerror(errno)) + " [" + std::to_string(errno) + "]");
   }
 
+  _interface_name      = interface_name;
   _communication_error = false;
   return true;
 }

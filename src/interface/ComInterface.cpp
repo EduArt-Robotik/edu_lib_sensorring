@@ -4,11 +4,11 @@ namespace eduart {
 
 namespace com {
 
-ComInterface::ComInterface(std::string interface_name)
+ComInterface::ComInterface()
     : _communication_error(false)
     , _listener_is_running(false)
     , _shut_down_listener(false)
-    , _interface_name(interface_name)
+    , _interface_name("")
     , _thread{nullptr} {
 }
 

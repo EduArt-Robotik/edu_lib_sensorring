@@ -20,9 +20,8 @@ class ComInterface {
 public:
   /**
    * Constructor
-   * @param[in] std::string name of the interface to be opened
    */
-  ComInterface(std::string interface_name);
+  ComInterface();
 
   /**
    * Destructor

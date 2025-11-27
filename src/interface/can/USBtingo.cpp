@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <exception>
+#include <iomanip>
 #include <limits>
 #include <string>
 #include <usbtingo/basic_bus/Message.hpp>
@@ -17,7 +18,7 @@ namespace eduart {
 namespace com {
 
 USBtingo::USBtingo(std::string interface_name)
-    : ComInterface(interface_name) {
+    : ComInterface() {
   if (!openInterface(interface_name)) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + interface_name);
   }
@@ -63,6 +64,10 @@ bool USBtingo::openInterface(std::string interface_name) {
   if (!_dev->set_mode(usbtingo::device::Mode::ACTIVE))
     return false;
 
+  std::stringstream ss;
+  ss << "0x" << std::hex << std::nouppercase << std::setw(8) << std::setfill('0') << _dev->get_serial();
+
+  _interface_name      = ss.str();
   _communication_error = false;
   return true;
 }

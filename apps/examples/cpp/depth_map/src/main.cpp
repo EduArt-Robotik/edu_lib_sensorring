@@ -18,7 +18,7 @@
 using namespace eduart;
 using namespace std::chrono_literals;
 
-static constexpr std::string_view INTERFACE_NAME = "0x1731a1f1";
+static constexpr std::string_view INTERFACE_NAME   = "0";
 static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 int main(int, char*[]) {
