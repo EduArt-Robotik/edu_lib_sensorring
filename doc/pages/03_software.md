@@ -193,8 +193,8 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
 <div class="section_buttons"> 
 
-| Read Previous | Read Next |
+| Read Previous | |
 |:--|--:|
-| [Installation](02_installation.md) | [Developer Documentation](04_dev_doc.md) |
+| [Installation](02_installation.md) | |
 
 </div>

@@ -78,7 +78,23 @@ Choose your target platform or target framework for a quick start guide:
 
 ## Installation
 
-> ℹ️ Have a look at the [installation guide](doc/pages/02_instatllation.md) on how build the library on your platform.
+> ℹ️ Have a look at the [installation guide](doc/pages/02_installation.md) on how build the library on your platform.
+
+### Quick Start - Use the library in other CMake projects
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  sensorring
+  URL      https://github.com/EduArt-Robotik/edu_lib_sensorring/archive/refs/heads/master.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP OFF
+)
+
+FetchContent_MakeAvailable(sensorring)
+```
+
+
+### Quick Start - Build and install the library from source
 
 <div class="tabbed">
 
@@ -108,14 +124,10 @@ Choose your target platform or target framework for a quick start guide:
 </div>
 
 
+
 ## Software
 
 > ℹ️ Have a look at the [software guide](doc/pages/03_software.md) on how to use the library in your own projects.
-
-
-## Developer documentation
-
-> ℹ️ Refer to the [developer documentation](doc/pages/04_dev_doc.md) for more details on how the library is implemented.
 
 
 <div class="section_buttons"> 

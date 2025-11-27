@@ -25,7 +25,7 @@ set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${ARCH_TEXT
 
 set(CPACK_PACKAGE_VENDOR "EduArt Robotik GmbH")
 set(CPACK_PACKAGE_CONTACT "Hannes Duske <hannes.duske@eduart-robotik.com>")
-set(CPACK_PACKAGE_DESCRIPTION "Software interface of the EduArt Sensorring")
+set(CPACK_PACKAGE_DESCRIPTION "Software interface of the EduArt Sensor Ring")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/EduArt-Robotik/edu_lib_sensorring")
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

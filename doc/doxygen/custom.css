@@ -50,9 +50,10 @@ html.light-mode {
     padding: 100px 120px;
 }
 
-/* Space between two blockquote elements */
-.doxtable + .doxtable {
-  margin-top: 1rem;
+/* Space above and below blockquote elements */
+.doxtable {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 
 /* Justified text formatting */
@@ -62,7 +63,8 @@ html.light-mode {
 }
 
 /* Justified text formatting */
-.contents p, .textblock p {
+.contents p,
+.textblock p {
     text-align: justify;
     text-justify: inter-word;
 }
