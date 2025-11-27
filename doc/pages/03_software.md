@@ -81,11 +81,11 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 <tr>
   <td style="text-align:center">
     <img src="../images/example_cpp1.png" height=500 onerror="this.onerror=null; this.src='example_cpp1.png';"><br>
-    The `depth_view` example
+    The `depth_map` example
   </td>
   <td style="text-align:center">
     <img src="../images/example_py1.png" height=500 onerror="this.onerror=null; this.src='example_py1.png';"><br>
-    The `depth_map` Python example.
+    The `depth_view` example.
   </td>
 </tr>
 </table>
@@ -177,15 +177,15 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 > ℹ️ The parameters of the Sensor Ring are fully defined in the [ROS2 parameter file](https://github.com/EduArt-Robotik/edu_sensorring_ros2/blob/master/params/edu_bot_sensorring_params.yaml) and just have to be adjusted to the individual sensor configuration.
 
 <div align=center>
-<table style="border: none;">
+<table style="border: none; table-layout: fixed; width: 100%;">
 <tr>
-  <td style="text-align:center">
-    <img src="../images/example_ros1.png" height=400 onerror="this.onerror=null; this.src='example_ros1.png';"><br>
-    3D point cloud from the sensor system on a mobile robot at the end of a corridor visualized with Rviz.
+  <td style="text-align:center; padding: 20px;">
+    <img src="../images/example_ros1.png" height=350 onerror="this.onerror=null; this.src='example_ros1.png';"><br>
+    3D point cloud from the sensor system on a mobile robot visualized with Rviz
   </td>
-  <td style="text-align:center">
-    <img src="../images/example_ros2.png" height=400 onerror="this.onerror=null; this.src='example_ros2.png';"><br>
-    3D map of a corridor recorded with the sensor system using <a href="https://octomap.github.io/">Octomap.</a> visualized with Rviz.
+  <td style="text-align:center; padding: 20px;">
+    <img src="../images/example_ros2.png" height=350 onerror="this.onerror=null; this.src='example_ros2.png';"><br>
+    3D map of a corridor recorded with the sensor system using <a href="https://octomap.github.io/">Octomap.</a>
   </td>
 </tr>
 </table>
