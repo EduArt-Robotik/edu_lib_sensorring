@@ -17,7 +17,7 @@ The result is that in most cases the thermal measurement frequency will be lower
 Below is a flowchart illustrating the state machine operation.
 
 <div align="center">
-<img src=../images/state_machine.png width=800 onerror="this.onerror=null; this.src='state_machine.png';">
+<img src=../images/state_machine.png width=1000 onerror="this.onerror=null; this.src='state_machine.png';">
 </div>
 
 ## Internal Communication Interface

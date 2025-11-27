@@ -18,7 +18,7 @@ The table below shows the current versions of the EduArt sensor boards that can 
 		<td style="text-align:left">
 			- Headlight of the Raspberry Pi based EduBot <br>
 			- ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-			- Optional Heimann HTPA32 thermal sensor <br>
+			- Optional Heimann HTPA32x32d thermal sensor <br>
 			- 11 Addressable RGB Leds <br>
 			- CAN FD Interface <br>
 			- Input voltage range 6 V - 65 V DC
@@ -72,9 +72,69 @@ The table below shows the current versions of the EduArt sensor boards that can 
 
 ### 2.1 ST VL53L8CX Time of Flight sensor
 
-### 2.2 Heimann HTPA32 Thermophile array
+All of the Edu Sensor Boards come with a ST VL53L8CX is a 3D multi zone Time of Flight sensor that returns a grid of 8 × 8 individual 3D distance values per measurement.
+The measurements from all Time-of-Flight sensors in the EduArt Sensor Ring are combined in a single large point cloud whose resolution solely depends on the number of connected Time-of-Flight sensors.
 
-### 2.3 WS2812b Addressable RGB LED
+The key features of the sensor according to the manufacturers [datasheet](https://www.st.com/resource/en/datasheet/vl53l8cx.pdf) are:
+
+- Ranging up to 400 cm
+- Measurements with 8 × 8 resolution at 15 Hz
+- Square Field-of-View with 65° diagonal opening angle (45° vertical and horizontal)
+- Accuracy of ±8% or better in most cases (refer to datasheet)
+
+<div align="center">
+<table style="border: none;">
+	<tr>
+		<td style="text-align:center">
+			<img src="../images/vl53l8cx.png" height=300 onerror="this.onerror=null; this.src='vl53l8cx.png';"><br>
+			The ST VL53L8CXTime-of-Flight sensor <a href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l8cx.html">[Product Website]</a>
+		</td>
+		<td style="text-align:center">
+			<img src="../images/example_ros3.png" height=300 onerror="this.onerror=null; this.src='example_ros3.png';"><br>
+			Visualization of a VL53L8CX measurement.
+		</td>
+	</tr>
+</table>
+</div>
+
+### 2.2 Heimann HTPA32x32d Thermophile Array
+
+The Edu Headlight sensors boards can be delivered with an optional Heimann HTPA32x32d is an all-in-one integrated thermal imaging sensor.
+It returns a thermal image with temperature values for each pixel.
+In addition the Sensor Ring library converts the temperature image into a false color image for better visualization.
+
+The key features of the sensor according to the manufacturers [datasheet](https://cdn.website-editor.net/s/156d2965ff764637aaea150903bb0161/files/uploaded/Overview-Datasheet-HTPA_32x32d_Rev17..pdf?Expires=1766828974&Signature=ayPse7nhwOi4OYhHHa6741axk7JH3HkDCt~zpfZMiv6pI2rj3XoPFwJDAJweLorboxOXewXBjHCR59WJvzPGT~2e5WX2BuvGyUfPGh9jrswpmV50EMBWNfxNtui0V-iMOzQ6QjD3R-LqB5xKXP8lZzYJDB1rGqcShdnoX~wQBuVsr~jNtsRjvCfAlx4lyAZpBpHEwnJOkuhz-ypo9rExuUukEd-2pSWV55nhWJ0IbBE3urLdm-vdfxkbuYoDUiQCkNmIIuPWVxUj18UStx15E~7cHYqQn4W66fPocQcgeLt0~iFnX2jZTNg9l45IoMbIg6cAqt39CYmAFtrFN9z5-w__&Key-Pair-Id=K2NXBXLF010TJW) are:
+
+- 32 × 32 pixel resolution
+- Measures temperatures between -20°C and >1000°C
+- Available with different optics
+- Developed for person detection
+
+<div align="center">
+<table style="border: none;">
+	<tr>
+		<td style="text-align:center; padding: 20px;">
+			<img src="../images/htpa32.png" height=300 onerror="this.onerror=null; this.src='htpa32.png';"><br>
+			The Heimann HTPA32x32d Thermophile Array <a href="https://www.heimannsensor.com/32x32">[Product Website]</a>
+		</td>
+		<td style="text-align:center; padding: 20px;">
+			<img src="../images/example_thermal1.png" height=300 onerror="this.onerror=null; this.src='example_thermal1.png';"><br>
+			Visualization of a HTPA32x32d measurement.
+		</td>
+	</tr>
+</table>
+</div>
+
+
+### 2.3 Individually Addressable RGB LEDs
+
+Some Sensor Boards come with individually addressable RGB LEDs.
+The LEDs can either be set to predefined color animations or can be set individually through the library.
+
+<div style="text-align:center">
+<img src="../images/ws2812b.png" height=300 onerror="this.onerror=null; this.src='ws2812b.png';"><br>
+Individually addressable RGB LEDs <a href="https://www.inolux-corp.com/details.php?i=230#SMD-LED">[Product Website]</a>
+</div>
 
 
 ## 3 Supported Communication Interfaces
@@ -155,21 +215,21 @@ A USBtingo CAN FD to USB adapter with one minipanel sensor board.
 
 ## 4 Connecting the Sensor Ring
 
-The sensor boards of the Sensor Ring are daisy chained together with Molex Pico-Lock 7 pin cables.
-The boards connectors on the boards don't have an orientation or polarity and all of the boards can be joined in any order and orientation.
-The chain of sensors then needs to be terminated by a suitable computer, i.e. a RaspberryPi with the EduArt shield or a computer with CAN FD to usb adapter.
+The sensor boards of the Sensor Ring are daisy chained together with **Molex Pico-Lock 7-Pin** off-the-shelf cables.
+The chain of sensors needs to be terminated at one one by a RaspberryPi with the EduArt adapter shield or by a computer with a CAN FD to USB adapter.
 
+> ℹ️ The connectors on the boards have no dedicated input or output and can be joined in any order and orientation.
 
 <div align="center">
 <table style="border: none;">
 <tr>
 	<td style="text-align:center">
 		<img src="../images/usbtingo_chain_top.png" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_top.png';"><br>
-		Top view of a sensor chain with two minipanels with a USBtingo as adapter.
+		Top view of a sensor chain with two minipanels and an USBtingo as adapter.
 	</td>
 	<td style="text-align:center">
 		<img src="../images/usbtingo_chain_bottom.png" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.png';"><br>
-		Bottom view of a sensor chain with two minipanels with a USBtingo as adapter.
+		Bottom view of a sensor chain with two minipanels and an USBtingo as adapter.
 	</td>
 </tr>
 </table>

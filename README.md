@@ -72,74 +72,9 @@
 </table>
 </div>
 
-## 3 Supported Hardware
+## 3 Hardware
 
 > ℹ️ Have a look at the [hardware guide](doc/pages/01_hardware.md) on how to set up and use the sensors with your computer.
-
-The supported sensors of the Sensor Ring library are listed in the following table:
-
-<div align="center">
-<table>
-  <tr>
-    <th style="text-align:center"><p>Sensor Board Type</p></th>
-    <th style="text-align:center"><p>Description</p></th>
-  </tr>
-  <tr>
-    <td style="text-align:center">
-      <p><b>Edu Headlight</b></p>
-      <p><img src="doc/images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p>
-    </td>
-    <td style="text-align:left">
-      - Headlight of the Raspberry Pi based EduBot <br>
-      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-      - Optional Heimann HTPA32 thermal sensor <br>
-      - 11 Addressable RGB Leds <br>
-      - CAN FD Interface <br>
-      - Input voltage range 6 V - 65 V DC
-    </td>
-  </tr>
-  <tr>
-    <td style="text-align:center">
-      <p><b>Edu Taillight</b></p>
-      <p><img src="doc/images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p>
-    </td>
-    <td style="text-align:left">
-      - Taillight of the Raspberry Pi based EduBot <br>
-      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-      - 2 Addressable RGB Leds <br>
-      - CAN FD Interface<br>
-      - Input voltage range 6 V - 65 V DC
-    </td>
-  </tr>
-  <tr>
-    <td style="text-align:center">
-      <p><b>Edu Sidepanel</b></p>
-      <p><img src="doc/images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p>
-    </td>
-    <td style="text-align:left">
-      - General purpose sensor board <br>
-      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-      - 2 Addressable RGB Leds <br>
-      - 38 × 28 mm <br>
-      - CAN FD Interface<br>
-      - Input voltage range 6 V - 65 V DC
-    </td>
-  </tr>
-  <tr>
-    <td style="text-align:center">
-      <p><b>Edu Minipanel</b></p>
-      <p><img src="doc/images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p>
-    </td>
-    <td style="text-align:left">
-      - General purpose sensor board <br>
-      - ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-      - 28 × 24 mm  <br>
-      - CAN FD Interface<br>
-      - Input voltage range 6 V - 65 V DC
-    </td>
-  </tr>
-</table>
-</div>
 
 ## 4 Installation
 
@@ -178,10 +113,6 @@ The supported sensors of the Sensor Ring library are listed in the following tab
 
 > ℹ️ Have a look at the [software guide](doc/pages/03_software.md) on how to use the library in your own projects.
 
-
-```cpp
-// Minimal example
-```
 
 ## 6 Developer documentation
 

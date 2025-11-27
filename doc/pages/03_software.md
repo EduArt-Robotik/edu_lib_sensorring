@@ -180,11 +180,11 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 <table style="border: none;">
 <tr>
   <td style="text-align:center">
-    <img src="../images/example_ros1.png" height=500 onerror="this.onerror=null; this.src='example_ros1.png';"><br>
+    <img src="../images/example_ros1.png" height=400 onerror="this.onerror=null; this.src='example_ros1.png';"><br>
     3D point cloud from the sensor system on a mobile robot at the end of a corridor visualized with Rviz.
   </td>
   <td style="text-align:center">
-    <img src="../images/example_ros3.png" height=500 onerror="this.onerror=null; this.src='example_ros3.png';"><br>
+    <img src="../images/example_ros2.png" height=400 onerror="this.onerror=null; this.src='example_ros2.png';"><br>
     3D map of a corridor recorded with the sensor system using <a href="https://octomap.github.io/">Octomap.</a> visualized with Rviz.
   </td>
 </tr>
