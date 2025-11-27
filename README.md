@@ -1,6 +1,6 @@
 # Sensor Ring Library
 
-💡 **The EduArt Sensor Ring library is the high level software interface of the EduArt sensor boards.**
+> 💡 **The EduArt Sensor Ring library is the high level software interface of the EduArt sensor boards.**
 
 <div align="center">
 
@@ -24,9 +24,9 @@
 
 </div>
 
-## 1 Quick Start Guide
+## Quick Start Guide
 
-🔧 **Choose your target platform or target framework for a quick start guide.**
+Choose your target platform or target framework for a quick start guide:
 
 <div align="center">
 
@@ -55,7 +55,7 @@
 
 </div>
 
-## 2 Application Example
+## Application Example
 
 <div align="center">
 <table style="border: none;">
@@ -72,18 +72,17 @@
 </table>
 </div>
 
-## 3 Hardware
+## Hardware
 
 > ℹ️ Have a look at the [hardware guide](doc/pages/01_hardware.md) on how to set up and use the sensors with your computer.
 
-## 4 Installation
+## Installation
 
-> ℹ️ Have a look at the [installation guide](doc/pages/02_instatllationö.md) on how build the library on your platform.
+> ℹ️ Have a look at the [installation guide](doc/pages/02_instatllation.md) on how build the library on your platform.
 
-**Quick start - Building the library:**
 <div class="tabbed">
 
-- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**Quick start Linux**</b><div class="darkmode_inverted_image">
 
   ```sh
   git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
@@ -95,7 +94,7 @@
   ```
 </div>
 
-- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**Quick start Windows**</b><div class="darkmode_inverted_image">
 
   ```powershell
   git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
@@ -109,12 +108,12 @@
 </div>
 
 
-## 5 Software
+## Software
 
 > ℹ️ Have a look at the [software guide](doc/pages/03_software.md) on how to use the library in your own projects.
 
 
-## 6 Developer documentation
+## Developer documentation
 
 > ℹ️ Refer to the [developer documentation](doc/pages/04_dev_doc.md) for more details on how the library is implemented.
 
