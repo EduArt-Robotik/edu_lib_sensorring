@@ -43,12 +43,12 @@ target_sources(sensorring PRIVATE ${SOURCES})
 #########################################################
 # library includes
 target_include_directories(sensorring PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
 
 # export includes for other packages
 target_include_directories(sensorring PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -102,7 +102,7 @@ install(EXPORT sensorringTargets
 
 # install headers
 install(DIRECTORY
-    ${CMAKE_SOURCE_DIR}/include/
+    ${PROJECT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
@@ -114,7 +114,7 @@ if(USE_USBTINGO)
     set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
 endif()
 
-configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
         "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
         INSTALL_DESTINATION lib/cmake/sensorring
 )
