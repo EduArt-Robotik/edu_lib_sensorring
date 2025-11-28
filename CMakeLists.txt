@@ -6,7 +6,7 @@ cmake_policy(SET CMP0086 NEW)
 #########################################################
 # Build type (has to be done before project() call)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
-   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
+   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build (Debug/ Release/ RelWithDebInfo)" FORCE)
 endif()
 
 #########################################################
@@ -47,8 +47,13 @@ if(BUILD_EXAMPLES)
   add_subdirectory(apps/examples/cpp)
 endif()
 
+# Documentation
+if(BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
+  add_subdirectory(doc)
+endif()
+
 # Language bindings
-if(BUILD_PYTHON_BINDINGS) # AND CMAKE_BUILD_TYPE MATCHES Release)
+if(BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(bindings)
 endif()
 

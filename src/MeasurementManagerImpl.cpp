@@ -48,7 +48,7 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
     for (const auto& board_params : bus_params.board_param_vec) {
       auto tof     = std::make_unique<sensor::TofSensor>(board_params.tof_params, interface, idx);
       auto thermal = std::make_unique<sensor::ThermalSensor>(board_params.thermal_params, interface, idx);
-      auto light   = std::make_unique<sensor::LedLight>(board_params.led_params);
+      auto light   = std::make_unique<sensor::LedLight>(board_params.light_params);
 
       board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
       idx++;

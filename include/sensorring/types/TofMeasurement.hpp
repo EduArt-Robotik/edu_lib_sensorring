@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "sensorring/math/Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/PointCloud.hpp"
