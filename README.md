@@ -36,8 +36,8 @@ Choose your target platform or target framework for a quick start guide:
             Target Platform
         </td>
         <td class="markdownTableBodyNone">
-            <a href="doc/pages/installation.md"><img src="https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white" alt="Windows"></a>
-            <a href="doc/pages/installation.md"><img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" alt="Linux"></a>
+            <a href="doc/pages/02_installation.md"><img src="https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white" alt="Windows"></a>
+            <a href="doc/pages/02_installation.md"><img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" alt="Linux"></a>
         </td>
     </tr>
     <tr class="markdownTableRowEven">
