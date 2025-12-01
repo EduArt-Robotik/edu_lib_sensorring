@@ -313,7 +313,7 @@ bool MeasurementManagerImpl::isMeasuring() noexcept {
         State machine function
 ==========================================================================================
 */
-void MeasurementManagerImpl::StateMachineWorker() noexcept{
+void MeasurementManagerImpl::StateMachineWorker() noexcept {
   while (_is_running) {
     // no wait command here, the individual states of the state machine
     // provide natural throttling
@@ -326,7 +326,7 @@ void MeasurementManagerImpl::StateMachineWorker() noexcept{
   }
 }
 
-void MeasurementManagerImpl::StateMachine(){
+void MeasurementManagerImpl::StateMachine() {
   bool success = true;
   switch (_measurement_state) {
     /* =============================================
@@ -411,8 +411,8 @@ void MeasurementManagerImpl::StateMachine(){
     if (success) {
       _measurement_state = MeasurementState::pre_loop_init;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor");
-      _measurement_state = MeasurementState::error_handler_measurement;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
+      _measurement_state = MeasurementState::shutdown;
     }
     break;
   }
