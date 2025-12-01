@@ -70,13 +70,14 @@ class MeasurementProxy(sensorring.SensorringClient):
     for row in range(0, 8):
       for col in range(0, 8):
         idx = row * 8 + col
-        print(self.depthToColor(points[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
+        print(self.depthToColor(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
       
       print("\033[0m")
     print("", end="", flush=True)  
 
 
 def main():
+  print("\33c")
   print("==========================")
   print("Minimal sensorring example")
   print("==========================")
