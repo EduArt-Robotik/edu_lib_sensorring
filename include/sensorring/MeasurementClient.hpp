@@ -72,7 +72,7 @@ public:
   virtual void onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
-   * Callback method for new Time-of-Flight sensor measurements.  Returns a
+   * Callback method for new Time-of-Flight sensor measurements. Returns a
    * vector of the transformed measurements per sensor.
    * @param[in] measurement_vec the most recent Time-of-Flight sensor
    * measurements in the common transformed coordinate frame
@@ -80,13 +80,10 @@ public:
   virtual void onTransformedTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
-   * Callback method for new thermal sensor measurements. Returns one individual
-   * measurements of each thermal sensor.
-   * @param[in] idx the index of the thermal sensor that that recorded the
-   * measurement. Index starts at zero (0) for the first thermal sensor and only
-   * counts active thermal sensors.
-   * @param[in] measurement the most recent thermal sensor measurement of the
-   * specified sensor
+   * Callback method for new thermal sensor measurements. Returns a
+   * vector of the measurements from all sensors.
+   * @param[in] measurement the most recent thermal sensor
+   * measurements in the common transformed coordinate frame
    */
   virtual void onThermalMeasurement([[maybe_unused]] const std::vector<measurement::ThermalMeasurement>& measurement_vec) {};
 };
