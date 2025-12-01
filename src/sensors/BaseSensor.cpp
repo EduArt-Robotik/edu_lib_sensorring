@@ -1,12 +1,12 @@
 #include "sensors/BaseSensor.hpp"
 
-#include "Math.hpp"
+#include "sensorring/math/Math.hpp"
 
 namespace eduart {
 
 namespace sensor {
 
-BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
+BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable)
     : ComObserver()
     , _idx(idx)
     , _error(SensorState::SensorInit)
@@ -25,7 +25,7 @@ BaseSensor::~BaseSensor() {
   _interface->unregisterObserver(this);
 }
 
-unsigned int BaseSensor::getIdx() const {
+std::size_t BaseSensor::getIdx() const {
   return _idx;
 }
 
@@ -48,7 +48,15 @@ bool BaseSensor::newDataAvailable() const {
 void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
   _translation = translation;
   _rotation    = rotation;
-  _rot_m       = math::Matrix3::rotMatrixFromEulerDegrees(_rotation);
+  _rot_m       = math::rotMatrixFromEulerDegrees(_rotation);
+}
+
+void BaseSensor::resetSensorState() {
+  _error                      = SensorState::SensorOK;
+  _new_data_available_flag    = false;
+  _new_data_in_buffer_flag    = false;
+  _new_measurement_ready_flag = false;
+  onResetSensorState();
 }
 
 void BaseSensor::clearDataFlag() {

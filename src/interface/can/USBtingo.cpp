@@ -1,12 +1,15 @@
 #include "USBtingo.hpp"
 
 #include <cstdint>
+#include <exception>
+#include <iomanip>
+#include <limits>
 #include <string>
 #include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/can/Dlc.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 #include "canprotocol.hpp"
 
@@ -15,7 +18,7 @@ namespace eduart {
 namespace com {
 
 USBtingo::USBtingo(std::string interface_name)
-    : ComInterface(interface_name) {
+    : ComInterface() {
   if (!openInterface(interface_name)) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + interface_name);
   }
@@ -61,21 +64,31 @@ bool USBtingo::openInterface(std::string interface_name) {
   if (!_dev->set_mode(usbtingo::device::Mode::ACTIVE))
     return false;
 
+  std::stringstream ss;
+  ss << "0x" << std::hex << std::nouppercase << std::setw(8) << std::setfill('0') << _dev->get_serial();
+
+  _interface_name      = ss.str();
+  _communication_error = false;
   return true;
 }
 
 bool USBtingo::send(ComEndpoint target, const std::vector<uint8_t>& data) {
   usbtingo::bus::Message msg(mapEndpointToId(target), data);
-  return _dev->send_can(msg.to_CanTxFrame(true));
+  if (!_dev->send_can(msg.to_CanTxFrame(true))) {
+    _communication_error = true;
+    throw std::runtime_error("Unable to send message on interface " + _interface_name);
+  }
+  _communication_error = false;
+  return true;
 }
 
 bool USBtingo::listener() {
   if (!_dev || !_dev->is_alive()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Error starting can listener on interface " + _interface_name + ". Interface not initialized.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Error starting listener on interface " + _interface_name + ". Interface not initialized.");
     return false;
   }
 
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting listener on interface " + _interface_name);
 
   std::vector<usbtingo::device::CanRxFrame> rx_frames;
   std::vector<usbtingo::device::TxEventFrame> tx_event_frames;
@@ -83,9 +96,9 @@ bool USBtingo::listener() {
   auto zero_timeout = std::chrono::microseconds(0);
   auto can_future   = _dev->request_can_async();
 
-  _shutDownListener  = false;
-  _listenerIsRunning = true;
-  while (!_shutDownListener) {
+  _shut_down_listener  = false;
+  _listener_is_running = true;
+  while (!_shut_down_listener) {
     {
       LockGuard guard(_mutex);
 
@@ -97,10 +110,14 @@ bool USBtingo::listener() {
           // forward can frames
           for (const auto& rx_frame : rx_frames) {
 
-            auto endpoint = mapIdToEndpoint(rx_frame.id);
-            for (auto observer : _observers) {
-              if (observer)
-                observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
+            try {
+              auto endpoint = mapIdToEndpoint(rx_frame.id);
+              for (auto observer : _observers) {
+                if (observer)
+                  observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
+              }
+            } catch (const std::exception&) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _interface_name);
             }
           }
           rx_frames.clear();
@@ -116,12 +133,23 @@ bool USBtingo::listener() {
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
 
   _dev->cancel_async_can_request();
-  _listenerIsRunning = false;
+  _listener_is_running = false;
   return true;
 }
 
 bool USBtingo::closeInterface() {
   return true;
+}
+
+bool USBtingo::repairInterface() {
+  stopListener();
+  closeInterface();
+
+  if (openInterface(_interface_name)) {
+    if (startListener())
+      return true;
+  }
+  return false;
 }
 
 void USBtingo::fillEndpointMap() {
@@ -143,29 +171,37 @@ void USBtingo::fillEndpointMap() {
 }
 
 void USBtingo::addToFSensorToEndpointMap(std::size_t idx) {
-  canid_t canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+  CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
   CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
 
+  if ((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+  }
+
   auto value                  = "tof" + std::to_string(idx) + "_data";
-  _id_map[ComEndpoint(value)] = canid_tof_data_in + idx;
+  _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_tof_data_in + idx);
   _endpoints.emplace(value);
 }
 
 void USBtingo::addThermalSensorToEndpointMap(std::size_t idx) {
-  canid_t canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+  CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
   CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
 
+  if ((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+  }
+
   auto value                  = "thermal" + std::to_string(idx) + "_data";
-  _id_map[ComEndpoint(value)] = canid_thermal_data_in + idx;
+  _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_thermal_data_in + idx);
   _endpoints.emplace(value);
 }
 
-std::uint32_t USBtingo::mapEndpointToId(ComEndpoint ep) {
-  std::uint32_t id = _id_map.at(ep); // may throw out_of_range exception
+CanProtocol::canid USBtingo::mapEndpointToId(ComEndpoint ep) {
+  CanProtocol::canid id = _id_map.at(ep); // may throw out_of_range exception
   return id;
 }
 
-ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
+ComEndpoint USBtingo::mapIdToEndpoint(CanProtocol::canid id) {
   auto it = std::find_if(_id_map.begin(), _id_map.end(), [&id](const auto& pair) {
     return pair.second == id;
   });
@@ -173,8 +209,7 @@ ComEndpoint USBtingo::mapIdToEndpoint(std::uint32_t id) {
   if (it != _id_map.end()) {
     return it->first;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "No Endpoint found for given CAN ID");
-    return ComEndpoint("");
+    throw std::runtime_error("No Endpoint found for given CAN ID");
   }
 }
 

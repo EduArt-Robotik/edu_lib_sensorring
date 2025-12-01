@@ -5,9 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "sensors/hardware/heimann_htpa32.hpp"
-
-#include "CustomTypes.hpp"
 
 namespace eduart {
 
@@ -50,10 +47,6 @@ public:
   static bool readStructFromFile(const std::string filename, T& str);
   static bool readStructFromFile(const std::string filepath, const std::string filename, T& str);
 };
-
-// concrete types that are used in the program
-template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
-template class filemanager::StructHandler<sensor::htpa32::HTPA32Eeprom>;
 
 } // namespace filemanager
 

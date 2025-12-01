@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+#include "canprotocol.hpp"
 
 namespace eduart {
 
@@ -69,6 +70,12 @@ public:
   bool closeInterface() override;
 
   /**
+   * Repair the connection in case of an error.
+   * @return success==true
+   */
+  bool repairInterface() override;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
@@ -83,11 +90,11 @@ public:
 private:
   void fillEndpointMap();
 
-  canid_t mapEndpointToId(ComEndpoint endpoint);
+  CanProtocol::canid mapEndpointToId(ComEndpoint endpoint);
 
-  ComEndpoint mapIdToEndpoint(canid_t id);
+  ComEndpoint mapIdToEndpoint(CanProtocol::canid id);
 
-  std::map<ComEndpoint, canid_t> _id_map;
+  std::map<ComEndpoint, CanProtocol::canid> _id_map;
 
   bool listener() override;
 

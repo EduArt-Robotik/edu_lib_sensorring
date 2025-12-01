@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 
@@ -26,12 +26,17 @@ const TofSensorParams& TofSensor::getParams() const {
   return _params;
 }
 
-std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestRawMeasurement() const {
+std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestRawMeasurement() const {
   return { _latest_raw_measurement, _error };
 }
 
-std::pair<measurement::TofMeasurement, SensorState> TofSensor::getLatestTransformedMeasurement() const {
+std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestTransformedMeasurement() const {
   return { _latest_transformed_measurement, _error };
+}
+
+void TofSensor::onResetSensorState() {
+  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
+  _rx_buffer_offset = 0;
 }
 
 void TofSensor::onClearDataFlag() {
@@ -75,7 +80,7 @@ void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, cons
 
 measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const {
   measurement::TofMeasurement measurement;
-  measurement.point_cloud.reserve(vl53l8::TOF_RESOLUTION);
+  measurement.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
   measurement.frame_id = frame_id;
 
   uint16_t distance_raw = 0;
@@ -98,14 +103,14 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
       point.z() = point_distance;
     }
 
-    measurement.point_cloud.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.user_idx }));
+    measurement.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.user_idx }));
   }
 
-  measurement.point_cloud.shrink_to_fit();
+  measurement.point_cloud.data.shrink_to_fit();
   return measurement;
 }
 
-void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void TofSensor::cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
@@ -116,7 +121,7 @@ void TofSensor::requestTofMeasurement(com::ComInterface* interface, std::uint16_
   }
 }
 
-void TofSensor::fetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+void TofSensor::cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
@@ -131,8 +136,8 @@ measurement::TofMeasurement TofSensor::transformTofMeasurements(const measuremen
 
   auto transformed_measurement = measurement;
 
-  for (unsigned int i = 0; i < transformed_measurement.point_cloud.size(); i++) {
-    transformed_measurement.point_cloud[i].point = (rotation * measurement.point_cloud[i].point) + translation;
+  for (unsigned int i = 0; i < transformed_measurement.point_cloud.data.size(); i++) {
+    transformed_measurement.point_cloud.data[i].point = (rotation * measurement.point_cloud.data[i].point) + translation;
   }
 
   return transformed_measurement;

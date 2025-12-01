@@ -110,7 +110,7 @@ transparency=50</panel_attributes><additional_attributes></additional_attributes
 fg=white
 bg=#C0C0C0
 layer=-1
-transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1080</y><w>900</w><h>1020</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>730;830;730;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>48</x><y>1452</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBoard corresponds to one
+transparency=50</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1080</y><w>900</w><h>708</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>730;570;730;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>48</x><y>1452</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBoard corresponds to one
 physical circuit board. It aggregates
 the individual sensors that are physically
 present on the circuit board.
@@ -123,7 +123,7 @@ their corresponding sensor.
 fg=black
 bg=white
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1944</x><y>2076</y><w>432</w><h>240</h></coordinates><panel_attributes>ComObserver
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1944</x><y>1764</y><w>432</w><h>240</h></coordinates><panel_attributes>ComObserver
 --
 
 
@@ -138,7 +138,7 @@ transparency=0
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1308</x><y>2172</y><w>660</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>530;10;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>1008</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1308</x><y>1860</y><w>660</w><h>348</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>530;10;330;10;330;270;10;270</additional_attributes></element><element><id>UMLNote</id><coordinates><x>36</x><y>1008</y><w>324</w><h>180</h></coordinates><panel_attributes>The SensorBus is the abstraction of a single
 communication interface, e.g. a can bus.
 It holds all information corresponding to
 that interface including a vector of all
@@ -264,10 +264,8 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 &lt;&lt;uses&gt;&gt;
 </panel_attributes><additional_attributes>130;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>1668</y><w>48</w><h>120</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
-m2=1</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>2256</x><y>1836</y><w>252</w><h>264</h></coordinates><panel_attributes>lt=&lt;-
-</panel_attributes><additional_attributes>10;200;10;10;190;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2484</x><y>2076</y><w>432</w><h>240</h></coordinates><panel_attributes>SocketCANFD
+m2=n</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2232</x><y>2076</y><w>432</w><h>240</h></coordinates><panel_attributes>SocketCANFD
 --
-vector&lt;ComObserver*&gt; observers
 
 --
 + SocketCANFD(name : string, sensorCount : size_t)
@@ -279,7 +277,7 @@ vector&lt;ComObserver*&gt; observers
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2688</x><y>1992</y><w>36</w><h>108</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1044</y><w>1536</w><h>456</h></coordinates><panel_attributes>lt=&lt;.
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2544</x><y>1992</y><w>36</w><h>108</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1188</x><y>1044</y><w>1536</w><h>456</h></coordinates><panel_attributes>lt=&lt;.
 &lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>1260;360;1260;20;10;20</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1836</x><y>1368</y><w>1776</w><h>996</h></coordinates><panel_attributes>Communication
 --
 fg=white
@@ -301,4 +299,19 @@ bg=white
 fg=black
 transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>780</x><y>1944</y><w>84</w><h>516</h></coordinates><panel_attributes>lt=&lt;.
 
-&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>10;410;10;10</additional_attributes></element></diagram>
+&lt;&lt;uses&gt;&gt;</panel_attributes><additional_attributes>10;410;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2724</x><y>2076</y><w>432</w><h>240</h></coordinates><panel_attributes>USBtingo
+--
+
+--
++ USBtingo(name : string, sensorCount : size_t)
+
++ send(target : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ send(id : canid_t, data : vector&lt;uint8_t&gt;)
++ send(frame : canfd_frame*)
+
+
+bg=white
+fg=black
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2832</x><y>1992</y><w>36</w><h>108</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>2364</x><y>1836</y><w>144</w><h>48</h></coordinates><panel_attributes>lt=&lt;-&gt;&gt;&gt;&gt;&gt;
+m1=n
+m2=1</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element></diagram>

@@ -6,11 +6,11 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "logger/Logger.hpp"
+#include "sensorring/logger/Logger.hpp"
 #include "sensors/LedLight.hpp"
 #include "sensors/ThermalSensor.hpp"
 #include "sensors/TofSensor.hpp"
-#include "utils/EnumerationInformation.hpp"
+#include "types/EnumerationInformation.hpp"
 
 #include "SensorBoard.hpp"
 
@@ -97,7 +97,15 @@ void SensorBus::resetDevices() {
   sensor::SensorBoard::cmdReset(_interface);
 }
 
+void SensorBus::resetSensorState() {
+  for (auto& sensor : _board_vec) {
+    sensor->getTof()->resetSensorState();
+    sensor->getThermal()->resetSensorState();
+  }
+}
+
 int SensorBus::enumerateDevices() {
+  _enumeration_vec.clear();
   _enumeration_flag  = true;
   _enumeration_count = 0;
 
@@ -114,10 +122,12 @@ int SensorBus::enumerateDevices() {
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   _enumeration_flag = false;
 
-  for (size_t i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+  for (auto i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
+    auto idx = static_cast<unsigned int>(i + 1);
+
     // Add configured but unconnected sensors to the enumeration list
     sensor::EnumerationInformation info;
-    info.idx   = i + 1;
+    info.idx   = idx;
     info.state = sensor::EnumerationState::ConfiguredNotConnected;
     _enumeration_vec.push_back(std::move(info));
 
@@ -163,7 +173,7 @@ void SensorBus::requestTofMeasurement() {
     }
   }
 
-  sensor::TofSensor::requestTofMeasurement(_interface, active_devices);
+  sensor::TofSensor::cmdRequestTofMeasurement(_interface, active_devices);
 }
 
 void SensorBus::fetchTofMeasurement() {
@@ -174,7 +184,7 @@ void SensorBus::fetchTofMeasurement() {
     active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
   }
 
-  sensor::TofSensor::fetchTofMeasurement(_interface, active_devices);
+  sensor::TofSensor::cmdFetchTofMeasurement(_interface, active_devices);
 }
 
 void SensorBus::requestThermalMeasurement() {
@@ -264,7 +274,7 @@ bool SensorBus::stopThermalCalibration() {
   return success;
 }
 
-bool SensorBus::startThermalCalibration(unsigned int window) {
+bool SensorBus::startThermalCalibration(std::size_t window) {
   bool success = true;
 
   for (auto& sensor : _board_vec) {

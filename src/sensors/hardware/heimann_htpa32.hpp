@@ -2,14 +2,16 @@
 
 #include <cstdint>
 
+#include "platform/Platform.hpp"
+
 namespace eduart {
 
 namespace sensor {
 
 namespace htpa32 {
 
-// Needs to be packed because µC memory is directly copied in this struct
-struct __attribute__((__packed__)) HTPA32Eeprom {
+// Needs to be packed because µC memory is directly copied to this struct
+PACK(struct HTPA32Eeprom {
   float pixc_min;
   float pixc_max;
   std::uint8_t grad_scale;
@@ -45,7 +47,7 @@ struct __attribute__((__packed__)) HTPA32Eeprom {
   std::int16_t th_gradient[1024];
   std::int16_t th_offset[1024];
   std::uint16_t p[1024];
-};
+});
 
 // DEVICE ADDRESS
 #define SENSOR_ADDRESS 0x1A

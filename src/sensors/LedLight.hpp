@@ -1,8 +1,10 @@
 #pragma once
 
 #include "interface/ComInterface.hpp"
+#include "sensorring/Parameter.hpp"
+#include "sensorring/types/LightMode.hpp"
+
 #include "BaseSensor.hpp"
-#include "Parameters.hpp"
 
 namespace eduart {
 

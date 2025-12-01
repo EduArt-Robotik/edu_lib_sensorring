@@ -38,6 +38,7 @@ public:
   bool allEEPROMTransmissionsComplete() const;
 
   void resetDevices();
+  void resetSensorState();
   int enumerateDevices();
   void setBrs(bool brs_enable);
   void syncLight();
@@ -49,9 +50,9 @@ public:
   void fetchThermalMeasurement();
 
   bool stopThermalCalibration();
-  bool startThermalCalibration(unsigned int window);
+  bool startThermalCalibration(std::size_t window);
 
-  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
   com::ComInterface* _interface;

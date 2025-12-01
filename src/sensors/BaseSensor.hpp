@@ -2,20 +2,24 @@
 
 #include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
-
-#include "CustomTypes.hpp"
-#include "Math.hpp"
+#include "sensorring/math/Matrix3.hpp"
 
 namespace eduart {
 
 namespace sensor {
 
+enum class SENSORRING_API SensorState {
+  SensorInit,
+  SensorOK,
+  ReceiveError
+};
+
 class BaseSensor : public com::ComObserver {
 public:
-  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
+  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
   ~BaseSensor();
 
-  unsigned int getIdx() const;
+  std::size_t getIdx() const;
 
   bool gotNewData() const;
   bool newDataAvailable() const;
@@ -25,14 +29,17 @@ public:
 
   void setPose(math::Vector3 translation, math::Vector3 rotation);
 
+  void resetSensorState();
   void clearDataFlag();
-  virtual void onClearDataFlag() = 0;
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
   virtual void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 protected:
-  unsigned int _idx;
+  virtual void onResetSensorState() = 0;
+  virtual void onClearDataFlag()    = 0;
+
+  std::size_t _idx;
   SensorState _error;
   com::ComInterface* _interface;
 

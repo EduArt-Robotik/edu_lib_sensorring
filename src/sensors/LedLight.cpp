@@ -30,4 +30,5 @@ void LedLight::cmdSyncLight(com::ComInterface* interface) {
 }
 
 } // namespace sensor
+
 } // namespace eduart

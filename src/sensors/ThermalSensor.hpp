@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include "interface/ComInterface.hpp"
 #include "hardware/heimann_htpa32.hpp"
+#include "interface/ComInterface.hpp"
+#include "sensorring/Parameter.hpp"
+#include "sensorring/types/ThermalMeasurement.hpp"
 
 #include "BaseSensor.hpp"
-#include "CustomTypes.hpp"
-#include "Parameters.hpp"
 
 namespace eduart {
 
@@ -21,21 +21,23 @@ public:
   void readEEPROM();
   bool gotEEPROM() const;
   bool stopCalibration();
-  bool startCalibration(size_t window);
+  bool startCalibration(std::size_t window);
   ThermalSensorParams getParams() const;
 
-  std::pair<measurement::GrayscaleImage, SensorState> getLatestGrayscaleImage() const;
-  std::pair<measurement::FalseColorImage, SensorState> getLatestFalseColorImage() const;
-  std::pair<measurement::ThermalMeasurement, SensorState> getLatestMeasurement() const;
+  std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
+  std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
+  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  void onClearDataFlag() override;
 
   static void cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
   static void cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
   static void cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
 private:
+  void onResetSensorState() override;
+  void onClearDataFlag() override;
+
   void rotateLeftImage(measurement::GrayscaleImage& image) const;
   const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
   const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;
@@ -49,14 +51,14 @@ private:
   measurement::ThermalMeasurement _latest_measurement;
 
   uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2];
-  unsigned int _rx_buffer_offset;
+  std::size_t _rx_buffer_offset;
 
   bool _got_eeprom;
   bool _got_calibration;
   bool _calibration_active;
   double _calibration_average;
-  size_t _calibration_count_current;
-  size_t _calibration_count_goal;
+  std::size_t _calibration_count_current;
+  std::size_t _calibration_count_goal;
   std::string _eeprom_filename;
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;

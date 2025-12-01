@@ -1,10 +1,10 @@
-#include "MeasurementClient.hpp"
+#include "sensorring/MeasurementClient.hpp"
 
 namespace eduart {
 
 namespace manager {
 
-std::string to_string(ManagerState state) {
+std::string toString(ManagerState state) noexcept {
   switch (state) {
   case ManagerState::Uninitialized:
     return "Uninitialized";
@@ -21,8 +21,8 @@ std::string to_string(ManagerState state) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, ManagerState state) {
-  return os << to_string(state);
+std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept {
+  return os << toString(state);
 }
 
 } // namespace manager

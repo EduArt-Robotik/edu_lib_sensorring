@@ -1,4 +1,4 @@
-#include "MeasurementManager.hpp"
+#include "sensorring/MeasurementManager.hpp"
 
 #include <memory>
 
@@ -12,34 +12,34 @@ MeasurementManager::MeasurementManager(ManagerParams params)
     : _mm_impl(std::make_unique<MeasurementManagerImpl>(params)) {
 }
 
-MeasurementManager::~MeasurementManager() {
+MeasurementManager::~MeasurementManager() noexcept {
 }
 
-void MeasurementManager::enableTofMeasurement(bool state) {
+void MeasurementManager::enableTofMeasurement(bool state) noexcept {
   return _mm_impl->enableTofMeasurement(state);
 }
 
-void MeasurementManager::enableThermalMeasurement(bool state) {
+void MeasurementManager::enableThermalMeasurement(bool state) noexcept {
   return _mm_impl->enableThermalMeasurement(state);
 }
 
-ManagerParams MeasurementManager::getParams() const {
+ManagerParams MeasurementManager::getParams() const noexcept {
   return _mm_impl->getParams();
 }
 
-std::string MeasurementManager::printTopology() const {
+std::string MeasurementManager::printTopology() const noexcept {
   return _mm_impl->printTopology();
 }
 
-bool MeasurementManager::stopThermalCalibration() {
+bool MeasurementManager::stopThermalCalibration() noexcept {
   return _mm_impl->stopThermalCalibration();
 }
 
-bool MeasurementManager::startThermalCalibration(std::size_t window) {
+bool MeasurementManager::startThermalCalibration(std::size_t window) noexcept {
   return _mm_impl->startThermalCalibration(window);
 }
 
-void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
+void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
   return _mm_impl->setLight(mode, red, green, blue);
 }
 
@@ -48,15 +48,15 @@ void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::
 ==========================================================================================
 */
 
-void MeasurementManager::registerClient(MeasurementClient* observer) {
+void MeasurementManager::registerClient(MeasurementClient* observer) noexcept {
   return _mm_impl->registerClient(observer);
 }
 
-void MeasurementManager::unregisterClient(MeasurementClient* observer) {
+void MeasurementManager::unregisterClient(MeasurementClient* observer) noexcept {
   return _mm_impl->unregisterClient(observer);
 }
 
-ManagerState MeasurementManager::getManagerState() const {
+ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
 }
 
@@ -65,19 +65,19 @@ ManagerState MeasurementManager::getManagerState() const {
 ==========================================================================================
 */
 
-bool MeasurementManager::measureSome() {
+bool MeasurementManager::measureSome() noexcept{
   return _mm_impl->measureSome();
 }
 
-bool MeasurementManager::startMeasuring() {
+bool MeasurementManager::startMeasuring() noexcept {
   return _mm_impl->startMeasuring();
 }
 
-bool MeasurementManager::stopMeasuring() {
+bool MeasurementManager::stopMeasuring() noexcept {
   return _mm_impl->stopMeasuring();
 }
 
-bool MeasurementManager::isMeasuring(){
+bool MeasurementManager::isMeasuring() noexcept {
   return _mm_impl->isMeasuring();
 }
 

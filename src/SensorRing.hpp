@@ -3,8 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "Parameters.hpp"
+#include "sensorring/Parameter.hpp"
+
 #include "SensorBus.hpp"
+
 
 namespace eduart {
 
@@ -22,6 +24,7 @@ public:
   void syncLight();
   void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   void resetDevices();
+  void resetSensorState();
   bool enumerateDevices();
   bool getEEPROM();
   void requestTofMeasurement();
@@ -29,7 +32,7 @@ public:
   void requestThermalMeasurement();
   void fetchThermalMeasurement();
   bool stopThermalCalibration();
-  bool startThermalCalibration(size_t window);
+  bool startThermalCalibration(std::size_t window);
 
   bool waitForAllTofMeasurementsReady() const;
   bool waitForAllTofDataTransmissionsComplete() const;
