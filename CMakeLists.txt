@@ -22,6 +22,15 @@ project(sensorring
   HOMEPAGE_URL "https://github.com/EduArt-Robotik/edu_lib_sensorring"
 )
 
+set(SENSORRING_NAME               "Sensor Ring Library")
+set(SENSORRING_COMPANY            "EduArt Robotik GmbH")
+set(SENSORRING_CONTACT            "Hannes Duske <hannes.duske@eduart-robotik.com>")
+set(SENSORRING_DESCRIPTION        "Software interface of the EduArt Sensor Ring")
+set(SENSORRING_VERSION            ${PROJECT_VERSION})
+set(SENSORRING_ABBREVIATION       ${PROJECT_NAME})
+set(SENSORRING_HOMEPAGE_URL       ${PROJECT_HOMEPAGE_URL})
+
+
 #########################################################
 # Require out-of-source builds
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
@@ -30,14 +39,20 @@ if(EXISTS "${LOC_PATH}")
 endif()
 
 #########################################################
+# For includes and find modules
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
 # Build settings
-include(cmake/BuildSettings.cmake REQUIRED)
+include(BuildSettings REQUIRED)
 
 # options
-include(cmake/BuildOptions.cmake REQUIRED)
+include(BuildOptions REQUIRED)
 
 # Fetch dependencies
-include(cmake/CollectDependencies.cmake REQUIRED)
+include(CollectDependencies REQUIRED)
+
+# Configure Paths
+include(ConfigurePaths REQUIRED)
 
 # Library
 add_subdirectory(src)
@@ -59,8 +74,8 @@ endif()
 
 # cpack packaging
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    include(cmake/PackageGeneration.cmake REQUIERD)    
+    include(PackageGeneration REQUIERD)    
 endif()
 
 # Build summary
-include(cmake/ShowSummary.cmake REQUIRED)
+include(ShowSummary REQUIRED)

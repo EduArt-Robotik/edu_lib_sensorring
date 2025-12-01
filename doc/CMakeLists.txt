@@ -54,5 +54,5 @@ add_custom_target(
 install(
   DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}/html
-  DESTINATION share/doc/sensorring COMPONENT Documentation
+  DESTINATION ${SENSORRING_INSTALL_DOC_DIR} COMPONENT Documentation
 )
