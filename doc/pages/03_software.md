@@ -171,7 +171,7 @@ In addition the pose of each sensor is published as a static transformation.
 
 <div class="tabbed">
 
-- <b class="tab-title">**Native ROS**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**ROS Native**</b><div class="darkmode_inverted_image">
     ```sh
     mkdir catkin_ws/src -p
     cd catkin_ws
@@ -184,7 +184,7 @@ In addition the pose of each sensor is published as a static transformation.
 
   </div>
 
-- <b class="tab-title">**Docker**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**ROS in Docker**</b><div class="darkmode_inverted_image">
     ```sh
     git clone https://github.com/EduArt-Robotik/edu_sensorring_ros1.git
     cd edu_sensorring_ros1/docker/
@@ -205,7 +205,7 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
 <div class="tabbed">
 
-- <b class="tab-title">**Native ROS2**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**ROS2 Native**</b><div class="darkmode_inverted_image">
     ```sh
     mkdir ros2_ws/src -p
     cd ros2_ws
@@ -218,7 +218,7 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
   </div>
 
-- <b class="tab-title">**Docker**</b><div class="darkmode_inverted_image">
+- <b class="tab-title">**ROS2 in Docker**</b><div class="darkmode_inverted_image">
     ```sh
     git clone https://github.com/EduArt-Robotik/edu_sensorring_ros2.git
     cd edu_sensorring_ros2/docker/
