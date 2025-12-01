@@ -42,10 +42,9 @@ public:
 
   /**
    * Run one processing cycle of the state machine worker
-   * @throw Throws std::runtime_error in case the measurement fails
    * @return true on success
    */
-  bool measureSome();
+  bool measureSome() noexcept;
 
   /**
    * Start running the state machine worker loop in a thread

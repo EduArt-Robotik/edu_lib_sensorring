@@ -39,7 +39,7 @@ public:
    * Run one processing cycle of the state machine worker
    * @return error code
    */
-  bool measureSome() noexcept(false);
+  bool measureSome() noexcept;
 
   /**
    * Start running the state machine worker loop in a thread
@@ -145,7 +145,7 @@ private:
   };
 
   void StateMachine();
-  void StateMachineWorker();
+  void StateMachineWorker() noexcept;
 
   int notifyToFData();
   int notifyThermalData();
@@ -179,6 +179,7 @@ private:
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
+  std::exception_ptr worker_exception;
 };
 
 } // namespace manager

@@ -65,7 +65,7 @@ ManagerState MeasurementManager::getManagerState() const noexcept {
 ==========================================================================================
 */
 
-bool MeasurementManager::measureSome() {
+bool MeasurementManager::measureSome() noexcept{
   return _mm_impl->measureSome();
 }
 
