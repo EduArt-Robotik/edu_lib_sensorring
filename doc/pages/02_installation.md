@@ -108,7 +108,7 @@ The library is built with a standard CMake workflow which is almost identical fo
     mkdir edu_lib_sensorring/build
     cd edu_lib_sensorring/build
     cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
-    cmake --build . --config=Release -- -j4
+    cmake --build . --config=Release --parallel
     ```
 
     **Windows build options:**

@@ -23,9 +23,16 @@ namespace measurement {
  * @brief  Stores the data of a single point in 3d space
  */
 struct SENSORRING_API PointData {
+  /// Cartesian coordinates of the point
   math::Vector3 point = { 0.0, 0.0, 0.0 };
+
+  /// Raw distance from the origin to the point
   double raw_distance = 0.0;
+
+  /// Standard deviation associated with the points location
   double sigma        = 0.0;
+
+  /// User assigned index of the sensor that measured the point
   int user_idx        = 0;
 };
 
@@ -34,6 +41,7 @@ struct SENSORRING_API PointData {
  * @brief  Stores a vector of points in 3D space
  */
 struct SENSORRING_API PointCloud {
+  /// Data structure of the PointCloud
   std::vector<PointData> data;
 
   /**

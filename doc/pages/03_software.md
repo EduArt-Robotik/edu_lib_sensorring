@@ -65,7 +65,7 @@ The following examples show how to use the Sensor Ring library in your own C++ p
 - [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp): Displays the current measurement rate
 - [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Displays a depth map of the ToF measurement on the command line
 
-
+> ⚠️ To use the `depth_map` C++ example on Windows you might first need to enable UTF-8 support for your current terminal session with this command: `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
 
 ### 4.2 Python <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
 The library can be built with `-DBUILD_PYTHON_BINDINGS=ON` option to generate python bindings.

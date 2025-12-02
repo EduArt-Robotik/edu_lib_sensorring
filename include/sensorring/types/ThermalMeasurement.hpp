@@ -41,13 +41,28 @@ class SENSORRING_API FalseColorImage : public GenericRGBImage<std::uint8_t, THER
  * @brief  Structure for holding a measurement form a thermal sensor
  */
 struct SENSORRING_API ThermalMeasurement {
+  /// Frame number of the ThermalMeasurement
   unsigned int frame_id  = 0;
+
+  /// User assigned index of the sensor that measured the point
   unsigned int user_idx  = 0;
+
+  /// Ambient temperature in °C
   double t_ambient_deg_c = 0;
+
+  /// Minimum temperature recorded in the measurement in °C
   double min_deg_c       = 0;
+
+  /// Maximum temperature recorded in the measurement in °C
   double max_deg_c       = 0;
+
+  /// Image structure where each pixel represents the temperature measured at that point in °C
   TemperatureImage temp_data_deg_c;
+
+  /// Grayscale image visualizing the thermal measurement
   GrayscaleImage grayscale_img;
+
+  /// False color image visualizing the thermal measurement
   FalseColorImage falsecolor_img;
 };
 
