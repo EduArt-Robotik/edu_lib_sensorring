@@ -1,7 +1,7 @@
 #########################################################
 # Configure install paths
 
-if (UNIX)
+if (IS_LINUX)
   set(CMAKE_INSTALL_PREFIX "/usr/local")
   # The following directories are defined relative to the CMAKE_INSTALL_PREFIX
   set(SENSORRING_INSTALL_RUNTIME_DIR           "bin")

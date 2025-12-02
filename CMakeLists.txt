@@ -42,6 +42,12 @@ endif()
 # For includes and find modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# Configure Platform
+include(ConfigurePlatform REQUIRED)
+
+# Configure Paths
+include(ConfigurePaths REQUIRED)
+
 # Build settings
 include(BuildSettings REQUIRED)
 
@@ -50,9 +56,6 @@ include(BuildOptions REQUIRED)
 
 # Fetch dependencies
 include(CollectDependencies REQUIRED)
-
-# Configure Paths
-include(ConfigurePaths REQUIRED)
 
 # Library
 add_subdirectory(src)

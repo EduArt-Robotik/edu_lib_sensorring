@@ -1,7 +1,7 @@
 #########################################################
 # options
 
-if(UNIX)
+if(IS_LINUX)
   option( USE_SOCKETCAN "Compile with support for Linux SocketCAN" ON)
 endif()
 option( USE_USBTINGO "Compile with support for the USBtingo USB adapter" OFF)
@@ -10,7 +10,7 @@ option( BUILD_EXAMPLES "Build the example programs" OFF)
 option( BUILD_DOCUMENTATION "Build the documentation" OFF)
 option( BUILD_PYTHON_BINDINGS "Build python bindings" OFF)
 
-if(WIN32)
+if(IS_WINDOWS)
   set( USE_USBTINGO ON)
 endif()
 
