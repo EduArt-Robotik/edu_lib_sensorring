@@ -23,12 +23,6 @@ namespace eduart {
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
   /**
-   * @brief Get the rate of measurements since the last call of this method
-   * @return measurement rate in Hz
-   */
-  double getRate();
-
-  /**
    * @brief Check if the client got the first measurement
    * @return true if the client already got the first measurement
    */
@@ -57,7 +51,6 @@ private:
 
   TimePoint _lastQuery;
   std::atomic<bool> _init_flag;
-  std::atomic<unsigned int> _counter;
 };
 
 } // namespace eduart
