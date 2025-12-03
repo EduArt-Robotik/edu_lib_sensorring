@@ -1,8 +1,13 @@
-if(USE_USBTINGO)
+if(SENSORRING_USE_USBTINGO)
   find_package(usbtingo QUIET)
 
   if(NOT usbtingo_FOUND)
     message(STATUS "Did not find libusbtingo. Fetching it from GitHub...")
+
+    set(USBTINGO_BUILD_SHARED_LIBS OFF)
+    set(USBTINGO_BUILD_EXAMPLES OFF)
+    set(USBTINGO_BUILD_UTILS OFF)
+    set(USBTINGO_BUILD_TESTS OFF)
 
     include(FetchContent)
     FetchContent_Declare(

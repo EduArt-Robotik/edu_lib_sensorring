@@ -1,6 +1,13 @@
 #########################################################
 # declare library
-add_library(sensorring
+if(SENSORRING_BUILD_SHARED_LIBS)
+    add_library(sensorring SHARED)
+else()
+    add_library(sensorring STATIC)
+endif()
+
+target_sources(sensorring
+  PRIVATE
   MeasurementManager.cpp
   MeasurementClient.cpp
   MeasurementManagerImpl.cpp
@@ -26,13 +33,13 @@ add_library(sensorring
   math/Matrix3.cpp
 )
 
-if(USE_SOCKETCAN)
+if(SENSORRING_USE_SOCKETCAN)
   list(APPEND SOURCES
     interface/can/SocketCANFD.cpp
   )
 endif()
 
-if(USE_USBTINGO)
+if(SENSORRING_USE_USBTINGO)
   list(APPEND SOURCES
     interface/can/USBtingo.cpp
   )
@@ -54,7 +61,7 @@ target_include_directories(sensorring PUBLIC
 
 #########################################################
 # build macros
-if(BUILD_SHARED_LIBS)
+if(SENSORRING_BUILD_SHARED_LIBS)
   target_compile_definitions(sensorring PUBLIC
     SENSORRING_SHARED
   )
@@ -66,13 +73,13 @@ if(MSVC)
   SENSORRING_DLL_EXPORT)
 endif()
 
-if(USE_SOCKETCAN)
+if(SENSORRING_USE_SOCKETCAN)
   target_compile_definitions(sensorring PRIVATE USE_SOCKETCAN)
 endif()
 
-if(USE_USBTINGO)
+if(SENSORRING_USE_USBTINGO)
   target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
-  if(BUILD_SHARED_LIBS)
+  if(SENSORRING_BUILD_SHARED_LIBS)
     target_link_libraries(sensorring PRIVATE
       usbtingo::usbtingo
       Threads::Threads
@@ -91,6 +98,7 @@ install(TARGETS sensorring
   EXPORT sensorringTargets
   LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
   ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
+  RUNTIME DESTINATION ${SENSORRING_INSTALL_RUNTIME_DIR}
 )
 
 # install cmake files
@@ -110,7 +118,7 @@ install(DIRECTORY
 # cmake package configuration
 include(CMakePackageConfigHelpers)
 
-if(USE_USBTINGO)
+if(SENSORRING_USE_USBTINGO)
     set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
 endif()
 

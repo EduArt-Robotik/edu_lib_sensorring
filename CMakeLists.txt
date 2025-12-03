@@ -23,6 +23,7 @@ project(sensorring
 )
 
 set(SENSORRING_NAME               "Sensor Ring Library")
+set(SENSORRING_NAME_SHORT         "Sensor Ring")
 set(SENSORRING_COMPANY            "EduArt Robotik GmbH")
 set(SENSORRING_CONTACT            "Hannes Duske <hannes.duske@eduart-robotik.com>")
 set(SENSORRING_DESCRIPTION        "Software interface of the EduArt Sensor Ring")
@@ -61,17 +62,17 @@ include(CollectDependencies REQUIRED)
 add_subdirectory(src)
 
 # Examples
-if(BUILD_EXAMPLES)
+if(SENSORRING_BUILD_EXAMPLES)
   add_subdirectory(apps/examples/cpp)
 endif()
 
 # Documentation
-if(BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
+if(SENSORRING_BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(doc)
 endif()
 
 # Language bindings
-if(BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
+if(SENSORRING_BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(bindings)
 endif()
 

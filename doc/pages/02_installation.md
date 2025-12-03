@@ -81,7 +81,7 @@ The library is built with a standard CMake workflow which is almost identical fo
     git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
     mkdir -p edu_lib_sensorring/build
     cd edu_lib_sensorring/build
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON
     cmake --build . -j4
     ```
 
@@ -89,12 +89,12 @@ The library is built with a standard CMake workflow which is almost identical fo
 
     <table>
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
-      <tr><td>BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
-      <tr><td>BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
-      <tr><td>BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
-      <tr><td>BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
-      <tr><td>USE_SOCKETCAN</td><td>ON</td><td>Compile with support for Linux SocketCAN</td></tr>
-      <tr><td>USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
+      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
+      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
+      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
+      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>SENSORRING_USE_SOCKETCAN</td><td>ON</td><td>Compile with support for Linux SocketCAN</td></tr>
+      <tr><td>SENSORRING_USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
       <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
       <tr><td>CMAKE_INSTALL_PREFIX</td><td>/usr/local</td><td>Install path prefix, prepended onto install directories</td></tr>
     </table>
@@ -107,7 +107,7 @@ The library is built with a standard CMake workflow which is almost identical fo
     git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
     mkdir edu_lib_sensorring/build
     cd edu_lib_sensorring/build
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON
     cmake --build . --config=Release --parallel
     ```
 
@@ -115,11 +115,11 @@ The library is built with a standard CMake workflow which is almost identical fo
 
     <table>
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
-      <tr><td>BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
-      <tr><td>BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
-      <tr><td>BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
-      <tr><td>BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
-      <tr><td>USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
+      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
+      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
+      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
+      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>SENSORRING_USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
       <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
       <tr><td>CMAKE_INSTALL_PREFIX</td><td>C:\Program Files</td><td>Install path prefix, prepended onto install directories</td></tr>
     </table>
