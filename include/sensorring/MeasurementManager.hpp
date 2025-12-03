@@ -125,7 +125,6 @@ public:
    * @param[in] red Red color value
    * @param[in] green Green color value
    * @param[in] blue Blue color value
-   * @return true if successful, false otherwise
    */
   void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0) noexcept;
 

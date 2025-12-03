@@ -210,7 +210,7 @@ The USBtingo can be used on both Linux and Windows devices.
 The Sensor Ring Library uses [libusbtingo](https://github.com/hannesduske/libusbtingo) internally to support this interface.
 If the libusbtingo library is not previously installed it is automatically fetched while building the the Sensor Ring library.
 
-> ⚠️ The Sensor Ring library needs to be compiled with the `-DUSE_USBTINGO=ON` option to enable support for this interface.
+> ⚠️ The Sensor Ring library needs to be compiled with the `-DSENSORRING_USE_USBTINGO=ON` option to enable support for this interface.
 
 > ⚠️ The USBtingo is not recognized as CAN device by the Linux Kernel. The commands from the SocketCAN compatible adapter above don't work for this device.
 

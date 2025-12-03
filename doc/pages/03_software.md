@@ -68,7 +68,28 @@ The following examples show how to use the Sensor Ring library in your own C++ p
 > ⚠️ To use the `depth_map` C++ example on Windows you might first need to enable UTF-8 support for your current terminal session with this command: `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
 
 ### 4.2 Python <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
-The library can be built with `-DBUILD_PYTHON_BINDINGS=ON` option to generate python bindings.
+> ℹ️ The library can be built with `-DSENSORRING_BUILD_PYTHON_BINDINGS=ON` option to generate python bindings.
+
+> ⚠️ To use the `sensorring` python package you have to append the location of the package to your `PYTHONPATH` environment variable.
+
+<div class="tabbed">
+
+- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
+    ```sh
+    export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages
+    ```
+    
+  </div>
+
+- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
+    ```ps
+    $env:PYTHONPATH = "${env:PYTHONPATH};C:\Program Files\EduArt Robotik GmbH\Sensor Ring\bindings\python3"
+    $env:EDU_SENSORRING_DIR = "C:\Program Files\EduArt Robotik GmbH\Sensor Ring\"
+    ```
+    Alternatively you can use the Windows `Edit the System Environment Variables` tool to add the python package location to the environment variable `PYTHONPATH`.
+
+  </div>
+</div>
 
 The following examples show how to use the Sensor Ring library in your own Python project:
 
@@ -100,7 +121,7 @@ For this reason the Python interface has the additional `SensorringClient` class
 
 > ⚠️ Use the `SensorringClient` base class in Python to inherit from both `MeasurementClient` and `LoggerClient`.
 
-> ⚠️ It is strongly recommended to clone measurements to numyp arrays before manipulating it. This is shown in the `onRawTofMeasurement()` callback below.
+> ⚠️ It is strongly recommended to clone measurements to numyp arrays before manipulating them. This is shown in the `onRawTofMeasurement()` callback below.
 
 Below is a minimal example that shows the Python specialities discussed above:
 
@@ -167,7 +188,7 @@ In addition the the examples, the Sensor Ring library has provides for [ROS](htt
 The Ros1 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](hhttps://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html) message and the thermal measurements as [Image](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html) message.
 In addition the pose of each sensor is published as a static transformation.
 
-> ℹ️ Using the ROS Wrapper does not require to install the Sensor Ring Library manually. The ROS build will automatically fetch the library if it is not detected by CMake.
+> ℹ️ Using the ROS Wrapper does not require you to install the Sensor Ring Library manually. The ROS build will automatically fetch the library if it is not detected by CMake.
 
 <div class="tabbed">
 
@@ -201,7 +222,7 @@ In addition the pose of each sensor is published as a static transformation.
 The Ros2 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](https://docs.ros2.org/foxy/api/sensor_msgs/msg/PointCloud.html) message and the thermal measurements as [Image](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html) message.
 In addition to the sensor messages the pose of each sensor is published as a static transformation.
 
-> ℹ️ Using the ROS2 Wrapper does not require to install the Sensor Ring Library manually. The ROS2 build will automatically fetch the library if it is not detected by CMake.
+> ℹ️ Using the ROS2 Wrapper does not require you to install the Sensor Ring Library manually. The ROS2 build will automatically fetch the library if it is not detected by CMake.
 
 <div class="tabbed">
 
@@ -229,10 +250,6 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
   </div>
 </div>
-
-
-
-
 
 <div align=center>
 <table style="border: none; table-layout: fixed; width: 100%;">

@@ -44,7 +44,7 @@ target_link_libraries(minimal_example
 )
 ```
 
-You can then simply integrate the Sensor Ring headers into your C++ program and compile the project.
+You can then simply include the Sensor Ring headers into your C++ program and compile the project.
 
 ```cpp
 // Example of a C++ program using the library
@@ -212,11 +212,6 @@ However, distributing the installable package requires that the computer on whic
   </div>
 
 </div>
-
-
-
-
-### 2.4 Uninstalling the Library
 
 
 <div class="section_buttons"> 
