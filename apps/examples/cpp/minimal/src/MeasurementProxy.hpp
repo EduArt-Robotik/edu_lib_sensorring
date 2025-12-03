@@ -50,10 +50,10 @@ private:
   using TimePoint = Clock::time_point;
   using toSeconds = std::chrono::duration<double>;
 
-  Duration _duration;
-  TimePoint _last_measurement;
-  std::atomic<bool> _init_flag;
-  std::atomic<unsigned int> _counter;
+  Duration _duration                 = Duration::zero();
+  TimePoint _last_measurement        = Clock::now();
+  std::atomic<bool> _init_flag       = false;
+  std::atomic<unsigned int> _counter = 0;
 };
 
 } // namespace eduart

@@ -26,7 +26,7 @@ void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] const std::vector<me
 void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {
   if (verbosity > logger::LogVerbosity::Debug) {
     std::cout << "[" << verbosity << "] " << msg << std::endl;
-    std::cout << "\033[s";
+    _reset_cursor = false;
   }
 }
 
@@ -50,7 +50,9 @@ std::string MeasurementProxy::depthToColor(double depth, double min, double max)
 
 void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
 
-  std::cout << "\033[u" << std::endl;
+  if(_reset_cursor){
+    std::cout << "\033[8F";
+  }
 
   for (int row = 0; row < 8; ++row) {
     for (int col = 0; col < 8; ++col) {
@@ -61,6 +63,7 @@ void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
   }
 
   std::cout.flush();
+  _reset_cursor = true;
 }
 
 } // namespace eduart
