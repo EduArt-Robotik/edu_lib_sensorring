@@ -17,7 +17,7 @@ import eduart.sensorring as sensorring
 
 # Sensor setup
 SENSOR_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
-SENSOR_INTERFACE_NAME = "0x1731a1f1"
+SENSOR_INTERFACE_NAME = "0"
 
 
 # Threshold values for color mapping
