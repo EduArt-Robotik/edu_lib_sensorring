@@ -130,7 +130,7 @@ configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
 write_basic_package_version_file(
   "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
   VERSION "${sensorringVERSION}"
-  COMPATIBILITY AnyNewerVersion
+  COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
