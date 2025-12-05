@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <usbtingo/basic_bus/BasicBus.hpp>
+#include <usbtingo/device/Device.hpp>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
