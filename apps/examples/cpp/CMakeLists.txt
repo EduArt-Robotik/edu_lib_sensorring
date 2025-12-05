@@ -1,2 +1,0 @@
-add_subdirectory(minimal)
-add_subdirectory(depth_map)

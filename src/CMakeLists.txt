@@ -138,3 +138,7 @@ install(FILES
   "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
   DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
 )
+
+#########################################################
+# alias for other components
+add_library(sensorring::sensorring ALIAS sensorring)

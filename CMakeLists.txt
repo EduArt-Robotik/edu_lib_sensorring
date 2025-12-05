@@ -63,7 +63,7 @@ add_subdirectory(src)
 
 # Examples
 if(SENSORRING_BUILD_EXAMPLES)
-  add_subdirectory(apps/examples/cpp)
+  add_subdirectory(apps/examples)
 endif()
 
 # Documentation
