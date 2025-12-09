@@ -6,6 +6,8 @@ else()
     add_library(sensorring STATIC)
 endif()
 
+add_library(sensorring::sensorring ALIAS sensorring)
+
 target_sources(sensorring
   PRIVATE
   MeasurementManager.cpp
@@ -47,6 +49,7 @@ endif()
 
 target_sources(sensorring PRIVATE ${SOURCES})
 
+
 #########################################################
 # library includes
 target_include_directories(sensorring PRIVATE
@@ -58,6 +61,7 @@ target_include_directories(sensorring PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+
 
 #########################################################
 # build macros
@@ -74,9 +78,14 @@ if(MSVC)
 endif()
 
 if(SENSORRING_USE_SOCKETCAN)
-  target_compile_definitions(sensorring PRIVATE USE_SOCKETCAN)
+  target_compile_definitions(sensorring PRIVATE
+    USE_SOCKETCAN
+  )
 endif()
 
+
+#########################################################
+# link usbtingo
 if(SENSORRING_USE_USBTINGO)
   target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
   if(SENSORRING_BUILD_SHARED_LIBS)
