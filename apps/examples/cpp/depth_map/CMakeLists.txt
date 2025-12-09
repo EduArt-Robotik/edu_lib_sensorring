@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(depth_map_example)
 
+find_package(sensorring REQUIRED)
+
 add_executable(depth_map
     src/main.cpp
     src/MeasurementProxy.cpp
