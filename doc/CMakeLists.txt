@@ -51,8 +51,10 @@ add_custom_target(
   VERBATIM
 )
 
-install(
-  DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}/html
-  DESTINATION ${SENSORRING_INSTALL_DOC_DIR} COMPONENT Documentation
-)
+if(SENSORRING_INSTALL)
+  install(
+    DIRECTORY
+      ${CMAKE_CURRENT_BINARY_DIR}/html
+    DESTINATION ${SENSORRING_INSTALL_DOC_DIR} COMPONENT Documentation
+  )
+endif()

@@ -92,53 +92,53 @@ if(SENSORRING_USE_USBTINGO)
   endif()
 endif()
 
-#########################################################
-# install library
-install(TARGETS sensorring
-  EXPORT sensorringTargets
-  LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
-  ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
-  RUNTIME DESTINATION ${SENSORRING_INSTALL_RUNTIME_DIR}
-)
-
-# install cmake files
-install(EXPORT sensorringTargets
-  FILE sensorringTargets.cmake
-  NAMESPACE sensorring::
-  DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-)
-
-# install headers
-install(DIRECTORY
-  ${PROJECT_SOURCE_DIR}/include/
-  DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
-)
 
 #########################################################
 # cmake package configuration
-include(CMakePackageConfigHelpers)
+if(SENSORRING_INSTALL AND NOT SENSORRING_BUILD_OBJECT_LIBS)
 
-if(SENSORRING_USE_USBTINGO)
-    set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
+  include(CMakePackageConfigHelpers)
+
+  if(SENSORRING_USE_USBTINGO)
+      set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
+  endif()
+
+  configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
+    "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
+    INSTALL_DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
+  )
+
+  write_basic_package_version_file(
+    "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
+    VERSION "${sensorringVERSION}"
+    COMPATIBILITY SameMajorVersion
+  )
+
+  #########################################################
+  # install library
+  install(TARGETS sensorring
+    EXPORT sensorringTargets
+    LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
+    ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${SENSORRING_INSTALL_RUNTIME_DIR}
+  )
+
+  # install cmake files
+  install(EXPORT sensorringTargets
+    FILE sensorringTargets.cmake
+    NAMESPACE sensorring::
+    DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
+  )
+
+  # install headers
+  install(DIRECTORY
+    ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
+  )
+
+  install(FILES
+    "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
+    "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
+    DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
+  )
 endif()
-
-configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
-  "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
-  INSTALL_DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-)
-
-write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
-  VERSION "${sensorringVERSION}"
-  COMPATIBILITY SameMajorVersion
-)
-
-install(FILES
-  "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
-  "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
-  DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-)
-
-#########################################################
-# alias for other components
-add_library(sensorring::sensorring ALIAS sensorring)
