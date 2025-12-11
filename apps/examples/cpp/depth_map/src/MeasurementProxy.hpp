@@ -22,6 +22,12 @@ namespace eduart {
  */
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
+  /// Constructor
+  MeasurementProxy();
+
+  /// Destructor
+  ~MeasurementProxy();
+
   /**
    * @brief Check if the client got the first measurement
    * @return true if the client already got the first measurement

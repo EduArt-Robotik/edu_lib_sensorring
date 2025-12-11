@@ -10,8 +10,19 @@
 #include "MeasurementProxy.hpp"
 
 #include <iostream>
+#include <sensorring/logger/Logger.hpp>
 
 namespace eduart {
+
+MeasurementProxy::MeasurementProxy() {
+  // Register the proxy with the Logger to get the log output
+  logger::Logger::getInstance()->registerClient(this);
+}
+
+MeasurementProxy::~MeasurementProxy() {
+  // Important, otherwise a segfault may occur on program exit
+  logger::Logger::getInstance()->unregisterClient(this);
+}
 
 bool MeasurementProxy::gotFirstMeasurement() {
   return _init_flag;
@@ -50,7 +61,7 @@ std::string MeasurementProxy::depthToColor(double depth, double min, double max)
 
 void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
 
-  if(_reset_cursor){
+  if (_reset_cursor) {
     std::cout << "\033[8F";
   }
 

@@ -11,7 +11,6 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/MeasurementManager.hpp>
-#include <sensorring/logger/Logger.hpp>
 #include <thread>
 
 #include "MeasurementProxy.hpp"
@@ -51,9 +50,6 @@ int main(int, char*[]) {
 
   // Instantiate a Measurement proxy
   auto proxy = std::make_unique<MeasurementProxy>();
-
-  // Register the proxy with the Logger to get the log output
-  logger::Logger::getInstance()->registerClient(proxy.get());
 
   try {
     // Instantiate a MeasurementManager with the parameters from above

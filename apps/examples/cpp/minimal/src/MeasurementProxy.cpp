@@ -10,10 +10,19 @@
 #include "MeasurementProxy.hpp"
 
 #include <iostream>
-
-#include "sensorring/logger/LoggerClient.hpp"
+#include <sensorring/logger/Logger.hpp>
 
 namespace eduart {
+
+MeasurementProxy::MeasurementProxy() {
+  // Register the proxy with the Logger to get the log output
+  logger::Logger::getInstance()->registerClient(this);
+}
+
+MeasurementProxy::~MeasurementProxy() {
+  // Important, otherwise a segfault may occur on program exit
+  logger::Logger::getInstance()->unregisterClient(this);
+}
 
 double MeasurementProxy::getRate() {
   auto rate = static_cast<double>(_counter) / toSeconds(_duration).count();

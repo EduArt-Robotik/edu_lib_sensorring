@@ -22,6 +22,12 @@ namespace eduart {
  */
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
+  /// Constructor
+  MeasurementProxy();
+
+  /// Destructor
+  ~MeasurementProxy();
+
   /**
    * @brief Get the rate of measurements since the last call of this method
    * @return measurement rate in Hz
