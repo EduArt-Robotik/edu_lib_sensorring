@@ -26,7 +26,7 @@ public:
   /**
    * Destructor
    */
-  ~ComInterface();
+  virtual ~ComInterface();
 
   /**
    * Get the interface name of the ComInterface object
