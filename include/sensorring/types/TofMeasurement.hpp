@@ -22,7 +22,10 @@ namespace measurement {
  * @brief  Structure for holding a measurement form a ToF sensor
  */
 struct SENSORRING_API TofMeasurement {
+  /// Frame number of the ThermalMeasurement
   unsigned int frame_id = 0;
+
+  /// Point cloud of the Time-of-Flight sensor measurement
   PointCloud point_cloud;
 };
 

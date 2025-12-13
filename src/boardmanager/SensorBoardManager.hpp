@@ -11,11 +11,11 @@ namespace sensor {
 
 // Numbers match the definition in the sensor board firmware
 enum class SensorBoardType {
-  Headlight = 0,
-  Taillight = 1,
-  Sidepanel = 2,
-  Minipanel = 3,
-  Undefined = 255
+  Sidepanel = 0x00,
+  Headlight = 0x01,
+  Taillight = 0x02,
+  Minipanel = 0x03,
+  Undefined = 0xff
 };
 
 enum class TofType {

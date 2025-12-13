@@ -11,8 +11,8 @@ endif()
 
 #########################################################
 # Project
-set(CMAKE_PROJECT_VERSION_MAJOR 2)
-set(CMAKE_PROJECT_VERSION_MINOR 1)
+set(CMAKE_PROJECT_VERSION_MAJOR 3)
+set(CMAKE_PROJECT_VERSION_MINOR 0)
 set(CMAKE_PROJECT_VERSION_PATCH 0)
 set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}")
 
@@ -22,6 +22,16 @@ project(sensorring
   HOMEPAGE_URL "https://github.com/EduArt-Robotik/edu_lib_sensorring"
 )
 
+set(SENSORRING_NAME               "Sensor Ring Library")
+set(SENSORRING_NAME_SHORT         "Sensor Ring")
+set(SENSORRING_COMPANY            "EduArt Robotik GmbH")
+set(SENSORRING_CONTACT            "Hannes Duske <hannes.duske@eduart-robotik.com>")
+set(SENSORRING_DESCRIPTION        "Software interface of the EduArt Sensor Ring")
+set(SENSORRING_VERSION            ${PROJECT_VERSION})
+set(SENSORRING_ABBREVIATION       ${PROJECT_NAME})
+set(SENSORRING_HOMEPAGE_URL       ${PROJECT_HOMEPAGE_URL})
+
+
 #########################################################
 # Require out-of-source builds
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
@@ -30,37 +40,46 @@ if(EXISTS "${LOC_PATH}")
 endif()
 
 #########################################################
+# For includes and find modules
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# Configure Platform
+include(ConfigurePlatform REQUIRED)
+
+# Configure Paths
+include(ConfigurePaths REQUIRED)
+
 # Build settings
-include(cmake/BuildSettings.cmake REQUIRED)
+include(BuildSettings REQUIRED)
 
 # options
-include(cmake/BuildOptions.cmake REQUIRED)
+include(BuildOptions REQUIRED)
 
 # Fetch dependencies
-include(cmake/CollectDependencies.cmake REQUIRED)
+include(CollectDependencies REQUIRED)
 
 # Library
 add_subdirectory(src)
 
 # Examples
-if(BUILD_EXAMPLES)
-  add_subdirectory(apps/examples/cpp)
+if(SENSORRING_BUILD_EXAMPLES)
+  add_subdirectory(apps/examples)
 endif()
 
 # Documentation
-if(BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
+if(SENSORRING_BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(doc)
 endif()
 
 # Language bindings
-if(BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
+if(SENSORRING_BUILD_PYTHON_BINDINGS AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(bindings)
 endif()
 
 # cpack packaging
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    include(cmake/PackageGeneration.cmake REQUIERD)    
+    include(PackageGeneration REQUIERD)    
 endif()
 
 # Build summary
-include(cmake/ShowSummary.cmake REQUIRED)
+include(ShowSummary REQUIRED)

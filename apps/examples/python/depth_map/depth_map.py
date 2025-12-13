@@ -13,7 +13,7 @@ import eduart.sensorring as sensorring
 
 # Sensor setup
 SENSOR_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
-SENSOR_INTERFACE_NAME = "0x1731a1f1"
+SENSOR_INTERFACE_NAME = "0"
 
 
 # Threshold values for color mapping
@@ -31,6 +31,7 @@ class MeasurementProxy(sensorring.SensorringClient):
 
     # class members
     self._init_flag = False
+    self._reset_cursor = False
     
 
   # Base class callback
@@ -43,7 +44,7 @@ class MeasurementProxy(sensorring.SensorringClient):
   def onOutputLog(self, verbosity, msg):
     if verbosity > sensorring.LogVerbosity_Debug:
       print("[" + sensorring.LogVerbosityToString(verbosity) + "] " + msg)
-      print("\033[s", end="")
+      self._reset_cursor = False
 
 
   def gotFirstMeasurement(self):
@@ -66,17 +67,21 @@ class MeasurementProxy(sensorring.SensorringClient):
     return "\033[38;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
 
   def printDepthMap(self, points):
-    print("\033[u")
+    if self._reset_cursor:
+      print("\33[8F", end="")
+
     for row in range(0, 8):
       for col in range(0, 8):
         idx = row * 8 + col
-        print(self.depthToColor(points[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
+        print(self.depthToColor(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
       
       print("\033[0m")
     print("", end="", flush=True)  
+    self._reset_cursor = True
 
 
 def main():
+  print("\33c")
   print("==========================")
   print("Minimal sensorring example")
   print("==========================")

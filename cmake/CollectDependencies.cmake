@@ -1,18 +1,35 @@
-if(USE_USBTINGO)
+if(SENSORRING_USE_USBTINGO)
   find_package(usbtingo QUIET)
 
-  if(NOT usbtingo_FOUND)
+  if(usbtingo_FOUND)
+    set(SENSORRING_USBTINGO_INSTALLED ON)
+  else()
     message(STATUS "Did not find libusbtingo. Fetching it from GitHub...")
+    set(SENSORRING_USBTINGO_INSTALLED OFF)
 
-    include(FetchContent)
-    FetchContent_Declare(
+    #include(FetchContent)
+    #FetchContent_Declare(
+    #  usbtingo
+    #  URL https://github.com/hannesduske/libusbtingo/archive/refs/tags/v1.1.3.zip
+    #  DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    #)
+
+    include(FetchContentCompat)
+    fetchcontent_declare_compat(
       usbtingo
-      URL      https://github.com/hannesduske/libusbtingo/archive/refs/heads/master.zip
-      DOWNLOAD_EXTRACT_TIMESTAMP OFF
+      URL https://github.com/hannesduske/libusbtingo/archive/v1.1.3.zip
     )
+
+    set(USBTINGO_INSTALL_DEV_COMPONENTS OFF)
+    set(USBTINGO_BUILD_SHARED_LIBS ${SENSORRING_BUILD_SHARED_LIBS})
+    set(USBTINGO_BUILD_EXAMPLES OFF)
+    set(USBTINGO_BUILD_UTILS OFF)
+    set(USBTINGO_BUILD_TESTS OFF)
+    set(USBTINGO_INSTALL ON)
     
     FetchContent_MakeAvailable(usbtingo)
-    add_library(usbtingo::usbtingo ALIAS usbtingo)
+
+    add_library(usbtingo::usbtingo ALIAS usbtingo)   
 
   endif()
 endif()

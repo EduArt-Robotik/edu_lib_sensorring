@@ -1,0 +1,30 @@
+#########################################################
+# Configure install paths
+
+if (IS_LINUX)
+  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  # The following directories are defined relative to the CMAKE_INSTALL_PREFIX
+  set(SENSORRING_INSTALL_RUNTIME_DIR           "bin")
+  set(SENSORRING_INSTALL_INCLUDE_DIR           "include")
+  set(SENSORRING_INSTALL_LIBRARY_DIR           "lib")
+  set(SENSORRING_INSTALL_ARCHIVE_DIR           "lib")
+  set(SENSORRING_INSTALL_CMAKE_DIR             "lib/cmake/${SENSORRING_ABBREVIATION}")
+  set(SENSORRING_INSTALL_SHARE_DIR             "share/${SENSORRING_ABBREVIATION}")
+  set(SENSORRING_INSTALL_DOC_DIR               "share/doc/${SENSORRING_ABBREVIATION}")
+  set(SENSORRING_INSTALL_EXAMPLES_DIR          "share/doc/${SENSORRING_ABBREVIATION}/examples")
+  set(SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR  "share/doc/${SENSORRING_ABBREVIATION}/examples/bin")
+  set(SENSORRING_INSTALL_PYTHON_DIR            "lib/python3/dist-packages")
+elseif(IS_WINDOWS)
+  # CMAKE_INSTALL_PREFIX does not apply here
+  set(CMAKE_INSTALL_PREFIX "C:\\\\Program Files\\\\${SENSORRING_COMPANY}\\\\${SENSORRING_NAME_SHORT}")
+  set(SENSORRING_INSTALL_RUNTIME_DIR           "bin")
+  set(SENSORRING_INSTALL_INCLUDE_DIR           "include")
+  set(SENSORRING_INSTALL_LIBRARY_DIR           "lib")
+  set(SENSORRING_INSTALL_ARCHIVE_DIR           "lib")
+  set(SENSORRING_INSTALL_CMAKE_DIR             "cmake")
+  set(SENSORRING_INSTALL_SHARE_DIR             ".")
+  set(SENSORRING_INSTALL_DOC_DIR               "doc")
+  set(SENSORRING_INSTALL_EXAMPLES_DIR          "examples")
+  set(SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR  "examples/bin")
+  set(SENSORRING_INSTALL_PYTHON_DIR            "bindings/python3")
+endif()

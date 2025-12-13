@@ -22,11 +22,11 @@ namespace eduart {
  */
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
-  /**
-   * @brief Get the rate of measurements since the last call of this method
-   * @return measurement rate in Hz
-   */
-  double getRate();
+  /// Constructor
+  MeasurementProxy();
+
+  /// Destructor
+  ~MeasurementProxy();
 
   /**
    * @brief Check if the client got the first measurement
@@ -45,19 +45,14 @@ public:
   void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) override;
 
 private:
-  using Clock     = std::chrono::steady_clock;
-  using TimePoint = Clock::time_point;
-  using toSeconds = std::chrono::duration<double>;
-
   static constexpr double MIN_DIST = 0.0;
   static constexpr double MAX_DIST = 1.0;
 
   std::string depthToColor(double depth, double min, double max);
   void printDepthMap(const measurement::PointCloud& points);
 
-  TimePoint _lastQuery;
-  std::atomic<bool> _init_flag;
-  std::atomic<unsigned int> _counter;
+  std::atomic<bool> _init_flag    = false;
+  std::atomic<bool> _reset_cursor = false;
 };
 
 } // namespace eduart

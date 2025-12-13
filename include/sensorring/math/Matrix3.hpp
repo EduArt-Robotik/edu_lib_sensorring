@@ -24,25 +24,34 @@ namespace math {
  * @brief Matrix of size 3 × 3
  */
 struct SENSORRING_API Matrix3 {
+  /// Data structure of the Matrix3
   std::array<Vector3, 3> data;
 
+  /// Indexing the Matrix
   Vector3& operator[](std::size_t idx);
 
+  /// Indexing the Matrix
   const Vector3& operator[](std::size_t idx) const;
 
-  // Matrix multiplication: Matrix3 * Matrix3 -> Matrix3
+  /// Matrix multiplication: Matrix3 * Matrix3 -> Matrix3
   Matrix3 operator*(const Matrix3& other) const;
+
+  /// Matrix multiplication: Matrix3 * Matrix3 -> Matrix3
   Matrix3& operator*=(const Matrix3& other);
 
-  // Matrix-Vector multiplication: Matrix3 * Vector3 -> Vector3
+  /// Matrix-Vector multiplication: Matrix3 * Vector3 -> Vector3
   Vector3 operator*(const Vector3& other) const;
 
-  // Matrix-Scalar multiplication: Matrix3 * double -> Matrix3
+  /// Matrix-Scalar multiplication: Matrix3 * double -> Matrix3
   Matrix3 operator*(const double& other) const;
+
+  /// Matrix-Scalar multiplication: Matrix3 * double -> Matrix3
   Matrix3& operator*=(const double& other);
 
-  // Matrix-Scalar division: Matrix3 / double -> Matrix3
+  /// Matrix-Scalar division: Matrix3 / double -> Matrix3
   Matrix3 operator/(const double& other) const;
+
+  /// Matrix-Scalar division: Matrix3 / double -> Matrix3
   Matrix3& operator/=(const double& other);
 };
 

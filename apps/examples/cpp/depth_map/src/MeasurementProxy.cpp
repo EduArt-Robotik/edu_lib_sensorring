@@ -10,17 +10,18 @@
 #include "MeasurementProxy.hpp"
 
 #include <iostream>
+#include <sensorring/logger/Logger.hpp>
 
 namespace eduart {
 
-double MeasurementProxy::getRate() {
-  auto now  = Clock::now();
-  auto rate = static_cast<double>(_counter) / toSeconds(now - _lastQuery).count();
+MeasurementProxy::MeasurementProxy() {
+  // Register the proxy with the Logger to get the log output
+  logger::Logger::getInstance()->registerClient(this);
+}
 
-  _lastQuery = now;
-  _counter   = 0;
-
-  return rate;
+MeasurementProxy::~MeasurementProxy() {
+  // Important, otherwise a segfault may occur on program exit
+  logger::Logger::getInstance()->unregisterClient(this);
 }
 
 bool MeasurementProxy::gotFirstMeasurement() {
@@ -29,7 +30,6 @@ bool MeasurementProxy::gotFirstMeasurement() {
 
 void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {
   _init_flag = true;
-  _counter++;
 
   printDepthMap(measurement_vec.at(0).point_cloud);
 }
@@ -37,7 +37,7 @@ void MeasurementProxy::onRawTofMeasurement([[maybe_unused]] const std::vector<me
 void MeasurementProxy::onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {
   if (verbosity > logger::LogVerbosity::Debug) {
     std::cout << "[" << verbosity << "] " << msg << std::endl;
-    std::cout << "\033[s";
+    _reset_cursor = false;
   }
 }
 
@@ -61,7 +61,9 @@ std::string MeasurementProxy::depthToColor(double depth, double min, double max)
 
 void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
 
-  std::cout << "\033[u" << std::endl;
+  if (_reset_cursor) {
+    std::cout << "\033[8F";
+  }
 
   for (int row = 0; row < 8; ++row) {
     for (int col = 0; col < 8; ++col) {
@@ -72,6 +74,7 @@ void MeasurementProxy::printDepthMap(const measurement::PointCloud& points) {
   }
 
   std::cout.flush();
+  _reset_cursor = true;
 }
 
 } // namespace eduart
