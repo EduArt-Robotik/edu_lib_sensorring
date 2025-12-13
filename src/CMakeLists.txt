@@ -104,7 +104,7 @@ endif()
 
 #########################################################
 # cmake package configuration
-if(SENSORRING_INSTALL AND NOT SENSORRING_BUILD_OBJECT_LIBS)
+if(SENSORRING_INSTALL)
 
   include(CMakePackageConfigHelpers)
 

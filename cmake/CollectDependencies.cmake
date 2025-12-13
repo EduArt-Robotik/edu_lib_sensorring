@@ -10,24 +10,18 @@ if(SENSORRING_USE_USBTINGO)
     include(FetchContent)
     FetchContent_Declare(
       usbtingo
-      URL      https://github.com/hannesduske/libusbtingo/archive/refs/heads/master.zip
+      URL        URL https://github.com/hannesduske/libusbtingo/archive/refs/tags/v1.1.3.zip
       DOWNLOAD_EXTRACT_TIMESTAMP OFF
-      EXCLUDE_FROM_ALL
     )
 
-    set(USBTINGO_BUILD_SHARED_LIBS OFF)
+    set(USBTINGO_INSTALL_DEV_COMPONENTS OFF)
+    set(USBTINGO_BUILD_SHARED_LIBS ${SENSORRING_BUILD_SHARED_LIBS})
     set(USBTINGO_BUILD_EXAMPLES OFF)
     set(USBTINGO_BUILD_UTILS OFF)
     set(USBTINGO_BUILD_TESTS OFF)
-    set(USBTINGO_INSTALL OFF)
-
+    set(USBTINGO_INSTALL ON)
+    
     FetchContent_MakeAvailable(usbtingo)
-
-    # Do NOT install usbtingo
-    set_property(TARGET usbtingo PROPERTY
-      EXCLUDE_FROM_ALL ON
-      EXCLUDE_FROM_DEFAULT_BUILD ON
-    )
 
     add_library(usbtingo::usbtingo ALIAS usbtingo)   
 
