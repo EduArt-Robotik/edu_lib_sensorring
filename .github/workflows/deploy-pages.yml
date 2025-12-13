@@ -19,13 +19,22 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
+      #- name: Install build dependencies
+      #  run: |
+      #    sudo apt-get update
+      #    sudo apt-get install -y \
+      #      cmake \
+      #      doxygen \
+      #      graphviz
+
+      - name: Install Doxygen 1.15
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            cmake \
-            doxygen \
-            graphviz
+          sudo apt-get install -y wget graphviz
+          wget https://www.doxygen.nl/files/doxygen-1.15.0.linux.bin.tar.gz
+          tar -xzf doxygen-1.15.0.linux.bin.tar.gz
+          sudo mv doxygen-1.15.0/bin/doxygen /usr/local/bin/doxygen
+          doxygen --version
 
       - name: Configure (CMake)
         run: |
