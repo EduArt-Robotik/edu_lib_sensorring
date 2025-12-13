@@ -7,11 +7,17 @@ if(SENSORRING_USE_USBTINGO)
     message(STATUS "Did not find libusbtingo. Fetching it from GitHub...")
     set(SENSORRING_USBTINGO_INSTALLED OFF)
 
-    include(FetchContent)
-    FetchContent_Declare(
+    #include(FetchContent)
+    #FetchContent_Declare(
+    #  usbtingo
+    #  URL https://github.com/hannesduske/libusbtingo/archive/refs/tags/v1.1.3.zip
+    #  DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    #)
+
+    include(FetchContentCompat)
+    fetchcontent_declare_compat(
       usbtingo
-      URL        URL https://github.com/hannesduske/libusbtingo/archive/refs/tags/v1.1.3.zip
-      DOWNLOAD_EXTRACT_TIMESTAMP OFF
+      URL https://github.com/hannesduske/libusbtingo/archive/v1.1.3.zip
     )
 
     set(USBTINGO_INSTALL_DEV_COMPONENTS OFF)
