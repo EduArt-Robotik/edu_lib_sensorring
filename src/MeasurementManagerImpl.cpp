@@ -104,7 +104,8 @@ std::string MeasurementManagerImpl::printTopology() const noexcept {
       ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
       ss << "    ToF sensor:     " << board_infos.tof.name << std::endl;
       ss << "    Thermal sensor: " << board_infos.thermal.name << std::endl;
-      ss << "    Nr of LEDs:     " << board_infos.leds.name << std::endl;
+      ss << "    RGB LEDs:       " << board_infos.leds.name << std::endl;
+      ss << "    Nr of LEDs:     " << board_infos.leds.count << std::endl;
       ss << std::endl;
     }
 
