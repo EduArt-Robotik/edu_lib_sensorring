@@ -13,7 +13,7 @@ The table below shows the current versions of the EduArt sensor boards that can 
 	<tr>
 		<td style="text-align:center">
 			<p><b>Edu Headlight</b></p>
-			<p><img src="../images/EDU_Headlight.png" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.png';"></p>
+			<p><img src="../images/EDU_Headlight.webp" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.webp';"></p>
 		</td>
 		<td style="text-align:left">
 			- Headlight of the Raspberry Pi based EduBot <br>
@@ -27,7 +27,7 @@ The table below shows the current versions of the EduArt sensor boards that can 
 	<tr>
 		<td style="text-align:center">
 			<p><b>Edu Taillight</b></p>
-			<p><img src="../images/EDU_Taillight.png" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.png';"></p>
+			<p><img src="../images/EDU_Taillight.webp" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.webp';"></p>
 		</td>
 		<td style="text-align:left">
 			- Taillight of the Raspberry Pi based EduBot <br>
@@ -40,7 +40,7 @@ The table below shows the current versions of the EduArt sensor boards that can 
 	<tr>
 		<td style="text-align:center">
 			<p><b>Edu Sidepanel</b></p>
-			<p><img src="../images/EDU_Sidepanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.png';"></p>
+			<p><img src="../images/EDU_Sidepanel.webp" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.webp';"></p>
 		</td>
 		<td style="text-align:left">
 			- General purpose sensor board <br>
@@ -54,7 +54,7 @@ The table below shows the current versions of the EduArt sensor boards that can 
 	<tr>
 		<td style="text-align:center">
 			<p><b>Edu Minipanel</b></p>
-			<p><img src="../images/EDU_Minipanel.png" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.png';"></p>
+			<p><img src="../images/EDU_Minipanel.webp" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.webp';"></p>
 		</td>
 		<td style="text-align:left">
 			- General purpose sensor board <br>
@@ -87,11 +87,11 @@ The key features of the sensor according to the manufacturers [datasheet](https:
 <table style="border: none;">
 	<tr>
 		<td style="text-align:center">
-			<img src="../images/vl53l8cx.png" height=300 onerror="this.onerror=null; this.src='vl53l8cx.png';"><br>
+			<img src="../images/vl53l8cx.webp" height=300 onerror="this.onerror=null; this.src='vl53l8cx.webp';"><br>
 			The ST VL53L8CXTime-of-Flight sensor
 		</td>
 		<td style="text-align:center">
-			<img src="../images/example_ros3.png" height=300 onerror="this.onerror=null; this.src='example_ros3.png';"><br>
+			<img src="../images/example_ros3.webp" height=300 onerror="this.onerror=null; this.src='example_ros3.webp';"><br>
 			Visualization of a VL53L8CX measurement
 		</td>
 	</tr>
@@ -116,11 +116,11 @@ The key features of the sensor according to the manufacturers [datasheet](https:
 <table style="border: none;">
 	<tr>
 		<td style="text-align:center; padding: 20px;">
-			<img src="../images/htpa32.png" height=300 onerror="this.onerror=null; this.src='htpa32.png';"><br>
+			<img src="../images/htpa32.webp" height=300 onerror="this.onerror=null; this.src='htpa32.webp';"><br>
 			The Heimann HTPA32x32d Thermophile Arrays with different optics
 		</td>
 		<td style="text-align:center; padding: 20px;">
-			<img src="../images/example_thermal1.png" height=300 onerror="this.onerror=null; this.src='example_thermal1.png';"><br>
+			<img src="../images/example_thermal1.webp" height=300 onerror="this.onerror=null; this.src='example_thermal1.webp';"><br>
 			Visualization of a HTPA32x32d measurement
 		</td>
 	</tr>
@@ -135,7 +135,7 @@ The LEDs can either be set to predefined color animations or can be set individu
 <a href="https://www.inolux-corp.com/details.php?i=230#SMD-LED">[Product Website]</a>
 
 <div style="text-align:center">
-<img src="../images/ws2812b.png" height=300 onerror="this.onerror=null; this.src='ws2812b.png';"><br>
+<img src="../images/ws2812b.webp" height=300 onerror="this.onerror=null; this.src='ws2812b.webp';"><br>
 Individually addressable RGB LEDs
 </div>
 
@@ -176,7 +176,7 @@ Refer to [this guide](https://github.com/EduArt-Robotik/edu_robot/blob/main/docu
 After the setup of the shield you should see three running CAN interfaces with the `ifconfig` or `ip addr` command.
 
 <div style="text-align:center">
-<img src="../images/raspberry_top.png" width=600 onerror="this.onerror=null; this.src='raspberry_top.png';"><br>
+<img src="../images/raspberry_top.webp" width=600 onerror="this.onerror=null; this.src='raspberry_top.webp';"><br>
 A Raspberry Pi with the EduArt adapter shield and one minipanel sensor board.
 </div>
 
@@ -199,7 +199,7 @@ sudo udevadm trigger
 ```
 
 <div style="text-align:center">
-<img src="../images/candlelight_top.png" width=600 onerror="this.onerror=null; this.src='candlelight_top.png';"><br>
+<img src="../images/candlelight_top.webp" width=600 onerror="this.onerror=null; this.src='candlelight_top.webp';"><br>
 A CandlightFD CAN FD to USB adapter with one minipanel sensor board.
 </div>
 
@@ -215,7 +215,7 @@ If the libusbtingo library is not previously installed it is automatically fetch
 > ⚠️ The USBtingo is not recognized as CAN device by the Linux Kernel. The commands from the SocketCAN compatible adapter above don't work for this device.
 
 <div style="text-align:center">
-<img src="../images/usbtingo_top.png" width=600 onerror="this.onerror=null; this.src='usbtingo_top.png';"><br>
+<img src="../images/usbtingo_top.webp" width=600 onerror="this.onerror=null; this.src='usbtingo_top.webp';"><br>
 A USBtingo CAN FD to USB adapter with one minipanel sensor board.
 </div>
 
@@ -230,11 +230,11 @@ The chain of sensors needs to be terminated at one one by a RaspberryPi with the
 <table style="border: none;">
 <tr>
 	<td style="text-align:center">
-		<img src="../images/usbtingo_chain_top.png" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_top.png';"><br>
+		<img src="../images/usbtingo_chain_top.webp" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_top.webp';"><br>
 		Top view of a sensor chain with two minipanels and an USBtingo as adapter.
 	</td>
 	<td style="text-align:center">
-		<img src="../images/usbtingo_chain_bottom.png" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.png';"><br>
+		<img src="../images/usbtingo_chain_bottom.webp" width=600 onerror="this.onerror=null; this.src='usbtingo_chain_bottom.webp';"><br>
 		Bottom view of a sensor chain with two minipanels and an USBtingo as adapter.
 	</td>
 </tr>

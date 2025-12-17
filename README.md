@@ -61,11 +61,11 @@ Choose your target platform or target framework for a quick Start guide:
 <table style="border: none;">
   <tr>
     <td style="text-align:center">
-      <img src="doc/images/bot_front.png" height=300 onerror="this.onerror=null; this.src='bot_front.png';"><br>
+      <img src="doc/images/bot_front.webp" height=300 onerror="this.onerror=null; this.src='bot_front.webp';"><br>
       A Raspberry Pi based EduBot equipped 12 sensor boards.
     </td>
     <td style="text-align:center">
-      <img src="doc/images/map.png" height=300 onerror="this.onerror=null; this.src='map.png';"><br>
+      <img src="doc/images/map.webp" height=300 onerror="this.onerror=null; this.src='map.webp';"><br>
       3D map of an office room recorded with the EduBot and <a href="https://octomap.github.io/">Octomap.</a>
     </td>
   </tr>
