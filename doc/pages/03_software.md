@@ -34,7 +34,7 @@ It is possible to use multiple communication interfaces to distribute the sensor
 The following class diagram illustrates the topology and the reflection of the hardware layers in the library.
 
 <div style="text-align:center">
-<img src="../images/class_diagram_simple.png" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.png';">
+<img src="../images/class_diagram_simple.webp" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.webp';">
 </div>
 
 ## 3. Input Parameters
@@ -101,11 +101,11 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 <table style="border: none;">
 <tr>
   <td style="text-align:center">
-    <img src="../images/example_cpp1.png" height=500 onerror="this.onerror=null; this.src='example_cpp1.png';"><br>
+    <img src="../images/example_cpp1.webp" height=500 onerror="this.onerror=null; this.src='example_cpp1.webp';"><br>
     The `depth_map` example
   </td>
   <td style="text-align:center">
-    <img src="../images/example_py1.png" height=500 onerror="this.onerror=null; this.src='example_py1.png';"><br>
+    <img src="../images/example_py1.webp" height=500 onerror="this.onerror=null; this.src='example_py1.webp';"><br>
     The `depth_view` example.
   </td>
 </tr>
@@ -255,11 +255,11 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 <table style="border: none; table-layout: fixed; width: 100%;">
 <tr>
   <td style="text-align:center; padding: 20px;">
-    <img src="../images/example_ros1.png" height=350 onerror="this.onerror=null; this.src='example_ros1.png';"><br>
+    <img src="../images/example_ros1.webp" height=350 onerror="this.onerror=null; this.src='example_ros1.webp';"><br>
     3D point cloud from the sensor system on a mobile robot visualized with Rviz
   </td>
   <td style="text-align:center; padding: 20px;">
-    <img src="../images/example_ros2.png" height=350 onerror="this.onerror=null; this.src='example_ros2.png';"><br>
+    <img src="../images/example_ros2.webp" height=350 onerror="this.onerror=null; this.src='example_ros2.webp';"><br>
     3D map of a corridor recorded with the sensor system using <a href="https://octomap.github.io/">Octomap.</a>
   </td>
 </tr>
