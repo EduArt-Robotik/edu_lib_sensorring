@@ -25,7 +25,7 @@ namespace sensor {
  * @enum SensorOrientation
  * @brief Possible orientations of a sensor board. Used to rotate the thermal images and to mirror the light animations.
  */
-enum class SENSORRING_API Orientation {
+enum class SENSORRING_EXPORT Orientation {
   left,
   right,
   none
@@ -35,7 +35,7 @@ enum class SENSORRING_API Orientation {
  * @struct LightParams
  * @brief Parameter structure of the sensor lights of a sensor board. Not all sensor boards have lights.
  */
-struct SENSORRING_API LightParams {
+struct SENSORRING_EXPORT LightParams {
   /// Enable the lights.
   bool enable = false;
 
@@ -47,7 +47,7 @@ struct SENSORRING_API LightParams {
  * @struct ThermalSensorParams
  * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
  */
-struct SENSORRING_API ThermalSensorParams {
+struct SENSORRING_EXPORT ThermalSensorParams {
   /// Customizable index that is returned with every measurement from this sensor.
   int user_idx = 0;
 
@@ -83,7 +83,7 @@ struct SENSORRING_API ThermalSensorParams {
  * @struct TofSensorParams
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
-struct SENSORRING_API TofSensorParams {
+struct SENSORRING_EXPORT TofSensorParams {
   /// Customizable index that is returned with every measurement from this sensor.
   int user_idx = 0;
 
@@ -95,7 +95,7 @@ struct SENSORRING_API TofSensorParams {
  * @struct SensorBoardParams
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
-struct SENSORRING_API SensorBoardParams {
+struct SENSORRING_EXPORT SensorBoardParams {
   /// Rotation part of the sensors pose. The rotation is applied in the order Roll(x) - Pitch(y) - Yaw(z). Values: Euler angles in degrees
   math::Vector3 rotation = { 0, 0, 0 };
 
@@ -121,7 +121,7 @@ namespace bus {
  * @brief Parameter structure of a communication bus. A bus is one communication
  * interface e.g. CAN bus and has an arbitrary number of sensor boards connected.
  */
-struct SENSORRING_API BusParams {
+struct SENSORRING_EXPORT BusParams {
   /// Name of the communication interface. E.g. "can0" for a CAN bus.
   std::string interface_name;
 
@@ -142,7 +142,7 @@ namespace ring {
  * abstraction of the whole sensor system and consists of an arbitrary number of
  * communication interfaces.
  */
-struct SENSORRING_API RingParams {
+struct SENSORRING_EXPORT RingParams {
   /// Timeout for the measurements before the error handler is called.
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
 
@@ -160,7 +160,7 @@ namespace manager {
  * handles the timing and communication of the whole system by running the
  * measurement state machine. One measurement manager manages exactly one sensor ring.
  */
-struct SENSORRING_API ManagerParams {
+struct SENSORRING_EXPORT ManagerParams {
   /// Enable bit rate switching on the can bus interface.
   bool enable_brs = false;
 

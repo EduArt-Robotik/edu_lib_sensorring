@@ -21,7 +21,7 @@ namespace measurement {
  * @class  TofMeasurement
  * @brief  Structure for holding a measurement form a ToF sensor
  */
-struct SENSORRING_API TofMeasurement {
+struct SENSORRING_EXPORT TofMeasurement {
   /// Frame number of the ThermalMeasurement
   unsigned int frame_id = 0;
 

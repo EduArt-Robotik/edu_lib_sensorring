@@ -15,7 +15,7 @@ namespace eduart {
 
 namespace com {
 
-enum class SENSORRING_API InterfaceType {
+enum class SENSORRING_EXPORT InterfaceType {
   UNDEFINED,
   SOCKETCAN,
   USBTINGO

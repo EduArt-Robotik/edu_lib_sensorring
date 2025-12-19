@@ -22,7 +22,7 @@ namespace math {
  * @class Vector3
  * @brief Vector of length 3
  */
-struct SENSORRING_API Vector3 {
+struct SENSORRING_EXPORT Vector3 {
   /// Data structure of the Vector 3
   std::array<double, 3> data;
 

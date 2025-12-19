@@ -51,6 +51,28 @@ target_sources(sensorring PRIVATE ${SOURCES})
 
 
 #########################################################
+# generate export header
+include(GenerateExportHeader)
+
+set(SENSORRING_GENERATED_INCLUDE_DIR
+  ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
+
+generate_export_header(sensorring
+  EXPORT_FILE_NAME ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
+)
+
+target_include_directories(sensorring PUBLIC
+  $<BUILD_INTERFACE:${SENSORRING_GENERATED_INCLUDE_DIR}>
+)
+
+install(FILES
+  ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
+  DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}/sensorring/platform
+)
+
+
+#########################################################
 # library includes
 target_include_directories(sensorring PRIVATE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
@@ -65,16 +87,10 @@ target_include_directories(sensorring PUBLIC
 
 #########################################################
 # build macros
-if(SENSORRING_BUILD_SHARED_LIBS)
-  target_compile_definitions(sensorring PUBLIC
-    SENSORRING_SHARED
-  )
-endif()
-
 if(MSVC)
   target_compile_definitions(sensorring PRIVATE
-  _USE_MATH_DEFINES
-  SENSORRING_DLL_EXPORT)
+    USE_MATH_DEFINES
+  )
 endif()
 
 if(SENSORRING_USE_SOCKETCAN)
@@ -82,7 +98,6 @@ if(SENSORRING_USE_SOCKETCAN)
     USE_SOCKETCAN
   )
 endif()
-
 
 #########################################################
 # link usbtingo

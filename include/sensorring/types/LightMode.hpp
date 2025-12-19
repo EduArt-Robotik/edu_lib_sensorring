@@ -15,7 +15,7 @@ namespace eduart {
 
 namespace light {
 
-enum class SENSORRING_API LightMode {
+enum class SENSORRING_EXPORT LightMode {
   Off,
   Dimmed,
   HighBeam,

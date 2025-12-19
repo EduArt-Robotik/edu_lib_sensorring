@@ -24,7 +24,7 @@ namespace manager {
  * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
  */
-enum class SENSORRING_API ManagerState {
+enum class SENSORRING_EXPORT ManagerState {
   Uninitialized,
   Initialized,
   Running,
@@ -37,14 +37,14 @@ enum class SENSORRING_API ManagerState {
  * @param[in] state to be converted to a string
  * @return Name of the state written out as string
  */
-SENSORRING_API std::string toString(ManagerState state) noexcept;
+SENSORRING_EXPORT std::string toString(ManagerState state) noexcept;
 
 /**
  * @brief  Output stream operator for the ManagerState enum class members
  * @param[in] state to be printed as stream
  * @return Stream of the states name written out
  */
-SENSORRING_API std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept;
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept;
 
 /**
  * @class MeasurementClient
@@ -52,7 +52,7 @@ SENSORRING_API std::ostream& operator<<(std::ostream& os, ManagerState state) no
  * callback methods that are triggered by the MeasurementManager. It is possible
  * to implement only one or a selection of the callback methods.
  */
-class SENSORRING_API MeasurementClient {
+class SENSORRING_EXPORT MeasurementClient {
 public:
   /// Destructor
   virtual ~MeasurementClient() = default;

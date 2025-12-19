@@ -23,7 +23,7 @@ namespace math {
  * @class Matrix3
  * @brief Matrix of size 3 × 3
  */
-struct SENSORRING_API Matrix3 {
+struct SENSORRING_EXPORT Matrix3 {
   /// Data structure of the Matrix3
   std::array<Vector3, 3> data;
 

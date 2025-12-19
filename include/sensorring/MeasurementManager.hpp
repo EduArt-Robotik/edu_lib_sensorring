@@ -21,14 +21,14 @@ namespace eduart {
 namespace manager {
 
 // Forward declaration of implementation class
-class SENSORRING_API MeasurementManagerImpl;
+class SENSORRING_EXPORT MeasurementManagerImpl;
 
 /**
  * @class MeasurementManager
  * @brief Meta class that handles the timing, triggering and processing of sensor measurements. Internally it runs a
  * looping state machine.
  */
-class SENSORRING_API MeasurementManager {
+class SENSORRING_EXPORT MeasurementManager {
 public:
   /**
    * Constructor

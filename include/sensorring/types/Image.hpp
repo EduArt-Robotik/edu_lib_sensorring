@@ -24,7 +24,7 @@ namespace measurement {
  * @class  GenericGrayscaleImage
  * @brief  Template for images with one channel and variable type
  */
-template <typename T, std::size_t RESOLUTION> struct SENSORRING_API GenericGrayscaleImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericGrayscaleImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
 
   /// Internal data structure for the image
@@ -89,7 +89,7 @@ template <typename T, std::size_t RESOLUTION> struct SENSORRING_API GenericGrays
  * @class  GenericRGBImage
  * @brief  Template for images with three channels and variable type
  */
-template <typename T, std::size_t RESOLUTION> struct SENSORRING_API GenericRGBImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericRGBImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
 
   /// Internal data structure for the image

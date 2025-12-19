@@ -8,7 +8,7 @@ namespace eduart {
 
 namespace sensor {
 
-enum class SENSORRING_API SensorState {
+enum class SENSORRING_EXPORT SensorState {
   SensorInit,
   SensorOK,
   ReceiveError

@@ -25,7 +25,7 @@ namespace logger {
  * @class Logger
  * @brief Centralized class to collect all log messages and relay them to the registered observers. The Logger is implemented as a singleton.
  */
-class SENSORRING_API Logger {
+class SENSORRING_EXPORT Logger {
 public:
   /// Destructor
   ~Logger() = default;

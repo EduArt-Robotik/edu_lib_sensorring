@@ -22,7 +22,7 @@ namespace logger {
  * @enum LogVerbosity
  * @brief Verbosity levels of the logger output
  */
-enum class SENSORRING_API LogVerbosity {
+enum class SENSORRING_EXPORT LogVerbosity {
   Debug,
   Info,
   Warning,
@@ -35,20 +35,20 @@ enum class SENSORRING_API LogVerbosity {
  * @param[in] verbosity to be converted to a string
  * @return Name of the state written out as string
  */
-SENSORRING_API std::string toString(LogVerbosity verbosity) noexcept;
+SENSORRING_EXPORT std::string toString(LogVerbosity verbosity) noexcept;
 
 /**
  * @brief  Output stream operator for the LogVerbosity enum class members
  * @param[in] verbosity to be printed as stream
  * @return Stream of the states name written out
  */
-SENSORRING_API std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept;
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept;
 
 /**
  * @class LoggerClient
  * @brief Observer interface of the Logger class. Defines the callback method that is triggered by the Logger.
  */
-class SENSORRING_API LoggerClient {
+class SENSORRING_EXPORT LoggerClient {
 public:
   /// Destructor
   virtual ~LoggerClient() = default;
