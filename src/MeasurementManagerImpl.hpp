@@ -63,13 +63,13 @@ public:
    * Register an client with the MeasurementManager object
    * @param[in] client Observer that is registered and gets notified on future events
    */
-  void registerClient(MeasurementClient* client) noexcept;
+  void registerClient(MeasurementClient* client);
 
   /**
    * Unregister an client with the MeasurementManager object
    * @param[in] client Observer that is unregistered and will not be notified on future events
    */
-  void unregisterClient(MeasurementClient* client) noexcept;
+  void unregisterClient(MeasurementClient* client);
 
   /**
    * Get a string representation of the topology of the connected sensors

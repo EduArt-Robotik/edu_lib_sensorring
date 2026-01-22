@@ -136,7 +136,7 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept {
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
   if (client) {
     LockGuard lock(_client_mutex);
     auto result = _clients.insert(client);
@@ -152,7 +152,7 @@ void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept 
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) noexcept {
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
   if (client) {
     LockGuard lock(_client_mutex);
     auto result = _clients.erase(client);
@@ -241,8 +241,8 @@ int MeasurementManagerImpl::notifyThermalData() {
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
+  LockGuard lock(_client_mutex);
   if (_manager_state != state) {
-    LockGuard lock(_client_mutex);
     _manager_state = state;
     for (auto client : _clients) {
       if (client)
@@ -261,14 +261,14 @@ ManagerState MeasurementManagerImpl::getManagerState() const noexcept {
 */
 
 bool MeasurementManagerImpl::measureSome() noexcept {
-  bool error = false;
+  bool success = false;
 
   if (!_is_running) {
     if (_tof_enabled || _thermal_enabled) {
       notifyState(ManagerState::Running);
       try {
         StateMachine();
-        error = true;
+        success = true;
       } catch (const std::exception& e) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in state machine: " + std::string(e.what()));
         _measurement_state = MeasurementState::error_handler_communication;
@@ -276,7 +276,7 @@ bool MeasurementManagerImpl::measureSome() noexcept {
     }
   }
 
-  return error;
+  return success;
 }
 
 bool MeasurementManagerImpl::startMeasuring() noexcept {

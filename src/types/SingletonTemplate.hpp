@@ -25,7 +25,7 @@ protected:
 
 private:
   template <typename... Args> static void initSingleton(Args&&... args) {
-    _instance = std::unique_ptr<T>(new T(std::forward<Args>(args)...)); // std::make_uniqe<T>() doesn't work because of private constructor of T
+    _instance = std::unique_ptr<T>(new T(std::forward<Args>(args)...)); // std::make_unique<T>() doesn't work because of private constructor of T
   }
 
   static std::unique_ptr<T> _instance;

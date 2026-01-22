@@ -78,7 +78,7 @@ endif()
 
 # cpack packaging
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    include(PackageGeneration REQUIERD)    
+    include(PackageGeneration REQUIRED)    
 endif()
 
 # Build summary

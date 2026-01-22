@@ -18,7 +18,7 @@ namespace com {
 
 ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
 
-  // Check if interface altready exists
+  // Check if interface already exists
   const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
     return interface->getInterfaceName() == interface_name;
   });
@@ -69,6 +69,10 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 #endif
     } catch (...) {
     }
+
+    // If both attempts failed, return nullptr instead of falling through to default
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface by name. Both SocketCAN and USBtingo attempts failed or are not available.");
+    return nullptr;
 
   default:
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open unknown interface type.");
