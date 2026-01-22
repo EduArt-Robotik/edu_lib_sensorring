@@ -70,6 +70,10 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
     } catch (...) {
     }
 
+    // If both attempts failed, return nullptr instead of falling through to default
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface by name. Both SocketCAN and USBtingo attempts failed or are not available.");
+    return nullptr;
+
   default:
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open unknown interface type.");
     return nullptr;
