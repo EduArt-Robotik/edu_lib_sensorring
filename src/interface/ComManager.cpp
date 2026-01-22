@@ -18,7 +18,7 @@ namespace com {
 
 ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
 
-  // Check if interface altready exists
+  // Check if interface already exists
   const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
     return interface->getInterfaceName() == interface_name;
   });

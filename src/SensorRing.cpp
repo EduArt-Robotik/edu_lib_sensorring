@@ -1,8 +1,8 @@
 #include "SensorRing.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <memory>
-#include <chrono>
 
 #include "sensorring/logger/Logger.hpp"
 
