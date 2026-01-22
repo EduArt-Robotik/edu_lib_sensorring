@@ -48,11 +48,11 @@ void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::
 ==========================================================================================
 */
 
-void MeasurementManager::registerClient(MeasurementClient* observer) noexcept {
+void MeasurementManager::registerClient(MeasurementClient* observer) {
   return _mm_impl->registerClient(observer);
 }
 
-void MeasurementManager::unregisterClient(MeasurementClient* observer) noexcept {
+void MeasurementManager::unregisterClient(MeasurementClient* observer) {
   return _mm_impl->unregisterClient(observer);
 }
 

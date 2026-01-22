@@ -136,7 +136,7 @@ void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, s
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept {
+void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
   if (client) {
     LockGuard lock(_client_mutex);
     auto result = _clients.insert(client);
@@ -152,7 +152,7 @@ void MeasurementManagerImpl::registerClient(MeasurementClient* client) noexcept 
   }
 }
 
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) noexcept {
+void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
   if (client) {
     LockGuard lock(_client_mutex);
     auto result = _clients.erase(client);

@@ -67,14 +67,16 @@ public:
   /**
    * Register an observer with the MeasurementManager object
    * @param[in] observer Observer that is registered and gets notified on future events
+   * @throw std::runtime_error if Logger::log() throws
    */
-  void registerClient(MeasurementClient* observer) noexcept;
+  void registerClient(MeasurementClient* observer);
 
   /**
    * Unregister an observer with the MeasurementManager object
    * @param[in] observer Observer that is unregistered and will not be notified on future events
+   * @throw std::runtime_error if Logger::log() throws
    */
-  void unregisterClient(MeasurementClient* observer) noexcept;
+  void unregisterClient(MeasurementClient* observer);
 
   /**
    * Get a string representation of the topology of the connected sensors
