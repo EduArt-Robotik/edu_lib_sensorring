@@ -127,21 +127,20 @@ bool SensorRing::waitForAllTofMeasurementsReady() const {
 }
 
 bool SensorRing::waitForAllThermalMeasurementsReady() const {
-  // int watchdog = 0;
-  // bool ready = false;
+  bool ready     = false;
+  auto timestamp = std::chrono::steady_clock::now();
 
-  // while(!ready && watchdog < _params.timeout){
-  // 	ready = true;
-  // 	for(auto& sensor_bus : _bus_vec){
-  // 		ready &= sensor_bus->allThermalMeasurementsReady();
-  // 	}
+  do {
+    ready = true;
+    for (auto& sensor_bus : _bus_vec) {
+      ready &= sensor_bus->allThermalMeasurementsReady();
+    }
+    if (!ready) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+  } while (!ready && ((std::chrono::steady_clock::now() - timestamp) < _params.timeout));
 
-  // 	watchdog += 100;
-  // 	std::this_thread::sleep_for(std::chrono::microseconds(1);
-  // }
-
-  // return ready; // ToDo: Check if a thermal frame is actually available
-  return true;
+  return ready;
 }
 
 bool SensorRing::waitForAllTofDataTransmissionsComplete() const {
