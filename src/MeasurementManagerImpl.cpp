@@ -241,8 +241,8 @@ int MeasurementManagerImpl::notifyThermalData() {
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
+  LockGuard lock(_client_mutex);
   if (_manager_state != state) {
-    LockGuard lock(_client_mutex);
     _manager_state = state;
     for (auto client : _clients) {
       if (client)
