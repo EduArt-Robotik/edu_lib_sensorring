@@ -23,9 +23,9 @@ static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::USBTING
 int main(int, char*[]) {
 
   std::cout << "\33c";
-  std::cout << "==========================" << std::endl;
-  std::cout << "Minimal sensorring example" << std::endl;
-  std::cout << "==========================" << std::endl;
+  std::cout << "============================" << std::endl;
+  std::cout << "Depth map sensorring example" << std::endl;
+  std::cout << "============================" << std::endl;
   std::cout << std::endl;
 
   // Create the parameter structure that is used to instantiate the sensorring

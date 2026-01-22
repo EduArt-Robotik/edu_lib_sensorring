@@ -65,9 +65,9 @@ class MeasurementProxy(sensorring.SensorringClient):
 
 
 def main():
-  print("==========================")
-  print("Minimal sensorring example")
-  print("==========================")
+  print("=============================")
+  print("Depth view sensorring example")
+  print("=============================")
 
   # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
