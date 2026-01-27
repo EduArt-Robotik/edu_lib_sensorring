@@ -17,8 +17,8 @@
 using namespace eduart;
 using namespace std::chrono_literals;
 
-static constexpr std::string_view INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::USBTINGO;
+static constexpr std::string_view INTERFACE_NAME   = "can0";
+static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
 
 int main(int, char*[]) {
 

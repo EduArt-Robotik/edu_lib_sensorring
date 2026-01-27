@@ -28,4 +28,14 @@ if(SENSORRING_USE_USBTINGO)
   endif()
 endif()
 
+if(SENSORRING_BUILD_TESTS)
+  include(FetchContentCompat)
+  fetchcontent_declare_compat(
+    Catch2
+    URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.5.2.zip
+  )
+  FetchContent_MakeAvailable(Catch2)
+  list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+endif()
+
 find_package(Threads REQUIRED)

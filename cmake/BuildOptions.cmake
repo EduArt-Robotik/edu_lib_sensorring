@@ -10,6 +10,8 @@ option( SENSORRING_BUILD_SHARED_LIBS "Build as shared library. If set to OFF a s
 option( SENSORRING_BUILD_EXAMPLES "Build the example programs" OFF)
 option( SENSORRING_BUILD_DOCUMENTATION "Build the documentation" OFF)
 option( SENSORRING_BUILD_PYTHON_BINDINGS "Build python bindings" OFF)
+option( SENSORRING_BUILD_TESTS "Build unit tests" OFF)
+option( SENSORRING_BUILD_HARDWARE_TESTS "Build hardware-dependent tests" OFF)
 
 if(IS_WINDOWS)
   set( SENSORRING_USE_USBTINGO ON)

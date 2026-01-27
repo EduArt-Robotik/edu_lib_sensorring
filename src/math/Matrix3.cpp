@@ -43,40 +43,34 @@ Vector3 Matrix3::operator*(const Vector3& other) const {
   return result;
 }
 
-Matrix3 Matrix3::operator*(const double& other) const {
-  Matrix3 result{};
+Matrix3& Matrix3::operator*=(const double& other) {
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      result[i][j] = 0.0f;
-      for (int k = 0; k < 3; ++k) {
-        result[i][j] += data[i][k] * other;
-      }
+      data[i][j] *= other;
     }
   }
-  return result;
-}
-
-Matrix3& Matrix3::operator*=(const double& other) {
-  *this = *this * other;
   return *this;
 }
 
-Matrix3 Matrix3::operator/(const double& other) const {
-  Matrix3 result{};
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      result[i][j] = 0.0f;
-      for (int k = 0; k < 3; ++k) {
-        result[i][j] += data[i][k] / other;
-      }
-    }
-  }
+Matrix3 Matrix3::operator*(const double& other) const {
+  Matrix3 result(*this);
+  result *= other;
   return result;
 }
 
 Matrix3& Matrix3::operator/=(const double& other) {
-  *this = *this / other;
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      data[i][j] /= other;
+    }
+  }
   return *this;
+}
+
+Matrix3 Matrix3::operator/(const double& other) const {
+  Matrix3 result(*this);
+  result /= other;
+  return result;
 }
 
 } // namespace math

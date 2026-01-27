@@ -61,6 +61,12 @@ include(CollectDependencies REQUIRED)
 # Library
 add_subdirectory(src)
 
+# Tests
+if(SENSORRING_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
 # Examples
 if(SENSORRING_BUILD_EXAMPLES)
   add_subdirectory(apps/examples)
