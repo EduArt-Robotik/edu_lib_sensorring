@@ -30,6 +30,11 @@ endif()
 message(STATUS " SENSORRING_USE_USBTINGO                     : " ${SENSORRING_USE_USBTINGO})
 message(STATUS "")
 
+message(STATUS " __________________________ TESTS ____________________________")
+message(STATUS " SENSORRING_BUILD_TESTS                      : " ${SENSORRING_BUILD_TESTS})
+message(STATUS " SENSORRING_BUILD_HARDWARE_TESTS             : " ${SENSORRING_BUILD_HARDWARE_TESTS})
+message(STATUS "")
+
 message(STATUS " _________________________ PLATFORM __________________________")
 if(NOT ARCH_TEXT STREQUAL "")
 	message(STATUS " Host                             : ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION} ${ARCH_TEXT}")
