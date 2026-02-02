@@ -12,7 +12,7 @@ namespace sensor {
 
 class LedLight {
 public:
-  LedLight(LightParams params);
+  LedLight(LightParams params, com::ComInterface* interface);
   ~LedLight();
 
   const LightParams& getParams() const;

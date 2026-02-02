@@ -3,7 +3,6 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
@@ -77,26 +76,28 @@ public:
   bool repairInterface() override;
 
   /**
+   * Add endpoint for a new sensor board
+   */
+  void addSensorBoardEndpoint() override;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
-  void addToFSensorToEndpointMap(std::size_t idx) override;
+  void addTofSensorEndpoint(std::size_t idx) override;
 
   /**
    * Add endpoint for a new thermal sensor
    * @param[in] idx index of the sensor
    */
-  void addThermalSensorToEndpointMap(std::size_t idx) override;
+  void addThermalSensorEndpoint(std::size_t idx) override;
+
+  /**
+   * Add endpoint for a new light sensor
+   */
+  void addLightSensorEndpoint() override;
 
 private:
-  void fillEndpointMap();
-
-  CanProtocol::canid mapEndpointToId(ComEndpoint endpoint);
-
-  ComEndpoint mapIdToEndpoint(CanProtocol::canid id);
-
-  std::unordered_map<ComEndpoint, CanProtocol::canid> _id_map;
-
   bool listener() override;
 
   int _soc;

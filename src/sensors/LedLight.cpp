@@ -6,8 +6,10 @@ namespace eduart {
 
 namespace sensor {
 
-LedLight::LedLight(LightParams params)
+LedLight::LedLight(LightParams params, com::ComInterface* interface)
     : _params(params) {
+
+  interface->addLightSensorEndpoint();
 }
 
 LedLight::~LedLight() {

@@ -7,8 +7,10 @@ add_executable(sensorring_tests
     unit/test_math_utils.cpp
     unit/test_pointcloud.cpp
     unit/test_tof_measurement.cpp
+    unit/test_com_endpoints.cpp
 )
 
+target_include_directories(sensorring_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(sensorring_tests PRIVATE sensorring::sensorring Catch2::Catch2WithMain)
 catch_discover_tests(sensorring_tests)
 

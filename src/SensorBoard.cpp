@@ -18,6 +18,8 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
     , _thermal(std::move(thermal))
     , _leds(std::move(leds)) {
 
+  _interface->addSensorBoardEndpoint();
+
   addEndpoint(com::ComEndpoint("broadcast"));
   _interface->registerObserver(this);
 }

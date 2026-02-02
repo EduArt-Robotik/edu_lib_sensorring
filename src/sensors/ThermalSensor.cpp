@@ -20,7 +20,7 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* inte
     , _params(params) {
 
   _rx_buffer_offset = 0;
-  _interface->addThermalSensorToEndpointMap(idx);
+  _interface->addThermalSensorEndpoint(idx);
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 
   _vdd  = 0;
