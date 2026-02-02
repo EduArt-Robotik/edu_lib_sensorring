@@ -26,7 +26,7 @@ bool ComObserver::removeEndpoint(const ComEndpoint canid) {
   return false;
 }
 
-const std::set<ComEndpoint>& ComObserver::getEndpoints() const {
+const std::unordered_set<ComEndpoint>& ComObserver::getEndpoints() const {
   return _endpoints;
 }
 

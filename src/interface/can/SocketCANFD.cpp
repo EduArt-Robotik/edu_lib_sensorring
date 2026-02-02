@@ -29,7 +29,6 @@ SocketCANFD::SocketCANFD(std::string interface_name)
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface " + _interface_name + ": " + e.what());
   }
 
-  _endpoints = ComEndpoint::createStaticEndpoints();
   fillEndpointMap();
   startListener();
 }
@@ -227,7 +226,6 @@ void SocketCANFD::addToFSensorToEndpointMap(std::size_t idx) {
 
   auto value                  = "tof" + std::to_string(idx) + "_data";
   _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_tof_data_in + idx);
-  _endpoints.emplace(value);
 }
 
 void SocketCANFD::addThermalSensorToEndpointMap(std::size_t idx) {
@@ -240,7 +238,6 @@ void SocketCANFD::addThermalSensorToEndpointMap(std::size_t idx) {
 
   auto value                  = "thermal" + std::to_string(idx) + "_data";
   _id_map[ComEndpoint(value)] = static_cast<CanProtocol::canid>(canid_thermal_data_in + idx);
-  _endpoints.emplace(value);
 }
 
 CanProtocol::canid SocketCANFD::mapEndpointToId(ComEndpoint endpoint) {

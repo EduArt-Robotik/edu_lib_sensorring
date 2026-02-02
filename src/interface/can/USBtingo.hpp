@@ -1,12 +1,13 @@
 #pragma once
 
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <usbtingo/device/Device.hpp>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+
 #include "canprotocol.hpp"
 
 namespace eduart {
@@ -78,7 +79,7 @@ private:
 
   ComEndpoint mapIdToEndpoint(std::uint32_t id);
 
-  std::map<ComEndpoint, std::uint32_t> _id_map;
+  std::unordered_map<ComEndpoint, std::uint32_t> _id_map;
 
   bool listener() override;
 

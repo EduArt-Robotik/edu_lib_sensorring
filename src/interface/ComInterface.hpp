@@ -3,9 +3,9 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
-#include <set>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "ComEndpoints.hpp"
@@ -38,7 +38,7 @@ public:
    * Get all known ComEndpoints.
    * @return Set of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
    */
-  const std::set<ComEndpoint>& getEndpoints() const;
+  const std::unordered_set<ComEndpoint>& getEndpoints() const;
 
   /**
    * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
@@ -128,9 +128,7 @@ protected:
 
   std::mutex _mutex;
 
-  std::set<ComEndpoint> _endpoints;
-
-  std::set<ComObserver*> _observers;
+  std::unordered_set<ComObserver*> _observers;
 
 private:
   std::unique_ptr<std::thread> _thread;

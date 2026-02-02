@@ -2,11 +2,12 @@
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+
 #include "canprotocol.hpp"
 
 namespace eduart {
@@ -94,7 +95,7 @@ private:
 
   ComEndpoint mapIdToEndpoint(CanProtocol::canid id);
 
-  std::map<ComEndpoint, CanProtocol::canid> _id_map;
+  std::unordered_map<ComEndpoint, CanProtocol::canid> _id_map;
 
   bool listener() override;
 
