@@ -130,7 +130,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 // These tests require real hardware connected and appropriately configured.
 // They are intended to be enabled explicitly via SENSORRING_BUILD_HARDWARE_TESTS.
 
-TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToFHardware][!mayfail]") {
+TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToFHardware]") {
   // First try USBtingo with serial "0" (first connected device).
   TestResult usbtingo_result = run_single_interface_test("0", InterfaceType::USBTINGO);
 

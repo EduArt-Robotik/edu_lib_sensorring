@@ -21,7 +21,9 @@ target_link_libraries(sensorring_tests PRIVATE
   Threads::Threads
 )
 
-catch_discover_tests(sensorring_tests)
+catch_discover_tests(sensorring_tests
+  PROPERTIES LABELS "unit"
+)
 
 if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
@@ -34,6 +36,8 @@ if(SENSORRING_BUILD_HARDWARE_TESTS)
       Threads::Threads
     )
 
-    catch_discover_tests(sensorring_hardware_tests)
+    catch_discover_tests(sensorring_hardware_tests
+      PROPERTIES LABELS "hardware"
+    )
 endif()
 
