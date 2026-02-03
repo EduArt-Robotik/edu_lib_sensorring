@@ -1,12 +1,12 @@
 #pragma once
 
-#include <map>
 #include <memory>
 #include <string>
 #include <usbtingo/device/Device.hpp>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+
 #include "canprotocol.hpp"
 
 namespace eduart {
@@ -60,26 +60,28 @@ public:
   bool repairInterface() override;
 
   /**
+   * Add endpoint for a new sensor board
+   */
+  void addSensorBoardEndpoint() override;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
-  void addToFSensorToEndpointMap(std::size_t idx) override;
+  void addTofSensorEndpoint(std::size_t idx) override;
 
   /**
    * Add endpoint for a new thermal sensor
    * @param[in] idx index of the sensor
    */
-  void addThermalSensorToEndpointMap(std::size_t idx) override;
+  void addThermalSensorEndpoint(std::size_t idx) override;
+
+  /**
+   * Add endpoint for a new light sensor
+   */
+  void addLightSensorEndpoint() override;
 
 private:
-  void fillEndpointMap();
-
-  CanProtocol::canid mapEndpointToId(ComEndpoint ep);
-
-  ComEndpoint mapIdToEndpoint(std::uint32_t id);
-
-  std::map<ComEndpoint, std::uint32_t> _id_map;
-
   bool listener() override;
 
   std::unique_ptr<usbtingo::device::Device> _dev;

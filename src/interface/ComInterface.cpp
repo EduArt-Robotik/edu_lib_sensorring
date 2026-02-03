@@ -9,7 +9,7 @@ ComInterface::ComInterface()
     , _listener_is_running(false)
     , _shut_down_listener(false)
     , _interface_name("")
-    , _thread{nullptr} {
+    , _thread{ nullptr } {
 }
 
 ComInterface::~ComInterface() {
@@ -66,10 +66,6 @@ void ComInterface::stopListener() {
   if (_thread && _thread->joinable()) {
     _thread->join();
   }
-}
-
-const std::set<ComEndpoint>& ComInterface::getEndpoints() const {
-  return _endpoints;
 }
 
 bool ComInterface::hasError() const {

@@ -3,9 +3,9 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
-#include <set>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "ComEndpoints.hpp"
@@ -38,7 +38,7 @@ public:
    * Get all known ComEndpoints.
    * @return Set of all known ComEndpoints. Messages may only be sent to one of the known endpoints.
    */
-  const std::set<ComEndpoint>& getEndpoints() const;
+  const std::unordered_set<ComEndpoint>& getEndpoints() const;
 
   /**
    * Register a ComObserver with the ComInterface. The observer gets notified on all future incoming messages.
@@ -102,16 +102,26 @@ public:
   bool hasError() const;
 
   /**
+   * Add endpoint for a new sensor board
+   */
+  virtual void addSensorBoardEndpoint() = 0;
+
+  /**
    * Add endpoint for a new tof sensor
    * @param[in] idx index of the sensor
    */
-  virtual void addToFSensorToEndpointMap(std::size_t idx) = 0;
+  virtual void addTofSensorEndpoint(std::size_t idx) = 0;
 
   /**
    * Add endpoint for a new thermal sensor
    * @param[in] idx index of the sensor
    */
-  virtual void addThermalSensorToEndpointMap(std::size_t idx) = 0;
+  virtual void addThermalSensorEndpoint(std::size_t idx) = 0;
+
+  /**
+   * Add endpoint for a new light sensor
+   */
+  virtual void addLightSensorEndpoint() = 0;
 
 protected:
   using LockGuard = std::lock_guard<std::mutex>;
@@ -128,9 +138,7 @@ protected:
 
   std::mutex _mutex;
 
-  std::set<ComEndpoint> _endpoints;
-
-  std::set<ComObserver*> _observers;
+  std::unordered_set<ComObserver*> _observers;
 
 private:
   std::unique_ptr<std::thread> _thread;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "ComEndpoints.hpp"
@@ -46,7 +46,7 @@ public:
    * Get a list of all ComEndpoints that currently trigger the notify callback.
    * @return Vector of all subscribed endpoints.
    */
-  const std::set<ComEndpoint>& getEndpoints() const;
+  const std::unordered_set<ComEndpoint>& getEndpoints() const;
 
   /**
    * Check connection status, i.e., whether the elapsed time since the last message arrival is smaler than a specific
@@ -71,7 +71,7 @@ public:
   virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
-  std::set<ComEndpoint> _endpoints;
+  std::unordered_set<ComEndpoint> _endpoints;
 
   std::chrono::time_point<std::chrono::steady_clock> _timestamp;
 };

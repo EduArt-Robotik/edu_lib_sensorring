@@ -21,9 +21,9 @@ public:
     if (measurement_vec.empty()) {
       return;
     }
-    if (_count >= _max_frames) {
-      return;
-    }
+    //if (_count >= _max_frames) {
+    //  return;
+    //}
     _measurements.push_back(measurement_vec.front());
     _count++;
   }
@@ -34,7 +34,7 @@ public:
 private:
   std::vector<TofMeasurement> _measurements;
   std::size_t _count{ 0 };
-  static constexpr std::size_t _max_frames = 3;
+  //static constexpr std::size_t _max_frames = 5;
 };
 
 enum class TestResult {
@@ -78,7 +78,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 
     // Wait up to ~5 seconds for up to 3 frames.
     const auto start = std::chrono::steady_clock::now();
-    while (client.frameCount() < 2 && std::chrono::steady_clock::now() - start < std::chrono::seconds(5)) {
+    while (client.frameCount() < 3 && std::chrono::steady_clock::now() - start < std::chrono::seconds(5)) {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
@@ -152,5 +152,5 @@ TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToF
   REQUIRE_FALSE(socketcan_result == TestResult::Failed);
 
   // If both are NotAvailable, treat as effectively skipped (but still report a warning).
-  WARN("No usable ToF interface found (neither USBtingo(0) nor SocketCAN(can0)).");
+  FAIL("No usable ToF interface found (neither USBtingo(0) nor SocketCAN(can0)).");
 }

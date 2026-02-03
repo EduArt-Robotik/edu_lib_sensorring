@@ -15,7 +15,7 @@ TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::
     , _params(params) {
 
   _rx_buffer_offset = 0;
-  _interface->addToFSensorToEndpointMap(idx);
+  _interface->addTofSensorEndpoint(idx);
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 }
 
@@ -111,14 +111,17 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
 }
 
 void TofSensor::cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+  static std::uint8_t request_count = 0;
   if (active_sensors > 0) {
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_TOF_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+    std::vector<uint8_t> tx_buf = { request_count, sensor_select_high, sensor_select_low };
     interface->send(com::ComEndpoint("tof_request"), tx_buf);
   } else {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
   }
+  request_count++;
+  if (request_count > std::numeric_limits<std::uint8_t>::max()) request_count = 0;
 }
 
 void TofSensor::cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
