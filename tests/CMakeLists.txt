@@ -16,21 +16,24 @@ target_include_directories(sensorring_tests PRIVATE
 )
 
 target_link_libraries(sensorring_tests PRIVATE
-    sensorring::sensorring
-    
-    Catch2::Catch2WithMain
+  sensorring::sensorring
+  Catch2::Catch2WithMain
+  Threads::Threads
 )
+
 catch_discover_tests(sensorring_tests)
 
 if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
-        hardware/test_tof_hardware.cpp
+      hardware/test_tof_hardware.cpp
     )
+
     target_link_libraries(sensorring_hardware_tests PRIVATE
-        sensorring::sensorring
-        Catch2::Catch2WithMain
+      sensorring::sensorring
+      Catch2::Catch2WithMain
+      Threads::Threads
     )
-    
+
     catch_discover_tests(sensorring_hardware_tests)
 endif()
 
