@@ -20,7 +20,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
 
   _interface->addSensorBoardEndpoint();
 
-  addEndpoint(com::ComEndpoint("broadcast"));
+  subscribeToEndpoint(com::ComEndpoint("broadcast"));
   _interface->registerObserver(this);
 }
 

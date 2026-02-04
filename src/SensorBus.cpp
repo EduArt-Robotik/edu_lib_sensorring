@@ -31,9 +31,9 @@ SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<s
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open com interface");
   }
 
-  addEndpoint(com::ComEndpoint("broadcast"));
-  addEndpoint(com::ComEndpoint("tof_status"));
-  addEndpoint(com::ComEndpoint("thermal_status"));
+  subscribeToEndpoint(com::ComEndpoint("broadcast"));
+  subscribeToEndpoint(com::ComEndpoint("tof_status"));
+  subscribeToEndpoint(com::ComEndpoint("thermal_status"));
   _interface->registerObserver(this);
 }
 
