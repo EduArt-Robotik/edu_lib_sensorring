@@ -17,7 +17,7 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, st
     , _new_measurement_ready_flag(false)
 
 {
-  addEndpoint(target);
+  subscribeToEndpoint(target);
   _interface->registerObserver(this);
 }
 

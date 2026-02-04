@@ -33,7 +33,7 @@ public:
    * @param[in] target ComEndpoint which will trigger the notify callback on future messages.
    * @return returns true if the new endpoint was added successfully
    */
-  bool addEndpoint(const ComEndpoint target);
+  bool subscribeToEndpoint(const ComEndpoint target);
 
   /**
    * Remove a ComEndpoint to the list of observed endpoints.

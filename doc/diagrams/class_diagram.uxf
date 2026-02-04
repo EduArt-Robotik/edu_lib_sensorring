@@ -128,11 +128,11 @@ transparency=0
 
 
 --
-+ addEndpoint(target : ComEndpoint) = 0
++ subscribeToEndpoint(target : ComEndpoint) = 0
 + getEndpoints() : vector&lt;ComEndpoint&gt;
 + checkConnectionStatus( timeout_ms : unsigned int) : bool
 
-/+ addEndpoint(target : ComEndpoint) = 0/
+/+ subscribeToEndpoint(target : ComEndpoint) = 0/
 /+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
 
 

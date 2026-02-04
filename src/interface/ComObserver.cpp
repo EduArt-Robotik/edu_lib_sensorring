@@ -10,7 +10,7 @@ ComObserver::ComObserver() {
 ComObserver::~ComObserver() {
 }
 
-bool ComObserver::addEndpoint(const ComEndpoint canid) {
+bool ComObserver::subscribeToEndpoint(const ComEndpoint canid) {
   auto result = _endpoints.insert(canid);
   if (result.second) {
     return true;
