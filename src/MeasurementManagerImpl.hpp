@@ -10,7 +10,7 @@
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
 
-#include "SensorRing.hpp"
+#include "sensorring/SensorRing.hpp"
 
 namespace eduart {
 
