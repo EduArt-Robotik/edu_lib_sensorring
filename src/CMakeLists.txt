@@ -23,6 +23,7 @@ target_sources(sensorring
   interface/can/canprotocol.cpp
   logger/Logger.cpp
   logger/LoggerClient.cpp
+  device/IDevice.cpp
   device/TofSensor.cpp
   device/ThermalSensor.cpp
   device/LedLight.cpp

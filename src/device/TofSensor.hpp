@@ -6,6 +6,7 @@
 #include "hardware/st_vl53l8cx.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/device/IDevice.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
@@ -15,7 +16,7 @@ namespace eduart {
 
 namespace sensor {
 
-class TofSensor : public BaseSensor {
+class TofSensor : public BaseSensor, public device::IDevice {
 public:
   TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~TofSensor();

@@ -39,9 +39,7 @@ private:
   const SensorBoardParams _params;
   EnumerationInformation _enum_info;
 
-  std::unique_ptr<TofSensor> _tof;
-  std::unique_ptr<ThermalSensor> _thermal;
-  std::unique_ptr<LedLight> _leds;
+  std::vector<std::unique_ptr<device::IDevice> > _device_vec;
 
   mutable std::mutex _com_mutex;
   using LockGuard = std::lock_guard<std::mutex>;

@@ -2,6 +2,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/device/IDevice.hpp"
 #include "sensorring/types/LightMode.hpp"
 
 #include "BaseSensor.hpp"
@@ -10,7 +11,7 @@ namespace eduart {
 
 namespace sensor {
 
-class LedLight {
+class LedLight : public device::IDevice {
 public:
   LedLight(LightParams params, com::ComInterface* interface);
   ~LedLight();

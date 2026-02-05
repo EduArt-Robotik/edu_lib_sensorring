@@ -5,6 +5,7 @@
 #include "hardware/heimann_htpa32.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/device/IDevice.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 
 #include "BaseSensor.hpp"
@@ -13,7 +14,7 @@ namespace eduart {
 
 namespace sensor {
 
-class ThermalSensor : public BaseSensor {
+class ThermalSensor : public BaseSensor, public device::IDevice {
 public:
   ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~ThermalSensor();

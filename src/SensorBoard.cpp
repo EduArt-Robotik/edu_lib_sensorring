@@ -3,6 +3,7 @@
 #include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComEndpoints.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
 
 namespace eduart {
@@ -13,10 +14,11 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
     : _idx(idx)
     , _interface(interface)
     , _params{ params }
-    , _enum_info()
-    , _tof(std::move(tof))
-    , _thermal(std::move(thermal))
-    , _leds(std::move(leds)) {
+    , _enum_info() {
+
+  _device_vec.push_back(std::move(tof));
+  _device_vec.push_back(std::move(thermal));
+  _device_vec.push_back(std::move(leds));
 
   _interface->addSensorBoardEndpoint();
 
@@ -38,17 +40,33 @@ const EnumerationInformation& SensorBoard::getEnumInfo() const {
 
 TofSensor* SensorBoard::getTof() const {
   LockGuard lock(_com_mutex);
-  return _tof.get();
+
+  if (auto tof = dynamic_cast<TofSensor*>(_device_vec[0].get())) {
+    return tof;
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "TofSensor not found");
+    return nullptr;
+  }
 }
 
 ThermalSensor* SensorBoard::getThermal() const {
   LockGuard lock(_com_mutex);
-  return _thermal.get();
+  if (auto thermal = dynamic_cast<ThermalSensor*>(_device_vec[1].get())) {
+    return thermal;
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "ThermalSensor not found");
+    return nullptr;
+  }
 }
 
 LedLight* SensorBoard::getLed() const {
   LockGuard lock(_com_mutex);
-  return _leds.get();
+  if (auto led = dynamic_cast<LedLight*>(_device_vec[2].get())) {
+    return led;
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "LedLight not found");
+    return nullptr;
+  }
 }
 
 void SensorBoard::cmdReset(com::ComInterface* interface) {
@@ -80,11 +98,11 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
 
       const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
       const auto tof_rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
-      _tof->setPose(tof_translation, tof_rotation);
+      getTof()->setPose(tof_translation, tof_rotation);
 
       const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
       const auto thermal_rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
-      _thermal->setPose(thermal_translation, thermal_rotation);
+      getThermal()->setPose(thermal_translation, thermal_rotation);
     }
   }
 }
