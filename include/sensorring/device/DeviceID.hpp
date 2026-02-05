@@ -9,7 +9,7 @@ namespace eduart {
 namespace device {
 
 enum class DeviceType {
-  VL53L8,
+  VL53L8CX,
   HTPA32,
   WS2812b,
   UNDEFINED
