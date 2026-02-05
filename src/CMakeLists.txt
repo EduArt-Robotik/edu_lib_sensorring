@@ -23,10 +23,10 @@ target_sources(sensorring
   interface/can/canprotocol.cpp
   logger/Logger.cpp
   logger/LoggerClient.cpp
-  sensors/TofSensor.cpp
-  sensors/ThermalSensor.cpp
-  sensors/LedLight.cpp
-  sensors/BaseSensor.cpp
+  device/TofSensor.cpp
+  device/ThermalSensor.cpp
+  device/LedLight.cpp
+  device/BaseSensor.cpp
   types/Image.cpp
   types/PointCloud.cpp
   types/EnumerationInformation.cpp

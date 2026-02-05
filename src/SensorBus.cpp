@@ -7,9 +7,9 @@
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/logger/Logger.hpp"
-#include "sensors/LedLight.hpp"
-#include "sensors/ThermalSensor.hpp"
-#include "sensors/TofSensor.hpp"
+#include "device/LedLight.hpp"
+#include "device/ThermalSensor.hpp"
+#include "device/TofSensor.hpp"
 #include "types/EnumerationInformation.hpp"
 
 #include "SensorBoard.hpp"

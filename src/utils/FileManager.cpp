@@ -5,12 +5,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "sensorring/types/Image.hpp"
-#include "sensors/hardware/heimann_htpa32.hpp"
-
-#include "sensorring/logger/Logger.hpp"
-
+#include "device/hardware/heimann_htpa32.hpp"
 #include "platform/Platform.hpp"
+#include "sensorring/logger/Logger.hpp"
+#include "sensorring/types/Image.hpp"
 
 namespace eduart {
 

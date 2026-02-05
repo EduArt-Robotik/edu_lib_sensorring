@@ -3,14 +3,13 @@
 #include <memory>
 #include <mutex>
 
+#include "device/LedLight.hpp"
+#include "device/ThermalSensor.hpp"
+#include "device/TofSensor.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComObserver.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensors/LedLight.hpp"
-#include "sensors/ThermalSensor.hpp"
-#include "sensors/TofSensor.hpp"
 #include "types/EnumerationInformation.hpp"
-
 
 namespace eduart {
 

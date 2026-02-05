@@ -1,4 +1,4 @@
-#include "sensors/BaseSensor.hpp"
+#include "device/BaseSensor.hpp"
 
 #include "sensorring/math/Math.hpp"
 
