@@ -49,8 +49,8 @@ private:
 };
 
 static bool _light_device_static_init = []() {
-  IDevice::register_static_function<SetLight>(&LedLight::setLight);
-  IDevice::register_static_function<SyncLight>(&LedLight::syncLight);
+  IDevice::register_static_function_for<LedLight, SetLight>(&LedLight::setLight);
+  IDevice::register_static_function_for<LedLight, SyncLight>(&LedLight::syncLight);
   return true;
 }();
 

@@ -8,9 +8,7 @@ std::vector<std::pair<std::type_index, std::string> > IDevice::capabilities() co
   std::vector<std::pair<std::type_index, std::string> > out;
   out.reserve(invokers_.size());
   for (auto const& kv : invokers_) {
-    const auto& idx      = kv.first;
-    const auto& inv_base = kv.second;
-    out.emplace_back(idx, inv_base->get_name().empty() ? idx.name() : inv_base->get_name());
+    out.emplace_back(kv.first, kv.second->get_name().empty() ? kv.first.name() : kv.second->get_name());
   }
   return out;
 }

@@ -156,7 +156,7 @@ static SyncByStaticCap::Response static_sync_impl(const SyncByStaticCap::Request
   return SyncByStaticCap::Response{ req.value + 200 };
 }
 
-// Capability types for register_static_function tests
+// Capability types for register_static_function_for tests (per-device-type static)
 struct StaticSyncCap {
   struct Request {
     int value;
@@ -175,19 +175,23 @@ struct StaticAsyncCap {
   };
 };
 
-struct StaticFallbackCap {
-  struct Request {
-    int value;
-  };
-  struct Response {
-    int value;
-  };
-};
-
-// Free function for static registration
+// Free function for static registration (used with register_static_function_for<DeviceType, Cap>)
 static StaticSyncCap::Response static_sync_free_func(const StaticSyncCap::Request& req) {
   return StaticSyncCap::Response{ req.value + 1000 };
 }
+
+// Concrete device types for per-device static registration tests
+struct StaticDeviceA : IDevice {
+  StaticDeviceA() {}
+};
+
+struct StaticDeviceB : IDevice {
+  StaticDeviceB() {}
+};
+
+struct StaticDeviceC : IDevice {
+  StaticDeviceC() {}
+};
 
 // Device that registers capabilities only via free/static/lambda (no ICapability)
 struct FunctionOnlyDevice : IDevice {
@@ -870,168 +874,108 @@ TEST_CASE("IDevice register_function and register_function_async (free, static, 
   }
 }
 
-TEST_CASE("IDevice register_static_function and static invocation", "[IDevice]") {
-  // Register static functions before testing
-  IDevice::register_static_function<StaticSyncCap>(&static_sync_free_func);
-  IDevice::register_static_function_async<StaticAsyncCap>(
+TEST_CASE("IDevice register_static_function_for and static_invoke (per-device-type)", "[IDevice]") {
+  // Register static functions scoped to concrete device types
+  IDevice::register_static_function_for<StaticDeviceA, StaticSyncCap>(&static_sync_free_func);
+  IDevice::register_static_function_async_for<StaticDeviceA, StaticAsyncCap>(
     [](const StaticAsyncCap::Request& req) {
       return std::async(std::launch::deferred, [req]() {
         return StaticAsyncCap::Response{ req.value * 3 };
       });
     });
-  IDevice::register_static_function<StaticFallbackCap>(
-    [](const StaticFallbackCap::Request& req) {
-      return StaticFallbackCap::Response{ req.value + 5000 };
+
+  IDevice::register_static_function_for<StaticDeviceB, StaticSyncCap>(
+    [](const StaticSyncCap::Request& req) {
+      return StaticSyncCap::Response{ req.value + 2000 }; // Different from DeviceA (1000)
     });
 
-  SECTION("invoke_static calls registered static sync function") {
-    auto result = IDevice::invoke_static<StaticSyncCap>(StaticSyncCap::Request{ 5 });
-    REQUIRE(result.has_value());
-    REQUIRE(result->value == 1005); // 5 + 1000
+  SECTION("static_invoke<D, Cap> calls function registered for device type D") {
+    auto result_a = IDevice::static_invoke<StaticDeviceA, StaticSyncCap>(StaticSyncCap::Request{ 5 });
+    REQUIRE(result_a.has_value());
+    REQUIRE(result_a->value == 1005); // 5 + 1000 (DeviceA)
+
+    auto result_b = IDevice::static_invoke<StaticDeviceB, StaticSyncCap>(StaticSyncCap::Request{ 5 });
+    REQUIRE(result_b.has_value());
+    REQUIRE(result_b->value == 2005); // 5 + 2000 (DeviceB)
   }
 
-  SECTION("invoke_static calls registered static async function (sync)") {
-    auto result = IDevice::invoke_static<StaticAsyncCap>(StaticAsyncCap::Request{ 4 });
+  SECTION("static_invoke<D, Cap> returns empty optional when no static function registered for D") {
+    // StaticDeviceC never registered StaticSyncCap
+    auto result_c = IDevice::static_invoke<StaticDeviceC, StaticSyncCap>(StaticSyncCap::Request{ 5 });
+    REQUIRE_FALSE(result_c.has_value());
+
+    // Unregistered capability for any device type
+    auto result_unreg = IDevice::static_invoke<StaticDeviceA, UnregisteredCap>(UnregisteredCap::Request{ 1 });
+    REQUIRE_FALSE(result_unreg.has_value());
+  }
+
+  SECTION("static_invoke<D, Cap> calls async static when only async registered for D") {
+    auto result = IDevice::static_invoke<StaticDeviceA, StaticAsyncCap>(StaticAsyncCap::Request{ 4 });
     REQUIRE(result.has_value());
     REQUIRE(result->value == 12); // 4 * 3
   }
 
-  SECTION("invoke_static returns empty optional for unregistered capability") {
-    auto result = IDevice::invoke_static<UnregisteredCap>(UnregisteredCap::Request{ 1 });
-    REQUIRE_FALSE(result.has_value());
-  }
-
-  SECTION("invoke_static_async calls registered static async function") {
-    auto fut_opt = IDevice::invoke_static_async<StaticAsyncCap>(StaticAsyncCap::Request{ 6 });
+  SECTION("static_invoke_async<D, Cap> calls registered static async function") {
+    auto fut_opt = IDevice::static_invoke_async<StaticDeviceA, StaticAsyncCap>(StaticAsyncCap::Request{ 6 });
     REQUIRE(fut_opt.has_value());
     REQUIRE(fut_opt->get().value == 18); // 6 * 3
   }
 
-  SECTION("invoke_static_async wraps registered static sync function in std::async") {
-    auto fut_opt = IDevice::invoke_static_async<StaticSyncCap>(StaticSyncCap::Request{ 7 });
+  SECTION("static_invoke_async<D, Cap> wraps registered static sync in std::async") {
+    auto fut_opt = IDevice::static_invoke_async<StaticDeviceA, StaticSyncCap>(StaticSyncCap::Request{ 7 });
     REQUIRE(fut_opt.has_value());
     REQUIRE(fut_opt->get().value == 1007); // 7 + 1000
   }
 
-  SECTION("invoke_static_async returns empty optional for unregistered capability") {
-    auto fut_opt = IDevice::invoke_static_async<UnregisteredCap>(UnregisteredCap::Request{ 1 });
+  SECTION("static_invoke_async<D, Cap> returns empty optional when not registered for D") {
+    auto fut_opt = IDevice::static_invoke_async<StaticDeviceC, StaticSyncCap>(StaticSyncCap::Request{ 1 });
     REQUIRE_FALSE(fut_opt.has_value());
   }
 
-  SECTION("try_invoke_static returns response for registered static function") {
-    auto resp = IDevice::try_invoke_static<StaticSyncCap>(StaticSyncCap::Request{ 8 });
+  SECTION("try_static_invoke<D, Cap> returns response for registered (D, Cap)") {
+    auto resp = IDevice::try_static_invoke<StaticDeviceA, StaticSyncCap>(StaticSyncCap::Request{ 8 });
     REQUIRE(resp.value == 1008); // 8 + 1000
   }
 
-  SECTION("try_invoke_static throws for unregistered capability") {
-    REQUIRE_THROWS_AS(
-      IDevice::try_invoke_static<UnregisteredCap>(UnregisteredCap::Request{ 1 }),
-      CapabilityNotSupported);
+  SECTION("try_static_invoke<D, Cap> throws when not registered for D") {
+    REQUIRE_THROWS_AS((IDevice::try_static_invoke<StaticDeviceC, StaticSyncCap>(StaticSyncCap::Request{ 1 })), CapabilityNotSupported);
   }
 
-  SECTION("try_invoke_static_async returns future for registered static async function") {
-    auto fut = IDevice::try_invoke_static_async<StaticAsyncCap>(StaticAsyncCap::Request{ 9 });
+  SECTION("try_static_invoke_async<D, Cap> returns future for registered (D, Cap)") {
+    auto fut = IDevice::try_static_invoke_async<StaticDeviceA, StaticAsyncCap>(StaticAsyncCap::Request{ 9 });
     REQUIRE(fut.get().value == 27); // 9 * 3
   }
 
-  SECTION("try_invoke_static_async wraps sync function in future") {
-    auto fut = IDevice::try_invoke_static_async<StaticSyncCap>(StaticSyncCap::Request{ 10 });
-    REQUIRE(fut.get().value == 1010); // 10 + 1000
+  SECTION("try_static_invoke_async<D, Cap> throws when not registered for D") {
+    REQUIRE_THROWS_AS((IDevice::try_static_invoke_async<StaticDeviceC, StaticSyncCap>(StaticSyncCap::Request{ 1 })), CapabilityNotSupported);
   }
 
-  SECTION("try_invoke_static_async throws for unregistered capability") {
-    REQUIRE_THROWS_AS(
-      IDevice::try_invoke_static_async<UnregisteredCap>(UnregisteredCap::Request{ 1 }),
-      CapabilityNotSupported);
+  SECTION("capability registered for DeviceA is only callable via static_invoke<StaticDeviceA, Cap>") {
+    // DeviceA registered StaticSyncCap and StaticAsyncCap
+    REQUIRE(IDevice::static_invoke<StaticDeviceA, StaticSyncCap>(StaticSyncCap::Request{ 1 }).has_value());
+    REQUIRE(IDevice::static_invoke<StaticDeviceA, StaticAsyncCap>(StaticAsyncCap::Request{ 1 }).has_value());
+
+    // DeviceB registered only StaticSyncCap (not StaticAsyncCap)
+    REQUIRE(IDevice::static_invoke<StaticDeviceB, StaticSyncCap>(StaticSyncCap::Request{ 1 }).has_value());
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceB, StaticAsyncCap>(StaticAsyncCap::Request{ 1 }).has_value());
+
+    // DeviceC registered nothing: both return empty
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceC, StaticSyncCap>(StaticSyncCap::Request{ 1 }).has_value());
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceC, StaticAsyncCap>(StaticAsyncCap::Request{ 1 }).has_value());
   }
 
-  SECTION("instance invoke falls back to static function when not found on instance") {
-    // Create empty device (no capabilities registered)
+  SECTION("instance invoke does not use static functions (no fallback)") {
     struct EmptyDevice : IDevice {
       EmptyDevice() {}
     };
     EmptyDevice dev;
 
-    // Instance doesn't support it
-    REQUIRE_FALSE(dev.supports<StaticFallbackCap>());
-
-    // But invoke falls back to static function
-    auto result = static_cast<IDevice&>(dev).invoke<StaticFallbackCap>(StaticFallbackCap::Request{ 3 });
-    REQUIRE(result.has_value());
-    REQUIRE(result->value == 5003); // 3 + 5000
+    REQUIRE_FALSE(dev.supports<StaticSyncCap>());
+    auto result = static_cast<IDevice&>(dev).invoke<StaticSyncCap>(StaticSyncCap::Request{ 3 });
+    REQUIRE_FALSE(result.has_value()); // No fallback to static; instance has no capability
   }
 
-  SECTION("const instance invoke falls back to static function") {
-    struct EmptyDevice : IDevice {
-      EmptyDevice() {}
-    };
-    const EmptyDevice dev;
-
-    auto result = static_cast<const IDevice&>(dev).invoke<StaticFallbackCap>(StaticFallbackCap::Request{ 4 });
-    REQUIRE(result.has_value());
-    REQUIRE(result->value == 5004); // 4 + 5000
-  }
-
-  SECTION("instance invoke_async falls back to static async function") {
-    struct EmptyDevice : IDevice {
-      EmptyDevice() {}
-    };
-    EmptyDevice dev;
-
-    auto fut_opt = static_cast<IDevice&>(dev).invoke_async<StaticAsyncCap>(StaticAsyncCap::Request{ 5 });
-    REQUIRE(fut_opt.has_value());
-    REQUIRE(fut_opt->get().value == 15); // 5 * 3
-  }
-
-  SECTION("const instance invoke_async falls back to static function") {
-    struct EmptyDevice : IDevice {
-      EmptyDevice() {}
-    };
-    const EmptyDevice dev;
-
-    auto fut_opt = static_cast<const IDevice&>(dev).invoke_async<StaticFallbackCap>(StaticFallbackCap::Request{ 6 });
-    REQUIRE(fut_opt.has_value());
-    REQUIRE(fut_opt->get().value == 5006); // 6 + 5000
-  }
-
-  SECTION("instance try_invoke falls back to static function") {
-    struct EmptyDevice : IDevice {
-      EmptyDevice() {}
-    };
-    EmptyDevice dev;
-
-    auto resp = static_cast<IDevice&>(dev).try_invoke<StaticFallbackCap>(StaticFallbackCap::Request{ 7 });
-    REQUIRE(resp.value == 5007); // 7 + 5000
-  }
-
-  SECTION("instance try_invoke_async falls back to static function") {
-    struct EmptyDevice : IDevice {
-      EmptyDevice() {}
-    };
-    EmptyDevice dev;
-
-    auto fut = static_cast<IDevice&>(dev).try_invoke_async<StaticAsyncCap>(StaticAsyncCap::Request{ 8 });
-    REQUIRE(fut.get().value == 24); // 8 * 3
-  }
-
-  SECTION("instance capability takes precedence over static fallback") {
-    struct DeviceWithInstanceCap : IDevice, ICapability<StaticFallbackCap> {
-      DeviceWithInstanceCap() {
-        register_capability<StaticFallbackCap>("instance_cap");
-      }
-      StaticFallbackCap::Response invoke(const StaticFallbackCap::Request& req) override {
-        return StaticFallbackCap::Response{ req.value + 1 }; // Different from static (5000)
-      }
-    };
-    DeviceWithInstanceCap dev;
-
-    // Instance implementation is used, not static fallback
-    auto result = static_cast<IDevice&>(dev).invoke<StaticFallbackCap>(StaticFallbackCap::Request{ 10 });
-    REQUIRE(result.has_value());
-    REQUIRE(result->value == 11); // 10 + 1 (instance), not 10 + 5000 (static)
-  }
-
-  SECTION("static function can be registered with lambda") {
+  SECTION("static function can be registered with lambda for device type D") {
     struct LambdaStaticCap {
       struct Request {
         int value;
@@ -1041,39 +985,21 @@ TEST_CASE("IDevice register_static_function and static invocation", "[IDevice]")
       };
     };
 
-    IDevice::register_static_function<LambdaStaticCap>(
+    IDevice::register_static_function_for<StaticDeviceC, LambdaStaticCap>(
       [](const LambdaStaticCap::Request& req) {
         return LambdaStaticCap::Response{ req.value + 42 };
       });
 
-    auto result = IDevice::invoke_static<LambdaStaticCap>(LambdaStaticCap::Request{ 1 });
+    auto result = IDevice::static_invoke<StaticDeviceC, LambdaStaticCap>(LambdaStaticCap::Request{ 1 });
     REQUIRE(result.has_value());
     REQUIRE(result->value == 43); // 1 + 42
+
+    // Still not callable via DeviceA or DeviceB
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceA, LambdaStaticCap>(LambdaStaticCap::Request{ 1 }).has_value());
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceB, LambdaStaticCap>(LambdaStaticCap::Request{ 1 }).has_value());
   }
 
-  SECTION("static function can be registered with free function pointer") {
-    struct FreeFuncStaticCap {
-      struct Request {
-        int value;
-      };
-      struct Response {
-        int value;
-      };
-    };
-
-    // Define function outside SECTION
-    auto free_func_impl = [](const FreeFuncStaticCap::Request& req) {
-      return FreeFuncStaticCap::Response{ req.value + 99 };
-    };
-
-    IDevice::register_static_function<FreeFuncStaticCap>(free_func_impl);
-
-    auto result = IDevice::invoke_static<FreeFuncStaticCap>(FreeFuncStaticCap::Request{ 2 });
-    REQUIRE(result.has_value());
-    REQUIRE(result->value == 101); // 2 + 99
-  }
-
-  SECTION("static function can be registered with static member function") {
+  SECTION("static function can be registered with static member function for device type D") {
     struct StaticMemberCap {
       struct Request {
         int value;
@@ -1089,10 +1015,12 @@ TEST_CASE("IDevice register_static_function and static invocation", "[IDevice]")
       }
     };
 
-    IDevice::register_static_function<StaticMemberCap>(&Helper::member_func);
+    IDevice::register_static_function_for<StaticDeviceB, StaticMemberCap>(&Helper::member_func);
 
-    auto result = IDevice::invoke_static<StaticMemberCap>(StaticMemberCap::Request{ 3 });
+    auto result = IDevice::static_invoke<StaticDeviceB, StaticMemberCap>(StaticMemberCap::Request{ 3 });
     REQUIRE(result.has_value());
     REQUIRE(result->value == 80); // 3 + 77
+
+    REQUIRE_FALSE(IDevice::static_invoke<StaticDeviceA, StaticMemberCap>(StaticMemberCap::Request{ 3 }).has_value());
   }
 }

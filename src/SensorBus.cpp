@@ -86,11 +86,11 @@ void SensorBus::setBrs(bool brs_enable) {
 }
 
 void SensorBus::syncLight() {
-  device::LedLight::invoke_static<device::SyncLight>(device::SyncLight::Request{ _interface });
+  device::IDevice::static_invoke<device::LedLight, device::SyncLight>(device::SyncLight::Request{ _interface });
 }
 
 void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  device::LedLight::invoke_static<device::SetLight>(device::SetLight::Request{ _interface, mode, red, green, blue });
+  device::IDevice::static_invoke<device::LedLight, device::SetLight>(device::SetLight::Request{ _interface, mode, red, green, blue });
 }
 
 void SensorBus::resetDevices() {

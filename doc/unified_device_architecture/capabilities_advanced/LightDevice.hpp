@@ -32,7 +32,7 @@ struct GetFirmware {
 };
 
 // Light device: implements TurnOn (sync) and SetBrightness (sync + async).
-// Also registers a static (global) capability GetFirmware via register_static_function.
+// Also registers a static (device-scoped) capability GetFirmware via register_static_function_for.
 struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, ICapabilityAsync<SetBrightness> {
   LightDevice() {
     // instance registration
@@ -73,7 +73,7 @@ struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, I
     });
   }
 
-  // Static function used as a globally-registered capability target (no per-instance state)
+  // Static function used as a globally-registered capability target for LightDevice only
   static GetFirmware::Response static_get_firmware(const GetFirmware::Request&) { return GetFirmware::Response{ "LightDeviceFW v1.2.3" }; }
 
 private:
@@ -84,10 +84,10 @@ private:
 // Register the static function at namespace scope so it's available before any instance is created.
 // This ensures that IDevice::invoke_static<GetFirmware>() can be called without creating a LightDevice instance.
 namespace {
-  // This static variable initializer runs before main(), ensuring the static function is registered
-  // as soon as this translation unit is loaded.
-  static bool _light_device_static_init = []() {
-    IDevice::register_static_function<GetFirmware>(&LightDevice::static_get_firmware);
-    return true;
-  }();
-}
+// This static variable initializer runs before main(), ensuring the static function is registered
+// as soon as this translation unit is loaded.
+static bool _light_device_static_init = []() {
+  IDevice::register_static_function_for<LightDevice, GetFirmware>(&LightDevice::static_get_firmware);
+  return true;
+}();
+} // namespace
