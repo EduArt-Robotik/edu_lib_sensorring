@@ -1,7 +1,17 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   ICapabilityAsync.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Asynchronous capability interface for IDevice (Request/Response per capability type).
+ * @date   2025-02-06
+ */
+
 #pragma once
 
 #include <future>
 #include <stdexcept>
+#include <utility>
 
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -19,14 +29,21 @@ template <typename Cap> struct SENSORRING_EXPORT ICapabilityAsync {
   using Response = typename Cap::Response;
 
   /**
-   * @brief Invoke the capability asynchronously.
+   * @brief Invoke the capability asynchronously. Delegates to const overload if not overridden.
    * @param[in] req Request object.
    * @return std::future<Response> for the asynchronous result.
+   * @throw std::runtime_error if invoke async is not overridden and const invoke async is not implemented.
    */
-  virtual std::future<Response> invoke_async(const Request& req) = 0;
+  virtual std::future<Response> invoke_async(const Request& req) {
+    try {
+      return std::as_const(*this).invoke_async(req);
+    } catch (const std::runtime_error& e) {
+      throw std::runtime_error("try to invoke capability asynchronously, but const invoke_async is not implemented");
+    }
+  }
 
   /**
-   * @brief Optional const overload of invoke_async.
+   * @brief Const overload of invoke_async; override in derived classes.
    * @param[in] req Request object.
    * @return std::future<Response> for the asynchronous result.
    * @throw std::runtime_error if not implemented by the derived class.
@@ -36,6 +53,7 @@ template <typename Cap> struct SENSORRING_EXPORT ICapabilityAsync {
     throw std::runtime_error("const async invoke not implemented for capability");
   }
 
+  /// Destructor.
   virtual ~ICapabilityAsync() = default;
 };
 
