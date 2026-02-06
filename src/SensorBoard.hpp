@@ -41,8 +41,8 @@ private:
 
   std::vector<std::unique_ptr<device::IDevice> > _device_vec;
 
-  mutable std::mutex _com_mutex;
-  using LockGuard = std::lock_guard<std::mutex>;
+  mutable std::recursive_mutex _com_mutex;
+  using LockGuard = std::lock_guard<std::recursive_mutex>;
 };
 
 } // namespace device
