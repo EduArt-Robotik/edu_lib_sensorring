@@ -4,7 +4,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable)
     : ComObserver()
@@ -70,6 +70,6 @@ void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t
   canCallback(source, data);
 }
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

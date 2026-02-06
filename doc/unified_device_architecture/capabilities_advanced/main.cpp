@@ -21,14 +21,29 @@ int main() {
       std::cout << "    - name=\"" << info.second << "\" type=\"" << info.first.name() << "\"\n";
     }
 
-    // Example pattern: use non-throwing invoke and handle std::nullopt
+    // Example: call the static-registered capability GetFirmware
+    // 1) non-throwing path (invoke -> std::optional)
+    if (auto fw_opt = dev->invoke<GetFirmware>({})) {
+      std::cout << "  Firmware (non-throwing) -> " << fw_opt->version << "\n";
+    } else {
+      std::cout << "  Firmware capability not supported (non-throwing)\n";
+    }
+
+    // 2) throwing path (try_invoke -> throws if missing)
+    try {
+      auto fw = dev->try_invoke<GetFirmware>({});
+      std::cout << "  Firmware (throwing) -> " << fw.version << "\n";
+    } catch (const CapabilityNotSupported& e) {
+      std::cout << "  Firmware capability not supported (throwing): " << e.what() << "\n";
+    }
+
+    // Existing examples from before (TurnOn / SetBrightness / ReadTemperature)
     if (auto opt = dev->invoke<TurnOn>({})) {
       std::cout << "  TurnOn (non-throwing) -> ok=" << std::boolalpha << opt->ok << "\n";
     } else {
       std::cout << "  TurnOn not supported (non-throwing)\n";
     }
 
-    // Or use throwing variant try_invoke (thin wrapper)
     try {
       auto res = dev->try_invoke<SetBrightness>(SetBrightness::Request{ 75 });
       std::cout << "  SetBrightness (sync, throwing) -> " << res.level << "\n";
@@ -36,7 +51,6 @@ int main() {
       std::cout << "  SetBrightness not supported: " << e.what() << "\n";
     }
 
-    // Async example: non-throwing invoke_async
     if (auto fut_opt = dev->invoke_async<SetBrightness>(SetBrightness::Request{ 20 })) {
       std::cout << "  SetBrightness (async, non-throwing) -> waiting...\n";
       auto result = fut_opt->get();
@@ -45,7 +59,6 @@ int main() {
       std::cout << "  SetBrightness async not supported (non-throwing)\n";
     }
 
-    // ReadTemperature (sync + async) and Calibrate
     if (auto temp_opt = dev->invoke<ReadTemperature>({})) {
       std::cout << "  ReadTemperature (sync) -> " << temp_opt->value << " C\n";
     } else {
@@ -59,16 +72,6 @@ int main() {
       std::cout << "  ReadTemperature (async) -> " << temp2.value << " C\n";
     } catch (const CapabilityNotSupported& e) {
       std::cout << "  ReadTemperature async not supported: " << e.what() << "\n";
-    }
-
-    // Calibrate (throwing)
-    try {
-      auto ok = dev->try_invoke<Calibrate>(Calibrate::Request{ 0.5 });
-      std::cout << "    Calibrate -> ok=" << std::boolalpha << ok.ok << "\n";
-      auto after = dev->try_invoke<ReadTemperature>({});
-      std::cout << "    New temperature -> " << after.value << " C\n";
-    } catch (const CapabilityNotSupported& e) {
-      std::cout << "    Calibrate not supported: " << e.what() << "\n";
     }
 
     std::cout << "\n";

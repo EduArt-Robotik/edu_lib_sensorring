@@ -37,7 +37,7 @@ bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept {
   return lhs.hash == rhs.hash;
 }
 
-namespace sensor {
+namespace device {
 
 std::string toString(EnumerationState state) {
   switch (state) {
@@ -82,6 +82,6 @@ bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& 
   return lhs.idx < rhs.idx;
 }
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

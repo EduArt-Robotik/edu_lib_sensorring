@@ -6,14 +6,13 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
 
-#include "sensorring/logger/Logger.hpp"
-
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx)
     : BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), idx, params.enable)
@@ -231,13 +230,14 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
     }
 
     std::size_t table_row = std::lround(buffer[i] + TABLEOFFSET);
-    table_row              = table_row >> ADEXPBITS; // ToDo: Table row too large. Causes Segfault when accessing the TempTable
+    table_row             = table_row >> ADEXPBITS; // ToDo: Table row too large. Causes Segfault when accessing the TempTable
 
     if ((table_row < NROFADELEMENTS) && (table_col < NROFTAELEMENTS)) {
       std::int32_t dta = std::lround(t_ambient - htpa32::XTATemps[table_col]);
 
       double vx = ((((std::int32_t)htpa32::TempTable[table_row][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row][table_col];
-      double vy = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
+      double vy
+          = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
       buffer[i] = (std::uint32_t)((vy - vx) * ((std::int32_t)(buffer[i] + TABLEOFFSET) - (std::int32_t)htpa32::YADValues[table_row]) / (std::int32_t)ADEQUIDISTANCE + (std::int32_t)vx);
 
       // apply global offset
@@ -297,7 +297,7 @@ const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
 }
 
 void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
-  if (_params.orientation == sensor::Orientation::left) {
+  if (_params.orientation == device::Orientation::left) {
     std::reverse(image.data.begin(), image.data.end());
   }
 }
@@ -335,6 +335,6 @@ void ThermalSensor::cmdFetchThermalMeasurement(com::ComInterface* interface, std
   }
 }
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

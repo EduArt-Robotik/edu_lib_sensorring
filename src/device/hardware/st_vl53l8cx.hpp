@@ -4,7 +4,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 namespace vl53l8 {
 
@@ -36,6 +36,6 @@ static constexpr std::uint8_t TOF_RESOLUTION = 64;
 
 } // namespace vl53l8
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

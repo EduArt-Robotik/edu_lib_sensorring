@@ -214,7 +214,7 @@ typedef ::int64_t int64_t;
 }
 %rename(timeout_ms) eduart::ring::RingParams::timeout;
 %template (BusParamVector) std::vector<eduart::bus::BusParams>;
-%template (BoardParamVector) std::vector<eduart::sensor::SensorBoardParams>;
+%template (BoardParamVector) std::vector<eduart::device::SensorBoardParams>;
 %include "sensorring/Parameter.hpp"
 
 

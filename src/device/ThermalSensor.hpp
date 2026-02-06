@@ -12,7 +12,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 class ThermalSensor : public BaseSensor, public device::IDevice {
 public:
@@ -65,6 +65,6 @@ private:
   measurement::TemperatureImage _calibration_image;
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

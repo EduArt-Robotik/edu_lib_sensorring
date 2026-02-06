@@ -19,7 +19,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 /**
  * @enum SensorOrientation
@@ -112,7 +112,7 @@ struct SENSORRING_EXPORT SensorBoardParams {
   ThermalSensorParams thermal_params;
 };
 
-} // namespace sensor
+} // namespace device
 
 namespace bus {
 
@@ -129,7 +129,7 @@ struct SENSORRING_EXPORT BusParams {
   com::InterfaceType type = com::InterfaceType::UNDEFINED;
 
   /// Parameters of the sensor boards that are connected through this communication interface. Each element belongs to a unique sensor board.
-  std::vector<sensor::SensorBoardParams> board_param_vec;
+  std::vector<device::SensorBoardParams> board_param_vec;
 };
 
 } // namespace bus

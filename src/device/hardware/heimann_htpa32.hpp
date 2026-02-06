@@ -6,7 +6,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 namespace htpa32 {
 
@@ -1858,6 +1858,6 @@ static const unsigned int YADValues[NROFADELEMENTS] = {
 
 } // namespace htpa32
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

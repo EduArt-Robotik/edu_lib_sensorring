@@ -13,7 +13,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 class SensorBoard : public com::ComObserver {
 public:
@@ -45,6 +45,6 @@ private:
   using LockGuard = std::lock_guard<std::mutex>;
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

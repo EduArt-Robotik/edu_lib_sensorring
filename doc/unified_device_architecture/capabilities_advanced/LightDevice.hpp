@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <string>
 #include <thread>
 
 #include "IDevice.hpp"
@@ -22,13 +23,26 @@ struct SetBrightness {
   }; // new brightness
 };
 
-// Light device: implements TurnOn (sync) and SetBrightness (sync + async)
+// New: firmware/version capability implemented as a static function
+struct GetFirmware {
+  struct Request {};
+  struct Response {
+    std::string version;
+  };
+};
+
+// Light device: implements TurnOn (sync) and SetBrightness (sync + async).
+// Also registers a static (free-like) capability GetFirmware via register_function.
 struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, ICapabilityAsync<SetBrightness> {
   LightDevice() {
     // explicit registration calls (typed invokers created for each Cap)
     register_capability<TurnOn>("turn_on");
     register_capability<SetBrightness>("set_brightness");
     register_capability_async<SetBrightness>("set_brightness_async"); // async optional
+
+    // register a static function for firmware/version capability
+    // This demonstrates registering a function instead of implementing an instance method.
+    register_function<GetFirmware>(&LightDevice::static_get_firmware, "firmware_version");
   }
 
   // TurnOn (mutating)
@@ -59,6 +73,12 @@ struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, I
     return std::async(std::launch::async, [this]() {
       return SetBrightness::Response{ this->brightness };
     });
+  }
+
+  // Static function used as a capability target (no need for per-instance state)
+  static GetFirmware::Response static_get_firmware(const GetFirmware::Request&) {
+    // In real code this could query a compile-time constant, embedded resource, or call platform API.
+    return GetFirmware::Response{ "LightDeviceFW v1.2.3" };
   }
 
 private:

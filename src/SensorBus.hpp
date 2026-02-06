@@ -14,16 +14,16 @@ namespace bus {
 
 class SensorBus : public com::ComObserver {
 public:
-  SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec);
+  SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec);
   ~SensorBus();
 
   size_t getSensorCount() const;
   size_t getEnumerationCount() const;
-  const std::vector<sensor::EnumerationInformation>& getEnumerationInfo() const;
+  const std::vector<device::EnumerationInformation>& getEnumerationInfo() const;
 
   com::ComInterface* getInterface() const;
 
-  std::vector<const sensor::SensorBoard*> getSensorBoards() const;
+  std::vector<const device::SensorBoard*> getSensorBoards() const;
   bool isTofEnabled(int idx) const;
   bool isThermalEnabled(int idx) const;
 
@@ -56,9 +56,9 @@ public:
 
 private:
   com::ComInterface* _interface;
-  std::vector<sensor::EnumerationInformation> _enumeration_vec;
-  std::vector<std::unique_ptr<sensor::SensorBoard> > _board_vec;
-  
+  std::vector<device::EnumerationInformation> _enumeration_vec;
+  std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
+
   std::atomic<bool> _enumeration_flag;
   std::atomic<unsigned int> _enumeration_count;
 

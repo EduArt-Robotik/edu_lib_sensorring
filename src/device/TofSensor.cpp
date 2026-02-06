@@ -8,7 +8,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx)
     : BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable)
@@ -121,7 +121,8 @@ void TofSensor::cmdRequestTofMeasurement(com::ComInterface* interface, std::uint
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
   }
   request_count++;
-  if (request_count > std::numeric_limits<std::uint8_t>::max()) request_count = 0;
+  if (request_count > std::numeric_limits<std::uint8_t>::max())
+    request_count = 0;
 }
 
 void TofSensor::cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
@@ -146,6 +147,6 @@ measurement::TofMeasurement TofSensor::transformTofMeasurements(const measuremen
   return transformed_measurement;
 }
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

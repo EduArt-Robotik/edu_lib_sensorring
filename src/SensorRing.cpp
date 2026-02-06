@@ -4,9 +4,8 @@
 #include <cmath>
 #include <memory>
 
-#include "sensorring/logger/Logger.hpp"
-
 #include "interface/ComManager.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 using namespace std::chrono_literals;
 
@@ -223,13 +222,13 @@ std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {
     auto interface = com::ComManager::getInstance()->createInterface(bus_params.interface_name, bus_params.type);
 
     unsigned int idx = 0;
-    std::vector<std::unique_ptr<sensor::SensorBoard> > board_vec;
+    std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
     for (const auto& board_params : bus_params.board_param_vec) {
-      auto tof     = std::make_unique<sensor::TofSensor>(board_params.tof_params, interface, idx);
-      auto thermal = std::make_unique<sensor::ThermalSensor>(board_params.thermal_params, interface, idx);
-      auto light   = std::make_unique<sensor::LedLight>(board_params.light_params, interface);
+      auto tof     = std::make_unique<device::TofSensor>(board_params.tof_params, interface, idx);
+      auto thermal = std::make_unique<device::ThermalSensor>(board_params.thermal_params, interface, idx);
+      auto light   = std::make_unique<device::LedLight>(board_params.light_params, interface);
 
-      board_vec.push_back(std::make_unique<sensor::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
+      board_vec.push_back(std::make_unique<device::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
       idx++;
     }
 

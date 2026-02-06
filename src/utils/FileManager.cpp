@@ -19,7 +19,7 @@ namespace filemanager {
 //==================================================
 
 template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
-template class filemanager::StructHandler<sensor::htpa32::HTPA32Eeprom>;
+template class filemanager::StructHandler<device::htpa32::HTPA32Eeprom>;
 
 //==================================================
 // PathHandler

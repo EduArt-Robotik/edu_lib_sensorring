@@ -6,7 +6,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 enum class SENSORRING_EXPORT SensorState {
   SensorInit,
@@ -53,6 +53,6 @@ protected:
   bool _new_measurement_ready_flag;
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

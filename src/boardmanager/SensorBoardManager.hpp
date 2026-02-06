@@ -7,7 +7,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 // Numbers match the definition in the sensor board firmware
 enum class SensorBoardType {
@@ -104,6 +104,6 @@ private:
   };
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

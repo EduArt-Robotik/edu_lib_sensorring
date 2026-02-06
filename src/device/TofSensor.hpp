@@ -14,7 +14,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 class TofSensor : public BaseSensor, public device::IDevice {
 public:
@@ -46,6 +46,6 @@ private:
   std::size_t _rx_buffer_offset;
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

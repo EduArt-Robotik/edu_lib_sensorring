@@ -75,7 +75,7 @@ std::string MeasurementManagerImpl::printTopology() const noexcept {
 
     auto enum_info_vec = bus->getEnumerationInfo();
     for (const auto& enum_info : enum_info_vec) {
-      auto board_infos = sensor::SensorBoardManager::getSensorBoardInfo(enum_info.type);
+      auto board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
 
       ss << "sensor " << enum_info.idx << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
@@ -155,7 +155,7 @@ int MeasurementManagerImpl::notifyToFData() {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
       if (sensor_board->getTof()->getEnable()) {
         auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
-        if (raw_error == sensor::SensorState::SensorOK) {
+        if (raw_error == device::SensorState::SensorOK) {
           if (!raw_measurement.point_cloud.data.empty())
             raw_measurement_vec.emplace_back(raw_measurement);
         } else {
@@ -163,7 +163,7 @@ int MeasurementManagerImpl::notifyToFData() {
         }
 
         auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
-        if (transformed_error == sensor::SensorState::SensorOK) {
+        if (transformed_error == device::SensorState::SensorOK) {
           if (!transformed_measurement.point_cloud.data.empty())
             transformed_measurement_vec.emplace_back(transformed_measurement);
         }
@@ -199,7 +199,7 @@ int MeasurementManagerImpl::notifyThermalData() {
       if (sensor_board->getThermal()->getEnable()) {
         auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
 
-        if (error == sensor::SensorState::SensorOK) {
+        if (error == device::SensorState::SensorOK) {
           measurement_vec.emplace_back(measurement);
         } else {
           error_frames++;

@@ -8,7 +8,7 @@
 
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
 SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
     : _idx(idx)
@@ -107,6 +107,6 @@ void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const s
   }
 }
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

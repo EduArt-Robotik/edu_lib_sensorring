@@ -33,7 +33,7 @@ struct CommitHash {
   friend bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept;
 };
 
-namespace sensor {
+namespace device {
 
 enum class EnumerationState {
   Undefined,
@@ -62,6 +62,6 @@ struct EnumerationInformation {
   friend bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept;
 };
 
-} // namespace sensor
+} // namespace device
 
 } // namespace eduart

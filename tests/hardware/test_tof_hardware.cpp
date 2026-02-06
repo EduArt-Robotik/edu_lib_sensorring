@@ -21,9 +21,9 @@ public:
     if (measurement_vec.empty()) {
       return;
     }
-    //if (_count >= _max_frames) {
-    //  return;
-    //}
+    // if (_count >= _max_frames) {
+    //   return;
+    // }
     _measurements.push_back(measurement_vec.front());
     _count++;
   }
@@ -34,7 +34,7 @@ public:
 private:
   std::vector<TofMeasurement> _measurements;
   std::size_t _count{ 0 };
-  //static constexpr std::size_t _max_frames = 5;
+  // static constexpr std::size_t _max_frames = 5;
 };
 
 enum class TestResult {
@@ -47,11 +47,11 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   // Configure one bus with a single ToF-enabled board, similar to minimal example.
   ManagerParams params;
   {
-    eduart::sensor::TofSensorParams tof;
+    eduart::device::TofSensorParams tof;
     tof.user_idx = 0;
     tof.enable   = true;
 
-    eduart::sensor::SensorBoardParams board;
+    eduart::device::SensorBoardParams board;
     board.tof_params = tof;
 
     eduart::bus::BusParams bus;
