@@ -9,6 +9,7 @@ add_executable(sensorring_tests
     unit/test_tof_measurement.cpp
     unit/test_com_endpoints.cpp
     unit/test_can_endpoint_map.cpp
+    unit/test_IDevice.cpp
 )
 
 target_include_directories(sensorring_tests PRIVATE
