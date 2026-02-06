@@ -86,11 +86,11 @@ void SensorBus::setBrs(bool brs_enable) {
 }
 
 void SensorBus::syncLight() {
-  device::IDevice::static_invoke<device::LedLight, device::SyncLight>(device::SyncLight::Request{ _interface });
+  device::IDevice::static_invoke<device::LedLight, device::SyncLight>({ _interface });
 }
 
 void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  device::IDevice::static_invoke<device::LedLight, device::SetLight>(device::SetLight::Request{ _interface, mode, red, green, blue });
+  device::IDevice::static_invoke<device::LedLight, device::SetLight>({ _interface, mode, red, green, blue });
 }
 
 void SensorBus::resetDevices() {
@@ -173,7 +173,7 @@ void SensorBus::requestTofMeasurement() {
     }
   }
 
-  device::TofSensor::cmdRequestTofMeasurement(_interface, active_devices);
+  device::IDevice::static_invoke<device::TofSensor, device::RequestTofMeasurement>({ _interface, active_devices });
 }
 
 void SensorBus::fetchTofMeasurement() {
@@ -184,7 +184,7 @@ void SensorBus::fetchTofMeasurement() {
     active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
   }
 
-  device::TofSensor::cmdFetchTofMeasurement(_interface, active_devices);
+  device::IDevice::static_invoke<device::TofSensor, device::FetchTofMeasurement>({ _interface, active_devices });
 }
 
 void SensorBus::requestThermalMeasurement() {

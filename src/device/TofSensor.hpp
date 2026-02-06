@@ -16,31 +16,65 @@ namespace eduart {
 
 namespace device {
 
-class TofSensor : public BaseSensor, public device::IDevice {
+struct GetLatestRawMeasurement {
+  struct Request {};
+  struct Response {
+    const measurement::TofMeasurement& measurement;
+    SensorState state;
+  };
+};
+
+struct GetLatestTransformedMeasurement {
+  struct Request {};
+  struct Response {
+    const measurement::TofMeasurement& measurement;
+    SensorState state;
+  };
+};
+
+struct RequestTofMeasurement {
+  struct Request {
+    com::ComInterface* interface;
+    unsigned int active_sensors;
+  };
+  struct Response {};
+};
+
+struct FetchTofMeasurement {
+  struct Request {
+    com::ComInterface* interface;
+    unsigned int active_sensors;
+  };
+  struct Response {};
+};
+
+class TofSensor : public BaseSensor, public IDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
 public:
   TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~TofSensor();
 
   const TofSensorParams& getParams() const;
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
+
+  GetLatestRawMeasurement::Response invoke(const GetLatestRawMeasurement::Request&) const override;
+  GetLatestTransformedMeasurement::Response invoke(const GetLatestTransformedMeasurement::Request&) const override;
+
+  static RequestTofMeasurement::Response requestTofMeasurement(const RequestTofMeasurement::Request& req);
+  static FetchTofMeasurement::Response fetchTofMeasurement(const FetchTofMeasurement::Request& req);
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-
-  static void cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
-
-  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 
+  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
   const TofSensorParams _params;
   measurement::TofMeasurement _latest_raw_measurement;
   measurement::TofMeasurement _latest_transformed_measurement;
+
+  static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
   uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
   std::size_t _rx_buffer_offset;

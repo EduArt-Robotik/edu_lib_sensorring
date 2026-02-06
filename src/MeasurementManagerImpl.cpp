@@ -154,18 +154,17 @@ int MeasurementManagerImpl::notifyToFData() {
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
       if (sensor_board->getTof()->getEnable()) {
-        auto [raw_measurement, raw_error] = sensor_board->getTof()->getLatestRawMeasurement();
-        if (raw_error == device::SensorState::SensorOK) {
-          if (!raw_measurement.point_cloud.data.empty())
-            raw_measurement_vec.emplace_back(raw_measurement);
+        auto raw_response = sensor_board->getTof()->invoke(device::GetLatestRawMeasurement::Request{});
+        if (raw_response.state == device::SensorState::SensorOK) {
+          if (!raw_response.measurement.point_cloud.data.empty())
+            raw_measurement_vec.emplace_back(raw_response.measurement);
         } else {
           error_frames++;
         }
-
-        auto [transformed_measurement, transformed_error] = sensor_board->getTof()->getLatestTransformedMeasurement();
-        if (transformed_error == device::SensorState::SensorOK) {
-          if (!transformed_measurement.point_cloud.data.empty())
-            transformed_measurement_vec.emplace_back(transformed_measurement);
+        auto transformed_response = sensor_board->getTof()->invoke(device::GetLatestTransformedMeasurement::Request{});
+        if (transformed_response.state == device::SensorState::SensorOK) {
+          if (!transformed_response.measurement.point_cloud.data.empty())
+            transformed_measurement_vec.emplace_back(transformed_response.measurement);
         }
       }
     }

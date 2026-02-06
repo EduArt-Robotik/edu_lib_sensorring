@@ -4,15 +4,22 @@
 #include <cstring>
 
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 
 namespace device {
 
+SENSORRING_REGISTER_STATIC(TofSensor, RequestTofMeasurement, &TofSensor::requestTofMeasurement);
+SENSORRING_REGISTER_STATIC(TofSensor, FetchTofMeasurement, &TofSensor::fetchTofMeasurement);
+
 TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx)
     : BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable)
     , _params(params) {
+
+  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
+  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestTransformedMeasurement, "GetLatestTransformedMeasurement");
 
   _rx_buffer_offset = 0;
   _interface->addTofSensorEndpoint(idx);
@@ -26,11 +33,11 @@ const TofSensorParams& TofSensor::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestRawMeasurement() const {
+GetLatestRawMeasurement::Response TofSensor::invoke(const GetLatestRawMeasurement::Request&) const {
   return { _latest_raw_measurement, _error };
 }
 
-std::pair<const measurement::TofMeasurement&, SensorState> TofSensor::getLatestTransformedMeasurement() const {
+GetLatestTransformedMeasurement::Response TofSensor::invoke(const GetLatestTransformedMeasurement::Request&) const {
   return { _latest_transformed_measurement, _error };
 }
 
@@ -110,30 +117,37 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
   return measurement;
 }
 
-void TofSensor::cmdRequestTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
+RequestTofMeasurement::Response TofSensor::requestTofMeasurement(const RequestTofMeasurement::Request& req) {
   static std::uint8_t request_count = 0;
-  if (active_sensors > 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { request_count, sensor_select_high, sensor_select_low };
-    interface->send(com::ComEndpoint("tof_request"), tx_buf);
-  } else {
+  if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
   }
-  request_count++;
-  if (request_count > std::numeric_limits<std::uint8_t>::max())
-    request_count = 0;
+  else if(req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
+  }
+  else {
+    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { request_count, sensor_select_high, sensor_select_low };
+    req.interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  }
+  return {};
 }
 
-void TofSensor::cmdFetchTofMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
-  if (active_sensors > 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
-    interface->send(com::ComEndpoint("tof_request"), tx_buf);
-  } else {
+FetchTofMeasurement::Response TofSensor::fetchTofMeasurement(const FetchTofMeasurement::Request& req) {
+  if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
   }
+  else if(req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
+  }
+  else {
+    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
+    req.interface->send(com::ComEndpoint("tof_request"), tx_buf);
+  }
+  return {};
 }
 
 measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
