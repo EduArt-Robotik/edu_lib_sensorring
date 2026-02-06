@@ -7,6 +7,23 @@
 #include "TemperatureSensorDevice.hpp"
 
 int main() {
+
+  // You can call the static capability without any device instance:
+  if (auto fw_opt = IDevice::invoke_static<GetFirmware>({})) {
+    std::cout << "Global firmware -> " << fw_opt->version << "\n";
+  } else {
+    std::cout << "Global firmware capability not registered\n";
+  }
+
+  // Or using throwing wrapper:
+  try {
+    auto fw = IDevice::try_invoke_static<GetFirmware>({});
+    std::cout << "Global firmware (throwing) -> " << fw.version << "\n";
+  } catch (const CapabilityNotSupported& e) {
+    std::cout << "Global firmware not available: " << e.what() << "\n";
+  }
+
+  // Existing instance usage unchanged
   std::vector<std::unique_ptr<IDevice> > devices;
   devices.emplace_back(std::make_unique<LightDevice>());
   devices.emplace_back(std::make_unique<TemperatureSensorDevice>());

@@ -12,7 +12,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include "CapabilityException.hpp"
+// Exception thrown when a requested capability is not supported by a device.
+struct CapabilityNotSupported : std::runtime_error {
+  std::type_index capability_type;
+  CapabilityNotSupported(std::type_index cap)
+      : std::runtime_error(std::string("Capability not supported: ") + cap.name())
+      , capability_type(cap) {}
+};
 
 // -------------------------------------------------------------
 // Capability interface types (synchronous and optional async)
@@ -58,7 +64,7 @@ struct IInvokerBase {
 };
 
 template <typename Cap> struct Invoker : IInvokerBase {
-  // instance-based interfaces (as before)
+  // instance-based interfaces
   ICapability<Cap>* impl                        = nullptr;
   const ICapability<Cap>* impl_const            = nullptr;
   ICapabilityAsync<Cap>* impl_async             = nullptr;
@@ -73,7 +79,7 @@ template <typename Cap> struct Invoker : IInvokerBase {
 // IDevice (typed-invoker map)
 // - invoke / invoke_async: non-throwing, return std::optional
 // - try_invoke / try_invoke_async: thin wrappers that throw on missing capability
-// - new: register_function / register_function_async to register static/free callables
+// - static function registration + static invocation support
 // -------------------------------------------------------------
 struct IDevice {
   virtual ~IDevice() = default;
@@ -97,109 +103,107 @@ struct IDevice {
     if (it == invokers_.end())
       return false;
     auto inv = static_cast<Invoker<Cap>*>(it->second.get());
-    return inv->impl || inv->impl_const || inv->impl_async || inv->impl_async_const || (bool)inv->func || (bool)inv->func_async;
+    return inv->impl || inv->impl_const || inv->impl_async || inv->impl_async_const || (bool)inv->func || (bool)inv->func_async || static_has_function<Cap>();
   }
 
   // -------------------------
   // Non-throwing synchronous invoke (non-const)
   // Returns std::optional<Response> (std::nullopt if not supported)
-  // Order of preference: instance sync -> registered sync func -> instance async -> registered async func -> const sync -> const async
+  // Instance funcs have priority; then registered instance/free functions;
+  // finally falls back to static registered functions when calling via IDevice::invoke_static.
   // -------------------------
   template <typename Cap> std::optional<typename Cap::Response> invoke(const typename Cap::Request& req) {
     auto idx = std::type_index(typeid(Cap));
     auto it  = invokers_.find(idx);
-    if (it == invokers_.end())
-      return std::nullopt;
-    auto inv = static_cast<Invoker<Cap>*>(it->second.get());
-
-    if (inv->impl) {
-      return inv->impl->invoke(req);
+    if (it != invokers_.end()) {
+      auto inv = static_cast<Invoker<Cap>*>(it->second.get());
+      if (inv->impl)
+        return inv->impl->invoke(req);
+      if (inv->func)
+        return inv->func(req);
+      if (inv->impl_async)
+        return inv->impl_async->invoke_async(req).get();
+      if (inv->func_async)
+        return inv->func_async(req).get();
+      if (inv->impl_const)
+        return inv->impl_const->invoke(req);
+      if (inv->impl_async_const)
+        return inv->impl_async_const->invoke_async(req).get();
     }
-    if (inv->func) {
-      return inv->func(req);
-    }
-    if (inv->impl_async) {
-      return inv->impl_async->invoke_async(req).get();
-    }
-    if (inv->func_async) {
-      return inv->func_async(req).get();
-    }
-    if (inv->impl_const) {
-      return inv->impl_const->invoke(req);
-    }
-    if (inv->impl_async_const) {
-      return inv->impl_async_const->invoke_async(req).get();
-    }
+    // fallback to static (global) function if any
+    if (auto sf = static_get_function<Cap>())
+      return sf->get()(req);
+    if (auto sf_async = static_get_function_async<Cap>())
+      return sf_async->get()(req).get();
     return std::nullopt;
   }
 
   // -------------------------
   // Non-throwing synchronous invoke (const)
-  // Order: const sync -> registered sync func -> const async -> registered async func -> non-const sync -> non-const async
   // -------------------------
   template <typename Cap> std::optional<typename Cap::Response> invoke(const typename Cap::Request& req) const {
     auto idx = std::type_index(typeid(Cap));
     auto it  = invokers_.find(idx);
-    if (it == invokers_.end())
-      return std::nullopt;
-    auto inv = static_cast<Invoker<Cap>*>(it->second.get());
-
-    if (inv->impl_const) {
-      return inv->impl_const->invoke(req);
+    if (it != invokers_.end()) {
+      auto inv = static_cast<Invoker<Cap>*>(it->second.get());
+      if (inv->impl_const)
+        return inv->impl_const->invoke(req);
+      if (inv->func)
+        return inv->func(req); // registered free/static considered const-friendly
+      if (inv->impl_async_const)
+        return inv->impl_async_const->invoke_async(req).get();
+      if (inv->func_async)
+        return inv->func_async(req).get();
+      if (inv->impl)
+        return inv->impl->invoke(req);
+      if (inv->impl_async)
+        return inv->impl_async->invoke_async(req).get();
     }
-    if (inv->func) {
-      // registered free/static function is considered const-friendly
-      return inv->func(req);
-    }
-    if (inv->impl_async_const) {
-      return inv->impl_async_const->invoke_async(req).get();
-    }
-    if (inv->func_async) {
-      return inv->func_async(req).get();
-    }
-    if (inv->impl) {
-      return inv->impl->invoke(req); // may mutate
-    }
-    if (inv->impl_async) {
-      return inv->impl_async->invoke_async(req).get();
-    }
+    // fallback to static
+    if (auto sf = static_get_function<Cap>())
+      return sf->get()(req);
+    if (auto sf_async = static_get_function_async<Cap>())
+      return sf_async->get()(req).get();
     return std::nullopt;
   }
 
   // -------------------------
   // Non-throwing asynchronous invoke (non-const)
   // Returns std::optional<std::future<Response>>
-  // Order: instance async -> registered async func -> wrap instance sync -> wrap registered sync func -> const async -> wrap const sync
   // -------------------------
   template <typename Cap> std::optional<std::future<typename Cap::Response> > invoke_async(const typename Cap::Request& req) {
     auto idx = std::type_index(typeid(Cap));
     auto it  = invokers_.find(idx);
-    if (it == invokers_.end())
-      return std::nullopt;
-    auto inv = static_cast<Invoker<Cap>*>(it->second.get());
-
-    if (inv->impl_async) {
-      return std::optional<std::future<typename Cap::Response> >(inv->impl_async->invoke_async(req));
+    if (it != invokers_.end()) {
+      auto inv = static_cast<Invoker<Cap>*>(it->second.get());
+      if (inv->impl_async)
+        return std::optional<std::future<typename Cap::Response> >(inv->impl_async->invoke_async(req));
+      if (inv->func_async)
+        return std::optional<std::future<typename Cap::Response> >(inv->func_async(req));
+      if (inv->impl) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl, req]() {
+          return impl->invoke(req);
+        }));
+      }
+      if (inv->func) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = inv->func, req]() {
+          return f(req);
+        }));
+      }
+      if (inv->impl_async_const)
+        return std::optional<std::future<typename Cap::Response> >(inv->impl_async_const->invoke_async(req));
+      if (inv->impl_const) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl_const, req]() {
+          return impl->invoke(req);
+        }));
+      }
     }
-    if (inv->func_async) {
-      return std::optional<std::future<typename Cap::Response> >(inv->func_async(req));
-    }
-    if (inv->impl) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl, req]() {
-        return impl->invoke(req);
-      }));
-    }
-    if (inv->func) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = inv->func, req]() {
+    // static
+    if (auto sf_async = static_get_function_async<Cap>())
+      return std::optional<std::future<typename Cap::Response> >(sf_async->get()(req));
+    if (auto sf = static_get_function<Cap>()) {
+      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = sf->get(), req]() {
         return f(req);
-      }));
-    }
-    if (inv->impl_async_const) {
-      return std::optional<std::future<typename Cap::Response> >(inv->impl_async_const->invoke_async(req));
-    }
-    if (inv->impl_const) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl_const, req]() {
-        return impl->invoke(req);
       }));
     }
     return std::nullopt;
@@ -211,32 +215,36 @@ struct IDevice {
   template <typename Cap> std::optional<std::future<typename Cap::Response> > invoke_async(const typename Cap::Request& req) const {
     auto idx = std::type_index(typeid(Cap));
     auto it  = invokers_.find(idx);
-    if (it == invokers_.end())
-      return std::nullopt;
-    auto inv = static_cast<Invoker<Cap>*>(it->second.get());
-
-    if (inv->impl_async_const) {
-      return std::optional<std::future<typename Cap::Response> >(inv->impl_async_const->invoke_async(req));
+    if (it != invokers_.end()) {
+      auto inv = static_cast<Invoker<Cap>*>(it->second.get());
+      if (inv->impl_async_const)
+        return std::optional<std::future<typename Cap::Response> >(inv->impl_async_const->invoke_async(req));
+      if (inv->func_async)
+        return std::optional<std::future<typename Cap::Response> >(inv->func_async(req));
+      if (inv->impl_async)
+        return std::optional<std::future<typename Cap::Response> >(inv->impl_async->invoke_async(req));
+      if (inv->func) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = inv->func, req]() {
+          return f(req);
+        }));
+      }
+      if (inv->impl_const) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl_const, req]() {
+          return impl->invoke(req);
+        }));
+      }
+      if (inv->impl) {
+        return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl, req]() {
+          return impl->invoke(req);
+        }));
+      }
     }
-    if (inv->func_async) {
-      return std::optional<std::future<typename Cap::Response> >(inv->func_async(req));
-    }
-    if (inv->impl_async) {
-      return std::optional<std::future<typename Cap::Response> >(inv->impl_async->invoke_async(req));
-    }
-    if (inv->func) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = inv->func, req]() {
+    // static
+    if (auto sf_async = static_get_function_async<Cap>())
+      return std::optional<std::future<typename Cap::Response> >(sf_async->get()(req));
+    if (auto sf = static_get_function<Cap>()) {
+      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = sf->get(), req]() {
         return f(req);
-      }));
-    }
-    if (inv->impl_const) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl_const, req]() {
-        return impl->invoke(req);
-      }));
-    }
-    if (inv->impl) {
-      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [impl = inv->impl, req]() {
-        return impl->invoke(req);
       }));
     }
     return std::nullopt;
@@ -268,6 +276,47 @@ struct IDevice {
 
   template <typename Cap> std::future<typename Cap::Response> try_invoke_async(const typename Cap::Request& req) const {
     auto opt = invoke_async<Cap>(req);
+    if (opt)
+      return std::move(*opt);
+    throw CapabilityNotSupported(typeid(Cap));
+  }
+
+  // -------------------------
+  // Static function registration & invocation (per-Cap)
+  // These provide invocation without any IDevice instance.
+  // -------------------------
+  template <typename Cap, typename F> static void register_static_function(F&& f) { static_func<Cap>() = std::function<typename Cap::Response(const typename Cap::Request&)>(std::forward<F>(f)); }
+
+  template <typename Cap, typename F> static void register_static_function_async(F&& f) { static_func_async<Cap>() = std::function<std::future<typename Cap::Response>(const typename Cap::Request&)>(std::forward<F>(f)); }
+
+  template <typename Cap> static std::optional<typename Cap::Response> invoke_static(const typename Cap::Request& req) {
+    if (auto sf = static_get_function<Cap>())
+      return sf->get()(req);
+    if (auto sf_async = static_get_function_async<Cap>())
+      return sf_async->get()(req).get();
+    return std::nullopt;
+  }
+
+  template <typename Cap> static std::optional<std::future<typename Cap::Response> > invoke_static_async(const typename Cap::Request& req) {
+    if (auto sf_async = static_get_function_async<Cap>())
+      return std::optional<std::future<typename Cap::Response> >(sf_async->get()(req));
+    if (auto sf = static_get_function<Cap>()) {
+      return std::optional<std::future<typename Cap::Response> >(std::async(std::launch::async, [f = sf->get(), req]() {
+        return f(req);
+      }));
+    }
+    return std::nullopt;
+  }
+
+  template <typename Cap> static typename Cap::Response try_invoke_static(const typename Cap::Request& req) {
+    auto opt = invoke_static<Cap>(req);
+    if (opt)
+      return *opt;
+    throw CapabilityNotSupported(typeid(Cap));
+  }
+
+  template <typename Cap> static std::future<typename Cap::Response> try_invoke_static_async(const typename Cap::Request& req) {
+    auto opt = invoke_static_async<Cap>(req);
     if (opt)
       return std::move(*opt);
     throw CapabilityNotSupported(typeid(Cap));
@@ -313,7 +362,6 @@ protected:
   }
 
   // Register a free/static/lambda callable for Cap (sync)
-  // Accepts any callable F callable as Response(Request).
   template <typename Cap, typename F> void register_function(F&& f, const std::string& name = {}) {
     auto idx = std::type_index(typeid(Cap));
     auto it  = invokers_.find(idx);
@@ -349,4 +397,29 @@ protected:
 
 private:
   std::unordered_map<std::type_index, std::unique_ptr<IInvokerBase> > invokers_;
+
+  // Helper: per-Cap static function holders (function-local static avoids type-erasure).
+  template <typename Cap> static std::function<typename Cap::Response(const typename Cap::Request&)>& static_func() {
+    static std::function<typename Cap::Response(const typename Cap::Request&)> f;
+    return f;
+  }
+  template <typename Cap> static std::function<std::future<typename Cap::Response>(const typename Cap::Request&)>& static_func_async() {
+    static std::function<std::future<typename Cap::Response>(const typename Cap::Request&)> f;
+    return f;
+  }
+
+  template <typename Cap> static std::optional<std::reference_wrapper<const std::function<typename Cap::Response(const typename Cap::Request&)> > > static_get_function() {
+    auto& f = static_func<Cap>();
+    if (f)
+      return std::cref(f);
+    return std::nullopt;
+  }
+  template <typename Cap> static std::optional<std::reference_wrapper<const std::function<std::future<typename Cap::Response>(const typename Cap::Request&)> > > static_get_function_async() {
+    auto& f = static_func_async<Cap>();
+    if (f)
+      return std::cref(f);
+    return std::nullopt;
+  }
+
+  template <typename Cap> static bool static_has_function() { return static_cast<bool>(static_func<Cap>()); }
 };

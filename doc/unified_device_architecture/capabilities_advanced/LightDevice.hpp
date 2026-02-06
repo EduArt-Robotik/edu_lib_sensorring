@@ -32,17 +32,17 @@ struct GetFirmware {
 };
 
 // Light device: implements TurnOn (sync) and SetBrightness (sync + async).
-// Also registers a static (free-like) capability GetFirmware via register_function.
+// Also registers a static (global) capability GetFirmware via register_static_function.
 struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, ICapabilityAsync<SetBrightness> {
   LightDevice() {
-    // explicit registration calls (typed invokers created for each Cap)
+    // instance registration
     register_capability<TurnOn>("turn_on");
     register_capability<SetBrightness>("set_brightness");
-    register_capability_async<SetBrightness>("set_brightness_async"); // async optional
+    register_capability_async<SetBrightness>("set_brightness_async");
 
-    // register a static function for firmware/version capability
-    // This demonstrates registering a function instead of implementing an instance method.
-    register_function<GetFirmware>(&LightDevice::static_get_firmware, "firmware_version");
+    // Note: Static function registration for GetFirmware is done at namespace scope
+    // (see below) so it's available before any instance is created.
+    // You may also register an async static function with register_static_function_async
   }
 
   // TurnOn (mutating)
@@ -50,7 +50,6 @@ struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, I
     is_on = true;
     return TurnOn::Response{ true };
   }
-  // const variant (provided for const-correctness)
   TurnOn::Response invoke(const TurnOn::Request& /*req*/) const override { return TurnOn::Response{ is_on }; }
 
   // SetBrightness - synchronous
@@ -58,7 +57,6 @@ struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, I
     brightness = r.level;
     return SetBrightness::Response{ brightness };
   }
-  // const variant: simply return brightness (no mutation)
   SetBrightness::Response invoke(const SetBrightness::Request& /*req*/) const override { return SetBrightness::Response{ brightness }; }
 
   // SetBrightness - asynchronous example (simulate work)
@@ -75,13 +73,21 @@ struct LightDevice : IDevice, ICapability<TurnOn>, ICapability<SetBrightness>, I
     });
   }
 
-  // Static function used as a capability target (no need for per-instance state)
-  static GetFirmware::Response static_get_firmware(const GetFirmware::Request&) {
-    // In real code this could query a compile-time constant, embedded resource, or call platform API.
-    return GetFirmware::Response{ "LightDeviceFW v1.2.3" };
-  }
+  // Static function used as a globally-registered capability target (no per-instance state)
+  static GetFirmware::Response static_get_firmware(const GetFirmware::Request&) { return GetFirmware::Response{ "LightDeviceFW v1.2.3" }; }
 
 private:
   bool is_on     = false;
   int brightness = 0;
 };
+
+// Register the static function at namespace scope so it's available before any instance is created.
+// This ensures that IDevice::invoke_static<GetFirmware>() can be called without creating a LightDevice instance.
+namespace {
+  // This static variable initializer runs before main(), ensuring the static function is registered
+  // as soon as this translation unit is loaded.
+  static bool _light_device_static_init = []() {
+    IDevice::register_static_function<GetFirmware>(&LightDevice::static_get_firmware);
+    return true;
+  }();
+}
