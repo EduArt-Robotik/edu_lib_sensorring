@@ -1,16 +1,20 @@
 #include "LedLight.hpp"
 
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/device/IDeviceMacros.hpp"
 
 namespace eduart {
 
 namespace device {
 
+SENSORRING_REGISTER_STATIC(LedLight, SetLight, &LedLight::setLight);
+SENSORRING_REGISTER_STATIC(LedLight, SyncLight, &LedLight::syncLight);
+
 LedLight::LedLight(LightParams params, com::ComInterface* interface)
     : _params(params) {
 
-  register_function<SetLight>(&LedLight::setLight, "SetLight");
-  register_function<SyncLight>(&LedLight::syncLight, "SyncLight");
+  SENSORRING_REGISTER_FUNCTION_NAMED(SetLight, &LedLight::setLight, "SetLight");
+  SENSORRING_REGISTER_FUNCTION_NAMED(SyncLight, &LedLight::syncLight, "SyncLight");
 
   interface->addLightSensorEndpoint();
 }
