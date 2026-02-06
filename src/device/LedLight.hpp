@@ -5,21 +5,41 @@
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/types/LightMode.hpp"
 
-#include "BaseSensor.hpp"
-
 namespace eduart {
 
-namespace sensor {
+namespace device {
 
-class LedLight : public device::IDevice {
+struct SetLight {
+  struct Request {
+    com::ComInterface* interface;
+    light::LightMode mode;
+    std::uint8_t red;
+    std::uint8_t green;
+    std::uint8_t blue;
+  };
+  struct Response {
+    bool ok;
+  };
+};
+
+struct SyncLight {
+  struct Request {
+    com::ComInterface* interface;
+  };
+  struct Response {
+    bool ok;
+  };
+};
+
+class LedLight : public IDevice {
 public:
   LedLight(LightParams params, com::ComInterface* interface);
   ~LedLight();
 
   const LightParams& getParams() const;
 
-  static void cmdSyncLight(com::ComInterface* interface);
-  static void cmdSetLight(com::ComInterface* interface, light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  static SetLight::Response setLight(const SetLight::Request& request);
+  static SyncLight::Response syncLight(const SyncLight::Request& request);
 
 private:
   const LightParams _params;
@@ -28,6 +48,12 @@ private:
   int _canid_out;
 };
 
-} // namespace sensor
+static bool _light_device_static_init = []() {
+  IDevice::register_static_function<SetLight>(&LedLight::setLight);
+  IDevice::register_static_function<SyncLight>(&LedLight::syncLight);
+  return true;
+}();
+
+} // namespace device
 
 } // namespace eduart
