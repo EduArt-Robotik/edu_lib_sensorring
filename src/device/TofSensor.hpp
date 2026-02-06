@@ -48,7 +48,7 @@ struct FetchTofMeasurement {
   struct Response {};
 };
 
-class TofSensor : public BaseSensor, public IDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
+struct TofSensor : BaseSensor, IDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
 public:
   TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~TofSensor();

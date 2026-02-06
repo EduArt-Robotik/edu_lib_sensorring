@@ -37,7 +37,7 @@ template <typename Cap> struct SENSORRING_EXPORT ICapability {
     try {
       return std::as_const(*this).invoke(req);
     } catch (const std::runtime_error& e) {
-      throw std::runtime_error("try to invoke capability, but const invoke is not implemented");
+      throw std::runtime_error("invoke not implemented for capability, fallback to const invoke is also not implemented");
     }
   }
 

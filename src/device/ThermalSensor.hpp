@@ -46,7 +46,7 @@ struct FetchThermalMeasurement {
   struct Response {};
 };
 
-class ThermalSensor : public BaseSensor, public IDevice, ICapability<GetLatestMeasurement> {
+struct ThermalSensor : BaseSensor, IDevice, ICapability<GetLatestMeasurement> {
 public:
   ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~ThermalSensor();

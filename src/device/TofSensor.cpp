@@ -18,6 +18,7 @@ TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::
     : BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable)
     , _params(params) {
 
+  register_capability<GetLatestRawMeasurement>("GetLatestRawMeasurement");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestTransformedMeasurement, "GetLatestTransformedMeasurement");
 

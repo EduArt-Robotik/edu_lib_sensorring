@@ -78,7 +78,7 @@ TEST_CASE("ICapabilityAsync default non-const invoke_async rethrows when const n
   REQUIRE_THROWS_AS(impl.invoke_async(AsyncCap::Request{5}), std::runtime_error);
   REQUIRE_THROWS_WITH(
       impl.invoke_async(AsyncCap::Request{5}),
-      "try to invoke capability asynchronously, but const invoke_async is not implemented");
+      "async invoke not implemented for capability, fallback to const async invoke is also not implemented");
 }
 
 TEST_CASE("ICapabilityAsync non-const only override called on non-const object", "[ICapabilityAsync]") {

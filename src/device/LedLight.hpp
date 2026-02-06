@@ -31,7 +31,7 @@ struct SyncLight {
   };
 };
 
-class LedLight : public IDevice {
+struct LedLight : IDevice {
 public:
   LedLight(LightParams params, com::ComInterface* interface);
   ~LedLight();

@@ -874,6 +874,81 @@ TEST_CASE("IDevice register_function and register_function_async (free, static, 
   }
 }
 
+TEST_CASE("IDevice one device cannot invoke capability registered on another device", "[IDevice]") {
+  // TestDevice has AddCap, SyncOnlyCap, ProcessStringsCap, etc. (instance).
+  // FunctionOnlyDevice has SyncByFreeCap, SyncByStaticCap, SyncByLambdaCap, AsyncByLambdaCap (instance functions).
+  // Empty device has nothing.
+  struct EmptyDevice : IDevice {
+    EmptyDevice() {}
+  };
+
+  TestDevice test_dev;
+  FunctionOnlyDevice func_dev;
+  EmptyDevice empty_dev;
+
+  SECTION("device that did not register a capability gets nullopt from invoke") {
+    // AddCap is only on TestDevice
+    REQUIRE(static_cast<IDevice&>(test_dev).invoke<AddCap>(AddCap::Request{ 5 }).has_value());
+
+    auto from_func_dev = static_cast<IDevice&>(func_dev).invoke<AddCap>(AddCap::Request{ 5 });
+    REQUIRE_FALSE(from_func_dev.has_value());
+
+    auto from_empty = static_cast<IDevice&>(empty_dev).invoke<AddCap>(AddCap::Request{ 5 });
+    REQUIRE_FALSE(from_empty.has_value());
+  }
+
+  SECTION("device that did not register a capability gets nullopt from invoke_async") {
+    // SyncByFreeCap is only on FunctionOnlyDevice
+    REQUIRE(static_cast<IDevice&>(func_dev).invoke_async<SyncByFreeCap>(SyncByFreeCap::Request{ 1 }).has_value());
+
+    auto from_test_dev = static_cast<IDevice&>(test_dev).invoke_async<SyncByFreeCap>(SyncByFreeCap::Request{ 1 });
+    REQUIRE_FALSE(from_test_dev.has_value());
+
+    auto from_empty = static_cast<IDevice&>(empty_dev).invoke_async<SyncByFreeCap>(SyncByFreeCap::Request{ 1 });
+    REQUIRE_FALSE(from_empty.has_value());
+  }
+
+  SECTION("device that did not register a capability throws from try_invoke") {
+    REQUIRE(static_cast<IDevice&>(test_dev).try_invoke<AddCap>(AddCap::Request{ 1 }).value == 2);
+
+    REQUIRE_THROWS_AS((static_cast<IDevice&>(func_dev).try_invoke<AddCap>(AddCap::Request{ 1 })), CapabilityNotSupported);
+    REQUIRE_THROWS_AS((static_cast<IDevice&>(empty_dev).try_invoke<AddCap>(AddCap::Request{ 1 })), CapabilityNotSupported);
+  }
+
+  SECTION("device that did not register a capability throws from try_invoke_async") {
+    REQUIRE(static_cast<IDevice&>(func_dev).try_invoke_async<AsyncByLambdaCap>(AsyncByLambdaCap::Request{ 1 }).get().value == 2);
+
+    REQUIRE_THROWS_AS((static_cast<IDevice&>(test_dev).try_invoke_async<AsyncByLambdaCap>(AsyncByLambdaCap::Request{ 1 })), CapabilityNotSupported);
+    REQUIRE_THROWS_AS((static_cast<IDevice&>(empty_dev).try_invoke_async<AsyncByLambdaCap>(AsyncByLambdaCap::Request{ 1 })), CapabilityNotSupported);
+  }
+
+  SECTION("supports() is false for capability registered only on another device") {
+    REQUIRE(test_dev.supports<AddCap>());
+    REQUIRE_FALSE(func_dev.supports<AddCap>());
+    REQUIRE_FALSE(empty_dev.supports<AddCap>());
+
+    REQUIRE(func_dev.supports<SyncByLambdaCap>());
+    REQUIRE_FALSE(test_dev.supports<SyncByLambdaCap>());
+    REQUIRE_FALSE(empty_dev.supports<SyncByLambdaCap>());
+
+    REQUIRE_FALSE(empty_dev.supports<AddCap>());
+    REQUIRE_FALSE(empty_dev.supports<SyncByLambdaCap>());
+  }
+
+  SECTION("two instances of same type each have their own capabilities (no cross-invocation)") {
+    TestDevice dev_a;
+    TestDevice dev_b;
+    // Both support AddCap, but each uses its own implementation (own add_base, etc.)
+    auto res_a = static_cast<IDevice&>(dev_a).invoke<AddCap>(AddCap::Request{ 10 });
+    auto res_b = static_cast<IDevice&>(dev_b).invoke<AddCap>(AddCap::Request{ 10 });
+    REQUIRE(res_a.has_value());
+    REQUIRE(res_b.has_value());
+    REQUIRE(res_a->value == 11); // dev_a.add_base == 1
+    REQUIRE(res_b->value == 11); // dev_b.add_base == 1
+    // Each device uses its own invoker/impl; no device "sees" the other's registration.
+  }
+}
+
 TEST_CASE("IDevice register_static_function_for and static_invoke (per-device-type)", "[IDevice]") {
   // Register static functions scoped to concrete device types
   IDevice::register_static_function_for<StaticDeviceA, StaticSyncCap>(&static_sync_free_func);

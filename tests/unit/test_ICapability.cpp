@@ -69,7 +69,7 @@ TEST_CASE("ICapability default non-const invoke rethrows when const not implemen
   REQUIRE_THROWS_AS(impl.invoke(SyncCap::Request{5}), std::runtime_error);
   REQUIRE_THROWS_WITH(
       impl.invoke(SyncCap::Request{5}),
-      "try to invoke capability, but const invoke is not implemented");
+      "invoke not implemented for capability, fallback to const invoke is also not implemented");
 }
 
 TEST_CASE("ICapability non-const only override called on non-const object", "[ICapability]") {

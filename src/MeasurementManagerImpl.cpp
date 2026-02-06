@@ -7,6 +7,7 @@
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
+#include "sensorring/device/IDevice.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "SensorBoard.hpp"
@@ -154,17 +155,17 @@ int MeasurementManagerImpl::notifyToFData() {
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
       if (sensor_board->getTof()->getEnable()) {
-        auto raw_response = sensor_board->getTof()->invoke(device::GetLatestRawMeasurement::Request{});
-        if (raw_response.state == device::SensorState::SensorOK) {
-          if (!raw_response.measurement.point_cloud.data.empty())
-            raw_measurement_vec.emplace_back(raw_response.measurement);
+        auto raw_opt = static_cast<device::IDevice*>(sensor_board->getTof())->invoke<device::GetLatestRawMeasurement>({});
+        if (raw_opt && raw_opt->state == device::SensorState::SensorOK) {
+          if (!raw_opt->measurement.point_cloud.data.empty())
+            raw_measurement_vec.emplace_back(raw_opt->measurement);
         } else {
           error_frames++;
         }
-        auto transformed_response = sensor_board->getTof()->invoke(device::GetLatestTransformedMeasurement::Request{});
-        if (transformed_response.state == device::SensorState::SensorOK) {
-          if (!transformed_response.measurement.point_cloud.data.empty())
-            transformed_measurement_vec.emplace_back(transformed_response.measurement);
+        auto transformed_opt = static_cast<device::IDevice*>(sensor_board->getTof())->invoke<device::GetLatestTransformedMeasurement>({});
+        if (transformed_opt && transformed_opt->state == device::SensorState::SensorOK) {
+          if (!transformed_opt->measurement.point_cloud.data.empty())
+            transformed_measurement_vec.emplace_back(transformed_opt->measurement);
         }
       }
     }
@@ -196,10 +197,9 @@ int MeasurementManagerImpl::notifyThermalData() {
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
       if (sensor_board->getThermal()->getEnable()) {
-        auto resp = sensor_board->getThermal()->invoke({});
-
-        if (resp.state == device::SensorState::SensorOK) {
-          measurement_vec.emplace_back(resp.measurement);
+        auto resp_opt = static_cast<device::IDevice*>(sensor_board->getThermal())->invoke<device::GetLatestMeasurement>({});
+        if (resp_opt && resp_opt->state == device::SensorState::SensorOK) {
+          measurement_vec.emplace_back(resp_opt->measurement);
         } else {
           error_frames++;
         }

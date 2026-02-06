@@ -38,7 +38,7 @@ template <typename Cap> struct SENSORRING_EXPORT ICapabilityAsync {
     try {
       return std::as_const(*this).invoke_async(req);
     } catch (const std::runtime_error& e) {
-      throw std::runtime_error("try to invoke capability asynchronously, but const invoke_async is not implemented");
+      throw std::runtime_error("async invoke not implemented for capability, fallback to const async invoke is also not implemented");
     }
   }
 
