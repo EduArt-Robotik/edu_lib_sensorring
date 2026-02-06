@@ -44,8 +44,8 @@ private:
   std::unique_ptr<ThermalSensor> _thermal;
   std::unique_ptr<LedLight> _leds;
 
-  mutable std::mutex _com_mutex;
-  using LockGuard = std::lock_guard<std::mutex>;
+  mutable std::recursive_mutex _com_mutex;
+  using LockGuard = std::lock_guard<std::recursive_mutex>;
 };
 
 } // namespace sensor
