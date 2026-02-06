@@ -146,7 +146,7 @@ void SensorBus::requestEEPROM() {
     active_devices |= (sensor->getThermal()->getEnable() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
-  device::ThermalSensor::cmdRequestEEPROM(_interface, active_devices);
+  device::IDevice::static_invoke<device::ThermalSensor, device::RequestThermalEeprom>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 bool SensorBus::allEEPROMTransmissionsComplete() const {
@@ -199,7 +199,7 @@ void SensorBus::requestThermalMeasurement() {
     }
   }
 
-  device::ThermalSensor::cmdRequestThermalMeasurement(_interface, active_devices);
+  device::IDevice::static_invoke<device::ThermalSensor, device::RequestThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 void SensorBus::fetchThermalMeasurement() {
@@ -209,7 +209,7 @@ void SensorBus::fetchThermalMeasurement() {
     active_devices |= sensor->getThermal()->getEnable() << sensor->getThermal()->getIdx();
   }
 
-  device::ThermalSensor::cmdFetchThermalMeasurement(_interface, active_devices);
+  device::IDevice::static_invoke<device::ThermalSensor, device::FetchThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 bool SensorBus::allTofMeasurementsReady() const {

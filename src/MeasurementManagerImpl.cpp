@@ -196,10 +196,10 @@ int MeasurementManagerImpl::notifyThermalData() {
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
     for (const auto& sensor_board : sensor_bus->getSensorBoards()) {
       if (sensor_board->getThermal()->getEnable()) {
-        auto [measurement, error] = sensor_board->getThermal()->getLatestMeasurement();
+        auto resp = sensor_board->getThermal()->invoke({});
 
-        if (error == device::SensorState::SensorOK) {
-          measurement_vec.emplace_back(measurement);
+        if (resp.state == device::SensorState::SensorOK) {
+          measurement_vec.emplace_back(resp.measurement);
         } else {
           error_frames++;
         }

@@ -14,7 +14,39 @@ namespace eduart {
 
 namespace device {
 
-class ThermalSensor : public BaseSensor, public device::IDevice {
+struct GetLatestMeasurement {
+  struct Request {};
+  struct Response {
+    const measurement::ThermalMeasurement& measurement;
+    SensorState state;
+  };
+};
+
+struct RequestThermalEeprom {
+  struct Request {
+    com::ComInterface* interface;
+    unsigned int active_sensors;
+  };
+  struct Response {};
+};
+
+struct RequestThermalMeasurement {
+  struct Request {
+    com::ComInterface* interface;
+    unsigned int active_sensors;
+  };
+  struct Response {};
+};
+
+struct FetchThermalMeasurement {
+  struct Request {
+    com::ComInterface* interface;
+    unsigned int active_sensors;
+  };
+  struct Response {};
+};
+
+class ThermalSensor : public BaseSensor, public IDevice, ICapability<GetLatestMeasurement> {
 public:
   ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~ThermalSensor();
@@ -27,13 +59,14 @@ public:
 
   std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
-  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
+
+  GetLatestMeasurement::Response invoke(const GetLatestMeasurement::Request&) const override;
+
+  static RequestThermalEeprom::Response requestThermalEeprom(const RequestThermalEeprom::Request& req);
+  static RequestThermalMeasurement::Response requestThermalMeasurement(const RequestThermalMeasurement::Request& req);
+  static FetchThermalMeasurement::Response fetchThermalMeasurement(const FetchThermalMeasurement::Request& req);
 
   void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-
-  static void cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
-  static void cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors);
 
 private:
   void onResetSensorState() override;
@@ -43,6 +76,8 @@ private:
   const measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
   const measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const;
   const measurement::ThermalMeasurement processMeasurement(const uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const;
+
+  static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
   const ThermalSensorParams _params;
   htpa32::HTPA32Eeprom _eeprom;

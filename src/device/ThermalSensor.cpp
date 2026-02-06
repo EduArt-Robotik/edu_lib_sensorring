@@ -6,6 +6,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
@@ -14,9 +15,15 @@ namespace eduart {
 
 namespace device {
 
+SENSORRING_REGISTER_STATIC(ThermalSensor, RequestThermalEeprom, &ThermalSensor::requestThermalEeprom);
+SENSORRING_REGISTER_STATIC(ThermalSensor, RequestThermalMeasurement, &ThermalSensor::requestThermalMeasurement);
+SENSORRING_REGISTER_STATIC(ThermalSensor, FetchThermalMeasurement, &ThermalSensor::fetchThermalMeasurement);
+
 ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx)
     : BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), idx, params.enable)
     , _params(params) {
+
+  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestMeasurement, "GetLatestMeasurement");
 
   _rx_buffer_offset = 0;
   _interface->addThermalSensorEndpoint(idx);
@@ -60,7 +67,7 @@ std::pair<const measurement::FalseColorImage&, SensorState> ThermalSensor::getLa
   return { _latest_measurement.falsecolor_img, _error };
 }
 
-std::pair<const measurement::ThermalMeasurement&, SensorState> ThermalSensor::getLatestMeasurement() const {
+GetLatestMeasurement::Response ThermalSensor::invoke(const GetLatestMeasurement::Request&) const {
   return { _latest_measurement, _error };
 }
 
@@ -302,37 +309,46 @@ void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-void ThermalSensor::cmdRequestEEPROM(com::ComInterface* interface, std::uint16_t active_sensors) {
-  if (active_sensors > 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
-    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  } else {
+RequestThermalEeprom::Response ThermalSensor::requestThermalEeprom(const RequestThermalEeprom::Request& req) {
+  if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested transmission of EEPROM from thermal sensors but no boards have been selected");
+  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested transmission of EEPROM from thermal sensors but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
+  } else {
+    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
+    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
   }
+  return {};
 }
 
-void ThermalSensor::cmdRequestThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
-  if (active_sensors > 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+RequestThermalMeasurement::Response ThermalSensor::requestThermalMeasurement(const RequestThermalMeasurement::Request& req) {
+  if (req.active_sensors == 0) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
+  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested thermal measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
+  } else {
+    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
+    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
   }
+  return {};
 }
 
-void ThermalSensor::cmdFetchThermalMeasurement(com::ComInterface* interface, std::uint16_t active_sensors) {
-  if (active_sensors > 0) {
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
-    interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  } else {
+FetchThermalMeasurement::Response ThermalSensor::fetchThermalMeasurement(const FetchThermalMeasurement::Request& req) {
+  if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
+  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested thermal measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
+  } else {
+    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
+    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
   }
+  return {};
 }
 
 } // namespace device
