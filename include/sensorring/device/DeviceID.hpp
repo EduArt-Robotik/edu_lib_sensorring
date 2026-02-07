@@ -41,11 +41,41 @@ public:
   unsigned int index = 0;
 
   /**
-   * @brief True if type is not UNDEFINED and name is non-empty.
+   * @brief Returns the hardware device type.
+   * @return DeviceType of this ID.
+   */
+  DeviceType getDeviceType() const;
+
+  /**
+   * @brief Returns the human-readable device name.
+   * @return Name string.
+   */
+  std::string getDeviceName() const;
+
+  /**
+   * @brief Returns the instance index when multiple devices of the same type exist.
+   * @return Index value.
+   */
+  unsigned int getDeviceIndex() const;
+
+  /**
+   * @brief Check if the device ID belongs to a valid device.
    * @return true if this ID represents a valid device.
    */
   bool isValid() const;
 };
+
+inline DeviceType DeviceID::getDeviceType() const {
+  return type;
+}
+
+inline std::string DeviceID::getDeviceName() const {
+  return name;
+}
+
+inline unsigned int DeviceID::getDeviceIndex() const {
+  return index;
+}
 
 inline bool DeviceID::isValid() const {
   return type != DeviceType::UNDEFINED && name != "";
