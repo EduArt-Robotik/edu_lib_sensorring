@@ -43,6 +43,18 @@ void SensorRing::resetSensorState() {
   }
 }
 
+std::vector<device::BaseDevice*> SensorRing::getDevices() const {
+  std::vector<device::BaseDevice*> devices;
+  for (auto& sensor_bus : _bus_vec) {
+    for (auto& sensor_board : sensor_bus->getSensorBoards()) {
+      for (auto& device : sensor_board->getDevices()) {
+        devices.push_back(device);
+      }
+    }
+  }
+  return devices;
+}
+
 void SensorRing::resetDevices() {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->resetDevices();

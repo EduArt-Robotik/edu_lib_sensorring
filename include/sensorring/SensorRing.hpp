@@ -12,10 +12,10 @@
 #include <memory>
 #include <vector>
 
+#include "device/BaseDevice.hpp"
 #include "sensorring/Parameter.hpp"
 
 #include "SensorBus.hpp"
-
 
 namespace eduart {
 
@@ -62,6 +62,12 @@ public:
    * @param[in] blue Blue color value
    */
   void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+
+  /**
+   * @brief Get all devices connected to the sensor ring.
+   * @return Vector of all devices.
+   */
+  std::vector<device::BaseDevice*> getDevices() const;
 
   /**
    * @brief Reset all devices on all sensor buses.
@@ -148,10 +154,10 @@ public:
    * @return Unique pointer to the created SensorRing instance
    */
   static std::unique_ptr<SensorRing> create(RingParams params);
+
 private:
   const RingParams _params;
   std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
-  std::vector<device::IDevice* > _device_vec;
 };
 
 } // namespace ring

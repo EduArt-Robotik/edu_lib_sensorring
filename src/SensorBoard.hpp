@@ -23,6 +23,8 @@ public:
   bool isEnumerated() const;
   const EnumerationInformation& getEnumInfo() const;
 
+  std::vector<BaseDevice*> getDevices() const;
+
   TofSensor* getTof() const;
   ThermalSensor* getThermal() const;
   LedLight* getLed() const;
@@ -39,7 +41,7 @@ private:
   const SensorBoardParams _params;
   EnumerationInformation _enum_info;
 
-  std::vector<std::unique_ptr<device::IDevice> > _device_vec;
+  std::vector<std::unique_ptr<device::BaseDevice> > _device_vec;
 
   mutable std::recursive_mutex _com_mutex;
   using LockGuard = std::lock_guard<std::recursive_mutex>;

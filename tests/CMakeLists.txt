@@ -10,6 +10,7 @@ add_executable(sensorring_tests
     unit/test_com_endpoints.cpp
     unit/test_can_endpoint_map.cpp
     unit/test_DeviceID.cpp
+    unit/test_DeviceGroup.cpp
     unit/test_ICapability.cpp
     unit/test_ICapabilityAsync.cpp
     unit/test_IDevice.cpp

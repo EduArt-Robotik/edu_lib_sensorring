@@ -30,6 +30,7 @@ target_sources(sensorring
   device/LedLight.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp
+  device/DeviceGroup.cpp
   types/Image.cpp
   types/PointCloud.cpp
   types/EnumerationInformation.cpp

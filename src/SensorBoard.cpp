@@ -38,6 +38,15 @@ const EnumerationInformation& SensorBoard::getEnumInfo() const {
   return _enum_info;
 }
 
+std::vector<BaseDevice*> SensorBoard::getDevices() const {
+  std::vector<BaseDevice*> devices;
+  devices.reserve(_device_vec.size());
+  for (auto& device : _device_vec) {
+    devices.push_back(device.get());
+  }
+  return devices;
+}
+
 TofSensor* SensorBoard::getTof() const {
   LockGuard lock(_com_mutex);
 
