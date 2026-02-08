@@ -2,7 +2,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
@@ -31,7 +31,7 @@ struct SyncLight {
   };
 };
 
-struct LedLight : IDevice {
+struct LedLight : BaseDevice {
 public:
   LedLight(LightParams params, com::ComInterface* interface);
   ~LedLight();
@@ -41,11 +41,13 @@ public:
   static SetLight::Response setLight(const SetLight::Request& request);
   static SyncLight::Response syncLight(const SyncLight::Request& request);
 
-private:
-  const LightParams _params;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-  int _canid_in;
-  int _canid_out;
+private:
+  void onResetSensorState() override;
+  void onClearDataFlag() override;
+
+  const LightParams _params;
 };
 
 } // namespace device

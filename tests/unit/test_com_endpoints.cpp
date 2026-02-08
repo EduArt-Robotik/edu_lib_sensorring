@@ -1,8 +1,7 @@
 #include <catch2/catch_all.hpp>
-
-#include "interface/ComEndpoints.hpp"
-
 #include <unordered_set>
+
+#include "sensorring/interface/ComEndpoint.hpp"
 
 using eduart::com::ComEndpoint;
 
@@ -48,7 +47,7 @@ TEST_CASE("ComEndpoint in unordered_set", "[ComEndpoint]") {
 
   endpoints.insert(ComEndpoint("ep1"));
   endpoints.insert(ComEndpoint("ep2"));
-  endpoints.insert(ComEndpoint("ep1"));  // duplicate id
+  endpoints.insert(ComEndpoint("ep1")); // duplicate id
 
   REQUIRE(endpoints.size() == 2u);
 

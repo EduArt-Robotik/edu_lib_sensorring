@@ -11,7 +11,8 @@ SENSORRING_REGISTER_STATIC(LedLight, SetLight, &LedLight::setLight);
 SENSORRING_REGISTER_STATIC(LedLight, SyncLight, &LedLight::syncLight);
 
 LedLight::LedLight(LightParams params, com::ComInterface* interface)
-    : _params(params) {
+    : BaseDevice(DeviceID({ DeviceType::WS2812b, "light", 0 }), interface, com::ComEndpoint("light"), params.enable)
+    , _params(params) {
 
   SENSORRING_REGISTER_FUNCTION_NAMED(SetLight, &LedLight::setLight, "SetLight");
   SENSORRING_REGISTER_FUNCTION_NAMED(SyncLight, &LedLight::syncLight, "SyncLight");
@@ -37,6 +38,15 @@ SyncLight::Response LedLight::syncLight(const SyncLight::Request& request) {
   std::vector<uint8_t> tx_buf = { CAN_LIGHT_BEAT, 0x00 };
   request.interface->send(com::ComEndpoint("light"), tx_buf);
   return SyncLight::Response{ true };
+}
+
+void LedLight::comCallback(const com::ComEndpoint, const std::vector<uint8_t>&) {
+}
+
+void LedLight::onResetSensorState() {
+}
+
+void LedLight::onClearDataFlag() {
 }
 
 } // namespace device

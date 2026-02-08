@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "interface/ComObserver.hpp"
+#include "sensorring/interface/ComObserver.hpp"
 
 #include "SensorBoard.hpp"
 

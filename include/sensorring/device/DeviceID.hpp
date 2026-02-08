@@ -44,19 +44,19 @@ public:
    * @brief Returns the hardware device type.
    * @return DeviceType of this ID.
    */
-  DeviceType getDeviceType() const;
+  DeviceType getType() const;
 
   /**
    * @brief Returns the human-readable device name.
    * @return Name string.
    */
-  std::string getDeviceName() const;
+  std::string getName() const;
 
   /**
    * @brief Returns the instance index when multiple devices of the same type exist.
    * @return Index value.
    */
-  unsigned int getDeviceIndex() const;
+  unsigned int getIndex() const;
 
   /**
    * @brief Check if the device ID belongs to a valid device.
@@ -65,15 +65,15 @@ public:
   bool isValid() const;
 };
 
-inline DeviceType DeviceID::getDeviceType() const {
+inline DeviceType DeviceID::getType() const {
   return type;
 }
 
-inline std::string DeviceID::getDeviceName() const {
+inline std::string DeviceID::getName() const {
   return name;
 }
 
-inline unsigned int DeviceID::getDeviceIndex() const {
+inline unsigned int DeviceID::getIndex() const {
   return index;
 }
 

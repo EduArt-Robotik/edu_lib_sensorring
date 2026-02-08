@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "interface/ComEndpoints.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 
 #include "canprotocol.hpp"
 

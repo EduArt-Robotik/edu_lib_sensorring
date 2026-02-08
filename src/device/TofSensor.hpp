@@ -6,11 +6,9 @@
 #include "hardware/st_vl53l8cx.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
-
-#include "BaseSensor.hpp"
 
 namespace eduart {
 
@@ -48,7 +46,7 @@ struct FetchTofMeasurement {
   struct Response {};
 };
 
-struct TofSensor : BaseSensor, IDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
+struct TofSensor : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
 public:
   TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~TofSensor();
@@ -61,7 +59,7 @@ public:
   static RequestTofMeasurement::Response requestTofMeasurement(const RequestTofMeasurement::Request& req);
   static FetchTofMeasurement::Response fetchTofMeasurement(const FetchTofMeasurement::Request& req);
 
-  void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
   void onResetSensorState() override;

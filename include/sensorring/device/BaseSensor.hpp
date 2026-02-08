@@ -1,7 +1,7 @@
 #pragma once
 
-#include "interface/ComEndpoints.hpp"
 #include "interface/ComInterface.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Matrix3.hpp"
 
 namespace eduart {
@@ -33,7 +33,7 @@ public:
   void clearDataFlag();
 
   void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  virtual void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
+  virtual void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 protected:
   virtual void onResetSensorState() = 0;

@@ -7,8 +7,8 @@
 #include "device/ThermalSensor.hpp"
 #include "device/TofSensor.hpp"
 #include "interface/ComInterface.hpp"
-#include "interface/ComObserver.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/interface/ComObserver.hpp"
 #include "types/EnumerationInformation.hpp"
 
 namespace eduart {

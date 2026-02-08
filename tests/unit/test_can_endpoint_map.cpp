@@ -1,10 +1,9 @@
 #include <catch2/catch_all.hpp>
-
 #include <cstdint>
 
-#include "interface/ComEndpoints.hpp"
 #include "interface/can/CanEndpointMap.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 
 using eduart::com::CanEndpointMap;
 using eduart::com::CanProtocol;
@@ -25,7 +24,7 @@ TEST_CASE("CanEndpointMap addSensorBoardEndpoint and round-trip", "[CanEndpointM
   map->addSensorBoardEndpoint();
 
   ComEndpoint broadcast("broadcast");
-  CanProtocol::canid id = map->mapEndpointToId(broadcast);
+  CanProtocol::canid id  = map->mapEndpointToId(broadcast);
   ComEndpoint round_trip = map->mapIdToEndpoint(id);
 
   REQUIRE(round_trip.getId() == broadcast.getId());

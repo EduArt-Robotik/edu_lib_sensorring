@@ -238,7 +238,7 @@ vector&lt;ComObserver*&gt; observers
 
 + startListener()
 + stopListener()
-+ getEndpoints() : vector&lt;ComEndpoints&gt;
++ getEndpoints() : vector&lt;ComEndpoint&gt;
 + registerObserver(observer : ComObserver*) : bool
 
 /+ send(target : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
@@ -255,7 +255,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 + ComEndpoint(id : string)
 + getId() : string
 
-_+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoints&gt;
+_+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoint&gt;
 
 
 bg=white

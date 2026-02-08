@@ -20,7 +20,7 @@ SENSORRING_REGISTER_STATIC(ThermalSensor, RequestThermalMeasurement, &ThermalSen
 SENSORRING_REGISTER_STATIC(ThermalSensor, FetchThermalMeasurement, &ThermalSensor::fetchThermalMeasurement);
 
 ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx)
-    : BaseSensor(interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), idx, params.enable)
+    : BaseDevice(DeviceID({DeviceType::HTPA32, "thermal", idx}), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestMeasurement, "GetLatestMeasurement");
@@ -109,7 +109,7 @@ void ThermalSensor::onClearDataFlag() {
   _rx_buffer_offset = 0;
 }
 
-void ThermalSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void ThermalSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   std::size_t msg_size = data.size();
 
   if (!_got_eeprom) {

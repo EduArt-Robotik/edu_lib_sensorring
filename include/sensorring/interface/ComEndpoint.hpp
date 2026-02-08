@@ -9,15 +9,13 @@ namespace com {
 
 class ComEndpoint {
 public:
-  ComEndpoint(const std::string& id)
-      : _id(id) {};
+  ComEndpoint(const std::string& id);
 
-  ComEndpoint(const ComEndpoint& endpoint)
-      : _id(endpoint._id) {};
+  ComEndpoint(const ComEndpoint& endpoint);
 
-  const std::string getId() const { return _id; }
+  const std::string getId() const;
 
-  bool operator==(const ComEndpoint& other) const { return _id == other._id; }
+  bool operator==(const ComEndpoint& other) const;
 
 private:
   const std::string _id;

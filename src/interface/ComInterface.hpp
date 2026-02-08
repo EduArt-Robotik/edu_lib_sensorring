@@ -8,8 +8,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "ComEndpoints.hpp"
-#include "ComObserver.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
+#include "sensorring/interface/ComObserver.hpp"
 
 namespace eduart {
 

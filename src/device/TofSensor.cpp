@@ -15,7 +15,7 @@ SENSORRING_REGISTER_STATIC(TofSensor, RequestTofMeasurement, &TofSensor::request
 SENSORRING_REGISTER_STATIC(TofSensor, FetchTofMeasurement, &TofSensor::fetchTofMeasurement);
 
 TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx)
-    : BaseSensor(interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), idx, params.enable)
+    : BaseDevice(DeviceID({DeviceType::VL53L8CX, "tof", idx}), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
   register_capability<GetLatestRawMeasurement>("GetLatestRawMeasurement");
@@ -52,7 +52,7 @@ void TofSensor::onClearDataFlag() {
   _rx_buffer_offset = 0;
 }
 
-void TofSensor::canCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void TofSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   std::size_t msg_size = data.size();
 
   // point data msg
@@ -122,11 +122,9 @@ RequestTofMeasurement::Response TofSensor::requestTofMeasurement(const RequestTo
   static std::uint8_t request_count = 0;
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
-  }
-  else if(req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  }
-  else {
+  } else {
     uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { request_count, sensor_select_high, sensor_select_low };
@@ -138,11 +136,9 @@ RequestTofMeasurement::Response TofSensor::requestTofMeasurement(const RequestTo
 FetchTofMeasurement::Response TofSensor::fetchTofMeasurement(const FetchTofMeasurement::Request& req) {
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
-  }
-  else if(req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
+  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  }
-  else {
+  } else {
     uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };

@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "ComEndpoints.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 
 namespace eduart {
 

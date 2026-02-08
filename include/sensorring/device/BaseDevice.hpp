@@ -1,13 +1,14 @@
 #pragma once
 
-#include "interface/ComObserver.hpp"
-
+#include "BaseSensor.hpp"
 #include "DeviceID.hpp"
 #include "IDevice.hpp"
 
 namespace eduart {
 
 namespace device {
+
+class SENSORRING_EXPORT DeviceImpl;
 
 struct SENSORRING_EXPORT DeviceParams {
   DeviceID id;
@@ -22,20 +23,18 @@ enum class SENSORRING_EXPORT DeviceState {
   SHUTDOWN
 };
 
-class SENSORRING_EXPORT Device : public IDevice {
+class SENSORRING_EXPORT BaseDevice : public IDevice, public BaseSensor {
 public:
-  Device(const std::string& name);
-  ~Device();
+  BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  virtual ~BaseDevice() = default;
 
   DeviceID getDeviceID() const;
 
-  bool setEnable(bool enable);
-  bool getEnable() const;
-
-  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  virtual void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
+  //void setEnable(bool enable);
+  //bool getEnable() const;
 
 protected:
+  DeviceState _state;
   DeviceID _id;
   bool _enable;
 };

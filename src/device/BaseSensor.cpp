@@ -1,4 +1,4 @@
-#include "device/BaseSensor.hpp"
+#include "sensorring/device/BaseSensor.hpp"
 
 #include "sensorring/math/Math.hpp"
 
@@ -67,7 +67,7 @@ void BaseSensor::clearDataFlag() {
 }
 
 void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  canCallback(source, data);
+  comCallback(source, data);
 }
 
 } // namespace device

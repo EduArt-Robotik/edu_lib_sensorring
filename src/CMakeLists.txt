@@ -19,6 +19,7 @@ target_sources(sensorring
   interface/ComInterface.cpp
   interface/ComManager.cpp
   interface/ComObserver.cpp
+  interface/ComEndpoint.cpp
   interface/can/CanEndpointMap.cpp
   interface/can/canprotocol.cpp
   logger/Logger.cpp
@@ -28,6 +29,7 @@ target_sources(sensorring
   device/ThermalSensor.cpp
   device/LedLight.cpp
   device/BaseSensor.cpp
+  device/BaseDevice.cpp
   types/Image.cpp
   types/PointCloud.cpp
   types/EnumerationInformation.cpp

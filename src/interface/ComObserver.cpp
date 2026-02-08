@@ -1,4 +1,4 @@
-#include "ComObserver.hpp"
+#include "sensorring/interface/ComObserver.hpp"
 
 namespace eduart {
 

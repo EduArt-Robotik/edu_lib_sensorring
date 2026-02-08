@@ -5,10 +5,8 @@
 #include "hardware/heimann_htpa32.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
-#include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
-
-#include "BaseSensor.hpp"
 
 namespace eduart {
 
@@ -46,7 +44,7 @@ struct FetchThermalMeasurement {
   struct Response {};
 };
 
-struct ThermalSensor : BaseSensor, IDevice, ICapability<GetLatestMeasurement> {
+struct ThermalSensor : BaseDevice, ICapability<GetLatestMeasurement> {
 public:
   ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
   ~ThermalSensor();
@@ -66,7 +64,7 @@ public:
   static RequestThermalMeasurement::Response requestThermalMeasurement(const RequestThermalMeasurement::Request& req);
   static FetchThermalMeasurement::Response fetchThermalMeasurement(const FetchThermalMeasurement::Request& req);
 
-  void canCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
   void onResetSensorState() override;

@@ -11,7 +11,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "interface/ComEndpoints.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "CanEndpointMap.hpp"

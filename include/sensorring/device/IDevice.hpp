@@ -33,7 +33,7 @@ namespace device {
  * @class IInvokerBase
  * @brief Base interface for all capability invokers used by IDevice.
  */
-struct IInvokerBase {
+struct SENSORRING_EXPORT IInvokerBase {
   virtual ~IInvokerBase() = default;
   std::string name;
   /**
@@ -48,7 +48,7 @@ struct IInvokerBase {
  * @brief Storage for one capability: either instance-based ICapability/ICapabilityAsync or user-registered callables (free/static/lambda).
  * @tparam Cap Capability type providing nested Request and Response types.
  */
-template <typename Cap> struct Invoker : IInvokerBase {
+template <typename Cap> struct SENSORRING_EXPORT Invoker : IInvokerBase {
   ICapability<Cap>* impl                        = nullptr;
   const ICapability<Cap>* impl_const            = nullptr;
   ICapabilityAsync<Cap>* impl_async             = nullptr;
