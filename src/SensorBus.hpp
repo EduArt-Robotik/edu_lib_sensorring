@@ -35,22 +35,15 @@ public:
   bool allTofDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
   bool allThermalDataTransmissionsComplete() const;
   bool allThermalDataTransmissionsComplete(unsigned int& ready_sensors_count) const;
-  bool allEEPROMTransmissionsComplete() const;
 
   void resetDevices();
   void resetSensorState();
   int enumerateDevices();
   void setBrs(bool brs_enable);
-  void syncLight();
-  void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
-  void requestEEPROM();
   void requestTofMeasurement();
   void fetchTofMeasurement();
   void requestThermalMeasurement();
   void fetchThermalMeasurement();
-
-  bool stopThermalCalibration();
-  bool startThermalCalibration(std::size_t window);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

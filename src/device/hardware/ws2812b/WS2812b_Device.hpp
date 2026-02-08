@@ -11,7 +11,6 @@ namespace device {
 
 struct SetLight {
   struct Request {
-    com::ComInterface* interface;
     light::LightMode mode;
     std::uint8_t red;
     std::uint8_t green;
@@ -24,7 +23,6 @@ struct SetLight {
 
 struct SyncLight {
   struct Request {
-    com::ComInterface* interface;
   };
   struct Response {
     bool ok;

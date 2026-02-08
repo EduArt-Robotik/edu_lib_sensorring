@@ -3,9 +3,9 @@
 #include <memory>
 #include <mutex>
 
-#include "device/WS2812b_Device.hpp"
-#include "device/HTPA32_Device.hpp"
-#include "device/VL53L8CX_Device.hpp"
+#include "device/hardware/htpa32/HTPA32_Device.hpp"
+#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/interface/ComObserver.hpp"

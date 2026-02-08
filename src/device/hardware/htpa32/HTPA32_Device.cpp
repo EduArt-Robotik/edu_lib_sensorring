@@ -15,14 +15,16 @@ namespace eduart {
 
 namespace device {
 
-SENSORRING_REGISTER_STATIC(HTPA32_Device, RequestThermalEeprom, &HTPA32_Device::requestThermalEeprom);
 SENSORRING_REGISTER_STATIC(HTPA32_Device, RequestThermalMeasurement, &HTPA32_Device::requestThermalMeasurement);
 SENSORRING_REGISTER_STATIC(HTPA32_Device, FetchThermalMeasurement, &HTPA32_Device::fetchThermalMeasurement);
 
-HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, std::size_t idx)
-    : BaseDevice(DeviceID({DeviceType::HTPA32, "thermal", idx}), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
+HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
+    : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
+  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(GetEPROM, "GetEPROM");
+  SENSORRING_REGISTER_CAPABILITY_NAMED(StartCalibration, "StartCalibration");
+  SENSORRING_REGISTER_CAPABILITY_NAMED(StopCalibration, "StopCalibration");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestMeasurement, "GetLatestMeasurement");
 
   _rx_buffer_offset = 0;
@@ -71,32 +73,24 @@ GetLatestMeasurement::Response HTPA32_Device::invoke(const GetLatestMeasurement:
   return { _latest_measurement, _error };
 }
 
-bool HTPA32_Device::gotEEPROM() const {
-  return _got_eeprom;
-}
-
-void HTPA32_Device::readEEPROM() {
-  if (!_got_eeprom) {
-    _got_eeprom       = false;
-    _rx_buffer_offset = 0;
-  }
-}
-
-bool HTPA32_Device::stopCalibration() {
-  bool result         = _calibration_active;
-  _calibration_active = false;
-  return result;
-}
-
-bool HTPA32_Device::startCalibration(std::size_t window) {
+StopCalibration::Response HTPA32_Device::invoke(const StopCalibration::Request&) {
   if (!_calibration_active) {
-    _calibration_active        = true;
-    _calibration_count_goal    = window;
-    _calibration_count_current = 0;
-    return true;
-  } else {
-    return false;
+    return { false };
   }
+
+  _calibration_active = false;
+  return { true };
+}
+
+StartCalibration::Response HTPA32_Device::invoke(const StartCalibration::Request& req) {
+  if (_calibration_active) {
+    return { false };
+  }
+
+  _calibration_active        = true;
+  _calibration_count_goal    = req.window;
+  _calibration_count_current = 0;
+  return { true };
 }
 
 void HTPA32_Device::onResetSensorState() {
@@ -309,18 +303,25 @@ void HTPA32_Device::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-RequestThermalEeprom::Response HTPA32_Device::requestThermalEeprom(const RequestThermalEeprom::Request& req) {
-  if (req.active_sensors == 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested transmission of EEPROM from thermal sensors but no boards have been selected");
-  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested transmission of EEPROM from thermal sensors but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  } else {
-    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+std::future<GetEPROM::Response> HTPA32_Device::invoke_async(const GetEPROM::Request& req) {
+  return std::async(std::launch::async, [this, req]() {
+    if (_got_eeprom) {
+      return GetEPROM::Response{ true };
+    }
+
+    uint8_t sensor_select_high  = (uint8_t)((_idx >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((_idx >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
-    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  }
-  return {};
+    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+
+    auto timestamp = std::chrono::steady_clock::now();
+    while (!_got_eeprom && (std::chrono::steady_clock::now() - timestamp) < req.timeout) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    auto got_eeprom = _got_eeprom.load();
+    return GetEPROM::Response{ got_eeprom };
+  });
 }
 
 RequestThermalMeasurement::Response HTPA32_Device::requestThermalMeasurement(const RequestThermalMeasurement::Request& req) {

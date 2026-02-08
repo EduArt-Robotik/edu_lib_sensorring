@@ -1,5 +1,6 @@
 #include "WS2812b_Device.hpp"
 
+#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/IDeviceMacros.hpp"
 
@@ -30,13 +31,19 @@ const WS2812b_Params& WS2812b_Device::getParams() const {
 SetLight::Response WS2812b_Device::setLight(const SetLight::Request& request) {
   std::uint8_t mode_cmd       = static_cast<uint8_t>(request.mode) + CAN_LIGHT_LIGHTS_OFF;
   std::vector<uint8_t> tx_buf = { mode_cmd, request.red, request.green, request.blue };
-  request.interface->send(com::ComEndpoint("light"), tx_buf);
+
+  for (auto& interface : com::ComManager::getInstance()->getInterfaces()) {
+    interface->send(com::ComEndpoint("light"), tx_buf);
+  }
   return SetLight::Response{ true };
 }
 
-SyncLight::Response WS2812b_Device::syncLight(const SyncLight::Request& request) {
+SyncLight::Response WS2812b_Device::syncLight(const SyncLight::Request&) {
   std::vector<uint8_t> tx_buf = { CAN_LIGHT_BEAT, 0x00 };
-  request.interface->send(com::ComEndpoint("light"), tx_buf);
+
+  for (auto& interface : com::ComManager::getInstance()->getInterfaces()) {
+    interface->send(com::ComEndpoint("light"), tx_buf);
+  }
   return SyncLight::Response{ true };
 }
 

@@ -79,42 +79,6 @@ void SensorRing::setBrs(bool brs_enable) {
   }
 }
 
-void SensorRing::syncLight() {
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->syncLight();
-  }
-}
-
-void SensorRing::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->setLight(mode, red, green, blue);
-  }
-}
-
-bool SensorRing::getEEPROM() {
-
-  // request transmission of eeprom from all thermal sensors
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->requestEEPROM();
-  }
-
-  // wait until all sensors sent their response. Timeout protected
-  bool ready     = false;
-  auto timestamp = std::chrono::steady_clock::now();
-
-  do {
-    ready = true;
-    for (auto& sensor_bus : _bus_vec) {
-      ready &= sensor_bus->allEEPROMTransmissionsComplete();
-    }
-    if (!ready) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
-  } while (!ready && (std::chrono::steady_clock::now() - timestamp) < _params.timeout);
-
-  return ready;
-}
-
 void SensorRing::requestTofMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->requestTofMeasurement();
@@ -206,26 +170,6 @@ void SensorRing::fetchThermalMeasurement() {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->fetchThermalMeasurement();
   }
-}
-
-bool SensorRing::stopThermalCalibration() {
-  bool success = true;
-
-  for (auto& sensor_bus : _bus_vec) {
-    success &= sensor_bus->stopThermalCalibration();
-  }
-
-  return success;
-}
-
-bool SensorRing::startThermalCalibration(std::size_t window) {
-  bool success = true;
-
-  for (auto& sensor_bus : _bus_vec) {
-    success &= sensor_bus->startThermalCalibration(window);
-  }
-
-  return success;
 }
 
 std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {

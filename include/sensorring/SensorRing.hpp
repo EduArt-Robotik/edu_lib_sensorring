@@ -50,20 +50,6 @@ public:
   void setBrs(bool brs_enable);
 
   /**
-   * @brief Synchronize light animations across all sensor buses.
-   */
-  void syncLight();
-
-  /**
-   * @brief Set light mode and color for all sensor buses.
-   * @param[in] mode Light mode to set
-   * @param[in] red Red color value
-   * @param[in] green Green color value
-   * @param[in] blue Blue color value
-   */
-  void setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
-
-  /**
    * @brief Get all devices connected to the sensor ring.
    * @return Vector of all devices.
    */
@@ -86,12 +72,6 @@ public:
   bool enumerateDevices();
 
   /**
-   * @brief Request EEPROM data from all sensor buses.
-   * @return true if request succeeded on all buses
-   */
-  bool getEEPROM();
-
-  /**
    * @brief Request Time-of-Flight measurements from all enabled sensors.
    */
   void requestTofMeasurement();
@@ -110,19 +90,6 @@ public:
    * @brief Fetch thermal measurement data from all enabled sensors.
    */
   void fetchThermalMeasurement();
-
-  /**
-   * @brief Stop thermal calibration on all sensor buses.
-   * @return true if stop succeeded on all buses
-   */
-  bool stopThermalCalibration();
-
-  /**
-   * @brief Start thermal calibration on all sensor buses.
-   * @param[in] window Number of thermal frames used for averaging
-   * @return true if start succeeded on all buses
-   */
-  bool startThermalCalibration(std::size_t window);
 
   /**
    * @brief Wait until all Time-of-Flight measurements are ready.

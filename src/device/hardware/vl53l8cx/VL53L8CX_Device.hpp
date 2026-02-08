@@ -3,12 +3,13 @@
 #include <utility>
 #include <vector>
 
-#include "hardware/st_vl53l8cx.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
+
+#include "st_vl53l8cx.hpp"
 
 namespace eduart {
 
@@ -48,7 +49,7 @@ struct FetchTofMeasurement {
 
 struct VL53L8CX_Device : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
 public:
-  VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, std::size_t idx);
+  VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx);
   ~VL53L8CX_Device();
 
   const VL53L8CX_Params& getParams() const;

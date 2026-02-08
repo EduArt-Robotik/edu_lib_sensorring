@@ -14,8 +14,8 @@ namespace device {
 SENSORRING_REGISTER_STATIC(VL53L8CX_Device, RequestTofMeasurement, &VL53L8CX_Device::requestTofMeasurement);
 SENSORRING_REGISTER_STATIC(VL53L8CX_Device, FetchTofMeasurement, &VL53L8CX_Device::fetchTofMeasurement);
 
-VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, std::size_t idx)
-    : BaseDevice(DeviceID({DeviceType::VL53L8CX, "tof", idx}), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
+VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx)
+    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
   register_capability<GetLatestRawMeasurement>("GetLatestRawMeasurement");

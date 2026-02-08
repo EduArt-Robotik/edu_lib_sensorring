@@ -36,7 +36,10 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
     , _light_color{ 0, 0, 0 }
     , _light_brightness(0)
     , _light_update_flag(false)
-    , _is_running(false) {
+    , _is_running(false)
+    , _tof_device_group(device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()))
+    , _thermal_device_group(device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices()))
+    , _light_device_group(device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())) {
 
   // check if there are active tof or thermal sensors
   for (const auto& sensor_bus : _sensor_ring->getInterfaces()) {
@@ -95,11 +98,25 @@ std::string MeasurementManagerImpl::printTopology() const noexcept {
 }
 
 bool MeasurementManagerImpl::stopThermalCalibration() noexcept {
-  return _sensor_ring->stopThermalCalibration();
+  auto success = true;
+  _thermal_device_group.invokeForEachDevice([&success](device::BaseDevice* device) {
+    auto res = device->invoke<device::StopCalibration>({});
+    if (!res || !res->success) {
+      success = false;
+    }
+  });
+  return success;
 }
 
 bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) noexcept {
-  return _sensor_ring->startThermalCalibration(window);
+  auto success = true;
+  _thermal_device_group.invokeForEachDevice([&success, window](device::BaseDevice* device) {
+    auto res = device->invoke<device::StartCalibration>({ window });
+    if (!res || !res->success) {
+      success = false;
+    }
+  });
+  return success;
 }
 
 void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
@@ -333,8 +350,9 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::sync_lights: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
-    _sensor_ring->syncLight();
-    _sensor_ring->setLight(light::LightMode::Off, 0, 0, 0);
+
+    device::IDevice::static_invoke<device::WS2812b_Device, device::SyncLight>({});
+    device::IDevice::static_invoke<device::WS2812b_Device, device::SetLight>({ light::LightMode::Pulsation, 0, 0, 0 });
 
     // state transition
     _measurement_state = MeasurementState::enumerate_sensors;
@@ -383,7 +401,13 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::get_eeprom: {
     if (_thermal_enabled) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
-      success = _sensor_ring->getEEPROM();
+
+      _thermal_device_group.invokeForEachDevice([&success](device::BaseDevice* device) {
+        auto res = device->invoke<device::GetEPROM>({});
+        if (!res || !res->success) {
+          success = false;
+        }
+      });
     }
 
     // state transition
@@ -416,7 +440,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::set_lights: {
     if (_light_update_flag) {
-      _sensor_ring->setLight(_light_mode, _light_color[0], _light_color[1], _light_color[2]);
+      device::IDevice::static_invoke<device::WS2812b_Device, device::SetLight>({ _light_mode, _light_color[0], _light_color[1], _light_color[2] });
       _light_update_flag = false;
     }
 

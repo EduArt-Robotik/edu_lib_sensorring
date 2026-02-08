@@ -35,6 +35,12 @@ public:
    */
   ComInterface* getInterface(std::string interface_name);
 
+  /**
+   * Get all communication interfaces
+   * @return Vector of all communication interfaces
+   */
+  std::vector<ComInterface*> getInterfaces();
+
 private:
   friend class Singleton<ComManager>;
   ComManager() = default;

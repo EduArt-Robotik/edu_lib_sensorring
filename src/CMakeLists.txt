@@ -25,9 +25,9 @@ target_sources(sensorring
   logger/Logger.cpp
   logger/LoggerClient.cpp
   device/IDevice.cpp
-  device/VL53L8CX_Device.cpp
-  device/HTPA32_Device.cpp
-  device/WS2812b_Device.cpp
+  device/hardware/vl53l8cx/VL53L8CX_Device.cpp
+  device/hardware/htpa32/HTPA32_Device.cpp
+  device/hardware/ws2812b/WS2812b_Device.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp
   device/DeviceGroup.cpp

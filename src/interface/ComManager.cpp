@@ -90,6 +90,14 @@ ComInterface* ComManager::getInterface(std::string interface_name) {
   return (it != _interfaces.end()) ? it->get() : nullptr;
 }
 
+std::vector<ComInterface*> ComManager::getInterfaces() {
+  std::vector<ComInterface*> interfaces;
+  for (const auto& interface : _interfaces) {
+    interfaces.push_back(interface.get());
+  }
+  return interfaces;
+}
+
 } // namespace com
 
 } // namespace eduart

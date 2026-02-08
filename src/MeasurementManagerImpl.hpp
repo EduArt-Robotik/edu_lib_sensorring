@@ -9,8 +9,8 @@
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
-
 #include "sensorring/SensorRing.hpp"
+#include "sensorring/device/DeviceGroup.hpp"
 
 namespace eduart {
 
@@ -180,6 +180,10 @@ private:
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
+
+  device::DeviceGroup _tof_device_group;
+  device::DeviceGroup _thermal_device_group;
+  device::DeviceGroup _light_device_group;
 };
 
 } // namespace manager

@@ -4,9 +4,9 @@
 #include <memory>
 #include <string>
 
-#include "device/WS2812b_Device.hpp"
-#include "device/HTPA32_Device.hpp"
-#include "device/VL53L8CX_Device.hpp"
+#include "device/hardware/htpa32/HTPA32_Device.hpp"
+#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -85,14 +85,6 @@ void SensorBus::setBrs(bool brs_enable) {
   device::SensorBoard::cmdSetBrs(_interface, brs_enable);
 }
 
-void SensorBus::syncLight() {
-  device::IDevice::static_invoke<device::WS2812b_Device, device::SyncLight>({ _interface });
-}
-
-void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  device::IDevice::static_invoke<device::WS2812b_Device, device::SetLight>({ _interface, mode, red, green, blue });
-}
-
 void SensorBus::resetDevices() {
   device::SensorBoard::cmdReset(_interface);
 }
@@ -137,28 +129,6 @@ int SensorBus::enumerateDevices() {
   }
 
   return _enumeration_count;
-}
-
-void SensorBus::requestEEPROM() {
-  unsigned int active_devices = 0;
-  for (auto& sensor : _board_vec) {
-    sensor->getThermal()->readEEPROM();
-    active_devices |= (sensor->getThermal()->getEnable() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
-  }
-
-  device::IDevice::static_invoke<device::HTPA32_Device, device::RequestThermalEeprom>({ _interface, static_cast<std::uint16_t>(active_devices) });
-}
-
-bool SensorBus::allEEPROMTransmissionsComplete() const {
-  bool ready = true;
-
-  for (auto& sensor : _board_vec) {
-    if (sensor->getThermal()->getEnable()) {
-      ready &= sensor->getThermal()->gotEEPROM();
-    }
-  }
-
-  return ready;
 }
 
 void SensorBus::requestTofMeasurement() {
@@ -262,26 +232,6 @@ bool SensorBus::allThermalDataTransmissionsComplete(unsigned int& ready_sensors_
   }
 
   return _active_thermal_sensors == ready_sensors_count;
-}
-
-bool SensorBus::stopThermalCalibration() {
-  bool success = true;
-
-  for (auto& sensor : _board_vec) {
-    success &= sensor->getThermal()->stopCalibration();
-  }
-
-  return success;
-}
-
-bool SensorBus::startThermalCalibration(std::size_t window) {
-  bool success = true;
-
-  for (auto& sensor : _board_vec) {
-    success &= sensor->getThermal()->startCalibration(window);
-  }
-
-  return success;
 }
 
 void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
