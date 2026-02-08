@@ -151,6 +151,7 @@ public:
 private:
   const RingParams _params;
   std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
+  std::vector<device::IDevice* > _device_vec;
 };
 
 } // namespace ring

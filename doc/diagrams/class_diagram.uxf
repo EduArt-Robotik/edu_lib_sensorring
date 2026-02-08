@@ -67,7 +67,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 + BaseSensor ()
 + ~BaseSensor ()
 
-+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
 
 bg=white
 fg=black
@@ -89,7 +89,7 @@ sensor_board_vec : vector&lt;SensorBoard&gt;
 SensorBus(params : BusParams);
 ~SensorBus();
 
-+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
 
 bg=white
 fg=black
@@ -133,7 +133,7 @@ transparency=0
 + checkConnectionStatus( timeout_ms : unsigned int) : bool
 
 /+ subscribeToEndpoint(target : ComEndpoint) = 0/
-/+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
+/+ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
 
 
 bg=white

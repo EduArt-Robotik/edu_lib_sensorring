@@ -31,7 +31,7 @@ public:
   static void cmdSetBrs(com::ComInterface* interface, bool enable);
   static void cmdEnumerateBoards(com::ComInterface* interface);
 
-  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
   int _idx;

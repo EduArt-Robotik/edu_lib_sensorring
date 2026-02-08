@@ -32,9 +32,6 @@ public:
   void resetSensorState();
   void clearDataFlag();
 
-  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-  virtual void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) = 0;
-
 protected:
   virtual void onResetSensorState() = 0;
   virtual void onClearDataFlag()    = 0;

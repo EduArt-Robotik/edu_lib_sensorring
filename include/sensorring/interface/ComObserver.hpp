@@ -68,7 +68,7 @@ public:
    * @param[in] source ComEndpoint that sent the message
    * @param[in] data Message payload
    */
-  virtual void notify(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
+  virtual void comCallback(const ComEndpoint source, const std::vector<uint8_t>& data) = 0;
 
 private:
   std::unordered_set<ComEndpoint> _endpoints;

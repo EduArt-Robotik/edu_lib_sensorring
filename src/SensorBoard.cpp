@@ -84,7 +84,7 @@ void SensorBoard::cmdEnumerateBoards(com::ComInterface* interface) {
   interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
 }
 
-void SensorBoard::notify([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   // ToDo: Eliminate offset of index
   if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
 

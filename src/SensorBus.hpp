@@ -52,7 +52,7 @@ public:
   bool stopThermalCalibration();
   bool startThermalCalibration(std::size_t window);
 
-  void notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
   com::ComInterface* _interface;

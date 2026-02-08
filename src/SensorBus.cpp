@@ -284,7 +284,7 @@ bool SensorBus::startThermalCalibration(std::size_t window) {
   return success;
 }
 
-void SensorBus::notify([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
+void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
 
   if (source == com::ComEndpoint("broadcast")) { // general sensor board status
     // enumeration message

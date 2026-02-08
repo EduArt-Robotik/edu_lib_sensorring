@@ -66,10 +66,6 @@ void BaseSensor::clearDataFlag() {
   onClearDataFlag();
 }
 
-void BaseSensor::notify(const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  comCallback(source, data);
-}
-
 } // namespace device
 
 } // namespace eduart

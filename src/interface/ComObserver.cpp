@@ -37,7 +37,7 @@ void ComObserver::forwardNotification(const ComEndpoint source, const std::vecto
       _timestamp = std::chrono::steady_clock::now();
 
       // Trigger callback
-      notify(source, data);
+      comCallback(source, data);
       break;
     }
   }
