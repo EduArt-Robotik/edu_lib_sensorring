@@ -31,12 +31,12 @@ int main(int, char*[]) {
   // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
   {
-    device::TofSensorParams tof;
+    device::VL53L8CX_Params tof;
     tof.user_idx = 0;
     tof.enable   = true;
 
     device::SensorBoardParams board;
-    board.tof_params = tof;
+    board.vl53l8cx_params = tof;
 
     bus::BusParams bus;
     bus.interface_name = INTERFACE_NAME;

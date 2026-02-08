@@ -31,12 +31,12 @@ struct SyncLight {
   };
 };
 
-struct LedLight : BaseDevice {
+struct WS2812b_Device : BaseDevice {
 public:
-  LedLight(LightParams params, com::ComInterface* interface);
-  ~LedLight();
+  WS2812b_Device(WS2812b_Params params, com::ComInterface* interface);
+  ~WS2812b_Device();
 
-  const LightParams& getParams() const;
+  const WS2812b_Params& getParams() const;
 
   static SetLight::Response setLight(const SetLight::Request& request);
   static SyncLight::Response syncLight(const SyncLight::Request& request);
@@ -47,7 +47,7 @@ private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 
-  const LightParams _params;
+  const WS2812b_Params _params;
 };
 
 } // namespace device

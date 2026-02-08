@@ -3,9 +3,9 @@
 #include <memory>
 #include <mutex>
 
-#include "device/LedLight.hpp"
-#include "device/ThermalSensor.hpp"
-#include "device/TofSensor.hpp"
+#include "device/WS2812b_Device.hpp"
+#include "device/HTPA32_Device.hpp"
+#include "device/VL53L8CX_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/interface/ComObserver.hpp"
@@ -17,7 +17,7 @@ namespace device {
 
 class SensorBoard : public com::ComObserver {
 public:
-  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds);
+  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<VL53L8CX_Device> tof, std::unique_ptr<HTPA32_Device> thermal, std::unique_ptr<WS2812b_Device> leds);
   ~SensorBoard();
 
   bool isEnumerated() const;
@@ -25,9 +25,9 @@ public:
 
   std::vector<BaseDevice*> getDevices() const;
 
-  TofSensor* getTof() const;
-  ThermalSensor* getThermal() const;
-  LedLight* getLed() const;
+  VL53L8CX_Device* getTof() const;
+  HTPA32_Device* getThermal() const;
+  WS2812b_Device* getLed() const;
 
   static void cmdReset(com::ComInterface* interface);
   static void cmdSetBrs(com::ComInterface* interface, bool enable);

@@ -1,4 +1,4 @@
-#include "TofSensor.hpp"
+#include "VL53L8CX_Device.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -11,10 +11,10 @@ namespace eduart {
 
 namespace device {
 
-SENSORRING_REGISTER_STATIC(TofSensor, RequestTofMeasurement, &TofSensor::requestTofMeasurement);
-SENSORRING_REGISTER_STATIC(TofSensor, FetchTofMeasurement, &TofSensor::fetchTofMeasurement);
+SENSORRING_REGISTER_STATIC(VL53L8CX_Device, RequestTofMeasurement, &VL53L8CX_Device::requestTofMeasurement);
+SENSORRING_REGISTER_STATIC(VL53L8CX_Device, FetchTofMeasurement, &VL53L8CX_Device::fetchTofMeasurement);
 
-TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx)
+VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, std::size_t idx)
     : BaseDevice(DeviceID({DeviceType::VL53L8CX, "tof", idx}), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
@@ -27,32 +27,32 @@ TofSensor::TofSensor(TofSensorParams params, com::ComInterface* interface, std::
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 }
 
-TofSensor::~TofSensor() {
+VL53L8CX_Device::~VL53L8CX_Device() {
 }
 
-const TofSensorParams& TofSensor::getParams() const {
+const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _params;
 }
 
-GetLatestRawMeasurement::Response TofSensor::invoke(const GetLatestRawMeasurement::Request&) const {
+GetLatestRawMeasurement::Response VL53L8CX_Device::invoke(const GetLatestRawMeasurement::Request&) const {
   return { _latest_raw_measurement, _error };
 }
 
-GetLatestTransformedMeasurement::Response TofSensor::invoke(const GetLatestTransformedMeasurement::Request&) const {
+GetLatestTransformedMeasurement::Response VL53L8CX_Device::invoke(const GetLatestTransformedMeasurement::Request&) const {
   return { _latest_transformed_measurement, _error };
 }
 
-void TofSensor::onResetSensorState() {
+void VL53L8CX_Device::onResetSensorState() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
 }
 
-void TofSensor::onClearDataFlag() {
+void VL53L8CX_Device::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
 }
 
-void TofSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   std::size_t msg_size = data.size();
 
   // point data msg
@@ -86,10 +86,10 @@ void TofSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, cons
   }
 }
 
-measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t* data, int len) const {
-  measurement::TofMeasurement measurement;
-  measurement.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
-  measurement.frame_id = frame_id;
+measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, uint8_t* data, int len) const {
+  measurement::TofMeasurement result;
+  result.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
+  result.frame_id = frame_id;
 
   uint16_t distance_raw = 0;
   uint16_t sigma_raw    = 0;
@@ -111,14 +111,14 @@ measurement::TofMeasurement TofSensor::processMeasurement(int frame_id, uint8_t*
       point.z() = point_distance;
     }
 
-    measurement.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.user_idx }));
+    result.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.user_idx }));
   }
 
-  measurement.point_cloud.data.shrink_to_fit();
-  return measurement;
+  result.point_cloud.data.shrink_to_fit();
+  return result;
 }
 
-RequestTofMeasurement::Response TofSensor::requestTofMeasurement(const RequestTofMeasurement::Request& req) {
+RequestTofMeasurement::Response VL53L8CX_Device::requestTofMeasurement(const RequestTofMeasurement::Request& req) {
   static std::uint8_t request_count = 0;
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
@@ -133,7 +133,7 @@ RequestTofMeasurement::Response TofSensor::requestTofMeasurement(const RequestTo
   return {};
 }
 
-FetchTofMeasurement::Response TofSensor::fetchTofMeasurement(const FetchTofMeasurement::Request& req) {
+FetchTofMeasurement::Response VL53L8CX_Device::fetchTofMeasurement(const FetchTofMeasurement::Request& req) {
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
   } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
@@ -147,7 +147,7 @@ FetchTofMeasurement::Response TofSensor::fetchTofMeasurement(const FetchTofMeasu
   return {};
 }
 
-measurement::TofMeasurement TofSensor::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
+measurement::TofMeasurement VL53L8CX_Device::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
 
   auto transformed_measurement = measurement;
 

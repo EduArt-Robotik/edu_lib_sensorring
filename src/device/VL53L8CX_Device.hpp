@@ -46,12 +46,12 @@ struct FetchTofMeasurement {
   struct Response {};
 };
 
-struct TofSensor : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
+struct VL53L8CX_Device : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
 public:
-  TofSensor(TofSensorParams params, com::ComInterface* interface, std::size_t idx);
-  ~TofSensor();
+  VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, std::size_t idx);
+  ~VL53L8CX_Device();
 
-  const TofSensorParams& getParams() const;
+  const VL53L8CX_Params& getParams() const;
 
   GetLatestRawMeasurement::Response invoke(const GetLatestRawMeasurement::Request&) const override;
   GetLatestTransformedMeasurement::Response invoke(const GetLatestTransformedMeasurement::Request&) const override;
@@ -68,7 +68,7 @@ private:
   static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
 
-  const TofSensorParams _params;
+  const VL53L8CX_Params _params;
   measurement::TofMeasurement _latest_raw_measurement;
   measurement::TofMeasurement _latest_transformed_measurement;
 

@@ -47,12 +47,12 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   // Configure one bus with a single ToF-enabled board, similar to minimal example.
   ManagerParams params;
   {
-    eduart::device::TofSensorParams tof;
+    eduart::device::VL53L8CX_Params tof;
     tof.user_idx = 0;
     tof.enable   = true;
 
     eduart::device::SensorBoardParams board;
-    board.tof_params = tof;
+    board.vl53l8cx_params = tof;
 
     eduart::bus::BusParams bus;
     bus.interface_name = interface_name;

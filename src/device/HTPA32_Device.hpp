@@ -44,16 +44,16 @@ struct FetchThermalMeasurement {
   struct Response {};
 };
 
-struct ThermalSensor : BaseDevice, ICapability<GetLatestMeasurement> {
+struct HTPA32_Device : BaseDevice, ICapability<GetLatestMeasurement> {
 public:
-  ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx);
-  ~ThermalSensor();
+  HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, std::size_t idx);
+  ~HTPA32_Device();
 
   void readEEPROM();
   bool gotEEPROM() const;
   bool stopCalibration();
   bool startCalibration(std::size_t window);
-  ThermalSensorParams getParams() const;
+  HTPA32_Params getParams() const;
 
   std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
@@ -77,7 +77,7 @@ private:
 
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
-  const ThermalSensorParams _params;
+  const HTPA32_Params _params;
   htpa32::HTPA32Eeprom _eeprom;
 
   uint16_t _vdd;

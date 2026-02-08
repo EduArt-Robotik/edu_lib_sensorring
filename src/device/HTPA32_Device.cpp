@@ -1,4 +1,4 @@
-#include "ThermalSensor.hpp"
+#include "HTPA32_Device.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -15,11 +15,11 @@ namespace eduart {
 
 namespace device {
 
-SENSORRING_REGISTER_STATIC(ThermalSensor, RequestThermalEeprom, &ThermalSensor::requestThermalEeprom);
-SENSORRING_REGISTER_STATIC(ThermalSensor, RequestThermalMeasurement, &ThermalSensor::requestThermalMeasurement);
-SENSORRING_REGISTER_STATIC(ThermalSensor, FetchThermalMeasurement, &ThermalSensor::fetchThermalMeasurement);
+SENSORRING_REGISTER_STATIC(HTPA32_Device, RequestThermalEeprom, &HTPA32_Device::requestThermalEeprom);
+SENSORRING_REGISTER_STATIC(HTPA32_Device, RequestThermalMeasurement, &HTPA32_Device::requestThermalMeasurement);
+SENSORRING_REGISTER_STATIC(HTPA32_Device, FetchThermalMeasurement, &HTPA32_Device::fetchThermalMeasurement);
 
-ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* interface, std::size_t idx)
+HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, std::size_t idx)
     : BaseDevice(DeviceID({DeviceType::HTPA32, "thermal", idx}), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
@@ -52,43 +52,43 @@ ThermalSensor::ThermalSensor(ThermalSensorParams params, com::ComInterface* inte
   }
 }
 
-ThermalSensor::~ThermalSensor() {
+HTPA32_Device::~HTPA32_Device() {
 }
 
-ThermalSensorParams ThermalSensor::getParams() const {
+HTPA32_Params HTPA32_Device::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::GrayscaleImage&, SensorState> ThermalSensor::getLatestGrayscaleImage() const {
+std::pair<const measurement::GrayscaleImage&, SensorState> HTPA32_Device::getLatestGrayscaleImage() const {
   return { _latest_measurement.grayscale_img, _error };
 }
 
-std::pair<const measurement::FalseColorImage&, SensorState> ThermalSensor::getLatestFalseColorImage() const {
+std::pair<const measurement::FalseColorImage&, SensorState> HTPA32_Device::getLatestFalseColorImage() const {
   return { _latest_measurement.falsecolor_img, _error };
 }
 
-GetLatestMeasurement::Response ThermalSensor::invoke(const GetLatestMeasurement::Request&) const {
+GetLatestMeasurement::Response HTPA32_Device::invoke(const GetLatestMeasurement::Request&) const {
   return { _latest_measurement, _error };
 }
 
-bool ThermalSensor::gotEEPROM() const {
+bool HTPA32_Device::gotEEPROM() const {
   return _got_eeprom;
 }
 
-void ThermalSensor::readEEPROM() {
+void HTPA32_Device::readEEPROM() {
   if (!_got_eeprom) {
     _got_eeprom       = false;
     _rx_buffer_offset = 0;
   }
 }
 
-bool ThermalSensor::stopCalibration() {
+bool HTPA32_Device::stopCalibration() {
   bool result         = _calibration_active;
   _calibration_active = false;
   return result;
 }
 
-bool ThermalSensor::startCalibration(std::size_t window) {
+bool HTPA32_Device::startCalibration(std::size_t window) {
   if (!_calibration_active) {
     _calibration_active        = true;
     _calibration_count_goal    = window;
@@ -99,17 +99,17 @@ bool ThermalSensor::startCalibration(std::size_t window) {
   }
 }
 
-void ThermalSensor::onResetSensorState() {
+void HTPA32_Device::onResetSensorState() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
 }
 
-void ThermalSensor::onClearDataFlag() {
+void HTPA32_Device::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
 }
 
-void ThermalSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   std::size_t msg_size = data.size();
 
   if (!_got_eeprom) {
@@ -190,7 +190,7 @@ void ThermalSensor::comCallback([[maybe_unused]] const com::ComEndpoint source, 
   }
 }
 
-const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
+const measurement::ThermalMeasurement HTPA32_Device::processMeasurement(const uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, const uint16_t vdd, const uint16_t ptat, const size_t len) const {
   uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
   uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
@@ -265,7 +265,7 @@ const measurement::ThermalMeasurement ThermalSensor::processMeasurement(const ui
   return result;
 }
 
-const measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const {
+const measurement::GrayscaleImage HTPA32_Device::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, const double t_min_deg_c, const double t_max_deg_c) const {
   measurement::GrayscaleImage result;
 
   // pixel data with min - max scaling
@@ -290,7 +290,7 @@ const measurement::GrayscaleImage ThermalSensor::convertToGrayscaleImage(const m
   return result;
 }
 
-const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const measurement::GrayscaleImage& image) const {
+const measurement::FalseColorImage HTPA32_Device::convertToFalseColorImage(const measurement::GrayscaleImage& image) const {
   measurement::FalseColorImage color_image;
 
   // convert latest measurement to false color image
@@ -303,13 +303,13 @@ const measurement::FalseColorImage ThermalSensor::convertToFalseColorImage(const
   return color_image;
 }
 
-void ThermalSensor::rotateLeftImage(measurement::GrayscaleImage& image) const {
+void HTPA32_Device::rotateLeftImage(measurement::GrayscaleImage& image) const {
   if (_params.orientation == device::Orientation::left) {
     std::reverse(image.data.begin(), image.data.end());
   }
 }
 
-RequestThermalEeprom::Response ThermalSensor::requestThermalEeprom(const RequestThermalEeprom::Request& req) {
+RequestThermalEeprom::Response HTPA32_Device::requestThermalEeprom(const RequestThermalEeprom::Request& req) {
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested transmission of EEPROM from thermal sensors but no boards have been selected");
   } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
@@ -323,7 +323,7 @@ RequestThermalEeprom::Response ThermalSensor::requestThermalEeprom(const Request
   return {};
 }
 
-RequestThermalMeasurement::Response ThermalSensor::requestThermalMeasurement(const RequestThermalMeasurement::Request& req) {
+RequestThermalMeasurement::Response HTPA32_Device::requestThermalMeasurement(const RequestThermalMeasurement::Request& req) {
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
   } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
@@ -337,7 +337,7 @@ RequestThermalMeasurement::Response ThermalSensor::requestThermalMeasurement(con
   return {};
 }
 
-FetchThermalMeasurement::Response ThermalSensor::fetchThermalMeasurement(const FetchThermalMeasurement::Request& req) {
+FetchThermalMeasurement::Response HTPA32_Device::fetchThermalMeasurement(const FetchThermalMeasurement::Request& req) {
   if (req.active_sensors == 0) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
   } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {

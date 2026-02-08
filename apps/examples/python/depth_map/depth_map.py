@@ -89,12 +89,12 @@ def main():
   # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
   
-  tof = sensorring.TofSensorParams()
+  tof = sensorring.VL53L8CX_Params()
   tof.user_idx = 0
   tof.enable = True
 
   board = sensorring.SensorBoardParams()
-  board.tof_params = tof
+  board.vl53l8cx_params = tof
 
   bus = sensorring.BusParams()
   bus.type = SENSOR_INTERFACE_TYPE

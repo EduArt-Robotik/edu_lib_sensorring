@@ -25,9 +25,9 @@ target_sources(sensorring
   logger/Logger.cpp
   logger/LoggerClient.cpp
   device/IDevice.cpp
-  device/TofSensor.cpp
-  device/ThermalSensor.cpp
-  device/LedLight.cpp
+  device/VL53L8CX_Device.cpp
+  device/HTPA32_Device.cpp
+  device/WS2812b_Device.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp
   device/DeviceGroup.cpp

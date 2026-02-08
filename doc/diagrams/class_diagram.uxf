@@ -11,9 +11,9 @@ bg=white
 fg=black
 transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>564</x><y>1452</y><w>696</w><h>192</h></coordinates><panel_attributes>SensorBoard
 --
-- tof : TofSensor
-- thermal : ThermalSensor
-- leds : LedLight
+- tof : VL53L8CX_Device
+- thermal : HTPA32_Device
+- leds : WS2812b_Device
 
 --
 
@@ -21,37 +21,37 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 bg=white
 fg=black
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>ThermalSensor
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>HTPA32_Device
 --
-- params : ThermalSensorParams
+- params : HTPA32_Params
 - eeprom : HTPA32Eeprom
 
 --
-+ ThermalSensor (ThermalSensorParams params)
-+ ~ThermalSensor ()
++ HTPA32_Device (HTPA32_Params params)
++ ~HTPA32_Device ()
 
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>LedLight
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>WS2812b_Device
 --
 - params : LedPanelParams
 
 
 --
-+ LedLight( params : LedPanelParams)
-+ ~ LedLight ()
++ WS2812b_Device( params : LedPanelParams)
++ ~ WS2812b_Device ()
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>TofSensor
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>VL53L8CX_Device
 --
-- params : TofSensorParams
+- params : VL53L8CX_Params
 
 
 --
-+ TofSensor (params : TofSensorParams)
-+ ~TofSensor ()
++ VL53L8CX_Device (params : VL53L8CX_Params)
++ ~VL53L8CX_Device ()
 
 
 

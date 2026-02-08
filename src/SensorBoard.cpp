@@ -10,7 +10,7 @@ namespace eduart {
 
 namespace device {
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<TofSensor> tof, std::unique_ptr<ThermalSensor> thermal, std::unique_ptr<LedLight> leds)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<VL53L8CX_Device> tof, std::unique_ptr<HTPA32_Device> thermal, std::unique_ptr<WS2812b_Device> leds)
     : _idx(idx)
     , _interface(interface)
     , _params{ params }
@@ -47,33 +47,33 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
   return devices;
 }
 
-TofSensor* SensorBoard::getTof() const {
+VL53L8CX_Device* SensorBoard::getTof() const {
   LockGuard lock(_com_mutex);
 
-  if (auto tof = dynamic_cast<TofSensor*>(_device_vec[0].get())) {
+  if (auto tof = dynamic_cast<VL53L8CX_Device*>(_device_vec[0].get())) {
     return tof;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "TofSensor not found");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "VL53L8CX_Device not found");
     return nullptr;
   }
 }
 
-ThermalSensor* SensorBoard::getThermal() const {
+HTPA32_Device* SensorBoard::getThermal() const {
   LockGuard lock(_com_mutex);
-  if (auto thermal = dynamic_cast<ThermalSensor*>(_device_vec[1].get())) {
+  if (auto thermal = dynamic_cast<HTPA32_Device*>(_device_vec[1].get())) {
     return thermal;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "ThermalSensor not found");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "HTPA32_Device not found");
     return nullptr;
   }
 }
 
-LedLight* SensorBoard::getLed() const {
+WS2812b_Device* SensorBoard::getLed() const {
   LockGuard lock(_com_mutex);
-  if (auto led = dynamic_cast<LedLight*>(_device_vec[2].get())) {
+  if (auto led = dynamic_cast<WS2812b_Device*>(_device_vec[2].get())) {
     return led;
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "LedLight not found");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "WS2812b_Device not found");
     return nullptr;
   }
 }

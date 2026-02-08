@@ -32,10 +32,10 @@ enum class SENSORRING_EXPORT Orientation {
 };
 
 /**
- * @struct LightParams
+ * @struct WS2812b_Params
  * @brief Parameter structure of the sensor lights of a sensor board. Not all sensor boards have lights.
  */
-struct SENSORRING_EXPORT LightParams {
+struct SENSORRING_EXPORT WS2812b_Params {
   /// Enable the lights.
   bool enable = false;
 
@@ -44,10 +44,10 @@ struct SENSORRING_EXPORT LightParams {
 };
 
 /**
- * @struct ThermalSensorParams
+ * @struct HTPA32_Params
  * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
  */
-struct SENSORRING_EXPORT ThermalSensorParams {
+struct SENSORRING_EXPORT HTPA32_Params {
   /// Customizable index that is returned with every measurement from this sensor.
   int user_idx = 0;
 
@@ -80,10 +80,10 @@ struct SENSORRING_EXPORT ThermalSensorParams {
 };
 
 /**
- * @struct TofSensorParams
+ * @struct VL53L8CX_Params
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
-struct SENSORRING_EXPORT TofSensorParams {
+struct SENSORRING_EXPORT VL53L8CX_Params {
   /// Customizable index that is returned with every measurement from this sensor.
   int user_idx = 0;
 
@@ -103,13 +103,13 @@ struct SENSORRING_EXPORT SensorBoardParams {
   math::Vector3 translation = { 0, 0, 0 };
 
   /// Parameters of the lights on the sensor board. Only applicable if the corresponding hardware actually has addressable lights.
-  LightParams light_params;
+  WS2812b_Params ws2812b_params;
 
   /// Parameters of the time of flight sensor on the sensor board. Only applicable if the corresponding hardware actually has a time of flight sensor.
-  TofSensorParams tof_params;
+  VL53L8CX_Params vl53l8cx_params;
 
   /// Parameters of the thermal sensor on the sensor board. Only applicable if the corresponding hardware actually has a thermal sensor.
-  ThermalSensorParams thermal_params;
+  HTPA32_Params htpa32_params;
 };
 
 } // namespace device

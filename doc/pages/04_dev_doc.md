@@ -14,9 +14,9 @@ MeasurementManager (Public API)
             └── SensorRing
                     └── SensorBus (one per communication interface)
                             └── SensorBoard (one per physical board)
-                                    ├── TofSensor
-                                    ├── ThermalSensor
-                                    └── LedLight
+                                    ├── VL53L8CX_Device
+                                    ├── HTPA32_Device
+                                    └── WS2812b_Device
 ```
 
 ### Component Responsibilities
@@ -26,7 +26,7 @@ MeasurementManager (Public API)
 - **SensorRing**: Top-level container managing multiple sensor buses
 - **SensorBus**: Manages sensor boards on a single communication interface
 - **SensorBoard**: Represents a physical sensor board containing ToF, thermal, and LED sensors
-- **BaseSensor**: Base class for sensor implementations (TofSensor, ThermalSensor)
+- **BaseSensor**: Base class for sensor implementations (VL53L8CX_Device, HTPA32_Device)
 
 ## Directory Structure
 
@@ -49,8 +49,9 @@ src/                         # Implementation files
     │   └── can/            # CAN interface implementations
     ├── sensors/            # Sensor implementations
     │   ├── BaseSensor.hpp
-    │   ├── TofSensor.cpp/hpp
-    │   ├── ThermalSensor.cpp/hpp
+    │   ├── VL53L8CX_Device.cpp/hpp
+    │   ├── HTPA32_Device.cpp/hpp
+    │   ├── WS2812b_Device.cpp/hpp
     │   └── hardware/       # Hardware-specific code
     ├── boardmanager/       # Board configuration management
     ├── math/               # Math utilities
@@ -179,7 +180,7 @@ Sensor board configurations are managed by `SensorBoardManager`, which provides:
 ### Parameter Cascading
 
 Parameters follow a cascading structure matching the system topology:
-- `ManagerParams` → `RingParams` → `BusParams` → `SensorBoardParams` → `TofSensorParams` / `ThermalSensorParams`
+- `ManagerParams` → `RingParams` → `BusParams` → `SensorBoardParams` → `VL53L8CX_Params` / `HTPA32_Params`
 
 ### Error Handling
 
@@ -194,7 +195,7 @@ The state machine includes error handling states:
 
 1. **Start with the public API**: Understand `MeasurementManager` and `MeasurementClient`
 2. **Study the state machine**: Review `MeasurementManagerImpl::StateMachine()` to understand the measurement flow
-3. **Explore sensor implementations**: Look at `TofSensor` and `ThermalSensor` to understand data processing
+3. **Explore sensor implementations**: Look at `VL53L8CX_Device` and `HTPA32_Device` to understand data processing
 4. **Review communication layer**: Understand `ComInterface` and its implementations for adding new protocols
 
 ### Common Extension Points

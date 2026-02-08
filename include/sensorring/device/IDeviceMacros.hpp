@@ -34,15 +34,15 @@ namespace device {
 /**
  * @def SENSORRING_REGISTER_STATIC(Device, Cap, Func)
  * @brief Register a synchronous static/free function for capability Cap for device type Device at load time.
- * @param Device Device type (e.g. LedLight).
+ * @param Device Device type (e.g. WS2812b_Device).
  * @param Cap Capability type (e.g. SetLight).
  * @param Func Pointer to static member or free function with signature Cap::Response(const Cap::Request&).
  *
  * Use once per (Device, Cap) in the device's translation unit or header. Runs before main().
  * Example:
  * @code
- *   SENSORRING_REGISTER_STATIC(LedLight, SetLight, &LedLight::setLight);
- *   SENSORRING_REGISTER_STATIC(LedLight, SyncLight, &LedLight::syncLight);
+ *   SENSORRING_REGISTER_STATIC(WS2812b_Device, SetLight, &WS2812b_Device::setLight);
+ *   SENSORRING_REGISTER_STATIC(WS2812b_Device, SyncLight, &WS2812b_Device::syncLight);
  * @endcode
  */
 #define SENSORRING_REGISTER_STATIC(Device, Cap, Func)                                      \

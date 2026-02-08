@@ -4,9 +4,9 @@
 #include <memory>
 #include <string>
 
-#include "device/LedLight.hpp"
-#include "device/ThermalSensor.hpp"
-#include "device/TofSensor.hpp"
+#include "device/WS2812b_Device.hpp"
+#include "device/HTPA32_Device.hpp"
+#include "device/VL53L8CX_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -86,11 +86,11 @@ void SensorBus::setBrs(bool brs_enable) {
 }
 
 void SensorBus::syncLight() {
-  device::IDevice::static_invoke<device::LedLight, device::SyncLight>({ _interface });
+  device::IDevice::static_invoke<device::WS2812b_Device, device::SyncLight>({ _interface });
 }
 
 void SensorBus::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  device::IDevice::static_invoke<device::LedLight, device::SetLight>({ _interface, mode, red, green, blue });
+  device::IDevice::static_invoke<device::WS2812b_Device, device::SetLight>({ _interface, mode, red, green, blue });
 }
 
 void SensorBus::resetDevices() {
@@ -146,7 +146,7 @@ void SensorBus::requestEEPROM() {
     active_devices |= (sensor->getThermal()->getEnable() && !sensor->getThermal()->gotEEPROM()) << sensor->getThermal()->getIdx();
   }
 
-  device::IDevice::static_invoke<device::ThermalSensor, device::RequestThermalEeprom>({ _interface, static_cast<std::uint16_t>(active_devices) });
+  device::IDevice::static_invoke<device::HTPA32_Device, device::RequestThermalEeprom>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 bool SensorBus::allEEPROMTransmissionsComplete() const {
@@ -173,7 +173,7 @@ void SensorBus::requestTofMeasurement() {
     }
   }
 
-  device::IDevice::static_invoke<device::TofSensor, device::RequestTofMeasurement>({ _interface, active_devices });
+  device::IDevice::static_invoke<device::VL53L8CX_Device, device::RequestTofMeasurement>({ _interface, active_devices });
 }
 
 void SensorBus::fetchTofMeasurement() {
@@ -184,7 +184,7 @@ void SensorBus::fetchTofMeasurement() {
     active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
   }
 
-  device::IDevice::static_invoke<device::TofSensor, device::FetchTofMeasurement>({ _interface, active_devices });
+  device::IDevice::static_invoke<device::VL53L8CX_Device, device::FetchTofMeasurement>({ _interface, active_devices });
 }
 
 void SensorBus::requestThermalMeasurement() {
@@ -199,7 +199,7 @@ void SensorBus::requestThermalMeasurement() {
     }
   }
 
-  device::IDevice::static_invoke<device::ThermalSensor, device::RequestThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
+  device::IDevice::static_invoke<device::HTPA32_Device, device::RequestThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 void SensorBus::fetchThermalMeasurement() {
@@ -209,7 +209,7 @@ void SensorBus::fetchThermalMeasurement() {
     active_devices |= sensor->getThermal()->getEnable() << sensor->getThermal()->getIdx();
   }
 
-  device::IDevice::static_invoke<device::ThermalSensor, device::FetchThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
+  device::IDevice::static_invoke<device::HTPA32_Device, device::FetchThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
 }
 
 bool SensorBus::allTofMeasurementsReady() const {
