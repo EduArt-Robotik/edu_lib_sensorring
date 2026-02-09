@@ -5,7 +5,6 @@
 #include <cstring>
 #include <thread>
 
-#include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/logger/Logger.hpp"

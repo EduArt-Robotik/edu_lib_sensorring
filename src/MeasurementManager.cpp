@@ -1,7 +1,5 @@
 #include "sensorring/MeasurementManager.hpp"
 
-#include <memory>
-
 #include "MeasurementManagerImpl.hpp"
 
 namespace eduart {

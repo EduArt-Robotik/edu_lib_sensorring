@@ -1,9 +1,5 @@
 #include "sensorring/logger/Logger.hpp"
 
-#include <algorithm>
-
-#include "sensorring/logger/LoggerClient.hpp"
-
 namespace eduart {
 
 namespace logger {

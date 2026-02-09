@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <cmath>
-#include <memory>
 
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"

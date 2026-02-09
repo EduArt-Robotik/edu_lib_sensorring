@@ -1,17 +1,7 @@
 #include "MeasurementManagerImpl.hpp"
 
-#include <chrono>
-#include <functional>
-#include <future>
-#include <memory>
 #include <sstream>
-#include <string>
-#include <thread>
-#include <vector>
 
-#include "sensorring/MeasurementClient.hpp"
-#include "sensorring/Parameter.hpp"
-#include "sensorring/SensorRing.hpp"
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/logger/Logger.hpp"
 

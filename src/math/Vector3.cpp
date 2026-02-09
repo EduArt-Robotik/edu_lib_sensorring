@@ -1,7 +1,4 @@
-#include <cmath>
-
-#include "sensorring/math/Math.hpp"
-#include "sensorring/math/Matrix3.hpp"
+#include "sensorring/math/Vector3.hpp"
 
 namespace eduart {
 
