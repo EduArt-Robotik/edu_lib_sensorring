@@ -9,6 +9,12 @@
 
 #pragma once
 
+#include <chrono>
+#include <functional>
+#include <future>
+#include <thread>
+#include <vector>
+
 #include "BaseDevice.hpp"
 
 namespace eduart {
@@ -36,6 +42,18 @@ public:
    * @return Vector of BaseDevice pointers (order preserved).
    */
   std::vector<device::BaseDevice*> getDevices() const;
+
+  /**
+   * @brief Waits until all futures are ready within the given timeout, then checks each result with a predicate.
+   * @tparam Response Type of the future result.
+   * @tparam Predicate Callable with signature bool(const Response&); if it returns false for any result, this returns false.
+   * @param[in,out] futures Vector of futures to wait on (will be moved-from / consumed).
+   * @param[in] timeout Maximum time to wait.
+   * @param[in] success_predicate Called once per future result; all must return true for this to return true.
+   * @return true if all futures became ready within the timeout and the predicate returned true for every result; false otherwise.
+   */
+  template <typename Response, typename Predicate>
+  static bool waitForAll(std::vector<std::future<Response>>& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept;
 
   /**
    * @brief Invokes callback once per device in the group.
@@ -96,6 +114,33 @@ template <typename T> DeviceGroup DeviceGroup::createFromDevicesOfType(std::vect
     }
   }
   return DeviceGroup(filtered);
+}
+
+template <typename Response, typename Predicate>
+bool DeviceGroup::waitForAll(std::vector<std::future<Response>>& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept {
+  if (futures.empty())
+    return true;
+  auto deadline = std::chrono::steady_clock::now() + timeout;
+  while (std::chrono::steady_clock::now() < deadline) {
+    bool all_done = true;
+    for (auto& fut : futures) {
+      if (fut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
+        all_done = false;
+        break;
+      }
+    }
+    if (!all_done) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+      continue;
+    }
+    bool all_ok = true;
+    for (auto& fut : futures) {
+      if (!success_predicate(fut.get()))
+        all_ok = false;
+    }
+    return all_ok;
+  }
+  return false;
 }
 
 } // namespace device

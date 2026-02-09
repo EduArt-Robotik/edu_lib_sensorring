@@ -18,36 +18,6 @@
 #include "SensorBoard.hpp"
 #include "SensorBus.hpp"
 
-namespace {
-
-template <typename Response, typename Predicate> bool waitForFutures(std::vector<std::future<Response> >& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept {
-  if (futures.empty())
-    return true;
-  auto deadline = std::chrono::steady_clock::now() + timeout;
-  while (std::chrono::steady_clock::now() < deadline) {
-    bool all_done = true;
-    for (auto& fut : futures) {
-      if (fut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
-        all_done = false;
-        break;
-      }
-    }
-    if (!all_done) {
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-      continue;
-    }
-    bool all_ok = true;
-    for (auto& fut : futures) {
-      if (!success_predicate(fut.get()))
-        all_ok = false;
-    }
-    return all_ok;
-  }
-  return false;
-}
-
-} // namespace
-
 namespace eduart {
 
 namespace manager {
@@ -203,25 +173,25 @@ void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
 }
 
 bool MeasurementManagerImpl::waitForTofMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return waitForFutures(_tof_measurement_futures, timeout, [](const device::RequestTofMeasurement::Response& r) {
+  return device::DeviceGroup::waitForAll(_tof_measurement_futures, timeout, [](const device::RequestTofMeasurement::Response& r) {
     return r.ready;
   });
 }
 
 bool MeasurementManagerImpl::waitForTofFetchFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return waitForFutures(_tof_fetch_futures, timeout, [](const device::FetchTofMeasurement::Response& r) {
+  return device::DeviceGroup::waitForAll(_tof_fetch_futures, timeout, [](const device::FetchTofMeasurement::Response& r) {
     return r.complete;
   });
 }
 
 bool MeasurementManagerImpl::waitForThermalMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return waitForFutures(_thermal_measurement_futures, timeout, [](const device::RequestThermalMeasurement::Response& r) {
+  return device::DeviceGroup::waitForAll(_thermal_measurement_futures, timeout, [](const device::RequestThermalMeasurement::Response& r) {
     return r.ready;
   });
 }
 
 bool MeasurementManagerImpl::waitForThermalFetchFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return waitForFutures(_thermal_fetch_futures, timeout, [](const device::FetchThermalMeasurement::Response& r) {
+  return device::DeviceGroup::waitForAll(_thermal_fetch_futures, timeout, [](const device::FetchThermalMeasurement::Response& r) {
     return r.complete;
   });
 }
