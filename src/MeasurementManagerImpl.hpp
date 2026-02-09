@@ -2,15 +2,19 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <memory>
 #include <set>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
+#include "device/hardware/htpa32/HTPA32_Device.hpp"
+#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 
 namespace eduart {
 
@@ -147,6 +151,11 @@ private:
   void StateMachine();
   void StateMachineWorker() noexcept;
 
+  bool waitForTofMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
+  bool waitForTofFetchFutures(std::chrono::steady_clock::duration timeout) noexcept;
+  bool waitForThermalMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
+  bool waitForThermalFetchFutures(std::chrono::steady_clock::duration timeout) noexcept;
+
   int notifyToFData();
   int notifyThermalData();
   void notifyState(const ManagerState state);
@@ -180,6 +189,11 @@ private:
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
+
+  std::vector<std::future<device::RequestTofMeasurement::Response>> _tof_measurement_futures;
+  std::vector<std::future<device::FetchTofMeasurement::Response>> _tof_fetch_futures;
+  std::vector<std::future<device::RequestThermalMeasurement::Response>> _thermal_measurement_futures;
+  std::vector<std::future<device::FetchThermalMeasurement::Response>> _thermal_fetch_futures;
 
   device::DeviceGroup _tof_device_group;
   device::DeviceGroup _thermal_device_group;

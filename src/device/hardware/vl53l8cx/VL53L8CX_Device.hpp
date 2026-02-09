@@ -1,11 +1,13 @@
 #pragma once
 
-#include <utility>
+#include <chrono>
+#include <future>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/ICapabilityAsync.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
@@ -33,21 +35,23 @@ struct GetLatestTransformedMeasurement {
 
 struct RequestTofMeasurement {
   struct Request {
-    com::ComInterface* interface;
-    unsigned int active_sensors;
+    std::chrono::milliseconds timeout{ 1000 };
   };
-  struct Response {};
+  struct Response {
+    bool ready{ false };
+  };
 };
 
 struct FetchTofMeasurement {
   struct Request {
-    com::ComInterface* interface;
-    unsigned int active_sensors;
+    std::chrono::milliseconds timeout{ 1000 };
   };
-  struct Response {};
+  struct Response {
+    bool complete{ false };
+  };
 };
 
-struct VL53L8CX_Device : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement> {
+struct VL53L8CX_Device : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement>, ICapabilityAsync<RequestTofMeasurement>, ICapabilityAsync<FetchTofMeasurement> {
 public:
   VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx);
   ~VL53L8CX_Device();
@@ -56,9 +60,8 @@ public:
 
   GetLatestRawMeasurement::Response invoke(const GetLatestRawMeasurement::Request&) const override;
   GetLatestTransformedMeasurement::Response invoke(const GetLatestTransformedMeasurement::Request&) const override;
-
-  static RequestTofMeasurement::Response requestTofMeasurement(const RequestTofMeasurement::Request& req);
-  static FetchTofMeasurement::Response fetchTofMeasurement(const FetchTofMeasurement::Request& req);
+  std::future<RequestTofMeasurement::Response> invoke_async(const RequestTofMeasurement::Request& req) override;
+  std::future<FetchTofMeasurement::Response> invoke_async(const FetchTofMeasurement::Request& req) override;
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

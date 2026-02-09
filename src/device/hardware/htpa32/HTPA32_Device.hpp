@@ -1,10 +1,13 @@
 #pragma once
 
+#include <chrono>
+#include <future>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/ICapabilityAsync.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 
 #include "heimann_htpa32.hpp"
@@ -56,21 +59,29 @@ struct RequestThermalEeprom {
 
 struct RequestThermalMeasurement {
   struct Request {
-    com::ComInterface* interface;
-    unsigned int active_sensors;
+    std::chrono::milliseconds timeout{ 1000 };
   };
-  struct Response {};
+  struct Response {
+    bool ready{ false };
+  };
 };
 
 struct FetchThermalMeasurement {
   struct Request {
-    com::ComInterface* interface;
-    unsigned int active_sensors;
+    std::chrono::milliseconds timeout{ 1000 };
   };
-  struct Response {};
+  struct Response {
+    bool complete{ false };
+  };
 };
 
-struct HTPA32_Device : BaseDevice, ICapability<GetLatestMeasurement>, ICapabilityAsync<GetEPROM>, ICapability<StopCalibration>, ICapability<StartCalibration> {
+struct HTPA32_Device : BaseDevice,
+                       ICapability<GetLatestMeasurement>,
+                       ICapabilityAsync<GetEPROM>,
+                       ICapability<StopCalibration>,
+                       ICapability<StartCalibration>,
+                       ICapabilityAsync<RequestThermalMeasurement>,
+                       ICapabilityAsync<FetchThermalMeasurement> {
 public:
   HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx);
   ~HTPA32_Device();
@@ -84,9 +95,8 @@ public:
   StopCalibration::Response invoke(const StopCalibration::Request& req) override;
   StartCalibration::Response invoke(const StartCalibration::Request& req) override;
   GetLatestMeasurement::Response invoke(const GetLatestMeasurement::Request&) const override;
-
-  static RequestThermalMeasurement::Response requestThermalMeasurement(const RequestThermalMeasurement::Request& req);
-  static FetchThermalMeasurement::Response fetchThermalMeasurement(const FetchThermalMeasurement::Request& req);
+  std::future<RequestThermalMeasurement::Response> invoke_async(const RequestThermalMeasurement::Request& req) override;
+  std::future<FetchThermalMeasurement::Response> invoke_async(const FetchThermalMeasurement::Request& req) override;
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

@@ -72,50 +72,6 @@ public:
   bool enumerateDevices();
 
   /**
-   * @brief Request Time-of-Flight measurements from all enabled sensors.
-   */
-  void requestTofMeasurement();
-
-  /**
-   * @brief Fetch Time-of-Flight measurement data from all enabled sensors.
-   */
-  void fetchTofMeasurement();
-
-  /**
-   * @brief Request thermal measurements from all enabled sensors.
-   */
-  void requestThermalMeasurement();
-
-  /**
-   * @brief Fetch thermal measurement data from all enabled sensors.
-   */
-  void fetchThermalMeasurement();
-
-  /**
-   * @brief Wait until all Time-of-Flight measurements are ready.
-   * @return true if all measurements are ready
-   */
-  bool waitForAllTofMeasurementsReady() const;
-
-  /**
-   * @brief Wait until all Time-of-Flight data transmissions are complete.
-   * @return true if all transmissions are complete
-   */
-  bool waitForAllTofDataTransmissionsComplete() const;
-
-  /**
-   * @brief Wait until all thermal measurements are ready.
-   * @return true if all measurements are ready
-   */
-  bool waitForAllThermalMeasurementsReady() const;
-
-  /**
-   * @brief Wait until all thermal data transmissions are complete.
-   * @return true if all transmissions are complete
-   */
-  bool waitForAllThermalDataTransmissionsComplete() const;
-
-  /**
    * @brief Create a SensorRing instance from configuration parameters.
    * @param[in] params Configuration parameters for the sensor ring
    * @return Unique pointer to the created SensorRing instance

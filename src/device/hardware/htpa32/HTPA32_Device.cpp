@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <thread>
 
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
@@ -15,9 +16,6 @@ namespace eduart {
 
 namespace device {
 
-SENSORRING_REGISTER_STATIC(HTPA32_Device, RequestThermalMeasurement, &HTPA32_Device::requestThermalMeasurement);
-SENSORRING_REGISTER_STATIC(HTPA32_Device, FetchThermalMeasurement, &HTPA32_Device::fetchThermalMeasurement);
-
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
@@ -26,6 +24,8 @@ HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface,
   SENSORRING_REGISTER_CAPABILITY_NAMED(StartCalibration, "StartCalibration");
   SENSORRING_REGISTER_CAPABILITY_NAMED(StopCalibration, "StopCalibration");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestMeasurement, "GetLatestMeasurement");
+  register_capability_async<RequestThermalMeasurement>("RequestThermalMeasurement");
+  register_capability_async<FetchThermalMeasurement>("FetchThermalMeasurement");
 
   _rx_buffer_offset = 0;
   _interface->addThermalSensorEndpoint(idx);
@@ -324,32 +324,49 @@ std::future<GetEPROM::Response> HTPA32_Device::invoke_async(const GetEPROM::Requ
   });
 }
 
-RequestThermalMeasurement::Response HTPA32_Device::requestThermalMeasurement(const RequestThermalMeasurement::Request& req) {
-  if (req.active_sensors == 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
-  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested thermal measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  } else {
-    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+std::future<RequestThermalMeasurement::Response> HTPA32_Device::invoke_async(const RequestThermalMeasurement::Request& req) {
+  return std::async(std::launch::async, [this, req]() {
+    if (!getEnable())
+      return RequestThermalMeasurement::Response{ false };
+
+    const_cast<HTPA32_Device*>(this)->_new_data_available_flag = false;
+
+    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  }
-  return {};
+    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+
+    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    while (std::chrono::steady_clock::now() < deadline) {
+      if (newDataAvailable())
+        return RequestThermalMeasurement::Response{ true };
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+    return RequestThermalMeasurement::Response{ false };
+  });
 }
 
-FetchThermalMeasurement::Response HTPA32_Device::fetchThermalMeasurement(const FetchThermalMeasurement::Request& req) {
-  if (req.active_sensors == 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested thermal measurement but no boards have been selected");
-  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested thermal measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  } else {
-    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+std::future<FetchThermalMeasurement::Response> HTPA32_Device::invoke_async(const FetchThermalMeasurement::Request& req) {
+  return std::async(std::launch::async, [this, req]() {
+    if (!getEnable())
+      return FetchThermalMeasurement::Response{ false };
+
+    const_cast<HTPA32_Device*>(this)->clearDataFlag();
+    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
-    req.interface->send(com::ComEndpoint("thermal_request"), tx_buf);
-  }
-  return {};
+    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+
+    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    while (std::chrono::steady_clock::now() < deadline) {
+      if (gotNewData())
+        return FetchThermalMeasurement::Response{ true };
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+    return FetchThermalMeasurement::Response{ false };
+  });
 }
 
 } // namespace device

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <thread>
 
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/IDeviceMacros.hpp"
@@ -11,16 +12,15 @@ namespace eduart {
 
 namespace device {
 
-SENSORRING_REGISTER_STATIC(VL53L8CX_Device, RequestTofMeasurement, &VL53L8CX_Device::requestTofMeasurement);
-SENSORRING_REGISTER_STATIC(VL53L8CX_Device, FetchTofMeasurement, &VL53L8CX_Device::fetchTofMeasurement);
-
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
 
-  register_capability<GetLatestRawMeasurement>("GetLatestRawMeasurement");
+  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
   SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestTransformedMeasurement, "GetLatestTransformedMeasurement");
+  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(RequestTofMeasurement, "RequestTofMeasurement");
+  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(FetchTofMeasurement, "FetchTofMeasurement");
 
   _rx_buffer_offset = 0;
   _interface->addTofSensorEndpoint(idx);
@@ -118,33 +118,51 @@ measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, ui
   return result;
 }
 
-RequestTofMeasurement::Response VL53L8CX_Device::requestTofMeasurement(const RequestTofMeasurement::Request& req) {
-  static std::uint8_t request_count = 0;
-  if (req.active_sensors == 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
-  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  } else {
-    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { request_count, sensor_select_high, sensor_select_low };
-    req.interface->send(com::ComEndpoint("tof_request"), tx_buf);
-  }
-  return {};
+std::future<RequestTofMeasurement::Response> VL53L8CX_Device::invoke_async(const RequestTofMeasurement::Request& req) {
+  return std::async(std::launch::async, [this, req]() {
+    if (!getEnable())
+      return RequestTofMeasurement::Response{ false };
+
+    const_cast<VL53L8CX_Device*>(this)->_new_data_available_flag = false;
+
+    static std::uint8_t request_count = 0;
+    unsigned int active_sensors       = (1u << static_cast<unsigned int>(getIdx()));
+    uint8_t sensor_select_high        = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low        = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf       = { request_count, sensor_select_high, sensor_select_low };
+    _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+    request_count++;
+
+    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    while (std::chrono::steady_clock::now() < deadline) {
+      if (newDataAvailable())
+        return RequestTofMeasurement::Response{ true };
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+    return RequestTofMeasurement::Response{ false };
+  });
 }
 
-FetchTofMeasurement::Response VL53L8CX_Device::fetchTofMeasurement(const FetchTofMeasurement::Request& req) {
-  if (req.active_sensors == 0) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested ToF measurement but no boards have been selected");
-  } else if (req.active_sensors > MAX_SENSOR_SELECT_SIZE) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested ToF measurement but more than " + std::to_string(MAX_SENSOR_SELECT_SIZE) + " boards have been selected");
-  } else {
-    uint8_t sensor_select_high  = (uint8_t)((req.active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((req.active_sensors >> 0) & 0xFF);
+std::future<FetchTofMeasurement::Response> VL53L8CX_Device::invoke_async(const FetchTofMeasurement::Request& req) {
+  return std::async(std::launch::async, [this, req]() {
+    if (!getEnable())
+      return FetchTofMeasurement::Response{ false };
+
+    const_cast<VL53L8CX_Device*>(this)->clearDataFlag();
+    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
-    req.interface->send(com::ComEndpoint("tof_request"), tx_buf);
-  }
-  return {};
+    _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+
+    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    while (std::chrono::steady_clock::now() < deadline) {
+      if (gotNewData())
+        return FetchTofMeasurement::Response{ true };
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
+    return FetchTofMeasurement::Response{ false };
+  });
 }
 
 measurement::TofMeasurement VL53L8CX_Device::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {

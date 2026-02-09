@@ -4,11 +4,9 @@
 #include <memory>
 #include <string>
 
-#include "device/hardware/htpa32/HTPA32_Device.hpp"
-#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
-#include "device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "types/EnumerationInformation.hpp"
 
@@ -22,11 +20,7 @@ SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<d
     : _interface(interface)
     , _board_vec(std::move(board_vec))
     , _enumeration_flag(false)
-    , _enumeration_count(0)
-    , _active_tof_sensors(0)
-    , _active_thermal_sensors(0)
-    , _tof_measurement_count(0)
-    , _thermal_measurement_count(0) {
+    , _enumeration_count(0) {
   if (!_interface) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open com interface");
   }
@@ -55,20 +49,6 @@ std::vector<const device::SensorBoard*> SensorBus::getSensorBoards() const {
   return ref_vec;
 }
 
-bool SensorBus::isTofEnabled(int idx) const {
-  if (idx >= 0 && idx < (int)_board_vec.size()) {
-    return _board_vec[idx]->getTof()->getEnable();
-  }
-  return false;
-}
-
-bool SensorBus::isThermalEnabled(int idx) const {
-  if (idx >= 0 && idx < (int)_board_vec.size()) {
-    return _board_vec[idx]->getThermal()->getEnable();
-  }
-  return false;
-}
-
 size_t SensorBus::getSensorCount() const {
   return _board_vec.size();
 }
@@ -90,9 +70,10 @@ void SensorBus::resetDevices() {
 }
 
 void SensorBus::resetSensorState() {
-  for (auto& sensor : _board_vec) {
-    sensor->getTof()->resetSensorState();
-    sensor->getThermal()->resetSensorState();
+  for (auto& board : _board_vec) {
+    for (device::BaseDevice* device : board->getDevices()) {
+      static_cast<device::BaseSensor*>(device)->resetSensorState();
+    }
   }
 }
 
@@ -124,114 +105,12 @@ int SensorBus::enumerateDevices() {
     _enumeration_vec.push_back(std::move(info));
 
     // Disable sensors that are configured but unconnected
-    _board_vec.at(i)->getTof()->setEnable(false);
-    _board_vec.at(i)->getThermal()->setEnable(false);
+    for (device::BaseDevice* device : _board_vec.at(i)->getDevices()) {
+      static_cast<device::BaseSensor*>(device)->setEnable(false);
+    }
   }
 
   return _enumeration_count;
-}
-
-void SensorBus::requestTofMeasurement() {
-  unsigned int active_devices = 0;
-  _active_tof_sensors         = 0;
-  _tof_measurement_count      = 0;
-
-  for (auto& sensor : _board_vec) {
-    if (sensor->getTof()->getEnable()) {
-      active_devices |= 1 << sensor->getTof()->getIdx();
-      _active_tof_sensors++;
-    }
-  }
-
-  device::IDevice::static_invoke<device::VL53L8CX_Device, device::RequestTofMeasurement>({ _interface, active_devices });
-}
-
-void SensorBus::fetchTofMeasurement() {
-  unsigned int active_devices = 0;
-  for (auto& sensor : _board_vec) {
-    sensor->getTof()->clearDataFlag();
-    // check which boards have an active tof sensor
-    active_devices |= sensor->getTof()->getEnable() << sensor->getTof()->getIdx();
-  }
-
-  device::IDevice::static_invoke<device::VL53L8CX_Device, device::FetchTofMeasurement>({ _interface, active_devices });
-}
-
-void SensorBus::requestThermalMeasurement() {
-  unsigned int active_devices = 0;
-  _active_thermal_sensors     = 0;
-  _thermal_measurement_count  = 0;
-
-  for (auto& sensor : _board_vec) {
-    if (sensor->getThermal()->getEnable()) {
-      active_devices |= 1 << sensor->getThermal()->getIdx();
-      _active_thermal_sensors++;
-    }
-  }
-
-  device::IDevice::static_invoke<device::HTPA32_Device, device::RequestThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
-}
-
-void SensorBus::fetchThermalMeasurement() {
-  unsigned int active_devices = 0;
-  for (auto& sensor : _board_vec) {
-    sensor->getThermal()->clearDataFlag();
-    active_devices |= sensor->getThermal()->getEnable() << sensor->getThermal()->getIdx();
-  }
-
-  device::IDevice::static_invoke<device::HTPA32_Device, device::FetchThermalMeasurement>({ _interface, static_cast<std::uint16_t>(active_devices) });
-}
-
-bool SensorBus::allTofMeasurementsReady() const {
-  unsigned int unused = 0;
-  return allTofMeasurementsReady(unused);
-}
-
-bool SensorBus::allTofMeasurementsReady(unsigned int& ready_sensors_count) const {
-  ready_sensors_count = 0;
-  for (auto& sensor : _board_vec) {
-    ready_sensors_count += sensor->getTof()->newDataAvailable();
-  }
-  return _active_tof_sensors == ready_sensors_count;
-}
-
-bool SensorBus::allThermalMeasurementsReady() const {
-  unsigned int unused = 0;
-  return allThermalMeasurementsReady(unused);
-}
-
-bool SensorBus::allThermalMeasurementsReady(unsigned int& ready_sensors_count) const {
-  // ToDo: Needs actual implementation when more than one thermal sensor is used on one bus
-  ready_sensors_count = _thermal_measurement_count;
-  return _active_thermal_sensors == _thermal_measurement_count;
-}
-
-bool SensorBus::allTofDataTransmissionsComplete() const {
-  unsigned int unused = 0;
-  return allTofDataTransmissionsComplete(unused);
-}
-
-bool SensorBus::allTofDataTransmissionsComplete(unsigned int& ready_sensors_count) const {
-  ready_sensors_count = 0;
-  for (auto& sensor : _board_vec) {
-    ready_sensors_count += sensor->getTof()->gotNewData();
-  }
-
-  return _active_tof_sensors == ready_sensors_count;
-}
-
-bool SensorBus::allThermalDataTransmissionsComplete() const {
-  unsigned int unused = 0;
-  return allThermalDataTransmissionsComplete(unused);
-}
-
-bool SensorBus::allThermalDataTransmissionsComplete(unsigned int& ready_sensors_count) const {
-  ready_sensors_count = 0;
-  for (auto& sensor : _board_vec) {
-    ready_sensors_count += sensor->getThermal()->gotNewData();
-  }
-
-  return _active_thermal_sensors == ready_sensors_count;
 }
 
 void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
