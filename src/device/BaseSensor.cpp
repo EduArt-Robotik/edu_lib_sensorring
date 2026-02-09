@@ -38,11 +38,11 @@ bool BaseSensor::getEnable() const {
 }
 
 bool BaseSensor::gotNewData() const {
-  return _new_measurement_ready_flag;
+  return _new_measurement_ready_flag.load(std::memory_order_acquire);
 }
 
 bool BaseSensor::newDataAvailable() const {
-  return _new_data_available_flag;
+  return _new_data_available_flag.load(std::memory_order_acquire);
 }
 
 void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
@@ -52,17 +52,20 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
 }
 
 void BaseSensor::resetSensorState() {
-  _error                      = SensorState::SensorOK;
-  _new_data_available_flag    = false;
-  _new_data_in_buffer_flag    = false;
-  _new_measurement_ready_flag = false;
+  std::lock_guard<std::mutex> lock(_state_mutex);
+  _error = SensorState::SensorOK;
+  _new_data_available_flag.store(false, std::memory_order_release);
+  _new_data_in_buffer_flag.store(false, std::memory_order_release);
+  _new_measurement_ready_flag.store(false, std::memory_order_release);
   onResetSensorState();
 }
 
 void BaseSensor::clearDataFlag() {
-  _error                      = SensorState::SensorOK;
-  _new_data_in_buffer_flag    = false;
-  _new_measurement_ready_flag = false;
+  std::lock_guard<std::mutex> lock(_state_mutex);
+  _error = SensorState::SensorOK;
+  _new_data_in_buffer_flag.store(false, std::memory_order_release);
+  _new_measurement_ready_flag.store(false, std::memory_order_release);
+  // Do not clear _new_data_available_flag here
   onClearDataFlag();
 }
 

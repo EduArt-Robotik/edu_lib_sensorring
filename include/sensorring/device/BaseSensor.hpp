@@ -1,5 +1,8 @@
 #pragma once
 
+#include <atomic>
+#include <mutex>
+
 #include "interface/ComInterface.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Matrix3.hpp"
@@ -45,9 +48,10 @@ protected:
   math::Matrix3 _rot_m;
 
   bool _enable_flag;
-  bool _new_data_available_flag;
-  bool _new_data_in_buffer_flag;
-  bool _new_measurement_ready_flag;
+  std::atomic<bool> _new_data_available_flag;
+  std::atomic<bool> _new_data_in_buffer_flag;
+  std::atomic<bool> _new_measurement_ready_flag;
+  mutable std::mutex _state_mutex;
 };
 
 } // namespace device

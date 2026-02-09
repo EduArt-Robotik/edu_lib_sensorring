@@ -104,6 +104,7 @@ void HTPA32_Device::onClearDataFlag() {
 }
 
 void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+  std::lock_guard<std::mutex> lock(_state_mutex);
   std::size_t msg_size = data.size();
 
   if (!_got_eeprom) {
@@ -127,7 +128,7 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
     }
 
   } else {
-    if (!_new_measurement_ready_flag) {
+    if (!_new_measurement_ready_flag.load(std::memory_order_acquire)) {
       // vdd and ptat  message
       if (msg_size == 4) {
         _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
@@ -174,7 +175,7 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
 
             rotateLeftImage(_latest_measurement.grayscale_img);
             _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
-            _new_measurement_ready_flag        = true;
+            _new_measurement_ready_flag.store(true, std::memory_order_release);
           }
         } else {
           _error = SensorState::ReceiveError;
@@ -329,7 +330,7 @@ std::future<RequestThermalMeasurement::Response> HTPA32_Device::invoke_async(con
     if (!getEnable())
       return RequestThermalMeasurement::Response{ false };
 
-    const_cast<HTPA32_Device*>(this)->_new_data_available_flag = false;
+    _new_data_available_flag.store(false, std::memory_order_release);
 
     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
@@ -352,7 +353,7 @@ std::future<FetchThermalMeasurement::Response> HTPA32_Device::invoke_async(const
     if (!getEnable())
       return FetchThermalMeasurement::Response{ false };
 
-    const_cast<HTPA32_Device*>(this)->clearDataFlag();
+    clearDataFlag();
     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);

@@ -53,6 +53,7 @@ void VL53L8CX_Device::onClearDataFlag() {
 }
 
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+  std::lock_guard<std::mutex> lock(_state_mutex);
   std::size_t msg_size = data.size();
 
   // point data msg
@@ -60,12 +61,11 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
     if ((_rx_buffer_offset + msg_size) <= (int)sizeof(_rx_buffer)) {
       std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
       _rx_buffer_offset += msg_size;
-      //_new_data_in_buffer_flag = true;
-      _new_data_available_flag = false;
+      _new_data_available_flag.store(false, std::memory_order_release);
 
       // got all 4 raw data messages
       if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
-        _new_data_in_buffer_flag = true;
+        _new_data_in_buffer_flag.store(true, std::memory_order_release);
       }
     } else {
       _error = SensorState::ReceiveError;
@@ -73,16 +73,16 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
 
     // transmission complete message
   } else if (msg_size == 2) {
-    if (_new_data_in_buffer_flag) {
+    if (_new_data_in_buffer_flag.load(std::memory_order_acquire)) {
       _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, vl53l8::TOF_RESOLUTION);
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
-      _new_data_in_buffer_flag        = false;
-      _new_measurement_ready_flag     = true;
+      _new_data_in_buffer_flag.store(false, std::memory_order_release);
+      _new_measurement_ready_flag.store(true, std::memory_order_release);
     }
 
     // data available message
   } else if (msg_size == 1) {
-    _new_data_available_flag = true;
+    _new_data_available_flag.store(true, std::memory_order_release);
   }
 }
 
@@ -123,15 +123,15 @@ std::future<RequestTofMeasurement::Response> VL53L8CX_Device::invoke_async(const
     if (!getEnable())
       return RequestTofMeasurement::Response{ false };
 
-    const_cast<VL53L8CX_Device*>(this)->_new_data_available_flag = false;
+    _new_data_available_flag.store(false, std::memory_order_release);
 
-    static std::uint8_t request_count = 0;
-    unsigned int active_sensors       = (1u << static_cast<unsigned int>(getIdx()));
-    uint8_t sensor_select_high        = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low        = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf       = { request_count, sensor_select_high, sensor_select_low };
+    static std::atomic<std::uint8_t> request_count{ 0 };
+    std::uint8_t count          = request_count.fetch_add(1, std::memory_order_relaxed);
+    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+    std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
-    request_count++;
 
     auto deadline = std::chrono::steady_clock::now() + req.timeout;
     while (std::chrono::steady_clock::now() < deadline) {
@@ -148,7 +148,7 @@ std::future<FetchTofMeasurement::Response> VL53L8CX_Device::invoke_async(const F
     if (!getEnable())
       return FetchTofMeasurement::Response{ false };
 
-    const_cast<VL53L8CX_Device*>(this)->clearDataFlag();
+    clearDataFlag();
     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
