@@ -17,17 +17,13 @@ namespace device {
 
 struct SensorBoard : com::ComObserver, IDevice {
 public:
-  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<VL53L8CX_Device> tof, std::unique_ptr<HTPA32_Device> thermal, std::unique_ptr<WS2812b_Device> leds);
+  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice>> devices);
   ~SensorBoard();
 
   bool isEnumerated() const;
   const EnumerationInformation& getEnumInfo() const;
 
   std::vector<BaseDevice*> getDevices() const;
-
-  VL53L8CX_Device* getTof() const;
-  HTPA32_Device* getThermal() const;
-  WS2812b_Device* getLed() const;
 
   static bool resetBoards();
 

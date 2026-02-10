@@ -3,6 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/math/Math.hpp"
 
 namespace eduart {
@@ -42,8 +43,6 @@ struct TofSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
-  math::Vector3 board_center_translation_offset;
-  math::Vector3 board_center_rotation_offset;
 };
 
 struct ThermalSensorInfo {
@@ -51,8 +50,6 @@ struct ThermalSensorInfo {
   int res_x;
   int res_y;
   double max_rate;
-  math::Vector3 board_center_translation_offset;
-  math::Vector3 board_center_rotation_offset;
 };
 
 struct LightInfo {
@@ -77,6 +74,8 @@ public:
 
   static inline SensorBoardInfo getSensorBoardInfo(SensorBoardType type) { return sensorBoardDatabase.at(type); }
 
+  static inline DevicePoseOffset getDevicePoseOffset(SensorBoardType board_type, const DeviceID& id) { return devicePoseOffsetDatabase.at(board_type).at(id.getType()); }
+
 private:
   static inline const std::unordered_map<LightType, LightInfo> lightDatabase = {
     { LightType::None,       { "none", 0 }     },
@@ -86,13 +85,13 @@ private:
   };
 
   static inline const std::unordered_map<TofType, TofSensorInfo> tofSensorDatabase = {
-    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0, { 0, 0, 0 }, { 0, 0, 0 } }           },
-    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0, { 0, 0, 0 }, { 0, 0, 0 } } }
+    { TofType::None,   { "none", 0.0, 0.0, 0, 0, 0.0 }           },
+    { TofType::VL53L8, { "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0 } }
   };
 
   static inline const std::unordered_map<ThermalType, ThermalSensorInfo> thermalSensorDatabase = {
-    { ThermalType::None,   { "none", 0, 0, 0.0, { 0, 0, 0 }, { 0, 0, 0 } }                  },
-    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0, { 0.013, 0, 0 }, { 0, 0, 0 } } }
+    { ThermalType::None,   { "none", 0, 0, 0.0 }              },
+    { ThermalType::HTPA32, { "Heimann HTPA32", 32, 32, 15.0 } }
   };
 
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
@@ -101,6 +100,39 @@ private:
     { SensorBoardType::Taillight, { "Taillight", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_8) }    },
     { SensorBoardType::Sidepanel, { "Sidepanel", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::WS2812b_2) }    },
     { SensorBoardType::Minipanel, { "Minipanel", tofSensorDatabase.at(TofType::VL53L8), thermalSensorDatabase.at(ThermalType::None), lightDatabase.at(LightType::None) }         }
+  };
+
+  static inline const std::unordered_map<SensorBoardType, std::unordered_map<DeviceType, DevicePoseOffset> > devicePoseOffsetDatabase = {
+    { SensorBoardType::Headlight,
+     {
+          { DeviceType::VL53L8CX, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::HTPA32, { { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::WS2812b, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+      } },
+    { SensorBoardType::Taillight,
+     {
+          { DeviceType::VL53L8CX, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::HTPA32, { { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::WS2812b, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+      } },
+    { SensorBoardType::Sidepanel,
+     {
+          { DeviceType::VL53L8CX, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::HTPA32, { { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::WS2812b, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+      } },
+    { SensorBoardType::Minipanel,
+     {
+          { DeviceType::VL53L8CX, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::HTPA32, { { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::WS2812b, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+      } },
+    { SensorBoardType::Undefined,
+     {
+          { DeviceType::VL53L8CX, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::HTPA32, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+          { DeviceType::WS2812b, { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+      } },
   };
 };
 

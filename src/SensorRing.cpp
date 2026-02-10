@@ -75,11 +75,12 @@ std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {
     unsigned int idx = 0;
     std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
     for (const auto& board_params : bus_params.board_param_vec) {
-      auto tof     = std::make_unique<device::VL53L8CX_Device>(board_params.vl53l8cx_params, interface, idx);
-      auto thermal = std::make_unique<device::HTPA32_Device>(board_params.htpa32_params, interface, idx);
-      auto light   = std::make_unique<device::WS2812b_Device>(board_params.ws2812b_params, interface);
+      std::vector<std::unique_ptr<device::BaseDevice>> devices;
+      devices.push_back(std::make_unique<device::VL53L8CX_Device>(board_params.vl53l8cx_params, interface, idx));
+      devices.push_back(std::make_unique<device::HTPA32_Device>(board_params.htpa32_params, interface, idx));
+      devices.push_back(std::make_unique<device::WS2812b_Device>(board_params.ws2812b_params, interface));
 
-      board_vec.push_back(std::make_unique<device::SensorBoard>(board_params, interface, idx, std::move(tof), std::move(thermal), std::move(light)));
+      board_vec.push_back(std::make_unique<device::SensorBoard>(board_params, interface, idx, std::move(devices)));
       idx++;
     }
 

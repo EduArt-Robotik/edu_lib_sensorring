@@ -12,12 +12,22 @@
 #include "BaseSensor.hpp"
 #include "DeviceID.hpp"
 #include "IDevice.hpp"
+#include "sensorring/math/Math.hpp"
 
 namespace eduart {
 
 namespace device {
 
 class SENSORRING_EXPORT DeviceImpl;
+
+/**
+ * @struct DevicePoseOffset
+ * @brief Pose offset of a device relative to the center of its sensor board.
+ */
+struct SENSORRING_EXPORT DevicePoseOffset {
+  math::Vector3 board_center_translation_offset;
+  math::Vector3 board_center_rotation_offset;
+};
 
 /**
  * @struct DeviceParams
@@ -65,6 +75,12 @@ public:
    */
   DeviceID getDeviceID() const;
 
+  /// Set the pose offset of this device relative to the board center.
+  void setPoseOffset(const DevicePoseOffset& offset) { _pose_offset = offset; }
+
+  /// Get the pose offset of this device relative to the board center.
+  DevicePoseOffset getPoseOffset() const { return _pose_offset; }
+
   //void setEnable(bool enable);
   //bool getEnable() const;
 
@@ -75,6 +91,8 @@ protected:
   DeviceID _id;
   /// Whether the device is enabled.
   bool _enable;
+  /// Pose offset of the device relative to the sensor board center.
+  DevicePoseOffset _pose_offset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
 };
 
 } // namespace device

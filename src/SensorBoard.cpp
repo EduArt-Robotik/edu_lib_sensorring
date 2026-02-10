@@ -11,16 +11,12 @@ namespace eduart {
 
 namespace device {
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<VL53L8CX_Device> tof, std::unique_ptr<HTPA32_Device> thermal, std::unique_ptr<WS2812b_Device> leds)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
     : _idx(idx)
     , _interface(interface)
-    , _params{ params }
-    , _enum_info() {
-
-  _device_vec.push_back(std::move(tof));
-  _device_vec.push_back(std::move(thermal));
-  _device_vec.push_back(std::move(leds));
-
+    , _params(params)
+    , _enum_info()
+    , _device_vec(std::move(devices)) {
   _interface->addSensorBoardEndpoint();
 
   subscribeToEndpoint(com::ComEndpoint("broadcast"));
@@ -46,37 +42,6 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
     devices.push_back(device.get());
   }
   return devices;
-}
-
-VL53L8CX_Device* SensorBoard::getTof() const {
-  LockGuard lock(_com_mutex);
-
-  if (auto tof = dynamic_cast<VL53L8CX_Device*>(_device_vec[0].get())) {
-    return tof;
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "VL53L8CX_Device not found");
-    return nullptr;
-  }
-}
-
-HTPA32_Device* SensorBoard::getThermal() const {
-  LockGuard lock(_com_mutex);
-  if (auto thermal = dynamic_cast<HTPA32_Device*>(_device_vec[1].get())) {
-    return thermal;
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "HTPA32_Device not found");
-    return nullptr;
-  }
-}
-
-WS2812b_Device* SensorBoard::getLed() const {
-  LockGuard lock(_com_mutex);
-  if (auto led = dynamic_cast<WS2812b_Device*>(_device_vec[2].get())) {
-    return led;
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "WS2812b_Device not found");
-    return nullptr;
-  }
 }
 
 bool SensorBoard::resetBoards() {
@@ -108,15 +73,18 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, co
       _enum_info       = EnumerationInformation::fromBuffer(data);
       _enum_info.state = EnumerationState::ConfiguredAndConnected;
 
-      const auto board_infos = SensorBoardManager::getSensorBoardInfo(_enum_info.type);
+      const auto board_type = _enum_info.type;
 
-      const auto tof_translation = _params.translation + board_infos.tof.board_center_translation_offset;
-      const auto tof_rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(board_infos.tof.board_center_rotation_offset));
-      getTof()->setPose(tof_translation, tof_rotation);
+      // Set pose for all devices on this board in a device-agnostic way.
+      for (auto& device : _device_vec) {
+        const auto offsets = SensorBoardManager::getDevicePoseOffset(board_type, device->getDeviceID());
+        device->setPoseOffset(offsets);
 
-      const auto thermal_translation = _params.translation + board_infos.thermal.board_center_translation_offset;
-      const auto thermal_rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(board_infos.thermal.board_center_rotation_offset));
-      getThermal()->setPose(thermal_translation, thermal_rotation);
+        const auto translation = _params.translation + offsets.board_center_translation_offset;
+        const auto rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(offsets.board_center_rotation_offset));
+
+        device->setPose(translation, rotation);
+      }
     }
   }
 }
