@@ -75,7 +75,7 @@ std::string MeasurementManagerImpl::printTopology() const noexcept {
 
     auto enum_info_vec = bus->getEnumerationInfo();
     for (const auto& enum_info : enum_info_vec) {
-      auto board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
+      const auto& board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
 
       ss << "sensor " << enum_info.idx << std::endl;
       ss << "    Type:           " << board_infos.name << std::endl;
