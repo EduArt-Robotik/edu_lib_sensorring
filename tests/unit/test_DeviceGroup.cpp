@@ -15,6 +15,7 @@ using eduart::com::ComInterface;
 using eduart::device::BaseDevice;
 using eduart::device::DeviceGroup;
 using eduart::device::DeviceID;
+using eduart::device::IDevice;
 using eduart::device::DeviceType;
 
 // Minimal ComInterface implementation for unit tests (no I/O).
@@ -61,13 +62,13 @@ TEST_CASE("DeviceGroup construction and getDevices", "[DeviceGroup]") {
   TestDeviceA dev_a1(&mock_com, 1);
 
   SECTION("empty group") {
-    DeviceGroup group(std::vector<BaseDevice*>{});
+    DeviceGroup group(std::vector<IDevice*>{});
     auto devices = group.getDevices();
     REQUIRE(devices.empty());
   }
 
   SECTION("single device") {
-    std::vector<BaseDevice*> raw = { &dev_a };
+    std::vector<IDevice*> raw = { &dev_a };
     DeviceGroup group(raw);
     auto devices = group.getDevices();
     REQUIRE(devices.size() == 1u);
@@ -75,7 +76,7 @@ TEST_CASE("DeviceGroup construction and getDevices", "[DeviceGroup]") {
   }
 
   SECTION("multiple devices") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_a1 };
+    std::vector<IDevice*> raw = { &dev_a, &dev_a1 };
     DeviceGroup group(raw);
     auto devices = group.getDevices();
     REQUIRE(devices.size() == 2u);
@@ -90,18 +91,18 @@ TEST_CASE("DeviceGroup invokeForEachDevice", "[DeviceGroup]") {
   TestDeviceA dev_a1(&mock_com, 1);
 
   SECTION("empty group") {
-    DeviceGroup group(std::vector<BaseDevice*>{});
+    DeviceGroup group(std::vector<IDevice*>{});
     int count = 0;
-    group.invokeForEachDevice([&count](BaseDevice*) { ++count; });
+    group.invokeForEachDevice([&count](IDevice*) { ++count; });
     REQUIRE(count == 0);
   }
 
   SECTION("callback invoked for each device") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_a1 };
+    std::vector<IDevice*> raw = { &dev_a, &dev_a1 };
     DeviceGroup group(raw);
     int count = 0;
-    std::vector<BaseDevice*> seen;
-    group.invokeForEachDevice([&count, &seen](BaseDevice* d) {
+    std::vector<IDevice*> seen;
+    group.invokeForEachDevice([&count, &seen](IDevice* d) {
       ++count;
       seen.push_back(d);
     });
@@ -119,7 +120,7 @@ TEST_CASE("DeviceGroup getDevicesOfType", "[DeviceGroup]") {
   TestDeviceB dev_b(&mock_com, 0);
 
   SECTION("empty group returns empty vector") {
-    DeviceGroup group(std::vector<BaseDevice*>{});
+    DeviceGroup group(std::vector<IDevice*>{});
     auto of_a = group.getDevicesOfType<TestDeviceA>();
     auto of_b = group.getDevicesOfType<TestDeviceB>();
     REQUIRE(of_a.empty());
@@ -127,7 +128,7 @@ TEST_CASE("DeviceGroup getDevicesOfType", "[DeviceGroup]") {
   }
 
   SECTION("only matching type returned") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_a1 };
+    std::vector<IDevice*> raw = { &dev_a, &dev_a1 };
     DeviceGroup group(raw);
     auto of_a = group.getDevicesOfType<TestDeviceA>();
     auto of_b = group.getDevicesOfType<TestDeviceB>();
@@ -138,7 +139,7 @@ TEST_CASE("DeviceGroup getDevicesOfType", "[DeviceGroup]") {
   }
 
   SECTION("mixed types filtered correctly") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b, &dev_a1 };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b, &dev_a1 };
     DeviceGroup group(raw);
     auto of_a = group.getDevicesOfType<TestDeviceA>();
     auto of_b = group.getDevicesOfType<TestDeviceB>();
@@ -150,7 +151,7 @@ TEST_CASE("DeviceGroup getDevicesOfType", "[DeviceGroup]") {
   }
 
   SECTION("BaseDevice returns all devices") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b };
     DeviceGroup group(raw);
     auto all = group.getDevicesOfType<BaseDevice>();
     REQUIRE(all.size() == 2u);
@@ -165,14 +166,14 @@ TEST_CASE("DeviceGroup invokeForEachDeviceOfType", "[DeviceGroup]") {
   TestDeviceB dev_b(&mock_com, 0);
 
   SECTION("empty group") {
-    DeviceGroup group(std::vector<BaseDevice*>{});
+    DeviceGroup group(std::vector<IDevice*>{});
     int count = 0;
     group.invokeForEachDeviceOfType<TestDeviceA>([&count](TestDeviceA*) { ++count; });
     REQUIRE(count == 0);
   }
 
   SECTION("callback only for matching type") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b };
     DeviceGroup group(raw);
     int count_a = 0;
     int count_b = 0;
@@ -183,7 +184,7 @@ TEST_CASE("DeviceGroup invokeForEachDeviceOfType", "[DeviceGroup]") {
   }
 
   SECTION("callback receives correct pointer") {
-    std::vector<BaseDevice*> raw = { &dev_a };
+    std::vector<IDevice*> raw = { &dev_a };
     DeviceGroup group(raw);
     TestDeviceA* received = nullptr;
     group.invokeForEachDeviceOfType<TestDeviceA>([&received](TestDeviceA* d) { received = d; });
@@ -198,12 +199,12 @@ TEST_CASE("DeviceGroup createFromDevicesOfType", "[DeviceGroup]") {
   TestDeviceB dev_b(&mock_com, 0);
 
   SECTION("empty input") {
-    auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(std::vector<BaseDevice*>{});
+    auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(std::vector<IDevice*>{});
     REQUIRE(group.getDevices().empty());
   }
 
   SECTION("filters to requested type only") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b, &dev_a1 };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b, &dev_a1 };
     auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
     auto devices = group.getDevices();
     REQUIRE(devices.size() == 2u);
@@ -212,7 +213,7 @@ TEST_CASE("DeviceGroup createFromDevicesOfType", "[DeviceGroup]") {
   }
 
   SECTION("createFromDevicesOfType TestDeviceB") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b };
     auto group = DeviceGroup::createFromDevicesOfType<TestDeviceB>(raw);
     auto devices = group.getDevices();
     REQUIRE(devices.size() == 1u);
@@ -220,7 +221,7 @@ TEST_CASE("DeviceGroup createFromDevicesOfType", "[DeviceGroup]") {
   }
 
   SECTION("result group getDevicesOfType matches") {
-    std::vector<BaseDevice*> raw = { &dev_a, &dev_b };
+    std::vector<IDevice*> raw = { &dev_a, &dev_b };
     auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
     auto of_a = group.getDevicesOfType<TestDeviceA>();
     REQUIRE(of_a.size() == 1u);
@@ -233,12 +234,12 @@ TEST_CASE("DeviceGroup edge cases", "[DeviceGroup]") {
   TestDeviceA dev(&mock_com, 0);
 
   SECTION("invokeForEachDevice with null callback not dereferenced for empty group") {
-    DeviceGroup group(std::vector<BaseDevice*>{});
-    group.invokeForEachDevice([](BaseDevice*) {});
+    DeviceGroup group(std::vector<IDevice*>{});
+    group.invokeForEachDevice([](IDevice*) {});
   }
 
   SECTION("single device invokeForEachDeviceOfType") {
-    DeviceGroup group(std::vector<BaseDevice*>{ &dev });
+    DeviceGroup group(std::vector<IDevice*>{ &dev });
     int calls = 0;
     group.invokeForEachDeviceOfType<TestDeviceA>([&calls](TestDeviceA*) { ++calls; });
     REQUIRE(calls == 1);

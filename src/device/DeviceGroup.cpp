@@ -4,15 +4,15 @@ namespace eduart {
 
 namespace device {
 
-DeviceGroup::DeviceGroup(std::vector<device::BaseDevice*> devices)
+DeviceGroup::DeviceGroup(std::vector<device::IDevice*> devices)
     : _devices(devices) {
 }
 
-std::vector<device::BaseDevice*> DeviceGroup::getDevices() const {
+std::vector<device::IDevice*> DeviceGroup::getDevices() const {
   return _devices;
 }
 
-void DeviceGroup::invokeForEachDevice(std::function<void(device::BaseDevice*)> callback) const {
+void DeviceGroup::invokeForEachDevice(std::function<void(device::IDevice*)> callback) const {
   for (auto& device : _devices) {
     callback(device);
   }

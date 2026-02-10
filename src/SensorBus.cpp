@@ -35,9 +35,9 @@ com::ComInterface* SensorBus::getInterface() const {
   return _interface;
 }
 
-std::vector<const device::SensorBoard*> SensorBus::getSensorBoards() const {
+std::vector<device::SensorBoard*> SensorBus::getSensorBoards() const {
 
-  std::vector<const device::SensorBoard*> ref_vec;
+  std::vector<device::SensorBoard*> ref_vec;
   for (const auto& sensor : _board_vec) {
     ref_vec.push_back(sensor.get());
   }
@@ -59,18 +59,6 @@ const std::vector<device::EnumerationInformation>& SensorBus::getEnumerationInfo
 
 void SensorBus::setBrs(bool brs_enable) {
   device::SensorBoard::cmdSetBrs(_interface, brs_enable);
-}
-
-void SensorBus::resetDevices() {
-  device::SensorBoard::cmdReset(_interface);
-}
-
-void SensorBus::resetSensorState() {
-  for (auto& board : _board_vec) {
-    for (device::BaseDevice* device : board->getDevices()) {
-      static_cast<device::BaseSensor*>(device)->resetSensorState();
-    }
-  }
 }
 
 int SensorBus::enumerateDevices() {

@@ -1,7 +1,9 @@
 #include "SensorBoard.hpp"
 
 #include "boardmanager/SensorBoardManager.hpp"
+#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
@@ -15,6 +17,8 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface,
     , _interface(interface)
     , _params{ params }
     , _enum_info() {
+
+  SENSORRING_REGISTER_CAPABILITY_NAMED(ResetBoards, "ResetBoards");
 
   _device_vec.push_back(std::move(tof));
   _device_vec.push_back(std::move(thermal));
@@ -78,9 +82,13 @@ WS2812b_Device* SensorBoard::getLed() const {
   }
 }
 
-void SensorBoard::cmdReset(com::ComInterface* interface) {
+ResetBoards::Response SensorBoard::invoke(const ResetBoards::Request& req) {
+  bool success                = true;
   std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
-  interface->send(com::ComEndpoint("broadcast"), tx_buf);
+  for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
+    success &= iface->send(com::ComEndpoint("broadcast"), tx_buf);
+  }
+  return ResetBoards::Response{ success };
 }
 
 void SensorBoard::cmdSetBrs(com::ComInterface* interface, bool enable) {

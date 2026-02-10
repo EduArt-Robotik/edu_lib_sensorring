@@ -23,11 +23,10 @@ public:
 
   com::ComInterface* getInterface() const;
 
-  std::vector<const device::SensorBoard*> getSensorBoards() const;
+  std::vector<device::SensorBoard*> getSensorBoards() const;
 
-  void resetDevices();
-  void resetSensorState();
   int enumerateDevices();
+  
   void setBrs(bool brs_enable);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;

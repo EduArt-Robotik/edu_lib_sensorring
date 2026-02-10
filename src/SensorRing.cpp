@@ -36,28 +36,17 @@ std::vector<const bus::SensorBus*> SensorRing::getInterfaces() const {
   return ref_vec;
 }
 
-void SensorRing::resetSensorState() {
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->resetSensorState();
-  }
-}
-
-std::vector<device::BaseDevice*> SensorRing::getDevices() const {
-  std::vector<device::BaseDevice*> devices;
+std::vector<device::IDevice*> SensorRing::getDevices() const {
+  std::vector<device::IDevice*> devices;
   for (auto& sensor_bus : _bus_vec) {
     for (auto& sensor_board : sensor_bus->getSensorBoards()) {
+      devices.push_back(sensor_board);
       for (auto& device : sensor_board->getDevices()) {
         devices.push_back(device);
       }
     }
   }
   return devices;
-}
-
-void SensorRing::resetDevices() {
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->resetDevices();
-  }
 }
 
 bool SensorRing::enumerateDevices() {

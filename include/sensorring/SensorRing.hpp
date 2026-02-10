@@ -53,17 +53,7 @@ public:
    * @brief Get all devices connected to the sensor ring.
    * @return Vector of all devices.
    */
-  std::vector<device::BaseDevice*> getDevices() const;
-
-  /**
-   * @brief Reset all devices on all sensor buses.
-   */
-  void resetDevices();
-
-  /**
-   * @brief Reset sensor state on all sensor buses.
-   */
-  void resetSensorState();
+  std::vector<device::IDevice*> getDevices() const;
 
   /**
    * @brief Enumerate devices on all sensor buses.
@@ -77,6 +67,13 @@ public:
    * @return Unique pointer to the created SensorRing instance
    */
   static std::unique_ptr<SensorRing> create(RingParams params);
+
+  /**
+   * @brief Enumerate the connected devices that are connected on the specified interfaces and create a sensor ring from what is connected.
+   * @param[in] params Configuration parameters for the sensor ring
+   * @return Unique pointer to the created SensorRing instance
+   */
+   static std::unique_ptr<SensorRing> createFromEnumeration(RingParams params);
 
 private:
   const RingParams _params;
