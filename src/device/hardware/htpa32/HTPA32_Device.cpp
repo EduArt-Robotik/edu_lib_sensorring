@@ -115,6 +115,7 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
       if (_rx_buffer_offset >= (int)sizeof(htpa32::HTPA32Eeprom)) {
         _got_eeprom = true;
         filemanager::StructHandler<htpa32::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+        _eeprom_condition.notify_all();
       }
     }
 
@@ -167,6 +168,7 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
             rotateLeftImage(_latest_measurement.grayscale_img);
             _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
             _new_measurement_ready_flag.store(true, std::memory_order_release);
+            _data_condition.notify_all();
           }
         } else {
           _error = SensorState::ReceiveError;
@@ -295,8 +297,8 @@ void HTPA32_Device::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
+std::future<bool> HTPA32_Device::getEpromAsync() {
+  return std::async(std::launch::async, [this]() {
     if (_got_eeprom) {
       return true;
     }
@@ -306,17 +308,14 @@ std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    auto timestamp = std::chrono::steady_clock::now();
-    while (!_got_eeprom && (std::chrono::steady_clock::now() - timestamp) < timeout) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-
+    std::unique_lock<std::mutex> lock(_state_mutex);
+    _eeprom_condition.wait(lock, [this]() { return _got_eeprom.load(); });
     return _got_eeprom.load();
   });
 }
 
-std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
+std::future<bool> HTPA32_Device::requestThermalMeasurementAsync() {
+  return std::async(std::launch::async, [this]() {
     if (!getEnable())
       return false;
 
@@ -328,18 +327,14 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::mil
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (std::chrono::steady_clock::now() < deadline) {
-      if (newDataAvailable())
-        return true;
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-    }
-    return false;
+    std::unique_lock<std::mutex> lock(_state_mutex);
+    _data_condition.wait(lock, [this]() { return newDataAvailable(); });
+    return newDataAvailable();
   });
 }
 
-std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
+std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync() {
+  return std::async(std::launch::async, [this]() {
     if (!getEnable())
       return false;
 
@@ -350,13 +345,9 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milli
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (std::chrono::steady_clock::now() < deadline) {
-      if (gotNewData())
-        return true;
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-    }
-    return false;
+    std::unique_lock<std::mutex> lock(_state_mutex);
+    _data_condition.wait(lock, [this]() { return gotNewData(); });
+    return gotNewData();
   });
 }
 

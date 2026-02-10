@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <condition_variable>
 #include <future>
 #include <vector>
 
@@ -26,8 +27,8 @@ public:
   // Thin, explicit API exposing ToF data and operations.
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
-  std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
-  std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
+  std::future<bool> requestTofMeasurementAsync();
+  std::future<bool> fetchTofMeasurementAsync();
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
@@ -46,6 +47,7 @@ private:
 
   uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
   std::size_t _rx_buffer_offset;
+  mutable std::condition_variable _data_condition;
 };
 
 } // namespace device

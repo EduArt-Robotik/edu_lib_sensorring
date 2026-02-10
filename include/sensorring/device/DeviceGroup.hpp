@@ -12,7 +12,6 @@
 #include <chrono>
 #include <functional>
 #include <future>
-#include <thread>
 #include <vector>
 
 #include "IDevice.hpp"
@@ -120,27 +119,23 @@ template <typename Response, typename Predicate>
 bool DeviceGroup::waitForAll(std::vector<std::future<Response>>& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept {
   if (futures.empty())
     return true;
-  auto deadline = std::chrono::steady_clock::now() + timeout;
-  while (std::chrono::steady_clock::now() < deadline) {
-    bool all_done = true;
-    for (auto& fut : futures) {
-      if (fut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
-        all_done = false;
-        break;
-      }
+  const auto deadline = std::chrono::steady_clock::now() + timeout;
+
+  // First, wait for all futures to become ready (or until timeout).
+  for (auto& fut : futures) {
+    if (fut.wait_until(deadline) != std::future_status::ready) {
+      return false; // At least one future did not complete in time.
     }
-    if (!all_done) {
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-      continue;
-    }
-    bool all_ok = true;
-    for (auto& fut : futures) {
-      if (!success_predicate(fut.get()))
-        all_ok = false;
-    }
-    return all_ok;
   }
-  return false;
+
+  // Then, consume results and apply the predicate.
+  bool all_ok = true;
+  for (auto& fut : futures) {
+    if (!success_predicate(fut.get())) {
+      all_ok = false;
+    }
+  }
+  return all_ok;
 }
 
 } // namespace device

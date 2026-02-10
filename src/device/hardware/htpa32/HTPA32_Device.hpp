@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <condition_variable>
 #include <future>
 #include <vector>
 
@@ -26,12 +27,12 @@ public:
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
 
   // Explicit methods replacing capability-based invoke APIs.
-  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  std::future<bool> getEpromAsync();
   bool stopCalibration();
   bool startCalibration(std::size_t window);
   std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
-  std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
-  std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
+  std::future<bool> requestThermalMeasurementAsync();
+  std::future<bool> fetchThermalMeasurementAsync();
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
@@ -65,6 +66,8 @@ private:
   std::string _eeprom_filename;
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;
+  mutable std::condition_variable _eeprom_condition;
+  mutable std::condition_variable _data_condition;
 };
 
 } // namespace device

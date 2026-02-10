@@ -58,6 +58,7 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
       // got all 4 raw data messages
       if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
         _new_data_in_buffer_flag.store(true, std::memory_order_release);
+        _data_condition.notify_all();
       }
     } else {
       _error = SensorState::ReceiveError;
@@ -70,11 +71,13 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
       _new_data_in_buffer_flag.store(false, std::memory_order_release);
       _new_measurement_ready_flag.store(true, std::memory_order_release);
+      _data_condition.notify_all();
     }
 
     // data available message
   } else if (msg_size == 1) {
     _new_data_available_flag.store(true, std::memory_order_release);
+    _data_condition.notify_all();
   }
 }
 
@@ -110,8 +113,8 @@ measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, ui
   return result;
 }
 
-std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
+std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync() {
+  return std::async(std::launch::async, [this]() {
     if (!getEnable())
       return false;
 
@@ -125,18 +128,14 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milli
     std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (std::chrono::steady_clock::now() < deadline) {
-      if (newDataAvailable())
-        return true;
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-    }
-    return false;
+    std::unique_lock<std::mutex> lock(_state_mutex);
+    _data_condition.wait(lock, [this]() { return newDataAvailable(); });
+    return newDataAvailable();
   });
 }
 
-std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
+std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync() {
+  return std::async(std::launch::async, [this]() {
     if (!getEnable())
       return false;
 
@@ -147,13 +146,9 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::millise
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (std::chrono::steady_clock::now() < deadline) {
-      if (gotNewData())
-        return true;
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-    }
-    return false;
+    std::unique_lock<std::mutex> lock(_state_mutex);
+    _data_condition.wait(lock, [this]() { return gotNewData(); });
+    return gotNewData();
   });
 }
 
