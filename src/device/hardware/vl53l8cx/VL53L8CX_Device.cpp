@@ -5,7 +5,6 @@
 #include <thread>
 
 #include "interface/can/canprotocol.hpp"
-#include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
@@ -15,13 +14,6 @@ namespace device {
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
-
-  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
-  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestRawMeasurement, "GetLatestRawMeasurement");
-  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestTransformedMeasurement, "GetLatestTransformedMeasurement");
-  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(RequestTofMeasurement, "RequestTofMeasurement");
-  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(FetchTofMeasurement, "FetchTofMeasurement");
-
   _rx_buffer_offset = 0;
   _interface->addTofSensorEndpoint(idx);
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
@@ -34,11 +26,11 @@ const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _params;
 }
 
-GetLatestRawMeasurement::Response VL53L8CX_Device::invoke(const GetLatestRawMeasurement::Request&) const {
+std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getLatestRawMeasurement() const {
   return { _latest_raw_measurement, _error };
 }
 
-GetLatestTransformedMeasurement::Response VL53L8CX_Device::invoke(const GetLatestTransformedMeasurement::Request&) const {
+std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getLatestTransformedMeasurement() const {
   return { _latest_transformed_measurement, _error };
 }
 
@@ -118,10 +110,10 @@ measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, ui
   return result;
 }
 
-std::future<RequestTofMeasurement::Response> VL53L8CX_Device::invoke_async(const RequestTofMeasurement::Request& req) {
-  return std::async(std::launch::async, [this, req]() {
+std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
-      return RequestTofMeasurement::Response{ false };
+      return false;
 
     _new_data_available_flag.store(false, std::memory_order_release);
 
@@ -133,20 +125,20 @@ std::future<RequestTofMeasurement::Response> VL53L8CX_Device::invoke_async(const
     std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     while (std::chrono::steady_clock::now() < deadline) {
       if (newDataAvailable())
-        return RequestTofMeasurement::Response{ true };
+        return true;
       std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
-    return RequestTofMeasurement::Response{ false };
+    return false;
   });
 }
 
-std::future<FetchTofMeasurement::Response> VL53L8CX_Device::invoke_async(const FetchTofMeasurement::Request& req) {
-  return std::async(std::launch::async, [this, req]() {
+std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
-      return FetchTofMeasurement::Response{ false };
+      return false;
 
     clearDataFlag();
     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
@@ -155,13 +147,13 @@ std::future<FetchTofMeasurement::Response> VL53L8CX_Device::invoke_async(const F
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     while (std::chrono::steady_clock::now() < deadline) {
       if (gotNewData())
-        return FetchTofMeasurement::Response{ true };
+        return true;
       std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
-    return FetchTofMeasurement::Response{ false };
+    return false;
   });
 }
 

@@ -190,10 +190,10 @@ private:
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::vector<std::future<device::RequestTofMeasurement::Response>> _tof_measurement_futures;
-  std::vector<std::future<device::FetchTofMeasurement::Response>> _tof_fetch_futures;
-  std::vector<std::future<device::RequestThermalMeasurement::Response>> _thermal_measurement_futures;
-  std::vector<std::future<device::FetchThermalMeasurement::Response>> _thermal_fetch_futures;
+  std::vector<std::future<bool>> _tof_measurement_futures;
+  std::vector<std::future<bool>> _tof_fetch_futures;
+  std::vector<std::future<bool>> _thermal_measurement_futures;
+  std::vector<std::future<bool>> _thermal_fetch_futures;
 
   device::DeviceGroup _tof_device_group;
   device::DeviceGroup _thermal_device_group;

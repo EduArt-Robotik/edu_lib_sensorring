@@ -9,26 +9,6 @@ namespace eduart {
 
 namespace device {
 
-struct SetLight {
-  struct Request {
-    light::LightMode mode;
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
-  };
-  struct Response {
-    bool ok;
-  };
-};
-
-struct SyncLight {
-  struct Request {
-  };
-  struct Response {
-    bool ok;
-  };
-};
-
 struct WS2812b_Device : BaseDevice {
 public:
   WS2812b_Device(WS2812b_Params params, com::ComInterface* interface);
@@ -36,8 +16,9 @@ public:
 
   const WS2812b_Params& getParams() const;
 
-  static SetLight::Response setLight(const SetLight::Request& request);
-  static SyncLight::Response syncLight(const SyncLight::Request& request);
+  // Simple static helpers to control all WS2812b devices on the bus.
+  static bool setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  static bool syncLight();
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

@@ -6,7 +6,6 @@
 #include <thread>
 
 #include "interface/can/canprotocol.hpp"
-#include "sensorring/device/IDeviceMacros.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
@@ -18,13 +17,6 @@ namespace device {
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }), interface, com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _params(params) {
-
-  SENSORRING_REGISTER_CAPABILITY_ASYNC_NAMED(GetEPROM, "GetEPROM");
-  SENSORRING_REGISTER_CAPABILITY_NAMED(StartCalibration, "StartCalibration");
-  SENSORRING_REGISTER_CAPABILITY_NAMED(StopCalibration, "StopCalibration");
-  SENSORRING_REGISTER_CAPABILITY_NAMED(GetLatestMeasurement, "GetLatestMeasurement");
-  register_capability_async<RequestThermalMeasurement>("RequestThermalMeasurement");
-  register_capability_async<FetchThermalMeasurement>("FetchThermalMeasurement");
 
   _rx_buffer_offset = 0;
   _interface->addThermalSensorEndpoint(idx);
@@ -68,28 +60,28 @@ std::pair<const measurement::FalseColorImage&, SensorState> HTPA32_Device::getLa
   return { _latest_measurement.falsecolor_img, _error };
 }
 
-GetLatestMeasurement::Response HTPA32_Device::invoke(const GetLatestMeasurement::Request&) const {
+std::pair<const measurement::ThermalMeasurement&, SensorState> HTPA32_Device::getLatestMeasurement() const {
   return { _latest_measurement, _error };
 }
 
-StopCalibration::Response HTPA32_Device::invoke(const StopCalibration::Request&) {
+bool HTPA32_Device::stopCalibration() {
   if (!_calibration_active) {
-    return { false };
+    return false;
   }
 
   _calibration_active = false;
-  return { true };
+  return true;
 }
 
-StartCalibration::Response HTPA32_Device::invoke(const StartCalibration::Request& req) {
+bool HTPA32_Device::startCalibration(std::size_t window) {
   if (_calibration_active) {
-    return { false };
+    return false;
   }
 
   _calibration_active        = true;
-  _calibration_count_goal    = req.window;
+  _calibration_count_goal    = window;
   _calibration_count_current = 0;
-  return { true };
+  return true;
 }
 
 void HTPA32_Device::onResetSensorState() {
@@ -303,10 +295,10 @@ void HTPA32_Device::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-std::future<GetEPROM::Response> HTPA32_Device::invoke_async(const GetEPROM::Request& req) {
-  return std::async(std::launch::async, [this, req]() {
+std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (_got_eeprom) {
-      return GetEPROM::Response{ true };
+      return true;
     }
 
     uint8_t sensor_select_high  = (uint8_t)((_idx >> 8) & 0xFF);
@@ -315,19 +307,18 @@ std::future<GetEPROM::Response> HTPA32_Device::invoke_async(const GetEPROM::Requ
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
     auto timestamp = std::chrono::steady_clock::now();
-    while (!_got_eeprom && (std::chrono::steady_clock::now() - timestamp) < req.timeout) {
+    while (!_got_eeprom && (std::chrono::steady_clock::now() - timestamp) < timeout) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    auto got_eeprom = _got_eeprom.load();
-    return GetEPROM::Response{ got_eeprom };
+    return _got_eeprom.load();
   });
 }
 
-std::future<RequestThermalMeasurement::Response> HTPA32_Device::invoke_async(const RequestThermalMeasurement::Request& req) {
-  return std::async(std::launch::async, [this, req]() {
+std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
-      return RequestThermalMeasurement::Response{ false };
+      return false;
 
     _new_data_available_flag.store(false, std::memory_order_release);
 
@@ -337,20 +328,20 @@ std::future<RequestThermalMeasurement::Response> HTPA32_Device::invoke_async(con
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     while (std::chrono::steady_clock::now() < deadline) {
       if (newDataAvailable())
-        return RequestThermalMeasurement::Response{ true };
+        return true;
       std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
-    return RequestThermalMeasurement::Response{ false };
+    return false;
   });
 }
 
-std::future<FetchThermalMeasurement::Response> HTPA32_Device::invoke_async(const FetchThermalMeasurement::Request& req) {
-  return std::async(std::launch::async, [this, req]() {
+std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
-      return FetchThermalMeasurement::Response{ false };
+      return false;
 
     clearDataFlag();
     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
@@ -359,13 +350,13 @@ std::future<FetchThermalMeasurement::Response> HTPA32_Device::invoke_async(const
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    auto deadline = std::chrono::steady_clock::now() + req.timeout;
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     while (std::chrono::steady_clock::now() < deadline) {
       if (gotNewData())
-        return FetchThermalMeasurement::Response{ true };
+        return true;
       std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
-    return FetchThermalMeasurement::Response{ false };
+    return false;
   });
 }
 

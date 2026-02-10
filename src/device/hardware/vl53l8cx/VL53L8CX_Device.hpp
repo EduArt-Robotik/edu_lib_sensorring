@@ -7,7 +7,6 @@
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/ICapabilityAsync.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
@@ -17,51 +16,18 @@ namespace eduart {
 
 namespace device {
 
-struct GetLatestRawMeasurement {
-  struct Request {};
-  struct Response {
-    const measurement::TofMeasurement& measurement;
-    SensorState state;
-  };
-};
-
-struct GetLatestTransformedMeasurement {
-  struct Request {};
-  struct Response {
-    const measurement::TofMeasurement& measurement;
-    SensorState state;
-  };
-};
-
-struct RequestTofMeasurement {
-  struct Request {
-    std::chrono::milliseconds timeout{ 1000 };
-  };
-  struct Response {
-    bool ready{ false };
-  };
-};
-
-struct FetchTofMeasurement {
-  struct Request {
-    std::chrono::milliseconds timeout{ 1000 };
-  };
-  struct Response {
-    bool complete{ false };
-  };
-};
-
-struct VL53L8CX_Device : BaseDevice, ICapability<GetLatestRawMeasurement>, ICapability<GetLatestTransformedMeasurement>, ICapabilityAsync<RequestTofMeasurement>, ICapabilityAsync<FetchTofMeasurement> {
+struct VL53L8CX_Device : BaseDevice {
 public:
   VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx);
   ~VL53L8CX_Device();
 
   const VL53L8CX_Params& getParams() const;
 
-  GetLatestRawMeasurement::Response invoke(const GetLatestRawMeasurement::Request&) const override;
-  GetLatestTransformedMeasurement::Response invoke(const GetLatestTransformedMeasurement::Request&) const override;
-  std::future<RequestTofMeasurement::Response> invoke_async(const RequestTofMeasurement::Request& req) override;
-  std::future<FetchTofMeasurement::Response> invoke_async(const FetchTofMeasurement::Request& req) override;
+  // Thin, explicit API exposing ToF data and operations.
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
+  std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
+  std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

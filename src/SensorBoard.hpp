@@ -15,14 +15,7 @@ namespace eduart {
 
 namespace device {
 
-struct ResetBoards {
-  struct Request {};
-  struct Response {
-    bool success;
-  };
-};
-
-struct SensorBoard : com::ComObserver, IDevice, ICapability<ResetBoards> {
+struct SensorBoard : com::ComObserver, IDevice {
 public:
   SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::unique_ptr<VL53L8CX_Device> tof, std::unique_ptr<HTPA32_Device> thermal, std::unique_ptr<WS2812b_Device> leds);
   ~SensorBoard();
@@ -36,7 +29,7 @@ public:
   HTPA32_Device* getThermal() const;
   WS2812b_Device* getLed() const;
 
-  ResetBoards::Response invoke(const ResetBoards::Request& req) override;
+  static bool resetBoards();
 
   static void cmdSetBrs(com::ComInterface* interface, bool enable);
   static void cmdEnumerateBoards(com::ComInterface* interface);

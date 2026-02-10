@@ -7,7 +7,6 @@
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/ICapabilityAsync.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 
 #include "heimann_htpa32.hpp"
@@ -16,72 +15,7 @@ namespace eduart {
 
 namespace device {
 
-struct GetEPROM {
-  struct Request {
-    std::chrono::milliseconds timeout;
-  };
-  struct Response {
-    bool success;
-  };
-};
-
-struct StartCalibration {
-  struct Request {
-    std::size_t window;
-  };
-  struct Response {
-    bool success;
-  };
-};
-
-struct StopCalibration {
-  struct Request {};
-  struct Response {
-    bool success;
-  };
-};
-
-struct GetLatestMeasurement {
-  struct Request {};
-  struct Response {
-    const measurement::ThermalMeasurement& measurement;
-    SensorState state;
-  };
-};
-
-struct RequestThermalEeprom {
-  struct Request {
-    com::ComInterface* interface;
-    unsigned int active_sensors;
-  };
-  struct Response {};
-};
-
-struct RequestThermalMeasurement {
-  struct Request {
-    std::chrono::milliseconds timeout{ 1000 };
-  };
-  struct Response {
-    bool ready{ false };
-  };
-};
-
-struct FetchThermalMeasurement {
-  struct Request {
-    std::chrono::milliseconds timeout{ 1000 };
-  };
-  struct Response {
-    bool complete{ false };
-  };
-};
-
-struct HTPA32_Device : BaseDevice,
-                       ICapability<GetLatestMeasurement>,
-                       ICapabilityAsync<GetEPROM>,
-                       ICapability<StopCalibration>,
-                       ICapability<StartCalibration>,
-                       ICapabilityAsync<RequestThermalMeasurement>,
-                       ICapabilityAsync<FetchThermalMeasurement> {
+struct HTPA32_Device : BaseDevice {
 public:
   HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx);
   ~HTPA32_Device();
@@ -91,12 +25,13 @@ public:
   std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
 
-  std::future<GetEPROM::Response> invoke_async(const GetEPROM::Request&) override;
-  StopCalibration::Response invoke(const StopCalibration::Request& req) override;
-  StartCalibration::Response invoke(const StartCalibration::Request& req) override;
-  GetLatestMeasurement::Response invoke(const GetLatestMeasurement::Request&) const override;
-  std::future<RequestThermalMeasurement::Response> invoke_async(const RequestThermalMeasurement::Request& req) override;
-  std::future<FetchThermalMeasurement::Response> invoke_async(const FetchThermalMeasurement::Request& req) override;
+  // Explicit methods replacing capability-based invoke APIs.
+  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  bool stopCalibration();
+  bool startCalibration(std::size_t window);
+  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
+  std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
+  std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
