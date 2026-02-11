@@ -8,6 +8,15 @@ target_link_libraries(depth_map
     PRIVATE sensorring::sensorring
 )
 
+add_executable(extra_action
+    cpp/extra_action/src/main.cpp
+    cpp/extra_action/src/MeasurementProxy.cpp
+)
+
+target_link_libraries(extra_action
+    PRIVATE sensorring::sensorring
+)
+
 add_executable(minimal
     cpp/minimal/src/main.cpp
     cpp/minimal/src/MeasurementProxy.cpp
@@ -22,6 +31,7 @@ if(SENSORRING_INSTALL)
   install( TARGETS
       minimal
       depth_map
+      extra_action
     RUNTIME DESTINATION ${SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR} COMPONENT Examples
   )
 
