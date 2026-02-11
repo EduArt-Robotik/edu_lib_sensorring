@@ -79,12 +79,6 @@ public:
   void unregisterClient(MeasurementClient* observer);
 
   /**
-   * Get a string representation of the topology of the connected sensors
-   * @return Formatted string describing the topology
-   */
-  std::string printTopology() const noexcept;
-
-  /**
    * Get the health status of the state machine
    * @return Current manager state
    */

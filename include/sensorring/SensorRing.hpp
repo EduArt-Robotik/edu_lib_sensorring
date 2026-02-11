@@ -10,6 +10,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "device/BaseDevice.hpp"
@@ -60,6 +61,12 @@ public:
    * @return true if enumeration succeeded on all buses
    */
   bool enumerateDevices();
+
+  /**
+   * @brief Get a string representation of the topology of the connected sensors.
+   * @return Formatted string describing the topology
+   */
+  std::string printTopology() const noexcept;
 
   /**
    * @brief Create a SensorRing instance from configuration parameters.

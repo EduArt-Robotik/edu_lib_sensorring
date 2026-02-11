@@ -25,10 +25,6 @@ ManagerParams MeasurementManager::getParams() const noexcept {
   return _mm_impl->getParams();
 }
 
-std::string MeasurementManager::printTopology() const noexcept {
-  return _mm_impl->printTopology();
-}
-
 bool MeasurementManager::stopThermalCalibration() noexcept {
   return _mm_impl->stopThermalCalibration();
 }

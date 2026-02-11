@@ -1,7 +1,5 @@
 #include "MeasurementManagerImpl.hpp"
 
-#include <sstream>
-
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
@@ -62,52 +60,6 @@ void MeasurementManagerImpl::enableThermalMeasurement(bool state) noexcept {
 
 ManagerParams MeasurementManagerImpl::getParams() const noexcept {
   return _params;
-}
-
-std::string MeasurementManagerImpl::printTopology() const noexcept {
-  std::stringstream ss;
-  for (const auto& bus : _sensor_ring->getInterfaces()) {
-    ss << std::endl << std::endl;
-    ss << "=================================================" << std::endl;
-    ss << "Topology of the sensors on " << bus->getInterface()->getInterfaceName() << ":" << std::endl;
-    ss << std::endl;
-
-    auto enum_info_vec = bus->getEnumerationInfo();
-    for (const auto& enum_info : enum_info_vec) {
-      const auto& board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
-
-      ss << "sensor " << enum_info.idx << std::endl;
-      ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    State:          " << toString(enum_info.state) << std::endl;
-      ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
-
-      // List all devices on this board in a device-agnostic way.
-      for (const auto& dev : board_infos.devices) {
-        std::string device_info_name = "unknown";
-        std::string device_extra;
-
-        std::visit(
-            [&](const auto& info) {
-              using T = std::decay_t<decltype(info)>;
-              if constexpr (std::is_same_v<T, std::monostate>) {
-                device_info_name = "unknown";
-              } else {
-                device_info_name = std::string(info.name);
-              }
-            },
-            dev.info);
-
-        ss << "    Device:         " << dev.id.name;
-        ss << " (" << device_info_name << ")";
-        ss << std::endl;
-      }
-
-      ss << std::endl;
-    }
-
-    ss << "=================================================" << std::endl;
-  }
-  return ss.str();
 }
 
 bool MeasurementManagerImpl::stopThermalCalibration() noexcept {
@@ -390,7 +342,7 @@ void MeasurementManagerImpl::StateMachine() {
           "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
 
       if (sensor_bus->getSensorCount() && _params.print_topology) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
       }
 
       if (sensor_bus->getEnumerationCount() > 0) {

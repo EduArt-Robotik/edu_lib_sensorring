@@ -2,8 +2,12 @@
 
 #include <chrono>
 #include <cmath>
+#include <sstream>
 
+#include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
+#include "SensorBus.hpp"
+#include "types/EnumerationInformation.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
@@ -68,6 +72,50 @@ void SensorRing::setBrs(bool brs_enable) {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->setBrs(brs_enable);
   }
+}
+
+std::string SensorRing::printTopology() const noexcept {
+  std::stringstream ss;
+  for (const auto& bus : getInterfaces()) {
+    ss << std::endl << std::endl;
+    ss << "=================================================" << std::endl;
+    ss << "Topology of the sensors on " << bus->getInterface()->getInterfaceName() << ":" << std::endl;
+    ss << std::endl;
+
+    auto enum_info_vec = bus->getEnumerationInfo();
+    for (const auto& enum_info : enum_info_vec) {
+      const auto& board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
+
+      ss << "sensor " << enum_info.idx << std::endl;
+      ss << "    Type:           " << board_infos.name << std::endl;
+      ss << "    State:          " << device::toString(enum_info.state) << std::endl;
+      ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
+
+      for (const auto& dev : board_infos.devices) {
+        std::string device_info_name = "unknown";
+
+        std::visit(
+            [&](const auto& info) {
+              using T = std::decay_t<decltype(info)>;
+              if constexpr (std::is_same_v<T, std::monostate>) {
+                device_info_name = "unknown";
+              } else {
+                device_info_name = std::string(info.name);
+              }
+            },
+            dev.info);
+
+        ss << "    Device:         " << dev.id.name;
+        ss << " (" << device_info_name << ")";
+        ss << std::endl;
+      }
+
+      ss << std::endl;
+    }
+
+    ss << "=================================================" << std::endl;
+  }
+  return ss.str();
 }
 
 std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {
