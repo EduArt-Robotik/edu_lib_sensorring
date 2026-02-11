@@ -26,13 +26,15 @@ public:
   std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
 
-  // Explicit methods replacing capability-based invoke APIs.
   std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
   bool stopCalibration();
   bool startCalibration(std::size_t window);
   std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
   std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
   std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
+
+  static std::future<bool> requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+  static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 

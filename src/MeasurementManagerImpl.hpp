@@ -8,6 +8,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <unordered_map>
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
@@ -148,11 +149,22 @@ private:
     shutdown
   };
 
+
+  enum class MeasurementFutureKey {
+    ToFRequest,
+    ThermalRequest
+  };
+
+  struct MeasurementFutureKeyHash {
+    std::size_t operator()(MeasurementFutureKey key) const noexcept {
+      return static_cast<std::size_t>(key);
+    }
+  };
+
   void StateMachine();
   void StateMachineWorker() noexcept;
 
-  bool waitForTofMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
-  bool waitForThermalMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
+  bool waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept;
 
   int notifyToFData();
   int notifyThermalData();
@@ -188,8 +200,7 @@ private:
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::vector<std::future<bool>> _tof_measurement_futures;
-  std::vector<std::future<bool>> _thermal_measurement_futures;
+  std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   device::DeviceGroup _tof_device_group;
   device::DeviceGroup _thermal_device_group;

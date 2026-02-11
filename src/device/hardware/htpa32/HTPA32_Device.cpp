@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <thread>
+#include <unordered_map>
 
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -353,6 +354,82 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milli
       return gotNewData();
     });
     return signaled && gotNewData();
+  });
+}
+
+std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds /*timeout*/) {
+  return std::async(std::launch::async, [devices]() {
+    // Group enabled devices by their communication interface, clear flags and
+    // build per-interface masks in a single pass.
+    struct InterfaceGroup {
+      std::vector<HTPA32_Device*> devices;
+      unsigned int active_sensors = 0;
+    };
+    std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
+
+    for (auto* dev : devices) {
+      if (dev != nullptr && dev->getEnable()) {
+        auto* iface = dev->_interface;
+        auto& group = groups[iface];
+        group.devices.push_back(dev);
+        // Clear data-available flags so that subsequent fetch operations will
+        // observe fresh data.
+        dev->_new_data_available_flag.store(false, std::memory_order_release);
+        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
+      }
+    }
+
+    if (groups.empty()) {
+      return false;
+    }
+
+    // Send one scan request per interface.
+    for (auto& [iface, group] : groups) {
+      if (group.devices.empty()) {
+        continue;
+      }
+      unsigned int active_sensors = group.active_sensors;
+      uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
+      uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
+      std::vector<uint8_t> tx_buf{ CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+      iface->send(com::ComEndpoint("thermal_request"), tx_buf);
+    }
+
+    // Fire-and-forget: success means the request was issued for all enabled devices.
+    return true;
+  });
+}
+
+std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [devices, timeout]() {
+    // For fetch, reuse the proven per-device behavior and aggregate the results
+    // into a single future<bool> without changing the on-wire protocol.
+    std::vector<std::future<bool>> futures;
+    futures.reserve(devices.size());
+
+    for (auto* dev : devices) {
+      if (dev != nullptr && dev->getEnable()) {
+        futures.emplace_back(dev->fetchThermalMeasurementAsync(timeout));
+      }
+    }
+
+    if (futures.empty()) {
+      return false;
+    }
+
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+
+    // Wait until all per-device fetch futures have completed successfully.
+    for (auto& fut : futures) {
+      if (fut.wait_until(deadline) != std::future_status::ready) {
+        return false;
+      }
+      if (!fut.get()) {
+        return false;
+      }
+    }
+
+    return true;
   });
 }
 
