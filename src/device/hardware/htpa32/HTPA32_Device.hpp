@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <future>
@@ -30,9 +31,9 @@ public:
   bool stopCalibration();
   bool startCalibration(std::size_t window);
   std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
-  std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
-  std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
 
+  //std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
+  //std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
   static std::future<bool> requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
   static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
 
@@ -69,7 +70,7 @@ private:
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;
   mutable std::condition_variable _eeprom_condition;
-  mutable std::condition_variable _data_condition;
+  bool _has_ready_measurement = false;
 };
 
 } // namespace device

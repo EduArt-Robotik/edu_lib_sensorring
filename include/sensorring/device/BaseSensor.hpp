@@ -9,8 +9,9 @@
 
 #pragma once
 
-#include <atomic>
+#include <future>
 #include <mutex>
+#include <optional>
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
@@ -56,18 +57,6 @@ public:
   std::size_t getIdx() const;
 
   /**
-   * @brief Check if a new measurement is ready for consumption.
-   * @return true if a new measurement has been processed and is ready.
-   */
-  bool gotNewData() const;
-
-  /**
-   * @brief Check if new raw data from the sensor is available.
-   * @return true if new data has been received into the internal buffer.
-   */
-  bool newDataAvailable() const;
-
-  /**
    * @brief Query if the sensor is currently enabled.
    * @return true if the sensor is enabled.
    */
@@ -94,11 +83,34 @@ public:
   void resetSensorState();
 
   /**
-   * @brief Clear flags indicating the presence of new data.
-   *
-   * Calls the sensor-specific hook onClearDataFlag().
+   * @brief Clear state for the next measurement cycle. Calls the sensor-specific hook onClearDataFlag().
    */
   void clearDataFlag();
+
+  /**
+   * @brief Start a measurement-wait cycle and return a future that will be set when the measurement is ready.
+   * @return Future that will hold true when the measurement has been fetched successfully.
+   */
+  std::future<bool> beginMeasurementWait();
+
+  /**
+   * @brief Start a data-available-wait cycle and return a future that will be set when new data is available.
+   * @return Future that will hold true when new data has been signalled as available.
+   */
+  std::future<bool> beginDataAvailableWait();
+
+protected:
+  /**
+   * @brief Set the result of the current measurement-wait cycle. Called from derived callbacks when ready.
+   * @param success true if measurement was fetched successfully.
+   */
+  void setMeasurementReady(bool success);
+
+  /**
+   * @brief Set the result of the current data-available-wait cycle. Called from derived callbacks when "data available" is received.
+   * @param success true if data available was signalled successfully.
+   */
+  void setDataAvailableReady(bool success);
 
 protected:
   /**
@@ -131,14 +143,15 @@ protected:
 
   /// Flag indicating whether the sensor is enabled.
   bool _enable_flag;
-  /// Flag indicating that new data is available from the sensor.
-  std::atomic<bool> _new_data_available_flag;
-  /// Flag indicating that new data has been written into the internal buffer.
-  std::atomic<bool> _new_data_in_buffer_flag;
-  /// Flag indicating that a new measurement has been fully processed and is ready.
-  std::atomic<bool> _new_measurement_ready_flag;
   /// Mutex protecting sensor state mutations.
   mutable std::mutex _state_mutex;
+
+  /// Promise for the current measurement-wait cycle; set by callback, consumed by wait + get().
+  std::optional<std::promise<bool>> _measurement_promise;
+  /// Promise for the current data-available-wait cycle; set by callback when "data available" is received.
+  std::optional<std::promise<bool>> _data_available_promise;
+  /// Protects promise lifecycles (create in batch thread, set in callback thread).
+  std::mutex _promise_mutex;
 };
 
 } // namespace device

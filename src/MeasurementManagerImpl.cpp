@@ -324,7 +324,7 @@ bool MeasurementManagerImpl::isMeasuring() noexcept {
 }
 
 /* =======================================================================================
-        State machine function
+  State machine function
 ==========================================================================================
 */
 void MeasurementManagerImpl::StateMachineWorker() noexcept {
@@ -344,8 +344,9 @@ void MeasurementManagerImpl::StateMachine() {
   bool success = true;
   switch (_measurement_state) {
     /* =============================================
-            Initialization part of the state machine
-            Runs once at start and may be triggered again on error conditions
+      Initialization part of the state machine
+      Runs once at start and may be triggered
+      again on error conditions
     ============================================= */
 
   case MeasurementState::init: {
@@ -453,8 +454,8 @@ void MeasurementManagerImpl::StateMachine() {
   }
 
     /* =============================================
-            Loop part of the state machine
-            Runs continuously to fetch data
+      Loop part of the state machine
+      Runs continuously to fetch data
     ============================================= */
 
   case MeasurementState::set_lights: {
@@ -603,7 +604,7 @@ void MeasurementManagerImpl::StateMachine() {
   }
 
     /* =============================================
-            Error handler
+      Error handler
     ============================================= */
 
   case MeasurementState::error_handler_measurement: {
@@ -705,7 +706,7 @@ void MeasurementManagerImpl::StateMachine() {
   }
 
     /* =============================================
-            Shutdown
+      Shutdown
     ============================================= */
 
   case MeasurementState::shutdown: {

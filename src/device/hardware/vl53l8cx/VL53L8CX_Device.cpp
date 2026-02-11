@@ -37,12 +37,14 @@ std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getL
 
 void VL53L8CX_Device::onResetSensorState() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
-  _rx_buffer_offset = 0;
+  _rx_buffer_offset   = 0;
+  _rx_buffer_complete = false;
 }
 
 void VL53L8CX_Device::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
-  _rx_buffer_offset = 0;
+  _rx_buffer_offset   = 0;
+  _rx_buffer_complete = false;
 }
 
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
@@ -54,12 +56,9 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
     if ((_rx_buffer_offset + msg_size) <= (int)sizeof(_rx_buffer)) {
       std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
       _rx_buffer_offset += msg_size;
-      _new_data_available_flag.store(false, std::memory_order_release);
 
-      // got all 4 raw data messages
       if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
-        _new_data_in_buffer_flag.store(true, std::memory_order_release);
-        _data_condition.notify_all();
+        _rx_buffer_complete = true;
       }
     } else {
       _error = SensorState::ReceiveError;
@@ -67,18 +66,16 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
 
     // transmission complete message
   } else if (msg_size == 2) {
-    if (_new_data_in_buffer_flag.load(std::memory_order_acquire)) {
+    if (_rx_buffer_complete) {
       _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, vl53l8::TOF_RESOLUTION);
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _rot_m, _translation);
-      _new_data_in_buffer_flag.store(false, std::memory_order_release);
-      _new_measurement_ready_flag.store(true, std::memory_order_release);
-      _data_condition.notify_all();
+      _rx_buffer_complete             = false;
+      setMeasurementReady(true);
     }
 
     // data available message
   } else if (msg_size == 1) {
-    _new_data_available_flag.store(true, std::memory_order_release);
-    _data_condition.notify_all();
+    setDataAvailableReady(true);
   }
 }
 
@@ -114,69 +111,70 @@ measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, ui
   return result;
 }
 
-std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable())
-      return false;
+// std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {
+//   return std::async(std::launch::async, [this, timeout]() {
+//     auto fut = beginDataAvailableWait();
 
-    // Clear the flag so that we really wait for a *new* data-available indication
-    _new_data_available_flag.store(false, std::memory_order_release);
+//     if (!getEnable()) {
+//       setDataAvailableReady(false);
+//       return false;
+//     }
 
-    static std::atomic<std::uint8_t> request_count{ 0 };
-    std::uint8_t count          = request_count.fetch_add(1, std::memory_order_relaxed);
-    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
-    _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+//     static std::atomic<std::uint8_t> request_count{ 0 };
+//     std::uint8_t count          = request_count.fetch_add(1, std::memory_order_relaxed);
+//     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+//     uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
+//     uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
+//     std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
+//     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    std::unique_lock<std::mutex> lock(_state_mutex);
-    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
-      return newDataAvailable();
-    });
-    return signaled && newDataAvailable();
-  });
-}
+//     const auto deadline = std::chrono::steady_clock::now() + timeout;
+//     if (fut.wait_until(deadline) != std::future_status::ready) {
+//       return false;
+//     }
+//     return fut.get();
+//   });
+// }
 
-std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable())
-      return false;
+// std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::milliseconds timeout) {
+//   return std::async(std::launch::async, [this, timeout]() {
+//     auto fut = beginMeasurementWait();
 
-    clearDataFlag();
-    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
-    _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+//     if (!getEnable()) {
+//       setMeasurementReady(false);
+//       return false;
+//     }
 
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    std::unique_lock<std::mutex> lock(_state_mutex);
-    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
-      return gotNewData();
-    });
-    return signaled && gotNewData();
-  });
-}
+//     clearDataFlag();
+//     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+//     uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
+//     uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
+//     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
+//     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
+
+//     const auto deadline = std::chrono::steady_clock::now() + timeout;
+//     if (fut.wait_until(deadline) != std::future_status::ready) {
+//       return false;
+//     }
+//     return fut.get();
+//   });
+// }
 
 std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
-    // Group enabled devices by their communication interface, clear flags and
-    // build per-interface masks in a single pass.
     struct InterfaceGroup {
       std::vector<VL53L8CX_Device*> devices;
       unsigned int active_sensors = 0;
     };
     std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
+    std::vector<std::future<bool> > futures;
 
     for (auto* dev : devices) {
       if (dev != nullptr && dev->getEnable()) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
-        // Clear flag so that we really wait for *new* data-available indications.
-        dev->_new_data_available_flag.store(false, std::memory_order_release);
+        futures.emplace_back(dev->beginDataAvailableWait());
         group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
       }
     }
@@ -188,7 +186,6 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<
     static std::atomic<std::uint8_t> request_count{ 0 };
     std::uint8_t count = request_count.fetch_add(1, std::memory_order_relaxed);
 
-    // Send one request per interface.
     for (auto& [iface, group] : groups) {
       if (group.devices.empty()) {
         continue;
@@ -202,16 +199,12 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
 
-    // Wait until all enabled devices (across all interfaces) report new data available.
-    for (auto& [iface, group] : groups) {
-      for (auto* dev : group.devices) {
-        std::unique_lock<std::mutex> lock(dev->_state_mutex);
-        const bool signaled = dev->_data_condition.wait_until(lock, deadline, [dev]() {
-          return dev->newDataAvailable();
-        });
-        if (!(signaled && dev->newDataAvailable())) {
-          return false;
-        }
+    for (auto& fut : futures) {
+      if (fut.wait_until(deadline) != std::future_status::ready) {
+        return false;
+      }
+      if (!fut.get()) {
+        return false;
       }
     }
 
@@ -221,20 +214,19 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<
 
 std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
-    // Group enabled devices by their communication interface, clear flags and
-    // build per-interface masks in a single pass.
     struct InterfaceGroup {
       std::vector<VL53L8CX_Device*> devices;
       unsigned int active_sensors = 0;
     };
     std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
+    std::vector<std::future<bool> > futures;
 
     for (auto* dev : devices) {
       if (dev != nullptr && dev->getEnable()) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
-        // Clear data flags before issuing the shared fetch.
+        futures.emplace_back(dev->beginMeasurementWait());
         dev->clearDataFlag();
         group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
       }
@@ -258,16 +250,13 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(const std::vector<VL
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
 
-    // Wait until all enabled devices (across all interfaces) have produced a new measurement.
-    for (auto& [iface, group] : groups) {
-      for (auto* dev : group.devices) {
-        std::unique_lock<std::mutex> lock(dev->_state_mutex);
-        const bool signaled = dev->_data_condition.wait_until(lock, deadline, [dev]() {
-          return dev->gotNewData();
-        });
-        if (!(signaled && dev->gotNewData())) {
-          return false;
-        }
+    // Wait until all enabled devices (across all interfaces) have got a new measurement.
+    for (auto& fut : futures) {
+      if (fut.wait_until(deadline) != std::future_status::ready) {
+        return false;
+      }
+      if (!fut.get()) {
+        return false;
       }
     }
 

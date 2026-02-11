@@ -93,6 +93,7 @@ void HTPA32_Device::onResetSensorState() {
 void HTPA32_Device::onClearDataFlag() {
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
   _rx_buffer_offset = 0;
+  _has_ready_measurement = false;
 }
 
 void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
@@ -121,7 +122,7 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
     }
 
   } else {
-    if (!_new_measurement_ready_flag.load(std::memory_order_acquire)) {
+    if (!_has_ready_measurement) {
       // vdd and ptat  message
       if (msg_size == 4) {
         _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
@@ -168,8 +169,8 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
 
             rotateLeftImage(_latest_measurement.grayscale_img);
             _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
-            _new_measurement_ready_flag.store(true, std::memory_order_release);
-            _data_condition.notify_all();
+            _has_ready_measurement = true;
+            setMeasurementReady(true);
           }
         } else {
           _error = SensorState::ReceiveError;
@@ -318,44 +319,47 @@ std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout
   });
 }
 
-std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds /*timeout*/) {
-  return std::async(std::launch::async, [this]() {
-    if (!getEnable())
-      return false;
+// std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds /*timeout*/) {
+//   return std::async(std::launch::async, [this]() {
+//     if (!getEnable())
+//       return false;
 
-    _new_data_available_flag.store(false, std::memory_order_release);
+//     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+//     uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
+//     uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
+//     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
+//     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+//     // Fire-and-forget: MeasurementManager tracks timing and will wait on fetch futures.
+//     return true;
+//   });
+//}
 
-    // Fire-and-forget: MeasurementManager tracks timing and will wait on fetch futures.
-    return true;
-  });
-}
+// std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milliseconds timeout) {
+//   // Single-device helper kept for completeness; the group overload is used by the manager.
+//   return std::async(std::launch::async, [this, timeout]() {
+//     // Prepare a per-cycle future that will be fulfilled from the callback thread.
+//     auto fut = beginMeasurementWait();
 
-std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable())
-      return false;
+//     if (!getEnable()) {
+//       setMeasurementReady(false);
+//       return false;
+//     }
 
-    clearDataFlag();
-    unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
-    uint8_t sensor_select_high  = (uint8_t)((active_sensors >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((active_sensors >> 0) & 0xFF);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
-    _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+//     clearDataFlag();
+//     unsigned int active_sensors = (1u << static_cast<unsigned int>(getIdx()));
+//     uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
+//     uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
+//     std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
+//     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    std::unique_lock<std::mutex> lock(_state_mutex);
-    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
-      return gotNewData();
-    });
-    return signaled && gotNewData();
-  });
-}
+//     const auto deadline = std::chrono::steady_clock::now() + timeout;
+//     if (fut.wait_until(deadline) != std::future_status::ready) {
+//       return false;
+//     }
+//     return fut.get();
+//   });
+// }
 
 std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds /*timeout*/) {
   return std::async(std::launch::async, [devices]() {
@@ -372,9 +376,6 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vecto
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
-        // Clear data-available flags so that subsequent fetch operations will
-        // observe fresh data.
-        dev->_new_data_available_flag.store(false, std::memory_order_release);
         group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
       }
     }
@@ -383,7 +384,6 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vecto
       return false;
     }
 
-    // Send one scan request per interface.
     for (auto& [iface, group] : groups) {
       if (group.devices.empty()) {
         continue;
@@ -402,24 +402,52 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vecto
 
 std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
-    // For fetch, reuse the proven per-device behavior and aggregate the results
-    // into a single future<bool> without changing the on-wire protocol.
+    // Group enabled devices by their communication interface, clear flags and
+    // build per-interface masks in a single pass. For each device, start a
+    // fresh measurement-wait cycle backed by a std::promise/std::future pair.
+    struct InterfaceGroup {
+      std::vector<HTPA32_Device*> devices;
+      unsigned int active_sensors = 0;
+    };
+    std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
     std::vector<std::future<bool>> futures;
-    futures.reserve(devices.size());
 
     for (auto* dev : devices) {
       if (dev != nullptr && dev->getEnable()) {
-        futures.emplace_back(dev->fetchThermalMeasurementAsync(timeout));
+        auto* iface = dev->_interface;
+        auto& group = groups[iface];
+        group.devices.push_back(dev);
+
+        // Start a new per-device measurement future before any fetch is sent to
+        // avoid races where the callback arrives early.
+        futures.emplace_back(dev->beginMeasurementWait());
+
+        // Clear data flags before issuing the shared fetch.
+        dev->clearDataFlag();
+        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
       }
     }
 
-    if (futures.empty()) {
+    if (groups.empty()) {
       return false;
+    }
+
+    // Send one fetch per interface.
+    for (auto& [iface, group] : groups) {
+      if (group.devices.empty()) {
+        continue;
+      }
+      unsigned int active_sensors = group.active_sensors;
+      uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
+      uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
+      std::vector<uint8_t> tx_buf{ CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
+      iface->send(com::ComEndpoint("thermal_request"), tx_buf);
     }
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
 
-    // Wait until all per-device fetch futures have completed successfully.
+    // Wait until all enabled devices (across all interfaces) have produced a
+    // new measurement and reported success through their futures.
     for (auto& fut : futures) {
       if (fut.wait_until(deadline) != std::future_status::ready) {
         return false;

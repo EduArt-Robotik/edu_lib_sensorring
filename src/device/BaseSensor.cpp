@@ -11,12 +11,7 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, st
     , _idx(idx)
     , _error(SensorState::SensorInit)
     , _interface(interface)
-    , _enable_flag(enable)
-    , _new_data_available_flag(false)
-    , _new_data_in_buffer_flag(false)
-    , _new_measurement_ready_flag(false)
-
-{
+    , _enable_flag(enable) {
   subscribeToEndpoint(target);
   _interface->registerObserver(this);
 }
@@ -37,12 +32,47 @@ bool BaseSensor::getEnable() const {
   return _enable_flag;
 }
 
-bool BaseSensor::gotNewData() const {
-  return _new_measurement_ready_flag.load(std::memory_order_acquire);
+std::future<bool> BaseSensor::beginMeasurementWait() {
+  std::lock_guard<std::mutex> lock(_promise_mutex);
+
+  // Start a new measurement cycle by resetting any previous promise.
+  _measurement_promise.reset();
+  _measurement_promise.emplace();
+  return _measurement_promise->get_future();
 }
 
-bool BaseSensor::newDataAvailable() const {
-  return _new_data_available_flag.load(std::memory_order_acquire);
+void BaseSensor::setMeasurementReady(bool success) {
+  std::lock_guard<std::mutex> lock(_promise_mutex);
+
+  if (_measurement_promise) {
+    try {
+      _measurement_promise->set_value(success);
+    } catch (const std::future_error&) {
+      // Promise already satisfied or future gone; nothing more to do.
+    }
+    _measurement_promise.reset();
+  }
+}
+
+std::future<bool> BaseSensor::beginDataAvailableWait() {
+  std::lock_guard<std::mutex> lock(_promise_mutex);
+
+  _data_available_promise.reset();
+  _data_available_promise.emplace();
+  return _data_available_promise->get_future();
+}
+
+void BaseSensor::setDataAvailableReady(bool success) {
+  std::lock_guard<std::mutex> lock(_promise_mutex);
+
+  if (_data_available_promise) {
+    try {
+      _data_available_promise->set_value(success);
+    } catch (const std::future_error&) {
+      // Promise already satisfied or future gone; nothing more to do.
+    }
+    _data_available_promise.reset();
+  }
 }
 
 void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
@@ -54,18 +84,18 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
 void BaseSensor::resetSensorState() {
   std::lock_guard<std::mutex> lock(_state_mutex);
   _error = SensorState::SensorOK;
-  _new_data_available_flag.store(false, std::memory_order_release);
-  _new_data_in_buffer_flag.store(false, std::memory_order_release);
-  _new_measurement_ready_flag.store(false, std::memory_order_release);
+  _data_available_promise.reset();
+  _measurement_promise.reset();
+
+
   onResetSensorState();
 }
 
 void BaseSensor::clearDataFlag() {
   std::lock_guard<std::mutex> lock(_state_mutex);
   _error = SensorState::SensorOK;
-  _new_data_in_buffer_flag.store(false, std::memory_order_release);
-  _new_measurement_ready_flag.store(false, std::memory_order_release);
-  // Do not clear _new_data_available_flag here
+  _measurement_promise.reset();
+
   onClearDataFlag();
 }
 

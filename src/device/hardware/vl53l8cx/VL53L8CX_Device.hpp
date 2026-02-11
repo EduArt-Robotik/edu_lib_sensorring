@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <condition_variable>
 #include <future>
 #include <vector>
 
@@ -26,9 +25,9 @@ public:
 
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
-  std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
-  std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
 
+  //std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
+  //std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
   static std::future<bool> requestTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
   static std::future<bool> fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
 
@@ -49,7 +48,7 @@ private:
 
   uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
   std::size_t _rx_buffer_offset;
-  mutable std::condition_variable _data_condition;
+  bool _rx_buffer_complete = false;
 };
 
 } // namespace device
