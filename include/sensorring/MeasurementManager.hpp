@@ -14,6 +14,7 @@
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
+#include "sensorring/SensorRing.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -33,7 +34,7 @@ public:
   /**
    * Constructor
    */
-  MeasurementManager(ManagerParams params);
+  MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
   /**
    * Destructor
@@ -91,38 +92,14 @@ public:
   ManagerParams getParams() const noexcept;
 
   /**
-   * Enable or disable the Time-of-Flight sensor measurements
-   * @param[in] state enable signal
+   * Get the SensorRing managed by this MeasurementManager.
+   * @return Pointer to the managed SensorRing
    */
-  void enableTofMeasurement(bool state) noexcept;
-
-  /**
-   * Enable or disable the thermal sensor measurements
-   * @param[in] state enable signal
-   */
-  void enableThermalMeasurement(bool state) noexcept;
-
-  /**
-   * Start a thermal calibration
-   * @param[in] window number of thermal frames used for averaging
-   * @return true on success
-   */
-  bool startThermalCalibration(std::size_t window) noexcept;
-
-  /**
-   * Stop any ongoing thermal calibration
-   * @return true on success
-   */
-  bool stopThermalCalibration() noexcept;
+  ring::SensorRing* getSensorRing() const noexcept;
 
   /**
    * Queue an extra action that will be executed in the
    * extra actions slot of the internal state machine.
-   *
-   * The action is executed from the measurement thread (or from the
-   * thread calling measureSome()). The callable should therefore
-   * be non-blocking and exception safe; any exception will be caught and logged.
-   *
    * @param[in] action callable to be executed once in the next extra actions slot
    */
   void enqueueExtraAction(std::function<void()> action);

@@ -1,12 +1,12 @@
-#include "SensorBus.hpp"
+#include "sensorring/SensorBus.hpp"
 
 #include <chrono>
 #include <thread>
 
+#include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/logger/Logger.hpp"
-#include "types/EnumerationInformation.hpp"
 
 namespace eduart {
 

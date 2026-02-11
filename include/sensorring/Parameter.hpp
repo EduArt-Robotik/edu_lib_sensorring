@@ -143,9 +143,6 @@ namespace ring {
  * communication interfaces.
  */
 struct SENSORRING_EXPORT RingParams {
-  /// Timeout for the measurements before the error handler is called.
-  std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
-
   /// Parameters of the communication interfaces that will be included in the sensor ring. Each element belongs to a unique communication interface.
   std::vector<bus::BusParams> bus_param_vec;
 };
@@ -161,8 +158,11 @@ namespace manager {
  * measurement state machine. One measurement manager manages exactly one sensor ring.
  */
 struct SENSORRING_EXPORT ManagerParams {
+  /// Timeout for the measurements before the error handler is called.
+  std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
+
   /// Enable bit rate switching on the can bus interface.
-  bool enable_brs = false;
+  bool enable_brs = false; // ToDo: remove
 
   /// If set to true a formatted string describing the sensor topology is printed via the Logger when the MeasurementManager init() method is called.
   bool print_topology = true;
@@ -178,9 +178,6 @@ struct SENSORRING_EXPORT ManagerParams {
 
   /// Target frequency for the thermal measurement. If set to 0.0 the measurements are executed as fast as possible.
   double frequency_thermal_hz = 1.0;
-
-  /// Parameters of the sensor ring that will be managed by the MeasurementManager.
-  ring::RingParams ring_params;
 };
 
 } // namespace manager

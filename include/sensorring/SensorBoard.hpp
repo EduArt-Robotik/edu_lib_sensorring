@@ -3,12 +3,15 @@
 #include <memory>
 #include <mutex>
 
-#include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/interface/ComObserver.hpp"
-#include "types/EnumerationInformation.hpp"
+#include "sensorring/types/EnumerationInformation.hpp"
 
 namespace eduart {
+
+namespace com {
+class ComInterface;
+}
 
 namespace device {
 

@@ -46,6 +46,7 @@ enum class TestResult {
 TestResult run_single_interface_test(const std::string& interface_name, InterfaceType type) {
   // Configure one bus with a single ToF-enabled board, similar to minimal example.
   ManagerParams params;
+  eduart::ring::RingParams ring;
   {
     eduart::device::VL53L8CX_Params tof;
     tof.user_idx = 0;
@@ -59,16 +60,14 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     bus.type           = type;
     bus.board_param_vec.push_back(board);
 
-    eduart::ring::RingParams ring;
     ring.bus_param_vec.push_back(bus);
-
-    params.ring_params = ring;
   }
 
   TofCaptureClient client;
 
   try {
-    MeasurementManager manager(params);
+    auto sensor_ring = eduart::ring::SensorRing::create(ring);
+    MeasurementManager manager(params, std::move(sensor_ring));
     manager.registerClient(&client);
 
     if (!manager.startMeasuring()) {

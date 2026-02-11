@@ -183,8 +183,6 @@ getParams() : ManagerParams
 
 enableTofMeasurement(state : bool)
 enableThermalMeasurement(state : bool)
-startThermalCalibration(window : size_t) : bool
-stopThermalCalibration() : bool
 
 setLight(mode : LightMode, red : uint8_t, green : uint8_t, blue : uint8_t) : void
 

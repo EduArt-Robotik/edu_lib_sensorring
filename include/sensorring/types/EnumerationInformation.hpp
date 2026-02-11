@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "boardmanager/SensorBoardManager.hpp"
+#include "sensorring/device/hardware/SensorBoardManager.hpp"
 
 namespace eduart {
 

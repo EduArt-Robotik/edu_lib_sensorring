@@ -3,12 +3,15 @@
 #include <memory>
 #include <vector>
 
-#include "interface/ComInterface.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
 #include "SensorBoard.hpp"
 
 namespace eduart {
+
+namespace com {
+class ComInterface;
+}
 
 namespace bus {
 
@@ -26,7 +29,7 @@ public:
   std::vector<device::SensorBoard*> getSensorBoards() const;
 
   int enumerateDevices();
-  
+
   void setBrs(bool brs_enable);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;

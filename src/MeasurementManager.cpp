@@ -6,31 +6,19 @@ namespace eduart {
 
 namespace manager {
 
-MeasurementManager::MeasurementManager(ManagerParams params)
-    : _mm_impl(std::make_unique<MeasurementManagerImpl>(params)) {
+MeasurementManager::MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
+    : _mm_impl(std::make_unique<MeasurementManagerImpl>(params, std::move(sensor_ring))) {
 }
 
 MeasurementManager::~MeasurementManager() noexcept {
-}
-
-void MeasurementManager::enableTofMeasurement(bool state) noexcept {
-  return _mm_impl->enableTofMeasurement(state);
-}
-
-void MeasurementManager::enableThermalMeasurement(bool state) noexcept {
-  return _mm_impl->enableThermalMeasurement(state);
 }
 
 ManagerParams MeasurementManager::getParams() const noexcept {
   return _mm_impl->getParams();
 }
 
-bool MeasurementManager::stopThermalCalibration() noexcept {
-  return _mm_impl->stopThermalCalibration();
-}
-
-bool MeasurementManager::startThermalCalibration(std::size_t window) noexcept {
-  return _mm_impl->startThermalCalibration(window);
+ring::SensorRing* MeasurementManager::getSensorRing() const noexcept {
+  return _mm_impl->getSensorRing();
 }
 
 void MeasurementManager::enqueueExtraAction(std::function<void()> action) {

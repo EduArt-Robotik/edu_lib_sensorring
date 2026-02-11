@@ -1,23 +1,24 @@
 #include "MeasurementManagerImpl.hpp"
 
+#include "sensorring/SensorBoard.hpp"
+#include "sensorring/SensorBus.hpp"
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
-#include "SensorBoard.hpp"
-#include "SensorBus.hpp"
+using namespace std::chrono_literals;
 
 namespace eduart {
 
 namespace manager {
 
-MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
+MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
     : _params(params)
     , _manager_state(ManagerState::Uninitialized)
     , _measurement_state(MeasurementState::init)
-    , _sensor_ring(ring::SensorRing::create(_params.ring_params))
+    , _sensor_ring(std::move(sensor_ring))
     , _tof_enabled(false)
     , _thermal_enabled(false)
     , _first_measurement(true)
@@ -32,6 +33,12 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
     , _tof_device_group(device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()))
     , _thermal_device_group(device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices()))
     , _light_device_group(device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())) {
+
+  if (_params.timeout == 0ms) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
+  } else if (_params.timeout < 200ms) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
+  }
 
   // check if there are active tof or thermal sensors (device-group based)
   _tof_device_group.invokeForEachDevice([this](device::IDevice* device) {
@@ -50,36 +57,12 @@ MeasurementManagerImpl::~MeasurementManagerImpl() noexcept {
   stopMeasuring();
 }
 
-void MeasurementManagerImpl::enableTofMeasurement(bool state) noexcept {
-  _tof_enabled = state;
-}
-
-void MeasurementManagerImpl::enableThermalMeasurement(bool state) noexcept {
-  _thermal_enabled = state;
-}
-
 ManagerParams MeasurementManagerImpl::getParams() const noexcept {
   return _params;
 }
 
-bool MeasurementManagerImpl::stopThermalCalibration() noexcept {
-  auto success = true;
-  _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([&success](device::HTPA32_Device* device) {
-    if (!device->stopCalibration()) {
-      success = false;
-    }
-  });
-  return success;
-}
-
-bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) noexcept {
-  auto success = true;
-  _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([&success, window](device::HTPA32_Device* device) {
-    if (!device->startCalibration(window)) {
-      success = false;
-    }
-  });
-  return success;
+ring::SensorRing* MeasurementManagerImpl::getSensorRing() const noexcept {
+  return _sensor_ring.get();
 }
 
 void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
@@ -374,7 +357,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (_thermal_enabled) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 
-      const auto timeout_ms = _params.ring_params.timeout;
+      const auto timeout_ms = _params.timeout;
       _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         auto fut = device->getEpromAsync(timeout_ms);
         if (!fut.get()) {
@@ -442,7 +425,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (_tof_enabled) {
       auto tof_devices = _tof_device_group.getDevicesOfType<device::VL53L8CX_Device>();
       if (!tof_devices.empty()) {
-        _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.ring_params.timeout);
+        _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.timeout);
       }
     }
     _last_tof_measurement_timestamp = std::chrono::steady_clock::now();
@@ -462,7 +445,7 @@ void MeasurementManagerImpl::StateMachine() {
       if (measure_thermal) {
         auto thermal_devices = _thermal_device_group.getDevicesOfType<device::HTPA32_Device>();
         if (!thermal_devices.empty()) {
-          _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(thermal_devices, _params.ring_params.timeout);
+          _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(thermal_devices, _params.timeout);
         }
         _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
         _thermal_measurement_flag           = true;
@@ -477,7 +460,7 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::wait_for_data: {
     if (_is_tof_throttled || _first_measurement) {
       if (_tof_enabled)
-        success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.ring_params.timeout);
+        success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
     }
 
     // state transition
@@ -502,8 +485,8 @@ void MeasurementManagerImpl::StateMachine() {
 
       auto tof_devices = _tof_device_group.getDevicesOfType<device::VL53L8CX_Device>();
       if (!tof_devices.empty()) {
-        auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(tof_devices, _params.ring_params.timeout);
-        if (fut.wait_for(_params.ring_params.timeout) == std::future_status::ready) {
+        auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(tof_devices, _params.timeout);
+        if (fut.wait_for(_params.timeout) == std::future_status::ready) {
           success = fut.get();
         } else {
           success = false;
@@ -533,8 +516,8 @@ void MeasurementManagerImpl::StateMachine() {
 
       auto thermal_devices = _thermal_device_group.getDevicesOfType<device::HTPA32_Device>();
       if (!thermal_devices.empty()) {
-        auto fut = device::HTPA32_Device::fetchThermalMeasurementAsync(thermal_devices, _params.ring_params.timeout);
-        success  = fut.wait_for(_params.ring_params.timeout) == std::future_status::ready && fut.get();
+        auto fut = device::HTPA32_Device::fetchThermalMeasurementAsync(thermal_devices, _params.timeout);
+        success  = fut.wait_for(_params.timeout) == std::future_status::ready && fut.get();
       }
 
       if (success) {
@@ -559,7 +542,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (_tof_enabled && _is_tof_throttled) {
       std::this_thread::sleep_until(_last_tof_measurement_timestamp + _tof_measurement_period);
     } else {
-      success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.ring_params.timeout);
+      success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
     }
 
     // state transition
@@ -595,9 +578,9 @@ void MeasurementManagerImpl::StateMachine() {
           attempts++;
           auto tof_devices = _tof_device_group.getDevicesOfType<device::VL53L8CX_Device>();
           if (!tof_devices.empty()) {
-            _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.ring_params.timeout);
+            _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.timeout);
           }
-          success = waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.ring_params.timeout);
+          success = waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
         } while (!success && _is_running && (attempts < 10));
       }
     }

@@ -1,19 +1,16 @@
 #include "sensorring/SensorRing.hpp"
 
-#include <chrono>
 #include <cmath>
 #include <sstream>
 
-#include "boardmanager/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
-#include "SensorBus.hpp"
-#include "types/EnumerationInformation.hpp"
+#include "sensorring/SensorBus.hpp"
+#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
-using namespace std::chrono_literals;
 
 namespace eduart {
 
@@ -22,12 +19,6 @@ namespace ring {
 SensorRing::SensorRing(RingParams params, std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
     : _params(params)
     , _bus_vec(std::move(bus_vec)) {
-
-  if (_params.timeout == 0ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
-  } else if (_params.timeout < 200ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
-  }
 }
 
 SensorRing::~SensorRing() {
@@ -116,6 +107,10 @@ std::string SensorRing::printTopology() const noexcept {
     ss << "=================================================" << std::endl;
   }
   return ss.str();
+}
+
+RingParams SensorRing::getParams() const noexcept {
+  return _params;
 }
 
 std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {

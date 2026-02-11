@@ -33,7 +33,7 @@ public:
    * Constructor
    * @param[in] params Parameter structure of the MeasurementManager
    */
-  MeasurementManagerImpl(ManagerParams params);
+  MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
   /**
    * Destructor
@@ -89,29 +89,10 @@ public:
   ManagerParams getParams() const noexcept;
 
   /**
-   * Enable or disable the Time-of-Flight sensor measurements
-   * @param[in] state enable signal
+   * Get the SensorRing managed by this implementation.
+   * @return Pointer to the managed SensorRing
    */
-  void enableTofMeasurement(bool state) noexcept;
-
-  /**
-   * Enable or disable the thermal sensor measurements
-   * @param[in] state enable signal
-   */
-  void enableThermalMeasurement(bool state) noexcept;
-
-  /**
-   * Start a thermal calibration
-   * @param[in] window number of thermal frames used for averaging
-   * @return error code
-   */
-  bool startThermalCalibration(std::size_t window) noexcept;
-
-  /**
-   * Stop any ongoing thermal calibration
-   * @return error code
-   */
-  bool stopThermalCalibration() noexcept;
+  ring::SensorRing* getSensorRing() const noexcept;
 
   /**
    * Queue an extra action that will be executed in the dedicated

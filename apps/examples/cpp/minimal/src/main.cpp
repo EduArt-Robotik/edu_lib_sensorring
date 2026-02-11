@@ -29,6 +29,7 @@ int main(int, char*[]) {
 
   // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
+  ring::RingParams ring;
   {
     device::VL53L8CX_Params tof;
     tof.user_idx = 0;
@@ -42,18 +43,16 @@ int main(int, char*[]) {
     bus.type           = INTERFACE_TYPE;
     bus.board_param_vec.push_back(board);
 
-    ring::RingParams ring;
     ring.bus_param_vec.push_back(bus);
-
-    params.ring_params = ring;
   }
 
   // Instantiate a Measurement proxy
   auto proxy = std::make_unique<MeasurementProxy>();
 
   try {
-    // Instantiate a MeasurementManager with the parameters from above
-    auto manager = std::make_unique<manager::MeasurementManager>(params);
+    // Create SensorRing from ring params, then instantiate MeasurementManager
+    auto sensor_ring = ring::SensorRing::create(ring);
+    auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
 
     // Register the proxy with the LogMeasurementManager to get the measurements
     manager->registerClient(proxy.get());

@@ -69,6 +69,12 @@ public:
   std::string printTopology() const noexcept;
 
   /**
+   * @brief Get the configuration parameters with which this SensorRing was created.
+   * @return RingParams used at construction
+   */
+  RingParams getParams() const noexcept;
+
+  /**
    * @brief Create a SensorRing instance from configuration parameters.
    * @param[in] params Configuration parameters for the sensor ring
    * @return Unique pointer to the created SensorRing instance
