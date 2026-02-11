@@ -2,13 +2,15 @@
 
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <future>
 #include <memory>
+#include <queue>
 #include <set>
 #include <string>
 #include <thread>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
@@ -118,14 +120,18 @@ public:
   bool stopThermalCalibration() noexcept;
 
   /**
-   * Set the light mode and color of the sensor ring
-   * @param[in] mode Light mode to set
-   * @param[in] red Red color value
-   * @param[in] green Green color value
-   * @param[in] blue Blue color value
-   * @return true if successful, false otherwise
+   * Queue an extra action that will be executed in the dedicated
+   * extra actions slot of the internal state machine.
+   *
+   * The action is executed from the measurement thread (or from the
+   * thread calling measureSome(), respectively). The callable should
+   * therefore be non-blocking and exception safe; any exception will
+   * be caught and logged.
+   *
+   * @param[in] action callable to be executed once in the next
+   *                   extra actions slot
    */
-  void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0) noexcept;
+  void enqueueExtraAction(std::function<void()> action);
 
 private:
   enum class MeasurementState {
@@ -135,7 +141,7 @@ private:
     sync_lights,
     get_eeprom,
     pre_loop_init,
-    set_lights,
+    extra_actions,
     request_tof_measurement,
     fetch_tof_data,
     request_thermal_measurement,
@@ -147,16 +153,13 @@ private:
     shutdown
   };
 
-
   enum class MeasurementFutureKey {
     ToFRequest,
     ThermalRequest
   };
 
   struct MeasurementFutureKeyHash {
-    std::size_t operator()(MeasurementFutureKey key) const noexcept {
-      return static_cast<std::size_t>(key);
-    }
+    std::size_t operator()(MeasurementFutureKey key) const noexcept { return static_cast<std::size_t>(key); }
   };
 
   void StateMachine();
@@ -185,14 +188,12 @@ private:
   bool _is_thermal_throttled;
   bool _thermal_measurement_flag;
 
-  light::LightMode _light_mode;
-  std::uint8_t _light_color[3];
-  std::uint8_t _light_brightness;
-  std::atomic<bool> _light_update_flag;
-
   mutable std::mutex _client_mutex;
   using LockGuard = std::lock_guard<std::mutex>;
   std::set<MeasurementClient*> _clients;
+
+  std::mutex _extra_actions_mutex;
+  std::queue<std::function<void()> > _extra_actions;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;

@@ -9,12 +9,12 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 
 #include "sensorring/MeasurementClient.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
 
@@ -122,13 +122,16 @@ public:
   bool stopThermalCalibration() noexcept;
 
   /**
-   * Set the light mode and color of the sensor ring
-   * @param[in] mode Light mode to set
-   * @param[in] red Red color value
-   * @param[in] green Green color value
-   * @param[in] blue Blue color value
+   * Queue an extra action that will be executed in the
+   * extra actions slot of the internal state machine.
+   *
+   * The action is executed from the measurement thread (or from the
+   * thread calling measureSome()). The callable should therefore
+   * be non-blocking and exception safe; any exception will be caught and logged.
+   *
+   * @param[in] action callable to be executed once in the next extra actions slot
    */
-  void setLight(light::LightMode mode, std::uint8_t red = 0, std::uint8_t green = 0, std::uint8_t blue = 0) noexcept;
+  void enqueueExtraAction(std::function<void()> action);
 
 private:
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;

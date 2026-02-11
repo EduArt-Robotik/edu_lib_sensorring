@@ -37,8 +37,8 @@ bool MeasurementManager::startThermalCalibration(std::size_t window) noexcept {
   return _mm_impl->startThermalCalibration(window);
 }
 
-void MeasurementManager::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
-  return _mm_impl->setLight(mode, red, green, blue);
+void MeasurementManager::enqueueExtraAction(std::function<void()> action) {
+  return _mm_impl->enqueueExtraAction(std::move(action));
 }
 
 /* =======================================================================================

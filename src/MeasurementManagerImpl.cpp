@@ -27,10 +27,6 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params)
     , _is_tof_throttled(params.frequency_tof_hz > 0.0)
     , _is_thermal_throttled(params.frequency_thermal_hz > 0.0)
     , _thermal_measurement_flag(false)
-    , _light_mode(light::LightMode::Off)
-    , _light_color{ 0, 0, 0 }
-    , _light_brightness(0)
-    , _light_update_flag(false)
     , _is_running(false)
     , _tof_device_group(device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()))
     , _thermal_device_group(device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices()))
@@ -131,13 +127,12 @@ bool MeasurementManagerImpl::startThermalCalibration(std::size_t window) noexcep
   return success;
 }
 
-void MeasurementManagerImpl::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept {
-  _light_mode     = mode;
-  _light_color[0] = red;
-  _light_color[1] = green;
-  _light_color[2] = blue;
-
-  _light_update_flag = true;
+void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
+  if (!action) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(_extra_actions_mutex);
+  _extra_actions.emplace(std::move(action));
 }
 
 /* =======================================================================================
@@ -449,7 +444,7 @@ void MeasurementManagerImpl::StateMachine() {
     _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
 
     // state transition
-    _measurement_state = MeasurementState::set_lights;
+    _measurement_state = MeasurementState::extra_actions;
     break;
   }
 
@@ -458,10 +453,28 @@ void MeasurementManagerImpl::StateMachine() {
       Runs continuously to fetch data
     ============================================= */
 
-  case MeasurementState::set_lights: {
-    if (_light_update_flag) {
-      device::WS2812b_Device::setLight(_light_mode, _light_color[0], _light_color[1], _light_color[2]);
-      _light_update_flag = false;
+  case MeasurementState::extra_actions: {
+    // Execute all queued extra actions once per loop.
+    std::queue<std::function<void()>> actions;
+    {
+      std::lock_guard<std::mutex> lock(_extra_actions_mutex);
+      std::swap(actions, _extra_actions);
+    }
+
+    while (!actions.empty()) {
+      auto& act = actions.front();
+      if (act) {
+        try {
+          act();
+        } catch (const std::exception& e) {
+          logger::Logger::getInstance()->log(
+              logger::LogVerbosity::Error, "Exception in MeasurementManager extra action: " + std::string(e.what()));
+        } catch (...) {
+          logger::Logger::getInstance()->log(
+              logger::LogVerbosity::Error, "Unknown exception in MeasurementManager extra action.");
+        }
+      }
+      actions.pop();
     }
 
     // state transition
@@ -515,7 +528,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (success) {
       if (_first_measurement) {
         _first_measurement = false;
-        _measurement_state = MeasurementState::set_lights;
+        _measurement_state = MeasurementState::extra_actions;
         break;
       } else {
         _measurement_state = MeasurementState::fetch_tof_data;
@@ -595,7 +608,7 @@ void MeasurementManagerImpl::StateMachine() {
 
     // state transition
     if (success) {
-      _measurement_state = MeasurementState::set_lights;
+      _measurement_state = MeasurementState::extra_actions;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while taking tof measurements.");
       _measurement_state = MeasurementState::error_handler_measurement;
@@ -637,8 +650,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (_params.repair_errors) {
       if (success) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting measurements succeeded after " + std::to_string(attempts) + " attempts.");
-        _measurement_state = MeasurementState::set_lights;
-        _light_update_flag = true;
+        _measurement_state = MeasurementState::extra_actions;
         notifyState(ManagerState::Running);
       } else {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart measurements. Resetting all sensors.");
@@ -691,8 +703,7 @@ void MeasurementManagerImpl::StateMachine() {
     if (_params.repair_errors) {
       if (success) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting communication succeeded after " + std::to_string(attempts) + " attempts.");
-        _measurement_state = MeasurementState::set_lights;
-        _light_update_flag = true;
+        _measurement_state = MeasurementState::extra_actions;
         notifyState(ManagerState::Running);
       } else {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart communication. Please check the interfaces.");
