@@ -14,8 +14,6 @@
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
-#include "device/hardware/htpa32/HTPA32_Device.hpp"
-#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 
 namespace eduart {
 

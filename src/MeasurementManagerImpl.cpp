@@ -533,7 +533,11 @@ void MeasurementManagerImpl::StateMachine() {
       auto tof_devices = _tof_device_group.getDevicesOfType<device::VL53L8CX_Device>();
       if (!tof_devices.empty()) {
         auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(tof_devices, _params.ring_params.timeout);
-        success  = fut.wait_for(_params.ring_params.timeout) == std::future_status::ready && fut.get();
+        if (fut.wait_for(_params.ring_params.timeout) == std::future_status::ready) {
+          success = fut.get();
+        } else {
+          success = false;
+        }
       }
 
       if (success) {
@@ -582,10 +586,11 @@ void MeasurementManagerImpl::StateMachine() {
   }
 
   case MeasurementState::throttle_measurement: {
-    if (_tof_enabled && _is_tof_throttled)
+    if (_tof_enabled && _is_tof_throttled) {
       std::this_thread::sleep_until(_last_tof_measurement_timestamp + _tof_measurement_period);
-
-    // request futures already completed in wait_for_data (measurement ready); no second wait
+    } else {
+      success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.ring_params.timeout);
+    }
 
     // state transition
     if (success) {
