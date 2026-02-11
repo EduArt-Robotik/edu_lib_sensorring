@@ -1,0 +1,118 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   HTPA32_Device.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Hardware abstraction for the HTPA32 thermal sensor device
+ * @date   2026-02-11
+ */
+
+#pragma once
+
+#include <chrono>
+#include <future>
+#include <memory>
+#include <vector>
+
+#include "interface/ComInterface.hpp"
+#include "sensorring/Parameter.hpp"
+#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/types/ThermalMeasurement.hpp"
+
+namespace eduart {
+
+namespace device {
+
+class HTPA32_DeviceImpl;
+
+/**
+ * @struct HTPA32_Device
+ * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
+ */
+struct HTPA32_Device : BaseDevice {
+public:
+  /**
+   * @brief Construct a new HTPA32 device instance.
+   * @param[in] params   Sensor configuration parameters.
+   * @param[in] interface Communication interface used to talk to the device.
+   * @param[in] idx      Index of the sensor on the bus.
+   */
+  HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx);
+  /// Destructor
+  ~HTPA32_Device();
+
+  /**
+   * @brief Get the sensor parameters used to configure this device.
+   * @return Copy of the HTPA32 parameter struct.
+   */
+  HTPA32_Params getParams() const;
+
+  /**
+   * @brief Get the most recent grayscale image and current sensor state.
+   * @return Pair of latest grayscale image and associated sensor state.
+   */
+  std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
+  /**
+   * @brief Get the most recent false-color image and current sensor state.
+   * @return Pair of latest false-color image and associated sensor state.
+   */
+  std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
+
+  /**
+   * @brief Request the EPROM content asynchronously.
+   * @param[in] timeout Maximum time to wait for completion.
+   * @return Future resolving to true on success.
+   */
+  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  /**
+   * @brief Stop any ongoing thermal calibration sequence.
+   * @return true on success.
+   */
+  bool stopCalibration();
+  /**
+   * @brief Start a thermal calibration over a sliding window of frames.
+   * @param[in] window Number of frames to average for calibration.
+   * @return true on success.
+   */
+  bool startCalibration(std::size_t window);
+  /**
+   * @brief Get the latest thermal measurement and current sensor state.
+   * @return Pair of latest thermal measurement and associated sensor state.
+   */
+  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
+
+  // std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
+  // std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
+  /**
+   * @brief Request thermal measurements asynchronously on a set of devices.
+   * @param[in] devices Vector of devices to trigger.
+   * @param[in] timeout Maximum time to wait for completion.
+   * @return Future resolving to true when all requests succeed.
+   */
+  static std::future<bool> requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+  /**
+   * @brief Fetch thermal measurements asynchronously from a set of devices.
+   * @param[in] devices Vector of devices to read from.
+   * @param[in] timeout Maximum time to wait for completion.
+   * @return Future resolving to true when all fetches succeed.
+   */
+  static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+
+  /**
+   * @brief Communication callback invoked by the bus interface.
+   * @param[in] source Endpoint that delivered the data.
+   * @param[in] data   Raw payload received from the device.
+   */
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+
+private:
+  void onResetSensorState() override;
+  void onClearDataFlag() override;
+
+  friend class HTPA32_DeviceImpl;
+  std::unique_ptr<HTPA32_DeviceImpl> _impl;
+};
+
+} // namespace device
+
+} // namespace eduart

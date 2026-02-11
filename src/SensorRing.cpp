@@ -4,6 +4,9 @@
 #include <cmath>
 
 #include "interface/ComManager.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 using namespace std::chrono_literals;
@@ -75,7 +78,7 @@ std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {
     unsigned int idx = 0;
     std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
     for (const auto& board_params : bus_params.board_param_vec) {
-      std::vector<std::unique_ptr<device::BaseDevice>> devices;
+      std::vector<std::unique_ptr<device::BaseDevice> > devices;
       devices.push_back(std::make_unique<device::VL53L8CX_Device>(board_params.vl53l8cx_params, interface, idx));
       devices.push_back(std::make_unique<device::HTPA32_Device>(board_params.htpa32_params, interface, idx));
       devices.push_back(std::make_unique<device::WS2812b_Device>(board_params.ws2812b_params, interface));

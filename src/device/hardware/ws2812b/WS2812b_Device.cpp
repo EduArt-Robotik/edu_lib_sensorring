@@ -1,5 +1,6 @@
-#include "WS2812b_Device.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 
+#include "device/hardware/ws2812b/WS2812b_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 
@@ -9,19 +10,18 @@ namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterface* interface)
     : BaseDevice(DeviceID({ DeviceType::WS2812b, "light", 0 }), interface, com::ComEndpoint("light"), params.enable)
-    , _params(params) {
-  interface->addLightSensorEndpoint();
+    , _impl(std::make_unique<WS2812b_DeviceImpl>(*this, params, interface)) {
 }
 
 WS2812b_Device::~WS2812b_Device() {
 }
 
 const WS2812b_Params& WS2812b_Device::getParams() const {
-  return _params;
+  return _impl->getParams();
 }
 
 bool WS2812b_Device::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-  std::uint8_t mode_cmd       = static_cast<uint8_t>(mode) + CAN_LIGHT_LIGHTS_OFF;
+  std::uint8_t mode_cmd       = static_cast<uint8_t>(mode);
   std::vector<uint8_t> tx_buf = { mode_cmd, red, green, blue };
 
   for (auto& interface : com::ComManager::getInstance()->getInterfaces()) {
@@ -39,13 +39,16 @@ bool WS2812b_Device::syncLight() {
   return true;
 }
 
-void WS2812b_Device::comCallback(const com::ComEndpoint, const std::vector<uint8_t>&) {
+void WS2812b_Device::comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+  _impl->comCallback(source, data);
 }
 
 void WS2812b_Device::onResetSensorState() {
+  _impl->onResetSensorState();
 }
 
 void WS2812b_Device::onClearDataFlag() {
+  _impl->onClearDataFlag();
 }
 
 } // namespace device

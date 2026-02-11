@@ -1,5 +1,6 @@
 #include "sensorring/device/BaseSensor.hpp"
 
+#include "interface/ComInterface.hpp"
 #include "sensorring/math/Math.hpp"
 
 namespace eduart {
@@ -86,7 +87,6 @@ void BaseSensor::resetSensorState() {
   _error = SensorState::SensorOK;
   _data_available_promise.reset();
   _measurement_promise.reset();
-
 
   onResetSensorState();
 }

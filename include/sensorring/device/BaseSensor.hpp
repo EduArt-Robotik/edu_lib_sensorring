@@ -13,11 +13,15 @@
 #include <mutex>
 #include <optional>
 
-#include "interface/ComInterface.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
+#include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/math/Matrix3.hpp"
 
 namespace eduart {
+// Forward declaration
+namespace com {
+class ComInterface;
+}
 
 namespace device {
 
@@ -147,9 +151,9 @@ protected:
   mutable std::mutex _state_mutex;
 
   /// Promise for the current measurement-wait cycle; set by callback, consumed by wait + get().
-  std::optional<std::promise<bool>> _measurement_promise;
+  std::optional<std::promise<bool> > _measurement_promise;
   /// Promise for the current data-available-wait cycle; set by callback when "data available" is received.
-  std::optional<std::promise<bool>> _data_available_promise;
+  std::optional<std::promise<bool> > _data_available_promise;
   /// Protects promise lifecycles (create in batch thread, set in callback thread).
   std::mutex _promise_mutex;
 };

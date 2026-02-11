@@ -3,9 +3,6 @@
 #include <memory>
 #include <mutex>
 
-#include "device/hardware/htpa32/HTPA32_Device.hpp"
-#include "device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
-#include "device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/interface/ComObserver.hpp"
@@ -17,7 +14,7 @@ namespace device {
 
 struct SensorBoard : com::ComObserver, IDevice {
 public:
-  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice>> devices);
+  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices);
   ~SensorBoard();
 
   bool isEnumerated() const;

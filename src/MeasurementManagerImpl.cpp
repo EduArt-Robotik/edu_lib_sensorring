@@ -3,6 +3,9 @@
 #include <sstream>
 
 #include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "SensorBoard.hpp"
@@ -179,7 +182,10 @@ bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, 
     return true;
   }
   auto& fut = it->second;
-  return fut.wait_for(timeout) == std::future_status::ready && fut.get();
+  if (fut.wait_for(timeout) != std::future_status::ready) {
+    return false;
+  }
+  return fut.get();
 }
 
 int MeasurementManagerImpl::notifyToFData() {
@@ -455,7 +461,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::extra_actions: {
     // Execute all queued extra actions once per loop.
-    std::queue<std::function<void()>> actions;
+    std::queue<std::function<void()> > actions;
     {
       std::lock_guard<std::mutex> lock(_extra_actions_mutex);
       std::swap(actions, _extra_actions);
@@ -467,11 +473,9 @@ void MeasurementManagerImpl::StateMachine() {
         try {
           act();
         } catch (const std::exception& e) {
-          logger::Logger::getInstance()->log(
-              logger::LogVerbosity::Error, "Exception in MeasurementManager extra action: " + std::string(e.what()));
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception in MeasurementManager extra action: " + std::string(e.what()));
         } catch (...) {
-          logger::Logger::getInstance()->log(
-              logger::LogVerbosity::Error, "Unknown exception in MeasurementManager extra action.");
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Unknown exception in MeasurementManager extra action.");
         }
       }
       actions.pop();
