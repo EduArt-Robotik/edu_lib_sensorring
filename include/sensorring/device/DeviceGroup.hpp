@@ -43,6 +43,12 @@ public:
   std::vector<device::IDevice*> getDevices() const;
 
   /**
+   * @brief Returns the number of devices in the group.
+   * @return Number of devices in the group.
+   */
+  std::size_t getDeviceCount() const;
+
+  /**
    * @brief Waits until all futures are ready within the given timeout, then checks each result with a predicate.
    * @tparam Response Type of the future result.
    * @tparam Predicate Callable with signature bool(const Response&); if it returns false for any result, this returns false.
@@ -51,8 +57,7 @@ public:
    * @param[in] success_predicate Called once per future result; all must return true for this to return true.
    * @return true if all futures became ready within the timeout and the predicate returned true for every result; false otherwise.
    */
-  template <typename Response, typename Predicate>
-  static bool waitForAll(std::vector<std::future<Response>>& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept;
+  template <typename Response, typename Predicate> static bool waitForAll(std::vector<std::future<Response> >& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept;
 
   /**
    * @brief Invokes callback once per device in the group.
@@ -115,8 +120,7 @@ template <typename T> DeviceGroup DeviceGroup::createFromDevicesOfType(std::vect
   return DeviceGroup(std::move(filtered));
 }
 
-template <typename Response, typename Predicate>
-bool DeviceGroup::waitForAll(std::vector<std::future<Response>>& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept {
+template <typename Response, typename Predicate> bool DeviceGroup::waitForAll(std::vector<std::future<Response> >& futures, std::chrono::steady_clock::duration timeout, Predicate&& success_predicate) noexcept {
   if (futures.empty())
     return true;
   const auto deadline = std::chrono::steady_clock::now() + timeout;

@@ -12,6 +12,10 @@ std::vector<device::IDevice*> DeviceGroup::getDevices() const {
   return _devices;
 }
 
+std::size_t DeviceGroup::getDeviceCount() const {
+  return _devices.size();
+}
+
 void DeviceGroup::invokeForEachDevice(std::function<void(device::IDevice*)> callback) const {
   for (auto& device : _devices) {
     callback(device);

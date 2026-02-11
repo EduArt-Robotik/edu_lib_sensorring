@@ -245,3 +245,94 @@ TEST_CASE("DeviceGroup edge cases", "[DeviceGroup]") {
     REQUIRE(calls == 1);
   }
 }
+
+TEST_CASE("DeviceGroup waitForAll", "[DeviceGroup]") {
+  using namespace std::chrono_literals;
+
+  SECTION("empty futures vector returns true immediately") {
+    std::vector<std::future<int>> futures;
+    const auto timeout = 10ms;
+    const auto ok = DeviceGroup::waitForAll(
+        futures, timeout, [](const int&) { return true; });
+    REQUIRE(ok);
+  }
+
+  SECTION("all futures ready and predicate returns true for all") {
+    std::promise<int> p1;
+    std::promise<int> p2;
+    auto f1 = p1.get_future();
+    auto f2 = p2.get_future();
+
+    // Make both futures ready before calling waitForAll.
+    p1.set_value(1);
+    p2.set_value(2);
+
+    std::vector<std::future<int>> futures;
+    futures.push_back(std::move(f1));
+    futures.push_back(std::move(f2));
+
+    const auto timeout = 100ms;
+    int predicate_calls = 0;
+    const auto ok = DeviceGroup::waitForAll(
+        futures, timeout, [&predicate_calls](const int& value) {
+          ++predicate_calls;
+          return value > 0;
+        });
+
+    REQUIRE(ok);
+    REQUIRE(predicate_calls == 2);
+  }
+
+  SECTION("all futures ready but predicate returns false for at least one") {
+    std::promise<int> p1;
+    std::promise<int> p2;
+    auto f1 = p1.get_future();
+    auto f2 = p2.get_future();
+
+    p1.set_value(1);
+    p2.set_value(0); // Will cause predicate to fail.
+
+    std::vector<std::future<int>> futures;
+    futures.push_back(std::move(f1));
+    futures.push_back(std::move(f2));
+
+    const auto timeout = 100ms;
+    int predicate_calls = 0;
+    const auto ok = DeviceGroup::waitForAll(
+        futures, timeout, [&predicate_calls](const int& value) {
+          ++predicate_calls;
+          return value > 0;
+        });
+
+    REQUIRE_FALSE(ok);
+    // Predicate should have been evaluated for all futures.
+    REQUIRE(predicate_calls == 2);
+  }
+
+  SECTION("returns false if at least one future does not become ready before timeout") {
+    std::promise<int> ready_promise;
+    std::promise<int> never_ready_promise;
+
+    auto ready_future = ready_promise.get_future();
+    auto never_ready_future = never_ready_promise.get_future();
+
+    // Only fulfill one promise; the other future will time out.
+    ready_promise.set_value(42);
+
+    std::vector<std::future<int>> futures;
+    futures.push_back(std::move(ready_future));
+    futures.push_back(std::move(never_ready_future));
+
+    const auto timeout = 10ms;
+    int predicate_calls = 0;
+    const auto ok = DeviceGroup::waitForAll(
+        futures, timeout, [&predicate_calls](const int&) {
+          ++predicate_calls;
+          return true;
+        });
+
+    REQUIRE_FALSE(ok);
+    // Predicate should not be called because waitForAll returns early on timeout.
+    REQUIRE(predicate_calls == 0);
+  }
+}
