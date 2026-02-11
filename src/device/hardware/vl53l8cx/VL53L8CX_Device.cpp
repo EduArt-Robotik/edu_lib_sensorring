@@ -113,11 +113,12 @@ measurement::TofMeasurement VL53L8CX_Device::processMeasurement(int frame_id, ui
   return result;
 }
 
-std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync() {
-  return std::async(std::launch::async, [this]() {
+std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
       return false;
 
+    // Clear the flag so that we really wait for a *new* data-available indication
     _new_data_available_flag.store(false, std::memory_order_release);
 
     static std::atomic<std::uint8_t> request_count{ 0 };
@@ -128,14 +129,17 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync() {
     std::vector<uint8_t> tx_buf = { count, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_state_mutex);
-    _data_condition.wait(lock, [this]() { return newDataAvailable(); });
-    return newDataAvailable();
+    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
+      return newDataAvailable();
+    });
+    return signaled && newDataAvailable();
   });
 }
 
-std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync() {
-  return std::async(std::launch::async, [this]() {
+std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
       return false;
 
@@ -146,9 +150,12 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync() {
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("tof_request"), tx_buf);
 
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_state_mutex);
-    _data_condition.wait(lock, [this]() { return gotNewData(); });
-    return gotNewData();
+    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
+      return gotNewData();
+    });
+    return signaled && gotNewData();
   });
 }
 

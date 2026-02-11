@@ -152,9 +152,7 @@ private:
   void StateMachineWorker() noexcept;
 
   bool waitForTofMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
-  bool waitForTofFetchFutures(std::chrono::steady_clock::duration timeout) noexcept;
   bool waitForThermalMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept;
-  bool waitForThermalFetchFutures(std::chrono::steady_clock::duration timeout) noexcept;
 
   int notifyToFData();
   int notifyThermalData();
@@ -191,9 +189,7 @@ private:
   std::exception_ptr worker_exception;
 
   std::vector<std::future<bool>> _tof_measurement_futures;
-  std::vector<std::future<bool>> _tof_fetch_futures;
   std::vector<std::future<bool>> _thermal_measurement_futures;
-  std::vector<std::future<bool>> _thermal_fetch_futures;
 
   device::DeviceGroup _tof_device_group;
   device::DeviceGroup _thermal_device_group;

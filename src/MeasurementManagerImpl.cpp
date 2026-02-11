@@ -183,20 +183,8 @@ bool MeasurementManagerImpl::waitForTofMeasurementFutures(std::chrono::steady_cl
   });
 }
 
-bool MeasurementManagerImpl::waitForTofFetchFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return device::DeviceGroup::waitForAll(_tof_fetch_futures, timeout, [](bool r) {
-    return r;
-  });
-}
-
 bool MeasurementManagerImpl::waitForThermalMeasurementFutures(std::chrono::steady_clock::duration timeout) noexcept {
   return device::DeviceGroup::waitForAll(_thermal_measurement_futures, timeout, [](bool r) {
-    return r;
-  });
-}
-
-bool MeasurementManagerImpl::waitForThermalFetchFutures(std::chrono::steady_clock::duration timeout) noexcept {
-  return device::DeviceGroup::waitForAll(_thermal_fetch_futures, timeout, [](bool r) {
     return r;
   });
 }
@@ -434,8 +422,9 @@ void MeasurementManagerImpl::StateMachine() {
     if (_thermal_enabled) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 
-      _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([&success](device::HTPA32_Device* device) {
-        auto fut = device->getEpromAsync();
+      const auto timeout_ms = _params.ring_params.timeout;
+      _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
+        auto fut = device->getEpromAsync(timeout_ms);
         if (!fut.get()) {
           success = false;
         }
@@ -484,11 +473,13 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::request_tof_measurement: {
     if (_tof_enabled) {
       _tof_measurement_futures.clear();
-      _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this](device::VL53L8CX_Device* device) {
-        if (!device->getEnable())
-          return;
-        auto fut = device->requestTofMeasurementAsync();
-        _tof_measurement_futures.push_back(std::move(fut));
+      _tof_measurement_futures.reserve(_tof_device_group.getDeviceCount());
+      const auto timeout_ms = _params.ring_params.timeout;
+      _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this, timeout_ms](device::VL53L8CX_Device* device) {
+        if (device->getEnable()) {
+          auto fut = device->requestTofMeasurementAsync(timeout_ms);
+          _tof_measurement_futures.push_back(std::move(fut));
+        }
       });
     }
     _last_tof_measurement_timestamp = std::chrono::steady_clock::now();
@@ -507,11 +498,12 @@ void MeasurementManagerImpl::StateMachine() {
       }
       if (measure_thermal) {
         _thermal_measurement_futures.clear();
-        _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([this](device::HTPA32_Device* device) {
-          if (!device->getEnable())
-            return;
-          auto fut = device->requestThermalMeasurementAsync();
-          _thermal_measurement_futures.push_back(std::move(fut));
+        const auto timeout_ms = _params.ring_params.timeout;
+        _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([this, timeout_ms](device::HTPA32_Device* device) {
+          if (device->getEnable()) {
+            auto fut = device->requestThermalMeasurementAsync(timeout_ms);
+            _thermal_measurement_futures.push_back(std::move(fut));
+          }
         });
         _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
         _thermal_measurement_flag           = true;
@@ -548,14 +540,17 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_tof_data: {
     // fetch and publish a tof measurement
     if (_tof_enabled) {
-      _tof_fetch_futures.clear();
-      _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this](device::VL53L8CX_Device* device) {
-        if (!device->getEnable())
-          return;
-        auto fut = device->fetchTofMeasurementAsync();
-        _tof_fetch_futures.push_back(std::move(fut));
+
+      auto deadline = std::chrono::steady_clock::now() + _params.ring_params.timeout;
+
+      _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this, &success, deadline](device::VL53L8CX_Device* device) {
+        if (success && device->getEnable()) {
+          auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now());
+          auto fut       = device->fetchTofMeasurementAsync(remaining);
+          success &= fut.wait_until(deadline) == std::future_status::ready && fut.get();
+        }
       });
-      success = waitForTofFetchFutures(_params.ring_params.timeout);
+
       if (success) {
         int error = notifyToFData();
         if (error != 0)
@@ -576,14 +571,18 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::fetch_thermal_data: {
     // fetch and publish a thermal measurement
     if (_thermal_enabled && _thermal_measurement_flag) {
-      _thermal_fetch_futures.clear();
-      _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([this](device::HTPA32_Device* device) {
-        if (!device->getEnable())
-          return;
-        auto fut = device->fetchThermalMeasurementAsync();
-        _thermal_fetch_futures.push_back(std::move(fut));
+
+      const auto timeout  = _params.ring_params.timeout;
+      const auto deadline = std::chrono::steady_clock::now() + timeout;
+
+      _thermal_device_group.invokeForEachDeviceOfType<device::HTPA32_Device>([this, &success, deadline](device::HTPA32_Device* device) {
+        if (success && device->getEnable()) {
+          auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now());
+          auto fut       = device->fetchThermalMeasurementAsync(remaining);
+          success &= fut.wait_until(deadline) == std::future_status::ready && fut.get();
+        }
       });
-      success = waitForThermalFetchFutures(_params.ring_params.timeout);
+
       if (success) {
         int error = notifyThermalData();
         if (error != 0)
@@ -640,10 +639,11 @@ void MeasurementManagerImpl::StateMachine() {
         do {
           attempts++;
           _tof_measurement_futures.clear();
-          _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this](device::VL53L8CX_Device* device) {
+          const auto timeout_ms = _params.ring_params.timeout;
+          _tof_device_group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([this, timeout_ms](device::VL53L8CX_Device* device) {
             if (!device->getEnable())
               return;
-            auto fut = device->requestTofMeasurementAsync();
+            auto fut = device->requestTofMeasurementAsync(timeout_ms);
             _tof_measurement_futures.push_back(std::move(fut));
           });
           success = waitForTofMeasurementFutures(_params.ring_params.timeout);

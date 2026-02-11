@@ -297,8 +297,8 @@ void HTPA32_Device::rotateLeftImage(measurement::GrayscaleImage& image) const {
   }
 }
 
-std::future<bool> HTPA32_Device::getEpromAsync() {
-  return std::async(std::launch::async, [this]() {
+std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (_got_eeprom) {
       return true;
     }
@@ -308,13 +308,16 @@ std::future<bool> HTPA32_Device::getEpromAsync() {
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_state_mutex);
-    _eeprom_condition.wait(lock, [this]() { return _got_eeprom.load(); });
-    return _got_eeprom.load();
+    const bool signaled = _eeprom_condition.wait_until(lock, deadline, [this]() {
+      return _got_eeprom.load();
+    });
+    return signaled && _got_eeprom.load();
   });
 }
 
-std::future<bool> HTPA32_Device::requestThermalMeasurementAsync() {
+std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds /*timeout*/) {
   return std::async(std::launch::async, [this]() {
     if (!getEnable())
       return false;
@@ -327,14 +330,13 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync() {
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
-    std::unique_lock<std::mutex> lock(_state_mutex);
-    _data_condition.wait(lock, [this]() { return newDataAvailable(); });
-    return newDataAvailable();
+    // Fire-and-forget: MeasurementManager tracks timing and will wait on fetch futures.
+    return true;
   });
 }
 
-std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync() {
-  return std::async(std::launch::async, [this]() {
+std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
     if (!getEnable())
       return false;
 
@@ -345,9 +347,12 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync() {
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
     _interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_state_mutex);
-    _data_condition.wait(lock, [this]() { return gotNewData(); });
-    return gotNewData();
+    const bool signaled = _data_condition.wait_until(lock, deadline, [this]() {
+      return gotNewData();
+    });
+    return signaled && gotNewData();
   });
 }
 

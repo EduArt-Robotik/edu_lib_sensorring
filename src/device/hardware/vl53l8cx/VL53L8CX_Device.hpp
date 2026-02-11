@@ -27,8 +27,8 @@ public:
   // Thin, explicit API exposing ToF data and operations.
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
-  std::future<bool> requestTofMeasurementAsync();
-  std::future<bool> fetchTofMeasurementAsync();
+  std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
+  std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
