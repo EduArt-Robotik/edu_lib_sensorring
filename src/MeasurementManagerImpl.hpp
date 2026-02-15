@@ -133,6 +133,16 @@ private:
     ThermalRequest
   };
 
+  enum class DeviceGroupKey {
+    ToF,
+    Thermal,
+    Light
+  };
+
+  struct DeviceGroupKeyHash {
+    std::size_t operator()(DeviceGroupKey key) const noexcept { return static_cast<std::size_t>(key); }
+  };
+
   struct MeasurementFutureKeyHash {
     std::size_t operator()(MeasurementFutureKey key) const noexcept { return static_cast<std::size_t>(key); }
   };
@@ -176,9 +186,7 @@ private:
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
-  device::DeviceGroup _tof_device_group;
-  device::DeviceGroup _thermal_device_group;
-  device::DeviceGroup _light_device_group;
+  std::unordered_map<DeviceGroupKey, device::DeviceGroup, DeviceGroupKeyHash> _device_groups;
 };
 
 } // namespace manager
