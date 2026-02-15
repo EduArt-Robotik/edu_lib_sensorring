@@ -9,7 +9,7 @@
 
 #include <chrono>
 #include <iostream>
-#include <sensorring/MeasurementManager.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
 #include "MeasurementProxy.hpp"

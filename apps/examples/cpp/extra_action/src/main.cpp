@@ -11,7 +11,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <sensorring/MeasurementManager.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
 #include <thread>
 

@@ -1,4 +1,4 @@
-#include "MeasurementManagerImpl.hpp"
+#include "manager/MeasurementManagerImpl.hpp"
 
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
@@ -110,6 +110,17 @@ void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
   } else {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
   }
+}
+
+SubscriptionToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+  (void)key;
+  (void)callback;
+  return 0;  // TODO: implement subscription storage and return unique token
+}
+
+void MeasurementManagerImpl::unsubscribeFromDeviceGroup(SubscriptionToken token) {
+  (void)token;
+  // TODO: implement unsubscribe
 }
 
 bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept {

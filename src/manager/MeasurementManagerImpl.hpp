@@ -1,3 +1,12 @@
+// Copyright (c) 2025 EduArt Robotik GmbH
+
+/**
+ * @file   MeasurementManagerImpl.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Implementation of MeasurementManager; holds state machine and private members.
+ * @date   2025-02-15
+ */
+
 #pragma once
 
 #include <atomic>
@@ -12,7 +21,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/manager/MeasurementClient.hpp"
+#include "sensorring/manager/ManagerSubscription.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
@@ -23,88 +33,91 @@ namespace manager {
 
 /**
  * @class MeasurementManagerImpl
- * @brief Implementation class of the MeasurementManager to hide private members.
- * @author Hannes Duske
- * @date 21.10.2025
+ * @brief Implementation of MeasurementManager.
  */
 class MeasurementManagerImpl {
 public:
   /**
-   * Constructor
-   * @param[in] params Parameter structure of the MeasurementManager
+   * @brief Construct the implementation with parameters and owned SensorRing.
+   * @param[in] params Manager configuration.
+   * @param[in] sensor_ring SensorRing instance to manage (ownership transferred).
    */
   MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
-  /**
-   * Destructor
-   */
+  /// Destructor
   ~MeasurementManagerImpl() noexcept;
 
   /**
-   * Run one processing cycle of the state machine worker
-   * @return error code
+   * @brief Run one processing cycle of the state machine worker.
+   * @return true on success.
    */
   bool measureSome() noexcept;
 
   /**
-   * Start running the state machine worker loop in a thread
-   * @return error code
+   * @brief Start the state machine worker loop in a dedicated thread.
+   * @return true on success.
    */
   bool startMeasuring() noexcept;
 
   /**
-   * Stop the state machine worker loop and close the thread
-   * @return error code
+   * @brief Stop the state machine worker loop and join the thread.
+   * @return true on success.
    */
   bool stopMeasuring() noexcept;
 
   /**
-   * Query if the measurement thread is currently running
-   * @return true if the measurement thread is running
+   * @brief Report whether the measurement worker thread is running.
+   * @return true if the measurement thread is running.
    */
   bool isMeasuring() noexcept;
 
   /**
-   * Register an client with the MeasurementManager object
-   * @param[in] client Observer that is registered and gets notified on future events
+   * @brief Register a client to receive state and measurement callbacks.
+   * @param[in] client Client to register; receives future notifications.
    */
   void registerClient(MeasurementClient* client);
 
   /**
-   * Unregister an client with the MeasurementManager object
-   * @param[in] client Observer that is unregistered and will not be notified on future events
+   * @brief Unregister a client; it will no longer receive notifications.
+   * @param[in] client Client to unregister.
    */
   void unregisterClient(MeasurementClient* client);
 
   /**
-   * Get the health status of the state machine
-   * @return Current worker state
+   * @brief Subscribe to device group updates; callback is invoked when the group is updated.
+   * @param[in] key Device group to subscribe to.
+   * @param[in] callback Invoked with the updated DeviceGroup.
+   * @return Token to pass to unsubscribeFromDeviceGroup.
+   */
+  SubscriptionToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback);
+
+  /**
+   * @brief Cancel a device group subscription.
+   * @param[in] token Token returned by subscribeToDeviceGroup.
+   */
+  void unsubscribeFromDeviceGroup(SubscriptionToken token);
+
+  /**
+   * @brief Return the current health state of the state machine worker.
+   * @return Current manager state.
    */
   ManagerState getManagerState() const noexcept;
 
   /**
-   * Get the parameters with which the MeasurementManager was initialized
-   * @return Initial parameter struct
+   * @brief Return the parameters used to initialize the manager.
+   * @return Initial parameter struct.
    */
   ManagerParams getParams() const noexcept;
 
   /**
-   * Get the SensorRing managed by this implementation.
-   * @return Pointer to the managed SensorRing
+   * @brief Return the SensorRing managed by this implementation.
+   * @return Pointer to the managed SensorRing (never null while implementation is alive).
    */
   ring::SensorRing* getSensorRing() const noexcept;
 
   /**
-   * Queue an extra action that will be executed in the dedicated
-   * extra actions slot of the internal state machine.
-   *
-   * The action is executed from the measurement thread (or from the
-   * thread calling measureSome(), respectively). The callable should
-   * therefore be non-blocking and exception safe; any exception will
-   * be caught and logged.
-   *
-   * @param[in] action callable to be executed once in the next
-   *                   extra actions slot
+   * @brief Queue a callable to run once in the next extra-actions slot; executed from measurement thread; exceptions are caught and logged.
+   * @param[in] action Callable executed once; should be non-blocking and exception-safe.
    */
   void enqueueExtraAction(std::function<void()> action);
 
@@ -131,12 +144,6 @@ private:
   enum class MeasurementFutureKey {
     ToFRequest,
     ThermalRequest
-  };
-
-  enum class DeviceGroupKey {
-    ToF,
-    Thermal,
-    Light
   };
 
   struct DeviceGroupKeyHash {

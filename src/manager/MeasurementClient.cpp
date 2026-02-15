@@ -1,4 +1,4 @@
-#include "sensorring/MeasurementClient.hpp"
+#include "sensorring/manager/MeasurementClient.hpp"
 
 namespace eduart {
 

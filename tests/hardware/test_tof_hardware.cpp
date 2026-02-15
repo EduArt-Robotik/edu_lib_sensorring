@@ -3,8 +3,8 @@
 #include <chrono>
 #include <thread>
 
-#include "sensorring/MeasurementClient.hpp"
-#include "sensorring/MeasurementManager.hpp"
+#include "sensorring/manager/MeasurementClient.hpp"
+#include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/types/InterfaceType.hpp"
 
 using eduart::com::InterfaceType;

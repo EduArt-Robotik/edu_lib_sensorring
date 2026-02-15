@@ -1,6 +1,6 @@
-#include "sensorring/MeasurementManager.hpp"
+#include "sensorring/manager/MeasurementManager.hpp"
 
-#include "MeasurementManagerImpl.hpp"
+#include "manager/MeasurementManagerImpl.hpp"
 
 namespace eduart {
 
@@ -40,6 +40,14 @@ void MeasurementManager::unregisterClient(MeasurementClient* observer) {
 
 ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
+}
+
+SubscriptionToken MeasurementManager::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+  return _mm_impl->subscribeToDeviceGroup(key, callback);
+}
+  
+void MeasurementManager::unsubscribeFromDeviceGroup(SubscriptionToken token) {
+  return _mm_impl->unsubscribeFromDeviceGroup(token);
 }
 
 /* =======================================================================================

@@ -11,7 +11,7 @@
 
 #include <atomic>
 #include <chrono>
-#include <sensorring/MeasurementClient.hpp>
+#include <sensorring/manager/MeasurementClient.hpp>
 #include <sensorring/logger/LoggerClient.hpp>
 
 namespace eduart {
