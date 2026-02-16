@@ -25,10 +25,20 @@ target_link_libraries(minimal
     PRIVATE sensorring::sensorring
 )
 
+add_executable(proxy
+    cpp/proxy/src/main.cpp
+    cpp/proxy/src/MeasurementProxy.cpp
+)
+
+target_link_libraries(proxy
+    PRIVATE sensorring::sensorring
+)
+
 if(SENSORRING_INSTALL)
   # Install compiled examples
   install( TARGETS
       minimal
+      proxy
       depth_map
       extra_action
     RUNTIME DESTINATION ${SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR} COMPONENT Examples
