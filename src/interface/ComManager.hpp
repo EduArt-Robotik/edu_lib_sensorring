@@ -5,7 +5,6 @@
 #include <string>
 
 #include "sensorring/types/InterfaceType.hpp"
-#include "types/SingletonTemplate.hpp"
 
 #include "ComInterface.hpp"
 
@@ -13,10 +12,16 @@ namespace eduart {
 
 namespace com {
 
-class ComManager : public Singleton<ComManager> {
+class ComManager {
 public:
   ComManager(const ComManager&)            = delete;
   ComManager& operator=(const ComManager&) = delete;
+
+  /**
+   * @brief Get a reference to the instance of the ComManager singleton
+   * @return Pointer to the ComManager instance
+   */
+  static ComManager* getInstance() noexcept;
 
   /**
    * Create or retrieve a communication interface
@@ -42,7 +47,7 @@ public:
   std::vector<ComInterface*> getInterfaces();
 
 private:
-  friend class Singleton<ComManager>;
+  /// Private constructor. The ComManager is a singleton.
   ComManager() = default;
 
   std::deque<std::unique_ptr<ComInterface> > _interfaces;

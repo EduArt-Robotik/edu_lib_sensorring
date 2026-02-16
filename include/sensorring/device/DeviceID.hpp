@@ -11,19 +11,12 @@
 
 #include <string>
 
+#include "sensorring/device/DeviceType.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
 namespace device {
-
-/** @brief Supported device hardware types. */
-enum class DeviceType {
-  VL53L8CX,
-  HTPA32,
-  WS2812b,
-  UNDEFINED
-};
 
 /**
  * @class DeviceID

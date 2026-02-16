@@ -16,6 +16,11 @@ namespace eduart {
 
 namespace com {
 
+ComManager* ComManager::getInstance() noexcept {
+  static ComManager* instance = new ComManager;
+  return instance;
+}
+
 ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
 
   // Check if interface already exists

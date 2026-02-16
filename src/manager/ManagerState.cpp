@@ -1,4 +1,4 @@
-#include "sensorring/types/ManagerState.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 
 namespace eduart {
 

@@ -10,7 +10,7 @@ add_library(sensorring::sensorring ALIAS sensorring)
 
 target_sources(sensorring
   PRIVATE
-  manager/ManagerTypes.cpp
+  manager/ManagerState.cpp
   manager/MeasurementClient.cpp
   manager/MeasurementManager.cpp
   manager/MeasurementManagerImpl.cpp

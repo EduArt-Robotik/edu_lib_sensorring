@@ -25,7 +25,8 @@
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
@@ -85,7 +86,7 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return Token to pass to unsubscribe.
    */
-  SubscriberToken subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback);
+  SubscriberToken subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription (state or device group).
@@ -145,8 +146,8 @@ private:
     ThermalRequest
   };
 
-  struct DeviceGroupHash {
-    std::size_t operator()(DeviceGroup key) const noexcept { return static_cast<std::size_t>(key); }
+  struct DeviceTypeHash {
+    std::size_t operator()(device::DeviceType key) const noexcept { return static_cast<std::size_t>(key); }
   };
 
   struct MeasurementFutureKeyHash {
@@ -187,13 +188,13 @@ private:
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::unordered_map<DeviceGroup, device::DeviceGroup, DeviceGroupHash> _device_groups;
+  std::unordered_map<device::DeviceType, device::DeviceGroup, DeviceTypeHash> _device_groups;
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   mutable Mutex _subscriber_mutex;
   std::unordered_map<SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
-  std::unordered_map<DeviceGroup, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupHash> _device_subscriptions;
+  std::unordered_map<device::DeviceType, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceTypeHash> _device_subscriptions;
 };
 
 } // namespace manager

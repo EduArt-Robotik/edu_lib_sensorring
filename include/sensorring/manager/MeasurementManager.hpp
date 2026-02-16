@@ -15,7 +15,8 @@
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
@@ -80,7 +81,7 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return Token to pass to unsubscribe.
    */
-  SubscriberToken subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback);
+  SubscriberToken subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription.

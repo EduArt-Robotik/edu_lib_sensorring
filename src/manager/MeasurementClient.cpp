@@ -1,8 +1,9 @@
 #include "sensorring/manager/MeasurementClient.hpp"
 
+#include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
-#include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 
 namespace eduart {
 
@@ -20,8 +21,8 @@ bool MeasurementClient::registerClient(MeasurementManager* manager) {
   if (_managers.find(manager) == _managers.end()) {
     _managers.insert(manager);
     auto state_token                = manager->subscribeToStateChanges(std::bind(&MeasurementClient::onStateChange, this, std::placeholders::_1));
-    auto tof_token                  = manager->subscribeToDeviceGroup(DeviceGroup::VL53L8CX, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
-    auto thermal_token              = manager->subscribeToDeviceGroup(DeviceGroup::HTPA32, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
+    auto tof_token                  = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
+    auto thermal_token              = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
     _state_subscriptions[manager]   = state_token;
     _tof_subscriptions[manager]     = tof_token;
     _thermal_subscriptions[manager] = thermal_token;

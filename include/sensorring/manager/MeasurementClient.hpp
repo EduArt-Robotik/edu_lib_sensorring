@@ -13,7 +13,7 @@
 #include <unordered_set>
 
 #include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
