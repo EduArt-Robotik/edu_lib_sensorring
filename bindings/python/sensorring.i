@@ -53,6 +53,7 @@ else:
 #define SWIG_FILE_WITH_INIT
 
 #include "sensorring/logger/Logger.hpp"
+#include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/Image.hpp"
@@ -61,11 +62,14 @@ else:
 #include "sensorring/types/PointCloud.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
+#include "sensorring/types/SubscriberToken.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Vector3.hpp"
 #include "sensorring/math/Matrix3.hpp"
-#include "sensorring/MeasurementClient.hpp"
-#include "sensorring/MeasurementManager.hpp"
+#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/manager/ManagerState.hpp"
+#include "sensorring/manager/MeasurementClient.hpp"
+#include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/Parameter.hpp"
 %}
 
@@ -150,7 +154,6 @@ typedef ::int64_t int64_t;
 
 %import "sensorring/platform/SensorringExport.hpp"
 
-
 %ignore eduart::math::Vector3::operator[];
 %extend eduart::math::Vector3 {
     double __getitem__(int idx) {
@@ -192,6 +195,9 @@ typedef ::int64_t int64_t;
 %include "sensorring/types/PointCloud.hpp"
 
 
+%include "sensorring/types/SubscriberToken.hpp"
+
+
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;
 %include "sensorring/types/TofMeasurement.hpp"
 
@@ -217,14 +223,37 @@ typedef ::int64_t int64_t;
 %template (BoardParamVector) std::vector<eduart::device::SensorBoardParams>;
 %include "sensorring/Parameter.hpp"
 
-
-%feature("director") eduart::manager::MeasurementClient;
 %rename (ManagerStateToString) eduart::manager::toString(ManagerState);
-%template (TofMeasurementVector) std::vector<eduart::measurement::TofMeasurement>;
-%template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
-%include "sensorring/MeasurementClient.hpp"
+%include "sensorring/device/DeviceType.hpp"
+%include "sensorring/manager/ManagerState.hpp"
 
-%exception eduart::manager::MeasurementManager::MeasurementManager {
+// --- MeasurementManager: SWIG cannot wrap std::unique_ptr. We ignore the C++ ctor
+// and expose a factory that takes a raw pointer (ownership transferred from Python).
+%ignore MeasurementManager(ManagerParams, std::unique_ptr<ring::SensorRing>);
+
+%inline %{
+namespace eduart { namespace manager {
+
+  /** Factory for Python bindings: takes ownership of sensor_ring. */
+  eduart::manager::MeasurementManager* make_MeasurementManager(eduart::manager::ManagerParams params, eduart::ring::SensorRing* sensor_ring) {
+    return new eduart::manager::MeasurementManager(params, std::unique_ptr<eduart::ring::SensorRing>(sensor_ring));
+  }
+
+}}  // namespace eduart::manager
+%}
+
+%newobject eduart::manager::make_MeasurementManager(eduart::manager::ManagerParams, eduart::ring::SensorRing*);
+
+// When passing a SensorRing into the factory, transfer ownership from Python to C++.
+%typemap(in) eduart::ring::SensorRing* sensor_ring (int res = 0, void* argp = nullptr) {
+  res = SWIG_ConvertPtr($input, &argp, $descriptor(eduart::ring::SensorRing*), SWIG_POINTER_DISOWN);
+  if (!SWIG_IsOK(res)) {
+    SWIG_exception_fail(SWIG_ArgError(res), "in method \"$symname\", argument $argnum of type \"eduart::ring::SensorRing *\" (ownership transferred)");
+  }
+  $1 = reinterpret_cast<eduart::ring::SensorRing*>(argp);
+}
+
+%exception eduart::manager::make_MeasurementManager {
     try {
         $action
     } catch (const std::exception& e) {
@@ -232,43 +261,22 @@ typedef ::int64_t int64_t;
     }
 }
 %catches(std::runtime_error) eduart::manager::MeasurementManager::measureSome(const LogVerbosity, const std::string);
-%include "sensorring/MeasurementManager.hpp"
+%include "sensorring/manager/MeasurementManager.hpp"
+
+// Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
+%pythoncode %{
+def _MeasurementManager_init(self, params, sensor_ring):
+    other = make_MeasurementManager(params, sensor_ring)
+    self.this = other.this
+    self.thisown = other.thisown
+MeasurementManager.__init__ = _MeasurementManager_init
+%}
 
 
-%feature("director") eduart::logger::LoggerClient;
 %rename (LogVerbosityToString) toString(LogVerbosity);
-%include "sensorring/logger/LoggerClient.hpp"
+%include "sensorring/logger/LoggerTypes.hpp"
 
 
 %catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
 %ignore Logger::log(const LogVerbosity, const std::stringstream);
 %include "sensorring/logger/Logger.hpp" 
-
-
-%feature("director") eduart::wrapper::SensorringClient;
-%inline %{
-/* Python+Swig director have a problem with multiple inheritance. Only the first base class is directed correctly.
- * This creates a shim class that combines both client interfaces of the sensorring library into one class.
- */
-namespace eduart {
-namespace wrapper {
-
-class SensorringClient : public eduart::manager::MeasurementClient,
-                         public eduart::logger::LoggerClient {
-public:
-    SensorringClient()
-        : eduart::manager::MeasurementClient()
-        , eduart::logger::LoggerClient() {}
-
-    virtual ~SensorringClient() {}
-
-    virtual void onStateChange([[maybe_unused]] const eduart::manager::ManagerState state) {};
-    virtual void onRawTofMeasurement([[maybe_unused]] const std::vector<eduart::measurement::TofMeasurement>& measurement_vec) {};
-    virtual void onTransformedTofMeasurement([[maybe_unused]] const std::vector<eduart::measurement::TofMeasurement>& measurement_vec) {};
-    virtual void onThermalMeasurement([[maybe_unused]] const std::vector<eduart::measurement::ThermalMeasurement>& measurement_vec) {};
-    virtual void onOutputLog([[maybe_unused]] eduart::logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) {};
-};
-} // namespace wrapper
-} // namespace eduart
-
-%}
