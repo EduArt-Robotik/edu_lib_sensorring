@@ -11,6 +11,7 @@ namespace eduart {
  * @brief Opaque token identifying a subscription (state or device group).
  */
 struct SENSORRING_EXPORT SubscriberToken {
+  using TokenType = unsigned long long;
 
   /**
    * @brief Default construction (invalid token, value 0).
@@ -27,14 +28,14 @@ struct SENSORRING_EXPORT SubscriberToken {
    * @brief Get the next token.
    */
   static SubscriberToken getNextToken() noexcept {
-    static std::atomic<unsigned int> next_token{ 1 };
+    static std::atomic<TokenType> next_token{ 1 };
     return SubscriberToken(next_token++);
   }
 
   /**
    * @brief Underlying value for hashing and comparison.
    */
-  unsigned int value() const noexcept { return _value; }
+  TokenType value() const noexcept { return _value; }
 
   bool operator==(const SubscriberToken& other) const noexcept { return _value == other._value; }
   bool operator!=(const SubscriberToken& other) const noexcept { return _value != other._value; }
@@ -43,9 +44,9 @@ private:
   /**
    * @brief Construct from numeric value.
    */
-  SubscriberToken(unsigned int value) noexcept : _value(value) {};
+  SubscriberToken(TokenType value) noexcept : _value(value) {};
 
-  unsigned int _value;
+  TokenType _value;
 
 };
 
@@ -54,7 +55,7 @@ private:
 namespace std {
 
 template <> struct hash<eduart::SubscriberToken> {
-  std::size_t operator()(const eduart::SubscriberToken& token) const noexcept { return std::hash<unsigned int>{}(token.value()); }
+  std::size_t operator()(const eduart::SubscriberToken& token) const noexcept { return std::hash<eduart::SubscriberToken::TokenType>{}(token.value()); }
 };
 
 } // namespace std
