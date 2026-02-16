@@ -19,7 +19,6 @@ target_link_libraries(extra_action
 
 add_executable(minimal
     cpp/minimal/src/main.cpp
-    cpp/minimal/src/MeasurementProxy.cpp
 )
 
 target_link_libraries(minimal

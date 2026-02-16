@@ -14,16 +14,6 @@
 
 namespace eduart {
 
-MeasurementProxy::MeasurementProxy() {
-  // Register the proxy with the Logger to get the log output
-  logger::Logger::getInstance()->registerClient(this);
-}
-
-MeasurementProxy::~MeasurementProxy() {
-  // Important, otherwise a segfault may occur on program exit
-  logger::Logger::getInstance()->unregisterClient(this);
-}
-
 bool MeasurementProxy::gotFirstMeasurement() {
   return _init_flag;
 }

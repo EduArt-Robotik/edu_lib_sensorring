@@ -6,7 +6,6 @@ find_package(sensorring REQUIRED)
 
 add_executable(minimal
     src/main.cpp
-    src/MeasurementProxy.cpp
 )
 
 target_link_libraries(minimal

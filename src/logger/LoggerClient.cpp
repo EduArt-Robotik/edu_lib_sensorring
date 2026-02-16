@@ -1,10 +1,12 @@
 #include "sensorring/logger/LoggerClient.hpp"
 
+#include "sensorring/logger/Logger.hpp"
+
 namespace eduart {
 
 namespace logger {
 
-std::string toString(LogVerbosity verbosity) noexcept{
+std::string toString(LogVerbosity verbosity) noexcept {
   switch (verbosity) {
   case LogVerbosity::Debug:
     return "Debug";
@@ -21,8 +23,18 @@ std::string toString(LogVerbosity verbosity) noexcept{
   }
 }
 
-std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept{
+std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept {
   return os << toString(verbosity);
+}
+
+LoggerClient::LoggerClient() noexcept {
+  // Register the client with the Logger to get the log output
+  _token = logger::Logger::getInstance()->subscribe(std::bind(&LoggerClient::onOutputLog, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+LoggerClient::~LoggerClient() noexcept {
+  // Unregister the client from the Logger to stop receiving log output
+  logger::Logger::getInstance()->unsubscribe(_token);
 }
 
 } // namespace logger

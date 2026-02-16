@@ -9,18 +9,15 @@
 
 #pragma once
 
-#include <atomic>
-#include <cstdint>
 #include <functional>
 #include <mutex>
-#include <set>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 
-#include "sensorring/logger/LoggerClient.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
 
@@ -42,23 +39,11 @@ public:
   static Logger* getInstance() noexcept;
 
   /**
-   * @brief Register a new LoggerClient to be notified of future log messages
-   * @param[in] client LoggerClient that will be registered
-   */
-  void registerClient(LoggerClient* client) noexcept;
-
-  /**
-   * @brief Unregister a new LoggerClient to no longer be notified of log messages
-   * @param[in] client LoggerClient that will be unregistered
-   */
-  void unregisterClient(LoggerClient* client) noexcept;
-
-  /**
    * @brief Subscribe to log messages
    * @param[in] token Subscription token
    * @param[in] callback Callback function to be called when a log message is received
    */
-   SubscriberToken subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
+  SubscriberToken subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
 
   /**
    * @brief Unsubscribe from log messages
@@ -86,12 +71,10 @@ private:
   /// Private constructor. The Logger is a singleton.
   Logger() = default;
 
-  mutable std::recursive_mutex _client_mutex;
-  using LockGuard = std::lock_guard<std::recursive_mutex>;
+  using Mutex     = std::recursive_mutex;
+  using LockGuard = std::lock_guard<Mutex>;
 
-  std::set<logger::LoggerClient*> _clients;
-
-  mutable std::recursive_mutex _subscriber_mutex;
+  mutable Mutex _subscriber_mutex;
   std::unordered_map<SubscriberToken, std::function<void(const LogVerbosity verbosity, const std::string& msg)> > _subscriptions;
 };
 
