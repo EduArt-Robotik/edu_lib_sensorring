@@ -85,7 +85,7 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return Token to pass to unsubscribe.
    */
-  SubscriberToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback);
+  SubscriberToken subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription (state or device group).
@@ -145,8 +145,8 @@ private:
     ThermalRequest
   };
 
-  struct DeviceGroupKeyHash {
-    std::size_t operator()(DeviceGroupKey key) const noexcept { return static_cast<std::size_t>(key); }
+  struct DeviceGroupHash {
+    std::size_t operator()(DeviceGroup key) const noexcept { return static_cast<std::size_t>(key); }
   };
 
   struct MeasurementFutureKeyHash {
@@ -186,13 +186,13 @@ private:
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::unordered_map<DeviceGroupKey, device::DeviceGroup, DeviceGroupKeyHash> _device_groups;
+  std::unordered_map<DeviceGroup, device::DeviceGroup, DeviceGroupHash> _device_groups;
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   mutable Mutex _subscriber_mutex;
   std::unordered_map<SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
-  std::unordered_map<DeviceGroupKey, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupKeyHash> _device_subscriptions;
+  std::unordered_map<DeviceGroup, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupHash> _device_subscriptions;
 };
 
 } // namespace manager

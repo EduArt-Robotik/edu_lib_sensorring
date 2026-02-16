@@ -3,11 +3,14 @@
 /**
  * @file   MeasurementClient.hpp
  * @author EduArt Robotik GmbH
- * @brief  MeasurementClient that can be registered with the Logger to receive measurement data
+ * @brief  MeasurementClient that can be registered with the MeasurementManager to receive measurement data
  * @date   2024-12-25
  */
 
 #pragma once
+
+#include <unordered_map>
+#include <unordered_set>
 
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/manager/ManagerTypes.hpp"

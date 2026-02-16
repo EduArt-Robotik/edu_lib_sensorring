@@ -80,7 +80,7 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return Token to pass to unsubscribe.
    */
-  SubscriberToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback); //ToDo: Switch to DeviceType -> no double housekeeping
+  SubscriberToken subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription.

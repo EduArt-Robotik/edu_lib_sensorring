@@ -20,8 +20,8 @@ bool MeasurementClient::registerClient(MeasurementManager* manager) {
   if (_managers.find(manager) == _managers.end()) {
     _managers.insert(manager);
     auto state_token                = manager->subscribeToStateChanges(std::bind(&MeasurementClient::onStateChange, this, std::placeholders::_1));
-    auto tof_token                  = manager->subscribeToDeviceGroup(DeviceGroupKey::ToF, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
-    auto thermal_token              = manager->subscribeToDeviceGroup(DeviceGroupKey::Thermal, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
+    auto tof_token                  = manager->subscribeToDeviceGroup(DeviceGroup::VL53L8CX, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
+    auto thermal_token              = manager->subscribeToDeviceGroup(DeviceGroup::HTPA32, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
     _state_subscriptions[manager]   = state_token;
     _tof_subscriptions[manager]     = tof_token;
     _thermal_subscriptions[manager] = thermal_token;
@@ -47,7 +47,18 @@ bool MeasurementClient::unregisterClient(MeasurementManager* manager) {
   if (!manager) {
     return false;
   }
-  return _managers.erase(manager);
+  auto it = _managers.find(manager);
+  if (it == _managers.end()) {
+    return false;
+  }
+  manager->unsubscribe(_state_subscriptions[manager]);
+  manager->unsubscribe(_tof_subscriptions[manager]);
+  manager->unsubscribe(_thermal_subscriptions[manager]);
+  _state_subscriptions.erase(manager);
+  _tof_subscriptions.erase(manager);
+  _thermal_subscriptions.erase(manager);
+  _managers.erase(it);
+  return true;
 }
 
 void MeasurementClient::onTofDispatcher(const device::DeviceGroup& group) {

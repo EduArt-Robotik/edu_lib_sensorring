@@ -32,9 +32,9 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _is_running(false)
     , _device_groups(
           {
-              { DeviceGroupKey::ToF,     device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()) },
-              { DeviceGroupKey::Thermal, device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())   },
-              { DeviceGroupKey::Light,   device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())  },
+              { DeviceGroup::VL53L8CX, device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()) },
+              { DeviceGroup::HTPA32,   device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())   },
+              { DeviceGroup::WS2812B,  device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())  },
 }) {
   if (_params.timeout == 0ms) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
@@ -43,11 +43,11 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
   }
 
   // check if there are active tof or thermal sensors (device-group based)
-  _device_groups.at(DeviceGroupKey::ToF).invokeForEachDevice([this](device::IDevice* device) {
+  _device_groups.at(DeviceGroup::VL53L8CX).invokeForEachDevice([this](device::IDevice* device) {
     if (dynamic_cast<device::VL53L8CX_Device*>(device)->getEnable())
       _tof_enabled = true;
   });
-  _device_groups.at(DeviceGroupKey::Thermal).invokeForEachDevice([this](device::IDevice* device) {
+  _device_groups.at(DeviceGroup::HTPA32).invokeForEachDevice([this](device::IDevice* device) {
     if (dynamic_cast<device::HTPA32_Device*>(device)->getEnable())
       _thermal_enabled = true;
   });
@@ -90,7 +90,7 @@ SubscriberToken MeasurementManagerImpl::subscribeToStateChanges(std::function<vo
   return token;
 }
 
-SubscriberToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+SubscriberToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback) {
   if (!callback) {
     return SubscriberToken();
   }
@@ -128,7 +128,7 @@ bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, 
 int MeasurementManagerImpl::notifyToFData() {
   int error_frames = 0;
 
-  _device_groups.at(DeviceGroupKey::ToF).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
+  _device_groups.at(DeviceGroup::VL53L8CX).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
     if (!device->getEnable())
       return;
     auto state = device->getLatestRawMeasurement().second;
@@ -139,17 +139,17 @@ int MeasurementManagerImpl::notifyToFData() {
 
   {
     LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& tof_group = _device_groups.at(DeviceGroupKey::ToF);
-    auto it                              = _device_subscriptions.find(DeviceGroupKey::ToF);
+    const device::DeviceGroup& tof_group = _device_groups.at(DeviceGroup::VL53L8CX);
+    auto it                              = _device_subscriptions.find(DeviceGroup::VL53L8CX);
     if (it != _device_subscriptions.end()) {
       for (auto& sub : it->second) {
         if (sub.second) {
           try {
             sub.second(tof_group);
           } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group ToF subscription callback threw: " + std::string(e.what()));
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group ToF subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown exception.");
           }
         }
       }
@@ -162,7 +162,7 @@ int MeasurementManagerImpl::notifyToFData() {
 int MeasurementManagerImpl::notifyThermalData() {
   int error_frames = 0;
 
-  _device_groups.at(DeviceGroupKey::Thermal).invokeForEachDeviceOfType<device::HTPA32_Device>([&error_frames](device::HTPA32_Device* device) {
+  _device_groups.at(DeviceGroup::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&error_frames](device::HTPA32_Device* device) {
     if (!device->getEnable())
       return;
     auto state = device->getLatestMeasurement().second;
@@ -173,17 +173,17 @@ int MeasurementManagerImpl::notifyThermalData() {
 
   {
     LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& thermal_group = _device_groups.at(DeviceGroupKey::Thermal);
-    auto it                                  = _device_subscriptions.find(DeviceGroupKey::Thermal);
+    const device::DeviceGroup& thermal_group = _device_groups.at(DeviceGroup::HTPA32);
+    auto it                                  = _device_subscriptions.find(DeviceGroup::HTPA32);
     if (it != _device_subscriptions.end()) {
       for (auto& sub : it->second) {
         if (sub.second) {
           try {
             sub.second(thermal_group);
           } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group Thermal subscription callback threw: " + std::string(e.what()));
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group Thermal subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown exception.");
           }
         }
       }
@@ -366,7 +366,7 @@ void MeasurementManagerImpl::StateMachine() {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
 
       const auto timeout_ms = _params.timeout;
-      _device_groups.at(DeviceGroupKey::Thermal).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
+      _device_groups.at(DeviceGroup::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         auto fut = device->getEpromAsync(timeout_ms);
         if (!fut.get()) {
           success = false;
@@ -431,7 +431,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::request_tof_measurement: {
     if (_tof_enabled) {
-      auto tof_devices = _device_groups.at(DeviceGroupKey::ToF).getDevicesOfType<device::VL53L8CX_Device>();
+      auto tof_devices = _device_groups.at(DeviceGroup::VL53L8CX).getDevicesOfType<device::VL53L8CX_Device>();
       if (!tof_devices.empty()) {
         _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.timeout);
       }
@@ -451,7 +451,7 @@ void MeasurementManagerImpl::StateMachine() {
           measure_thermal = false;
       }
       if (measure_thermal) {
-        auto thermal_devices = _device_groups.at(DeviceGroupKey::Thermal).getDevicesOfType<device::HTPA32_Device>();
+        auto thermal_devices = _device_groups.at(DeviceGroup::HTPA32).getDevicesOfType<device::HTPA32_Device>();
         if (!thermal_devices.empty()) {
           _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(thermal_devices, _params.timeout);
         }
@@ -491,7 +491,7 @@ void MeasurementManagerImpl::StateMachine() {
     // fetch and publish a tof measurement
     if (_tof_enabled) {
 
-      auto tof_devices = _device_groups.at(DeviceGroupKey::ToF).getDevicesOfType<device::VL53L8CX_Device>();
+      auto tof_devices = _device_groups.at(DeviceGroup::VL53L8CX).getDevicesOfType<device::VL53L8CX_Device>();
       if (!tof_devices.empty()) {
         auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(tof_devices, _params.timeout);
         if (fut.wait_for(_params.timeout) == std::future_status::ready) {
@@ -522,7 +522,7 @@ void MeasurementManagerImpl::StateMachine() {
     // fetch and publish a thermal measurement
     if (_thermal_enabled && _thermal_measurement_flag) {
 
-      auto thermal_devices = _device_groups.at(DeviceGroupKey::Thermal).getDevicesOfType<device::HTPA32_Device>();
+      auto thermal_devices = _device_groups.at(DeviceGroup::HTPA32).getDevicesOfType<device::HTPA32_Device>();
       if (!thermal_devices.empty()) {
         auto fut = device::HTPA32_Device::fetchThermalMeasurementAsync(thermal_devices, _params.timeout);
         success  = fut.wait_for(_params.timeout) == std::future_status::ready && fut.get();
@@ -584,7 +584,7 @@ void MeasurementManagerImpl::StateMachine() {
             bs->resetSensorState();
         do {
           attempts++;
-          auto tof_devices = _device_groups.at(DeviceGroupKey::ToF).getDevicesOfType<device::VL53L8CX_Device>();
+          auto tof_devices = _device_groups.at(DeviceGroup::VL53L8CX).getDevicesOfType<device::VL53L8CX_Device>();
           if (!tof_devices.empty()) {
             _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(tof_devices, _params.timeout);
           }

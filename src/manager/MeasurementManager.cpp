@@ -38,7 +38,7 @@ SubscriberToken MeasurementManager::subscribeToStateChanges(std::function<void(c
   return _mm_impl->subscribeToStateChanges(std::move(callback));
 }
 
-SubscriberToken MeasurementManager::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+SubscriberToken MeasurementManager::subscribeToDeviceGroup(DeviceGroup key, std::function<void(const device::DeviceGroup&)> callback) {
   return _mm_impl->subscribeToDeviceGroup(key, std::move(callback));
 }
   

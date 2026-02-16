@@ -10,13 +10,13 @@ namespace eduart {
 namespace manager {
 
 /**
- * @enum DeviceGroupKey
- * @brief Identifies which device group a subscription is for.
+ * @enum DeviceGroup
+ * @brief Device types managed by the MeasurementManager.
  */
-enum class SENSORRING_EXPORT DeviceGroupKey {
-  ToF,
-  Thermal,
-  Light
+enum class SENSORRING_EXPORT DeviceGroup {
+  VL53L8CX,
+  HTPA32,
+  WS2812B
 };
 
 /**
