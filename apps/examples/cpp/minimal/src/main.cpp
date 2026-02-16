@@ -96,7 +96,7 @@ int main(int, char*[]) {
     });
 
     // Subscribe to the ToF device group to get the measurements
-    auto tof_sub = manager->subscribeToDeviceGroup(manager::DeviceGroup::VL53L8CX, [&rate](const device::DeviceGroup&) {
+    auto tof_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&rate](const device::DeviceGroup&) {
       rate->tick();
     });
 
