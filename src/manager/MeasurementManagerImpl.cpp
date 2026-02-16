@@ -30,12 +30,12 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _is_thermal_throttled(params.frequency_thermal_hz > 0.0)
     , _thermal_measurement_flag(false)
     , _is_running(false)
-    , _device_groups({
-      {DeviceGroupKey::ToF, device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices())},
-      {DeviceGroupKey::Thermal, device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())},
-      {DeviceGroupKey::Light, device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())},
-    }) {
-
+    , _device_groups(
+          {
+              { DeviceGroupKey::ToF,     device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()) },
+              { DeviceGroupKey::Thermal, device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())   },
+              { DeviceGroupKey::Light,   device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())  },
+}) {
   if (_params.timeout == 0ms) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
   } else if (_params.timeout < 200ms) {
@@ -113,14 +113,22 @@ void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
 }
 
 SubscriptionToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
-  (void)key;
-  (void)callback;
-  return 0;  // TODO: implement subscription storage and return unique token
+  if (!callback) {
+    return 0;
+  }
+  static std::atomic<SubscriptionToken> next_token{0};
+  const SubscriptionToken token = next_token++;
+  LockGuard lock(_subscriber_mutex);
+  auto& key_subs = _subscriptions.try_emplace(key).first->second;
+  key_subs.emplace(token, std::move(callback));
+  return token;
 }
 
 void MeasurementManagerImpl::unsubscribeFromDeviceGroup(SubscriptionToken token) {
-  (void)token;
-  // TODO: implement unsubscribe
+  LockGuard lock(_subscriber_mutex);
+  for (auto& [key, subscriptions] : _subscriptions) {
+    subscriptions.erase(token);
+  }
 }
 
 bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept {
@@ -173,6 +181,27 @@ int MeasurementManagerImpl::notifyToFData() {
     }
   }
 
+  {
+    LockGuard lock(_subscriber_mutex);
+    const device::DeviceGroup& tof_group = _device_groups.at(DeviceGroupKey::ToF);
+    auto it = _subscriptions.find(DeviceGroupKey::ToF);
+    if (it != _subscriptions.end()) {
+      for (auto& sub : it->second) {
+        if (sub.second) {
+          try {
+            sub.second(tof_group);
+          } catch (const std::exception& e) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
+              "Device group ToF subscription callback threw: " + std::string(e.what()));
+          } catch (...) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
+              "Device group ToF subscription callback threw unknown exception.");
+          }
+        }
+      }
+    }
+  }
+
   return error_frames;
 }
 
@@ -196,6 +225,27 @@ int MeasurementManagerImpl::notifyThermalData() {
     for (auto client : _clients) {
       if (client)
         client->onThermalMeasurement(measurement_vec);
+    }
+  }
+
+  {
+    LockGuard lock(_subscriber_mutex);
+    const device::DeviceGroup& thermal_group = _device_groups.at(DeviceGroupKey::Thermal);
+    auto it = _subscriptions.find(DeviceGroupKey::Thermal);
+    if (it != _subscriptions.end()) {
+      for (auto& sub : it->second) {
+        if (sub.second) {
+          try {
+            sub.second(thermal_group);
+          } catch (const std::exception& e) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
+              "Device group Thermal subscription callback threw: " + std::string(e.what()));
+          } catch (...) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
+              "Device group Thermal subscription callback threw unknown exception.");
+          }
+        }
+      }
     }
   }
 

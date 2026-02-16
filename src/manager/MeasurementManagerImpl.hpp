@@ -21,11 +21,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "sensorring/manager/MeasurementClient.hpp"
-#include "sensorring/manager/ManagerSubscription.hpp"
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
+#include "sensorring/manager/ManagerSubscription.hpp"
+#include "sensorring/manager/MeasurementClient.hpp"
 
 namespace eduart {
 
@@ -122,6 +122,9 @@ public:
   void enqueueExtraAction(std::function<void()> action);
 
 private:
+  using Mutex     = std::mutex;
+  using LockGuard = std::lock_guard<Mutex>;
+
   enum class MeasurementState {
     init,
     reset_sensors,
@@ -180,20 +183,22 @@ private:
   bool _is_thermal_throttled;
   bool _thermal_measurement_flag;
 
-  mutable std::mutex _client_mutex;
-  using LockGuard = std::lock_guard<std::mutex>;
+  mutable Mutex _client_mutex;
   std::set<MeasurementClient*> _clients;
 
-  std::mutex _extra_actions_mutex;
+  Mutex _extra_actions_mutex;
   std::queue<std::function<void()> > _extra_actions;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
+  std::unordered_map<DeviceGroupKey, device::DeviceGroup, DeviceGroupKeyHash> _device_groups;
+
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
-  std::unordered_map<DeviceGroupKey, device::DeviceGroup, DeviceGroupKeyHash> _device_groups;
+  mutable Mutex _subscriber_mutex;
+  std::unordered_map<DeviceGroupKey, std::unordered_map<SubscriptionToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupKeyHash> _subscriptions;
 };
 
 } // namespace manager

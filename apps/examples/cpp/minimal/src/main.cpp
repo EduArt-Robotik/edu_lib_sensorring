@@ -13,13 +13,48 @@
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
-#include "MeasurementProxy.hpp"
-
 using namespace eduart;
 using namespace std::chrono_literals;
 
+using Clock     = std::chrono::steady_clock;
+using Duration  = Clock::duration;
+using TimePoint = Clock::time_point;
+using toSeconds = std::chrono::duration<double>;
+
 static constexpr std::string_view INTERFACE_NAME   = "can0";
 static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+
+struct Rate {
+  std::mutex mutex;
+  bool init_flag             = false;
+  unsigned int counter       = 0;
+  Duration duration          = Duration::zero();
+  TimePoint last_measurement = Clock::time_point::min();
+
+  void tick() {
+    std::lock_guard<std::mutex> lock(mutex);
+    init_flag = true;
+    duration += Clock::now() - last_measurement;
+    last_measurement = Clock::now();
+    counter++;
+  }
+
+  double getRate() {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (init_flag) {
+      auto rate = static_cast<double>(counter) / toSeconds(duration).count();
+      duration  = Duration::zero();
+      counter   = 0;
+      return rate;
+    }
+    return 0.0;
+  }
+
+  bool gotFirstMeasurement() {
+    std::lock_guard<std::mutex> lock(mutex);
+    return init_flag;
+  }
+};
 
 int main(int, char*[]) {
   std::cout << "==========================" << std::endl;
@@ -47,28 +82,33 @@ int main(int, char*[]) {
   }
 
   // Instantiate a Measurement proxy
-  auto proxy = std::make_unique<MeasurementProxy>();
+  auto rate = std::make_unique<Rate>();
 
   try {
     // Create SensorRing from ring params, then instantiate MeasurementManager
     auto sensor_ring = ring::SensorRing::create(ring);
     auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
 
-    // Register the proxy with the LogMeasurementManager to get the measurements
-    manager->registerClient(proxy.get());
+    // Subscribe to the ToF device group to get the measurements
+    auto tof_sub = manager->subscribeToDeviceGroup(manager::DeviceGroupKey::ToF, [&rate](const device::DeviceGroup&) {
+      rate->tick();
+    });
 
     // Start the measurements
     manager->startMeasuring();
 
-    while (!proxy->gotFirstMeasurement() && manager->isMeasuring()) {
+    while (!rate->gotFirstMeasurement() && manager->isMeasuring()) {
     }
 
     if (manager->isMeasuring()) {
       std::cout << std::endl << "Printing measurement rate:" << std::endl;
       while (manager->isMeasuring()) {
-        std::cout << "Current rate: " << std::fixed << std::setprecision(2) << std::setw(5) << proxy->getRate() << " Hz\r" << std::flush;
+        std::cout << "Current rate: " << std::fixed << std::setprecision(2) << std::setw(5) << rate->getRate() << " Hz\r" << std::flush;
         std::this_thread::sleep_for(1s);
       }
+
+      // Unsubscribe before stopping (optional; manager cleans up on destruction)
+      manager->unsubscribeFromDeviceGroup(tof_sub);
 
       // Stop the measurements
       manager->stopMeasuring();
