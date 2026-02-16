@@ -30,7 +30,7 @@ class SensorRing {
 
 public:
   /**
-   * Constructor
+   * @brief Constructor
    * @param[in] params Configuration parameters for the sensor ring
    * @param[in] bus_vec Vector of sensor buses to manage
    */

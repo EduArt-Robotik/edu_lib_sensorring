@@ -4,7 +4,7 @@
  * @file   HTPA32_Device.hpp
  * @author EduArt Robotik GmbH
  * @brief  Hardware abstraction for the HTPA32 thermal sensor device
- * @date   2026-02-11
+ * @date   2025-02-11
  */
 
 #pragma once
@@ -59,7 +59,7 @@ public:
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
 
   /**
-   * @brief Request the EPROM content asynchronously.
+   * @brief Request the EEPROM content asynchronously.
    * @param[in] timeout Maximum time to wait for completion.
    * @return Future resolving to true on success.
    */

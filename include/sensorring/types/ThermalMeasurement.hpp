@@ -38,7 +38,7 @@ class SENSORRING_EXPORT FalseColorImage : public GenericRGBImage<std::uint8_t, T
 
 /**
  * @class  ThermalMeasurement
- * @brief  Structure for holding a measurement form a thermal sensor
+ * @brief  Structure for holding a measurement from a thermal sensor
  */
 struct SENSORRING_EXPORT ThermalMeasurement {
   /// Frame number of the ThermalMeasurement

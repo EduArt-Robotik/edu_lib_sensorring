@@ -4,7 +4,7 @@
  * @file   WS2812b_Device.hpp
  * @author EduArt Robotik GmbH
  * @brief  Hardware abstraction for WS2812b LED strip devices
- * @date   2026-02-11
+ * @date   2025-02-11
  */
 
 #pragma once

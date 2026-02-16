@@ -44,10 +44,10 @@ struct SENSORRING_EXPORT Vector3 {
   /// Third component of the vector
   const double& z() const;
 
-  /// Indexing the Matrix
+  /// Indexing the vector
   double& operator[](std::size_t idx);
 
-  /// Indexing the Matrix
+  /// Indexing the vector
   const double& operator[](std::size_t idx) const;
 
   /// Vector addition

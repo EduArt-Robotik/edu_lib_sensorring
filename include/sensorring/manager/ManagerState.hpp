@@ -39,8 +39,9 @@ SENSORRING_EXPORT std::string toString(ManagerState state) noexcept;
 
 /**
  * @brief  Output stream operator for the ManagerState enum class members
+ * @param[in] os output stream to write to
  * @param[in] state to be printed as stream
- * @return Stream of the states name written out
+ * @return Stream of the state's name written out
  */
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept;
 

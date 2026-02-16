@@ -26,14 +26,14 @@ namespace logger {
  */
 class SENSORRING_EXPORT LoggerClient {
 public:
-  // Constructor
+  /// Constructor
   LoggerClient() noexcept;
 
   /// Destructor
   virtual ~LoggerClient() noexcept;
 
   /**
-   * Callback method for the log output of the sensorring library
+   * @brief Callback method for the log output of the sensorring library
    * @param[in] verbosity verbosity level of the log message
    * @param[in] msg       log message string
    */

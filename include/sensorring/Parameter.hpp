@@ -164,7 +164,7 @@ struct SENSORRING_EXPORT ManagerParams {
   /// Enable bit rate switching on the can bus interface.
   bool enable_brs = false; // ToDo: remove
 
-  /// If set to true a formatted string describing the sensor topology is printed via the Logger when the MeasurementManager init() method is called.
+  /// If set to true a formatted string describing the sensor topology is printed via the Logger after device enumeration in the state machine.
   bool print_topology = true;
 
   /// If set to true error handling is enabled to try to repair communication and timing errors. When set to false the MeasurementManager instantly shuts down when an error is detected.

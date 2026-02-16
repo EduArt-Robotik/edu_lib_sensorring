@@ -4,7 +4,7 @@
  * @file   VL53L8CX_Device.hpp
  * @author EduArt Robotik GmbH
  * @brief  Hardware abstraction for the VL53L8CX Time-of-Flight sensor device
- * @date   2026-02-11
+ * @date   2025-02-11
  */
 
 #pragma once

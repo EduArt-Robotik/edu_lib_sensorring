@@ -36,49 +36,46 @@ public:
   virtual ~MeasurementClient();
 
   /**
-   * Register the client to the MeasurementManager
+   * @brief Register the client to the MeasurementManager
    * @param[in] manager the MeasurementManager to register to
+   * @return true if registration succeeded
    */
   bool registerClient(MeasurementManager* manager);
 
   /**
-   * Unregister the client from the MeasurementManager
+   * @brief Unregister the client from the MeasurementManager
+   * @return true if unregistration succeeded
    */
   bool unregisterClient();
 
   /**
-   * Unregister the client from a specific MeasurementManager
+   * @brief Unregister the client from a specific MeasurementManager
    * @param[in] manager the MeasurementManager to unregister from
+   * @return true if unregistration succeeded
    */
   bool unregisterClient(MeasurementManager* manager);
 
   /**
-   * Callback method for state changes of the state machine worker
+   * @brief Callback method for state changes of the state machine worker
    * @param[in] state the new state of the state machine worker
    */
   virtual void onStateChange([[maybe_unused]] const ManagerState state) {};
 
   /**
-   * Callback method for new Time-of-Flight sensor measurements. Returns a
-   * vector of the raw measurements per sensor.
-   * @param[in] measurement_vec the most recent Time-of-Flight sensor
-   * measurements in the individual sensor coordinate frames
+   * @brief Callback method for new Time-of-Flight sensor measurements (raw, per-sensor coordinate frames).
+   * @param[in] measurement_vec the most recent Time-of-Flight sensor measurements in the individual sensor coordinate frames
    */
   virtual void onRawTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
-   * Callback method for new Time-of-Flight sensor measurements. Returns a
-   * vector of the transformed measurements per sensor.
-   * @param[in] measurement_vec the most recent Time-of-Flight sensor
-   * measurements in the common transformed coordinate frame
+   * @brief Callback method for new Time-of-Flight sensor measurements (transformed, common coordinate frame).
+   * @param[in] measurement_vec the most recent Time-of-Flight sensor measurements in the common transformed coordinate frame
    */
   virtual void onTransformedTofMeasurement([[maybe_unused]] const std::vector<measurement::TofMeasurement>& measurement_vec) {};
 
   /**
-   * Callback method for new thermal sensor measurements. Returns a
-   * vector of the measurements from all sensors.
-   * @param[in] measurement the most recent thermal sensor
-   * measurements in the common transformed coordinate frame
+   * @brief Callback method for new thermal sensor measurements.
+   * @param[in] measurement_vec the most recent thermal sensor measurements in the common transformed coordinate frame
    */
   virtual void onThermalMeasurement([[maybe_unused]] const std::vector<measurement::ThermalMeasurement>& measurement_vec) {};
 

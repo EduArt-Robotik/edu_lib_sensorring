@@ -33,7 +33,7 @@ public:
   ~Logger() = default;
 
   /**
-   * @brief Get a reference to the instance of the Logger singleton
+   * @brief Get a pointer to the instance of the Logger singleton
    * @return Pointer to the Logger instance
    */
   static Logger* getInstance() noexcept;

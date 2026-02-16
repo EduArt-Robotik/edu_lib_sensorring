@@ -3,7 +3,7 @@
 /**
  * @file   DeviceID.hpp
  * @author EduArt Robotik GmbH
- * @brief  Device type enumeration and identifier (type, name, index) for device registration.
+ * @brief  Device identifier (type, name, index) for device registration.
  * @date   2025-02-06
  */
 

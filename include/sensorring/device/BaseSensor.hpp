@@ -4,7 +4,7 @@
  * @file   BaseSensor.hpp
  * @author EduArt Robotik GmbH
  * @brief  Base class for sensors using a communication interface.
- * @date   2026-02-10
+ * @date   2025-02-10
  */
 
 #pragma once
@@ -106,13 +106,13 @@ public:
 protected:
   /**
    * @brief Set the result of the current measurement-wait cycle. Called from derived callbacks when ready.
-   * @param success true if measurement was fetched successfully.
+   * @param[in] success true if measurement was fetched successfully.
    */
   void setMeasurementReady(bool success);
 
   /**
    * @brief Set the result of the current data-available-wait cycle. Called from derived callbacks when "data available" is received.
-   * @param success true if data available was signalled successfully.
+   * @param[in] success true if data available was signalled successfully.
    */
   void setDataAvailableReady(bool success);
 
