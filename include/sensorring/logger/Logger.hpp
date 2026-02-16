@@ -40,14 +40,14 @@ public:
 
   /**
    * @brief Subscribe to log messages
-   * @param[in] token Subscription token
    * @param[in] callback Callback function to be called when a log message is received
+   * @return Token to pass to unsubscribe
    */
   SubscriberToken subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
 
   /**
    * @brief Unsubscribe from log messages
-   * @param[in] token Subscription token
+   * @param[in] token Token returned by subscribe
    */
   void unsubscribe(SubscriberToken token);
 
