@@ -125,7 +125,7 @@ bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, 
   return fut.get();
 }
 
-int MeasurementManagerImpl::notifyToFData() {
+int MeasurementManagerImpl::notifyVL53L8CX() {
   int error_frames = 0;
 
   _device_groups.at(DeviceGroup::VL53L8CX).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
@@ -159,7 +159,7 @@ int MeasurementManagerImpl::notifyToFData() {
   return error_frames;
 }
 
-int MeasurementManagerImpl::notifyThermalData() {
+int MeasurementManagerImpl::notifyHTPA32() {
   int error_frames = 0;
 
   _device_groups.at(DeviceGroup::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&error_frames](device::HTPA32_Device* device) {
@@ -191,6 +191,27 @@ int MeasurementManagerImpl::notifyThermalData() {
   }
 
   return error_frames;
+}
+
+void MeasurementManagerImpl::notifyWS2812B() {
+  {
+    LockGuard lock(_subscriber_mutex);
+    const device::DeviceGroup& ws2812b_group = _device_groups.at(DeviceGroup::WS2812B);
+    auto it                                  = _device_subscriptions.find(DeviceGroup::WS2812B);
+    if (it != _device_subscriptions.end()) {
+      for (auto& sub : it->second) {
+        if (sub.second) {
+          try {
+            sub.second(ws2812b_group);
+          } catch (const std::exception& e) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
+          } catch (...) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown exception.");
+          }
+        }
+      }
+    }
+  }
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
@@ -424,6 +445,8 @@ void MeasurementManagerImpl::StateMachine() {
       actions.pop();
     }
 
+    notifyWS2812B();
+
     // state transition
     _measurement_state = MeasurementState::request_tof_measurement;
     break;
@@ -502,7 +525,7 @@ void MeasurementManagerImpl::StateMachine() {
       }
 
       if (success) {
-        int error = notifyToFData();
+        int error = notifyVL53L8CX();
         if (error != 0)
           logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while parsing tof measurements from " + std::to_string(error) + " sensor(s)");
       }
@@ -529,7 +552,7 @@ void MeasurementManagerImpl::StateMachine() {
       }
 
       if (success) {
-        int error = notifyThermalData();
+        int error = notifyHTPA32();
         if (error != 0)
           logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while parsing thermal measurements from " + std::to_string(error) + " sensor(s)");
       }

@@ -158,8 +158,9 @@ private:
 
   bool waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept;
 
-  int notifyToFData();
-  int notifyThermalData();
+  int notifyVL53L8CX();
+  int notifyHTPA32();
+  void notifyWS2812B();
   void notifyState(const ManagerState state);
 
   const ManagerParams _params;
