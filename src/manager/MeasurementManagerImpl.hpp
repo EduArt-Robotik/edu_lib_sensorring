@@ -26,7 +26,6 @@
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/manager/ManagerTypes.hpp"
-#include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
@@ -72,18 +71,6 @@ public:
    * @return true if the measurement thread is running.
    */
   bool isMeasuring() noexcept;
-
-  /**
-   * @brief Register a client to receive state and measurement callbacks.
-   * @param[in] client Client to register; receives future notifications.
-   */
-  void registerClient(MeasurementClient* client);
-
-  /**
-   * @brief Unregister a client; it will no longer receive notifications.
-   * @param[in] client Client to unregister.
-   */
-  void unregisterClient(MeasurementClient* client);
 
   /**
    * @brief Subscribe to state changes; callback is invoked when the state changes.
@@ -191,9 +178,6 @@ private:
   bool _is_tof_throttled;
   bool _is_thermal_throttled;
   bool _thermal_measurement_flag;
-
-  mutable Mutex _client_mutex;
-  std::set<MeasurementClient*> _clients;
 
   Mutex _extra_actions_mutex;
   std::queue<std::function<void()> > _extra_actions;

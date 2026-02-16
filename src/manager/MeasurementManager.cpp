@@ -30,14 +30,6 @@ void MeasurementManager::enqueueExtraAction(std::function<void()> action) {
 ==========================================================================================
 */
 
-void MeasurementManager::registerClient(MeasurementClient* observer) {
-  return _mm_impl->registerClient(observer);
-}
-
-void MeasurementManager::unregisterClient(MeasurementClient* observer) {
-  return _mm_impl->unregisterClient(observer);
-}
-
 ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
 }

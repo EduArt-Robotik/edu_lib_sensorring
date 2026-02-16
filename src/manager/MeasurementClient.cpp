@@ -1,0 +1,99 @@
+#include "sensorring/manager/MeasurementClient.hpp"
+
+#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/manager/ManagerTypes.hpp"
+
+namespace eduart {
+
+namespace manager {
+
+MeasurementClient::~MeasurementClient() {
+  unregisterClient();
+}
+
+bool MeasurementClient::registerClient(MeasurementManager* manager) {
+  if (!manager) {
+    return false;
+  }
+
+  if (_managers.find(manager) == _managers.end()) {
+    _managers.insert(manager);
+    auto state_token                = manager->subscribeToStateChanges(std::bind(&MeasurementClient::onStateChange, this, std::placeholders::_1));
+    auto tof_token                  = manager->subscribeToDeviceGroup(DeviceGroupKey::ToF, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
+    auto thermal_token              = manager->subscribeToDeviceGroup(DeviceGroupKey::Thermal, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
+    _state_subscriptions[manager]   = state_token;
+    _tof_subscriptions[manager]     = tof_token;
+    _thermal_subscriptions[manager] = thermal_token;
+    return true;
+  }
+  return false;
+}
+
+bool MeasurementClient::unregisterClient() {
+  bool success = false;
+  for (auto manager : _managers) {
+    if (manager) {
+      manager->unsubscribe(_state_subscriptions[manager]);
+      manager->unsubscribe(_tof_subscriptions[manager]);
+      manager->unsubscribe(_thermal_subscriptions[manager]);
+      success = _managers.erase(manager);
+    }
+  }
+  return success;
+}
+
+bool MeasurementClient::unregisterClient(MeasurementManager* manager) {
+  if (!manager) {
+    return false;
+  }
+  return _managers.erase(manager);
+}
+
+void MeasurementClient::onTofDispatcher(const device::DeviceGroup& group) {
+  std::vector<measurement::TofMeasurement> raw_measurement_vec;
+  std::vector<measurement::TofMeasurement> transformed_measurement_vec;
+
+  group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([&raw_measurement_vec, &transformed_measurement_vec](device::VL53L8CX_Device* device) {
+    if (!device->getEnable())
+      return;
+    auto [raw_meas, raw_state] = device->getLatestRawMeasurement();
+    if (raw_state == device::SensorState::SensorOK) {
+      if (!raw_meas.point_cloud.data.empty())
+        raw_measurement_vec.emplace_back(raw_meas);
+    }
+    auto [trans_meas, trans_state] = device->getLatestTransformedMeasurement();
+    if (trans_state == device::SensorState::SensorOK) {
+      if (!trans_meas.point_cloud.data.empty())
+        transformed_measurement_vec.emplace_back(trans_meas);
+    }
+  });
+
+  if (!raw_measurement_vec.empty()) {
+    onRawTofMeasurement(raw_measurement_vec);
+  }
+  if (!transformed_measurement_vec.empty()) {
+    onTransformedTofMeasurement(transformed_measurement_vec);
+  }
+}
+
+void MeasurementClient::onThermalDispatcher(const device::DeviceGroup& group) {
+  std::vector<measurement::ThermalMeasurement> measurement_vec;
+
+  group.invokeForEachDeviceOfType<device::HTPA32_Device>([&measurement_vec](device::HTPA32_Device* device) {
+    if (!device->getEnable())
+      return;
+    auto [meas, state] = device->getLatestMeasurement();
+    if (state == device::SensorState::SensorOK) {
+      measurement_vec.emplace_back(meas);
+    }
+  });
+
+  if (!measurement_vec.empty()) {
+    onThermalMeasurement(measurement_vec);
+  }
+}
+
+} // namespace manager
+
+} // namespace eduart

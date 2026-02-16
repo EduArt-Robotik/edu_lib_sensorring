@@ -14,7 +14,6 @@ namespace eduart {
 
 namespace manager {
 
-
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
     : _params(params)
     , _manager_state(ManagerState::Uninitialized)
@@ -81,38 +80,6 @@ void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::registerClient(MeasurementClient* client) {
-  if (client) {
-    LockGuard lock(_client_mutex);
-    auto result = _clients.insert(client);
-
-    // Check if the client was registered
-    if (result.second) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new measurement client");
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client is already registered");
-    }
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be registered is not valid");
-  }
-}
-
-void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
-  if (client) {
-    LockGuard lock(_client_mutex);
-    auto result = _clients.erase(client);
-
-    // Check if the client was removed
-    if (result > 0) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Removed measurement client");
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not registered");
-    }
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
-  }
-}
-
 SubscriberToken MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   if (!callback) {
     return SubscriberToken();
@@ -160,40 +127,15 @@ bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, 
 
 int MeasurementManagerImpl::notifyToFData() {
   int error_frames = 0;
-  std::vector<measurement::TofMeasurement> raw_measurement_vec, transformed_measurement_vec;
 
-  _device_groups.at(DeviceGroupKey::ToF).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames, &raw_measurement_vec, &transformed_measurement_vec](device::VL53L8CX_Device* device) {
+  _device_groups.at(DeviceGroupKey::ToF).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
     if (!device->getEnable())
       return;
-    auto [raw_meas, raw_state] = device->getLatestRawMeasurement();
-    if (raw_state == device::SensorState::SensorOK) {
-      if (!raw_meas.point_cloud.data.empty())
-        raw_measurement_vec.emplace_back(raw_meas);
-    } else {
+    auto state = device->getLatestRawMeasurement().second;
+    if (state != device::SensorState::SensorOK) {
       error_frames++;
     }
-    auto [trans_meas, trans_state] = device->getLatestTransformedMeasurement();
-    if (trans_state == device::SensorState::SensorOK) {
-      if (!trans_meas.point_cloud.data.empty())
-        transformed_measurement_vec.emplace_back(trans_meas);
-    }
   });
-
-  if (!raw_measurement_vec.empty()) {
-    LockGuard lock(_client_mutex);
-    for (auto client : _clients) {
-      if (client)
-        client->onRawTofMeasurement(raw_measurement_vec);
-    }
-  }
-
-  if (!transformed_measurement_vec.empty()) {
-    LockGuard lock(_client_mutex);
-    for (auto client : _clients) {
-      if (client)
-        client->onTransformedTofMeasurement(transformed_measurement_vec);
-    }
-  }
 
   {
     LockGuard lock(_subscriber_mutex);
@@ -219,26 +161,15 @@ int MeasurementManagerImpl::notifyToFData() {
 
 int MeasurementManagerImpl::notifyThermalData() {
   int error_frames = 0;
-  std::vector<measurement::ThermalMeasurement> measurement_vec;
 
-  _device_groups.at(DeviceGroupKey::Thermal).invokeForEachDeviceOfType<device::HTPA32_Device>([&error_frames, &measurement_vec](device::HTPA32_Device* device) {
+  _device_groups.at(DeviceGroupKey::Thermal).invokeForEachDeviceOfType<device::HTPA32_Device>([&error_frames](device::HTPA32_Device* device) {
     if (!device->getEnable())
       return;
-    auto [meas, state] = device->getLatestMeasurement();
-    if (state == device::SensorState::SensorOK) {
-      measurement_vec.emplace_back(meas);
-    } else {
+    auto state = device->getLatestMeasurement().second;
+    if (state != device::SensorState::SensorOK) {
       error_frames++;
     }
   });
-
-  if (!measurement_vec.empty()) {
-    LockGuard lock(_client_mutex);
-    for (auto client : _clients) {
-      if (client)
-        client->onThermalMeasurement(measurement_vec);
-    }
-  }
 
   {
     LockGuard lock(_subscriber_mutex);
@@ -263,16 +194,7 @@ int MeasurementManagerImpl::notifyThermalData() {
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
-  LockGuard lock(_client_mutex);
-  if (_manager_state != state) {
-    _manager_state = state;
-    for (auto client : _clients) {
-      if (client)
-        client->onStateChange(state);
-    }
-  }
-
-  LockGuard lock2(_subscriber_mutex);
+  LockGuard lock(_subscriber_mutex);
   for (auto& sub : _state_subscriptions) {
     if (sub.second) {
       try {

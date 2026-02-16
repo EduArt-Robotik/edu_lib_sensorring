@@ -56,7 +56,7 @@ int main(int, char*[]) {
     auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
 
     // Register the proxy with the LogMeasurementManager to get the measurements
-    manager->registerClient(proxy.get());
+    proxy->registerClient(manager.get());
 
     // Start the measurements
     manager->startMeasuring();

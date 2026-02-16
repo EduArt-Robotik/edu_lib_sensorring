@@ -3,7 +3,7 @@
 /**
  * @file   MeasurementProxy.hpp
  * @author EduArt Robotik GmbH
- * @brief  Proxy class for the depth map C++ example
+ * @brief  Proxy class for the minimal C++ example
  * @date 2025-11-18
  */
 
@@ -23,10 +23,16 @@ namespace eduart {
 class MeasurementProxy : public manager::MeasurementClient, public logger::LoggerClient {
 public:
   /// Constructor
-  MeasurementProxy() noexcept = default;
+  MeasurementProxy();
 
   /// Destructor
-  ~MeasurementProxy() noexcept = default;
+  ~MeasurementProxy();
+
+  /**
+   * @brief Get the rate of measurements since the last call of this method
+   * @return measurement rate in Hz
+   */
+  double getRate();
 
   /**
    * @brief Check if the client got the first measurement
@@ -45,14 +51,15 @@ public:
   void onOutputLog([[maybe_unused]] logger::LogVerbosity verbosity, [[maybe_unused]] const std::string& msg) override;
 
 private:
-  static constexpr double MIN_DIST = 0.0;
-  static constexpr double MAX_DIST = 1.0;
+  using Clock     = std::chrono::steady_clock;
+  using Duration  = Clock::duration;
+  using TimePoint = Clock::time_point;
+  using toSeconds = std::chrono::duration<double>;
 
-  std::string depthToColor(double depth, double min, double max);
-  void printDepthMap(const measurement::PointCloud& points);
-
-  std::atomic<bool> _init_flag    = false;
-  std::atomic<bool> _reset_cursor = false;
+  Duration _duration                 = Duration::zero();
+  TimePoint _last_measurement        = Clock::now();
+  std::atomic<bool> _init_flag       = false;
+  std::atomic<unsigned int> _counter = 0;
 };
 
 } // namespace eduart

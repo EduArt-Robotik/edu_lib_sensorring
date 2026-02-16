@@ -16,7 +16,6 @@
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/manager/ManagerTypes.hpp"
-#include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
@@ -69,20 +68,6 @@ public:
   bool isMeasuring() noexcept;
 
   /**
-   * @brief Register an observer to receive state and measurement callbacks.
-   * @param[in] observer Client to register; receives future notifications.
-   * @throw std::runtime_error if Logger::log() throws.
-   */
-  void registerClient(MeasurementClient* observer);
-
-  /**
-   * @brief Unregister an observer; it will no longer receive notifications.
-   * @param[in] observer Client to unregister.
-   * @throw std::runtime_error if Logger::log() throws.
-   */
-  void unregisterClient(MeasurementClient* observer);
-
-  /**
    * @brief Subscribe to state changes; callback is invoked when the state changes.
    * @param[in] callback Invoked with the updated ManagerState.
    * @return Token to pass to unsubscribe.
@@ -95,7 +80,7 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return Token to pass to unsubscribe.
    */
-  SubscriberToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback);
+  SubscriberToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback); //ToDo: Switch to DeviceType -> no double housekeeping
 
   /**
    * @brief Cancel a subscription.

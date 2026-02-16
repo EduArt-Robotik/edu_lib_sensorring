@@ -9,19 +9,17 @@
 
 #pragma once
 
-#include <ostream>
-#include <string>
-
+#include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/types/SubscriberToken.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
 namespace eduart {
 
 namespace manager {
-
-
 
 /**
  * @class MeasurementClient
@@ -32,7 +30,24 @@ namespace manager {
 class SENSORRING_EXPORT MeasurementClient {
 public:
   /// Destructor
-  virtual ~MeasurementClient() = default;
+  virtual ~MeasurementClient();
+
+  /**
+   * Register the client to the MeasurementManager
+   * @param[in] manager the MeasurementManager to register to
+   */
+  bool registerClient(MeasurementManager* manager);
+
+  /**
+   * Unregister the client from the MeasurementManager
+   */
+  bool unregisterClient();
+
+  /**
+   * Unregister the client from a specific MeasurementManager
+   * @param[in] manager the MeasurementManager to unregister from
+   */
+  bool unregisterClient(MeasurementManager* manager);
 
   /**
    * Callback method for state changes of the state machine worker
@@ -63,6 +78,15 @@ public:
    * measurements in the common transformed coordinate frame
    */
   virtual void onThermalMeasurement([[maybe_unused]] const std::vector<measurement::ThermalMeasurement>& measurement_vec) {};
+
+private:
+  std::unordered_set<MeasurementManager*> _managers;
+  std::unordered_map<MeasurementManager*, SubscriberToken> _state_subscriptions;
+  std::unordered_map<MeasurementManager*, SubscriberToken> _tof_subscriptions;
+  std::unordered_map<MeasurementManager*, SubscriberToken> _thermal_subscriptions;
+
+  void onTofDispatcher(const device::DeviceGroup& group);
+  void onThermalDispatcher(const device::DeviceGroup& group);
 };
 
 } // namespace manager

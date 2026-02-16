@@ -68,7 +68,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   try {
     auto sensor_ring = eduart::ring::SensorRing::create(ring);
     MeasurementManager manager(params, std::move(sensor_ring));
-    manager.registerClient(&client);
+    client.registerClient(&manager);
 
     if (!manager.startMeasuring()) {
       manager.stopMeasuring();
