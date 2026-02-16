@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <functional>
 #include <future>
 #include <memory>
@@ -24,8 +25,9 @@
 #include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/manager/ManagerSubscription.hpp"
+#include "sensorring/manager/ManagerTypes.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
+#include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
 
@@ -84,18 +86,25 @@ public:
   void unregisterClient(MeasurementClient* client);
 
   /**
+   * @brief Subscribe to state changes; callback is invoked when the state changes.
+   * @param[in] callback Invoked with the updated ManagerState.
+   * @return Token to pass to unsubscribe.
+   */
+  SubscriberToken subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
+
+  /**
    * @brief Subscribe to device group updates; callback is invoked when the group is updated.
    * @param[in] key Device group to subscribe to.
    * @param[in] callback Invoked with the updated DeviceGroup.
-   * @return Token to pass to unsubscribeFromDeviceGroup.
+   * @return Token to pass to unsubscribe.
    */
-  SubscriptionToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback);
+  SubscriberToken subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
-   * @brief Cancel a device group subscription.
-   * @param[in] token Token returned by subscribeToDeviceGroup.
+   * @brief Cancel a subscription (state or device group).
+   * @param[in] token Token returned by subscribeToStateChanges or subscribeToDeviceGroup.
    */
-  void unsubscribeFromDeviceGroup(SubscriptionToken token);
+  void unsubscribe(SubscriberToken token);
 
   /**
    * @brief Return the current health state of the state machine worker.
@@ -198,7 +207,8 @@ private:
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   mutable Mutex _subscriber_mutex;
-  std::unordered_map<DeviceGroupKey, std::unordered_map<SubscriptionToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupKeyHash> _subscriptions;
+  std::unordered_map<SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
+  std::unordered_map<DeviceGroupKey, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceGroupKeyHash> _device_subscriptions;
 };
 
 } // namespace manager

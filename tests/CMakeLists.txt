@@ -11,6 +11,7 @@ add_executable(sensorring_tests
     unit/test_can_endpoint_map.cpp
     unit/test_DeviceID.cpp
     unit/test_DeviceGroup.cpp
+    unit/test_SubscriberToken.cpp
 )
 
 target_include_directories(sensorring_tests PRIVATE

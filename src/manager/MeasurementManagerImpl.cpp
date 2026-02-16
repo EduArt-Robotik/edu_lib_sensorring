@@ -14,6 +14,7 @@ namespace eduart {
 
 namespace manager {
 
+
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
     : _params(params)
     , _manager_state(ManagerState::Uninitialized)
@@ -112,21 +113,34 @@ void MeasurementManagerImpl::unregisterClient(MeasurementClient* client) {
   }
 }
 
-SubscriptionToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+SubscriberToken MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   if (!callback) {
-    return 0;
+    return SubscriberToken();
   }
-  static std::atomic<SubscriptionToken> next_token{0};
-  const SubscriptionToken token = next_token++;
+  auto token = SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
-  auto& key_subs = _subscriptions.try_emplace(key).first->second;
+  _state_subscriptions.emplace(token, std::move(callback));
+  return token;
+}
+
+SubscriberToken MeasurementManagerImpl::subscribeToDeviceGroup(DeviceGroupKey key, std::function<void(const device::DeviceGroup&)> callback) {
+  if (!callback) {
+    return SubscriberToken();
+  }
+  auto token = SubscriberToken::getNextToken();
+  LockGuard lock(_subscriber_mutex);
+  auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
   key_subs.emplace(token, std::move(callback));
   return token;
 }
 
-void MeasurementManagerImpl::unsubscribeFromDeviceGroup(SubscriptionToken token) {
+void MeasurementManagerImpl::unsubscribe(SubscriberToken token) {
+  if (!token.isValid()) {
+    return;
+  }
   LockGuard lock(_subscriber_mutex);
-  for (auto& [key, subscriptions] : _subscriptions) {
+  _state_subscriptions.erase(token);
+  for (auto& [key, subscriptions] : _device_subscriptions) {
     subscriptions.erase(token);
   }
 }
@@ -184,18 +198,16 @@ int MeasurementManagerImpl::notifyToFData() {
   {
     LockGuard lock(_subscriber_mutex);
     const device::DeviceGroup& tof_group = _device_groups.at(DeviceGroupKey::ToF);
-    auto it = _subscriptions.find(DeviceGroupKey::ToF);
-    if (it != _subscriptions.end()) {
+    auto it                              = _device_subscriptions.find(DeviceGroupKey::ToF);
+    if (it != _device_subscriptions.end()) {
       for (auto& sub : it->second) {
         if (sub.second) {
           try {
             sub.second(tof_group);
           } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
-              "Device group ToF subscription callback threw: " + std::string(e.what()));
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group ToF subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
-              "Device group ToF subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group ToF subscription callback threw unknown exception.");
           }
         }
       }
@@ -231,18 +243,16 @@ int MeasurementManagerImpl::notifyThermalData() {
   {
     LockGuard lock(_subscriber_mutex);
     const device::DeviceGroup& thermal_group = _device_groups.at(DeviceGroupKey::Thermal);
-    auto it = _subscriptions.find(DeviceGroupKey::Thermal);
-    if (it != _subscriptions.end()) {
+    auto it                                  = _device_subscriptions.find(DeviceGroupKey::Thermal);
+    if (it != _device_subscriptions.end()) {
       for (auto& sub : it->second) {
         if (sub.second) {
           try {
             sub.second(thermal_group);
           } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
-              "Device group Thermal subscription callback threw: " + std::string(e.what()));
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group Thermal subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
-              "Device group Thermal subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group Thermal subscription callback threw unknown exception.");
           }
         }
       }
@@ -259,6 +269,19 @@ void MeasurementManagerImpl::notifyState(const ManagerState state) {
     for (auto client : _clients) {
       if (client)
         client->onStateChange(state);
+    }
+  }
+
+  LockGuard lock2(_subscriber_mutex);
+  for (auto& sub : _state_subscriptions) {
+    if (sub.second) {
+      try {
+        sub.second(state);
+      } catch (const std::exception& e) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw: " + std::string(e.what()));
+      } catch (...) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw unknown exception.");
+      }
     }
   }
 }

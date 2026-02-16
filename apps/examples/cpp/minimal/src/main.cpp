@@ -10,6 +10,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
@@ -89,9 +90,19 @@ int main(int, char*[]) {
     auto sensor_ring = ring::SensorRing::create(ring);
     auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
 
+    // Subscribe to the state changes to get the measurements
+    auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
+      std::cout << "State changed to: " << state << std::endl;
+    });
+
     // Subscribe to the ToF device group to get the measurements
     auto tof_sub = manager->subscribeToDeviceGroup(manager::DeviceGroupKey::ToF, [&rate](const device::DeviceGroup&) {
       rate->tick();
+    });
+
+    // Subscribe to the log messages
+    auto log_sub = logger::Logger::getInstance()->subscribe([](const logger::LogVerbosity verbosity, const std::string& msg) {
+      std::cout << "[" << verbosity << "] " << msg << std::endl;
     });
 
     // Start the measurements
@@ -101,14 +112,20 @@ int main(int, char*[]) {
     }
 
     if (manager->isMeasuring()) {
-      std::cout << std::endl << "Printing measurement rate:" << std::endl;
-      while (manager->isMeasuring()) {
-        std::cout << "Current rate: " << std::fixed << std::setprecision(2) << std::setw(5) << rate->getRate() << " Hz\r" << std::flush;
+      std::cout << std::endl << "Start printing measurement rate." << std::endl;
+      unsigned int counter = 0;
+      while (manager->isMeasuring() && counter < 10) {
+        std::cout << "Current measurement rate: " << std::fixed << std::setprecision(2) << std::setw(5) << rate->getRate() << " Hz\r" << std::flush;
         std::this_thread::sleep_for(1s);
+        counter++;
       }
 
-      // Unsubscribe before stopping (optional; manager cleans up on destruction)
-      manager->unsubscribeFromDeviceGroup(tof_sub);
+      // Unsubscribe from manager before stopping (optional)
+      manager->unsubscribe(state_sub);
+      manager->unsubscribe(tof_sub);
+
+      // Unsubscribe from logger before stopping (optional)
+      logger::Logger::getInstance()->unsubscribe(log_sub);
 
       // Stop the measurements
       manager->stopMeasuring();

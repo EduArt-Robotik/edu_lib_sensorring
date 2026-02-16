@@ -9,12 +9,17 @@
 
 #pragma once
 
+#include <atomic>
+#include <cstdint>
+#include <functional>
 #include <mutex>
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #include "sensorring/logger/LoggerClient.hpp"
+#include "sensorring/types/SubscriberToken.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -49,6 +54,19 @@ public:
   void unregisterClient(LoggerClient* client) noexcept;
 
   /**
+   * @brief Subscribe to log messages
+   * @param[in] token Subscription token
+   * @param[in] callback Callback function to be called when a log message is received
+   */
+   SubscriberToken subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
+
+  /**
+   * @brief Unsubscribe from log messages
+   * @param[in] token Subscription token
+   */
+  void unsubscribe(SubscriberToken token);
+
+  /**
    * @brief Log a message that will be relayed to all registered observers
    * @param[in] verbosity Log verbosity of the message
    * @param[in] msg Log message
@@ -72,6 +90,9 @@ private:
   using LockGuard = std::lock_guard<std::recursive_mutex>;
 
   std::set<logger::LoggerClient*> _clients;
+
+  mutable std::recursive_mutex _subscriber_mutex;
+  std::unordered_map<SubscriberToken, std::function<void(const LogVerbosity verbosity, const std::string& msg)> > _subscriptions;
 };
 
 } // namespace logger

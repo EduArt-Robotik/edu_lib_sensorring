@@ -4,6 +4,7 @@ namespace eduart {
 
 namespace logger {
 
+
 Logger* Logger::getInstance() noexcept {
   static Logger* instance = new Logger;
   return instance;
@@ -41,11 +42,33 @@ void Logger::unregisterClient(LoggerClient* client) noexcept {
   }
 }
 
+SubscriberToken Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
+  if (!callback) {
+    return SubscriberToken();
+  }
+
+  auto token = SubscriberToken::getNextToken();
+  LockGuard lock(_subscriber_mutex);
+  _subscriptions.emplace(token, std::move(callback));
+  return token;
+}
+
+void Logger::unsubscribe(SubscriberToken token) {
+  LockGuard lock(_subscriber_mutex);
+  _subscriptions.erase(token);
+}
+
 void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
   LockGuard lock(_client_mutex);
   for (auto& client : _clients) {
     if (client)
       client->onOutputLog(verbosity, msg);
+  }
+  LockGuard sub_lock(_subscriber_mutex);
+  for (auto& sub : _subscriptions) {
+    if (sub.second) {
+      sub.second(verbosity, msg);
+    }
   }
   if (verbosity == LogVerbosity::Exception) {
     throw std::runtime_error(msg);
