@@ -25,7 +25,7 @@ namespace device {
  * @enum SensorOrientation
  * @brief Possible orientations of a sensor board. Used to rotate the thermal images and to mirror the light animations.
  */
-enum class SENSORRING_EXPORT Orientation {
+enum class Orientation {
   left,
   right,
   none

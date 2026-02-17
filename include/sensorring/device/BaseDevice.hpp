@@ -44,7 +44,7 @@ struct SENSORRING_EXPORT DeviceParams {
  * @enum DeviceState
  * @brief Lifecycle and runtime state of a device.
  */
-enum class SENSORRING_EXPORT DeviceState {
+enum class DeviceState {
   UNDEFINED,
   INITIALIZED,
   IDLE,

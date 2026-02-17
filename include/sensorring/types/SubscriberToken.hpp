@@ -47,15 +47,16 @@ private:
   SubscriberToken(TokenType value) noexcept : _value(value) {};
 
   TokenType _value;
-
 };
 
 } // namespace eduart
 
+#ifndef SWIG
 namespace std {
 
-template <> struct hash<eduart::SubscriberToken> {
+template <> struct SENSORRING_EXPORT hash<eduart::SubscriberToken> {
   std::size_t operator()(const eduart::SubscriberToken& token) const noexcept { return std::hash<eduart::SubscriberToken::TokenType>{}(token.value()); }
 };
 
 } // namespace std
+#endif // SWIG

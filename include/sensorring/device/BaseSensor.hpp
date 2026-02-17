@@ -29,7 +29,7 @@ namespace device {
  * @enum SensorState
  * @brief State of a sensor instance.
  */
-enum class SENSORRING_EXPORT SensorState {
+enum class SensorState {
   SensorInit,
   SensorOK,
   ReceiveError

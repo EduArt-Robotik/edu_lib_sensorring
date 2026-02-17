@@ -9,13 +9,17 @@
 
 #pragma once
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include <cstdint>
 
 namespace eduart {
 
 namespace light {
 
-enum class SENSORRING_EXPORT LightMode : std::uint8_t {
+/**
+ * @enum LightMode
+ * @brief Light mode enumeration.
+ */
+enum class LightMode : std::uint8_t {
   Off             = 0x02,
   Dimmed          = 0x03,
   HighBeam        = 0x04,

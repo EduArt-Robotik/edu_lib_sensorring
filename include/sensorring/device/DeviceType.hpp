@@ -22,7 +22,7 @@ namespace device {
  * @enum DeviceType
  * @brief Supported device hardware types used for device registration and grouping.
  */
-enum class SENSORRING_EXPORT DeviceType {
+enum class DeviceType {
   /// Time-of-flight sensor (VL53L8CX).
   VL53L8CX,
   /// Thermal sensor (HTPA32).

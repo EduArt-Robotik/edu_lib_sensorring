@@ -22,7 +22,7 @@ namespace manager {
  * @enum ManagerState
  * @brief Health state of the sensorring state machine worker
  */
-enum class SENSORRING_EXPORT ManagerState {
+enum class ManagerState {
   Uninitialized,
   Initialized,
   Running,

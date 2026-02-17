@@ -19,7 +19,7 @@ namespace logger {
  * @enum LogVerbosity
  * @brief Verbosity levels for logger output and filtering.
  */
-enum class SENSORRING_EXPORT LogVerbosity {
+enum class LogVerbosity {
   /// Fine-grained diagnostic messages.
   Debug,
   /// General informational messages.
