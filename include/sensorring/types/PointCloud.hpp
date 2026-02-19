@@ -30,10 +30,10 @@ struct SENSORRING_EXPORT PointData {
   double raw_distance = 0.0;
 
   /// Standard deviation associated with the points location
-  double sigma        = 0.0;
+  double sigma = 0.0;
 
   /// User assigned index of the sensor that measured the point
-  int user_idx        = 0;
+  int user_idx = 0;
 };
 
 /**

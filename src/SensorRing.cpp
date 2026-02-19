@@ -11,7 +11,6 @@
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
-
 namespace eduart {
 
 namespace ring {

@@ -42,19 +42,19 @@ class SENSORRING_EXPORT FalseColorImage : public GenericRGBImage<std::uint8_t, T
  */
 struct SENSORRING_EXPORT ThermalMeasurement {
   /// Frame number of the ThermalMeasurement
-  unsigned int frame_id  = 0;
+  unsigned int frame_id = 0;
 
   /// User assigned index of the sensor that measured the point
-  unsigned int user_idx  = 0;
+  unsigned int user_idx = 0;
 
   /// Ambient temperature in °C
   double t_ambient_deg_c = 0;
 
   /// Minimum temperature recorded in the measurement in °C
-  double min_deg_c       = 0;
+  double min_deg_c = 0;
 
   /// Maximum temperature recorded in the measurement in °C
-  double max_deg_c       = 0;
+  double max_deg_c = 0;
 
   /// Image structure where each pixel represents the temperature measured at that point in °C
   TemperatureImage temp_data_deg_c;

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "sensorring/Parameter.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/types/LightMode.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 

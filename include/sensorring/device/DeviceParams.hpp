@@ -20,7 +20,7 @@ namespace device {
  */
 struct SENSORRING_EXPORT DeviceParams {
   /// Device identifier (type, name, index).
-  unsigned int user_idx;
+  int user_idx;
   /// Whether the device is enabled at creation.
   bool enable;
 };

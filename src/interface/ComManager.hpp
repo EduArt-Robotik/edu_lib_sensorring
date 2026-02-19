@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "sensorring/types/InterfaceType.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 
 #include "ComInterface.hpp"
 

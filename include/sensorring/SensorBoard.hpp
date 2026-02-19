@@ -12,9 +12,10 @@
 #include <memory>
 #include <mutex>
 
-#include "sensorring/Parameter.hpp"
+#include "sensorring/SensorBoardParams.hpp"
+#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/interface/ComObserver.hpp"
-#include "sensorring/types/EnumerationInformation.hpp"
 
 namespace eduart {
 

@@ -25,6 +25,7 @@
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
