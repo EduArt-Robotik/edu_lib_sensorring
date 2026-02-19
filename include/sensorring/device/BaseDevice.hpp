@@ -9,10 +9,11 @@
 
 #pragma once
 
+#include "sensorring/math/Math.hpp"
+
 #include "BaseSensor.hpp"
 #include "DeviceID.hpp"
 #include "IDevice.hpp"
-#include "sensorring/math/Math.hpp"
 
 namespace eduart {
 
@@ -27,17 +28,6 @@ class SENSORRING_EXPORT DeviceImpl;
 struct SENSORRING_EXPORT DevicePoseOffset {
   math::Vector3 board_center_translation_offset;
   math::Vector3 board_center_rotation_offset;
-};
-
-/**
- * @struct DeviceParams
- * @brief Parameters for device creation: identifier and enable flag.
- */
-struct SENSORRING_EXPORT DeviceParams {
-  /// Device identifier (type, name, index).
-  DeviceID id;
-  /// Whether the device is enabled at creation.
-  bool enabled;
 };
 
 /**
@@ -81,8 +71,8 @@ public:
   /// Get the pose offset of this device relative to the board center.
   DevicePoseOffset getPoseOffset() const { return _pose_offset; }
 
-  //void setEnable(bool enable);
-  //bool getEnable() const;
+  // void setEnable(bool enable);
+  // bool getEnable() const;
 
 protected:
   /// Current lifecycle/runtime state.
@@ -92,7 +82,10 @@ protected:
   /// Whether the device is enabled.
   bool _enable;
   /// Pose offset of the device relative to the sensor board center.
-  DevicePoseOffset _pose_offset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+  DevicePoseOffset _pose_offset{
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 }
+  };
 };
 
 } // namespace device

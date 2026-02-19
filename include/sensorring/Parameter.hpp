@@ -13,6 +13,10 @@
 #include <string>
 #include <vector>
 
+#include "sensorring/device/hardware/SensorBoardType.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/InterfaceType.hpp"
@@ -20,82 +24,14 @@
 namespace eduart {
 
 namespace device {
-
-/**
- * @enum SensorOrientation
- * @brief Possible orientations of a sensor board. Used to rotate the thermal images and to mirror the light animations.
- */
-enum class Orientation {
-  left,
-  right,
-  none
-};
-
-/**
- * @struct WS2812b_Params
- * @brief Parameter structure of the sensor lights of a sensor board. Not all sensor boards have lights.
- */
-struct SENSORRING_EXPORT WS2812b_Params {
-  /// Enable the lights.
-  bool enable = false;
-
-  /// Orientation of the sensor board. Used to to mirror the light animations.
-  Orientation orientation = Orientation::none;
-};
-
-/**
- * @struct HTPA32_Params
- * @brief Parameter structure of the thermal sensor of a sensor board. Not all sensor boards have thermal sensors.
- */
-struct SENSORRING_EXPORT HTPA32_Params {
-  /// Customizable index that is returned with every measurement from this sensor.
-  int user_idx = 0;
-
-  /// Enable thermal measurements from this sensor.
-  bool enable = false;
-
-  /// Minimal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
-  double t_min_deg_c = 0;
-
-  /// Maximal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
-  double t_max_deg_c = 0;
-
-  /// Enable automatic color scaling of the thermal images using the coldest and the hottest temperature in each image.
-  bool auto_min_max = false;
-
-  /// Save the thermal sensors eeprom content to a local file to only require a transfer once.
-  bool use_eeprom_file = false;
-
-  /// Save the calibration data for the thermal sensor to a local file to only require the calibration procedure once.
-  bool use_calibration_file = false;
-
-  /// Directory of the eeprom file. The user requires read and write access to this directory.
-  std::string eeprom_dir = "";
-
-  /// Directory of the calibration data file.  The user requires read and write access to this directory.
-  std::string calibration_dir = "";
-
-  /// Orientation of the sensor board. Used to flip the image upside down.
-  Orientation orientation = Orientation::none;
-};
-
-/**
- * @struct VL53L8CX_Params
- * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
- */
-struct SENSORRING_EXPORT VL53L8CX_Params {
-  /// Customizable index that is returned with every measurement from this sensor.
-  int user_idx = 0;
-
-  /// Enable time of flight measurements from this sensor.
-  bool enable = false;
-};
-
 /**
  * @struct SensorBoardParams
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
 struct SENSORRING_EXPORT SensorBoardParams {
+  /// Hardware board type. When set to Undefined, the board is created with all supported device types (backward compatibility).
+  SensorBoardType board_type = SensorBoardType::Undefined;
+
   /// Rotation part of the sensors pose. The rotation is applied in the order Roll(x) - Pitch(y) - Yaw(z). Values: Euler angles in degrees
   math::Vector3 rotation = { 0, 0, 0 };
 
@@ -137,49 +73,33 @@ struct SENSORRING_EXPORT BusParams {
 namespace ring {
 
 /**
+ * @enum RingCreationMode
+ * @brief How the sensor ring is created: from explicit configuration or by auto-detecting connected hardware.
+ */
+enum class RingCreationMode {
+  /// Use bus_param_vec and board_param_vec to build the ring; optionally enforce that physical hardware matches (via ManagerParams::enforce_topology).
+  Configured,
+  /// Enumerate each bus and create one SensorBoard per discovered board; board_param_vec is ignored; default_board_params is applied to every discovered board.
+  AutoDetect
+};
+
+/**
  * @struct RingParams
  * @brief Parameter structure of a sensor ring. The sensor ring is the
  * abstraction of the whole sensor system and consists of an arbitrary number of
  * communication interfaces.
  */
 struct SENSORRING_EXPORT RingParams {
-  /// Parameters of the communication interfaces that will be included in the sensor ring. Each element belongs to a unique communication interface.
+  /// How to create the ring: Configured (use board_param_vec) or AutoDetect (enumerate and create from discovered boards).
+  RingCreationMode creation_mode = RingCreationMode::Configured;
+
+  /// Default board parameters used when creation_mode is AutoDetect; applied to every discovered board. Ignored when creation_mode is Configured.
+  device::SensorBoardParams default_board_params;
+
+  /// Parameters of the communication interfaces. For Configured: each bus lists its boards in board_param_vec. For AutoDetect: only interface_name and type are used; boards are discovered.
   std::vector<bus::BusParams> bus_param_vec;
 };
 
 } // namespace ring
-
-namespace manager {
-
-/**
- * @struct ManagerParams
- * @brief Parameter structure of the MeasurementManager. The MeasurementManager
- * handles the timing and communication of the whole system by running the
- * measurement state machine. One measurement manager manages exactly one sensor ring.
- */
-struct SENSORRING_EXPORT ManagerParams {
-  /// Timeout for the measurements before the error handler is called.
-  std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
-
-  /// Enable bit rate switching on the can bus interface.
-  bool enable_brs = false; // ToDo: remove
-
-  /// If set to true a formatted string describing the sensor topology is printed via the Logger after device enumeration in the state machine.
-  bool print_topology = true;
-
-  /// If set to true error handling is enabled to try to repair communication and timing errors. When set to false the MeasurementManager instantly shuts down when an error is detected.
-  bool repair_errors = true;
-
-  /// If set to true the MeasurementManager will only start when the configured topology matches the actual connected devices. If set to false the MeasurementManager will still start but only use the properly configured sensors.
-  bool enforce_topology = false;
-
-  /// Target frequency for the time of flight measurement. If set to 0.0 the measurements are executed as fast as possible.
-  double frequency_tof_hz = 0.0;
-
-  /// Target frequency for the thermal measurement. If set to 0.0 the measurements are executed as fast as possible.
-  double frequency_thermal_hz = 1.0;
-};
-
-} // namespace manager
 
 } // namespace eduart

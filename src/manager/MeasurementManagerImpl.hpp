@@ -22,7 +22,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/device/DeviceType.hpp"

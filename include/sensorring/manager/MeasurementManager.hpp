@@ -12,10 +12,10 @@
 #include <functional>
 #include <memory>
 
-#include "sensorring/Parameter.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/SubscriberToken.hpp"

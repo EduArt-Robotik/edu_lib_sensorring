@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "sensorring/Parameter.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
@@ -59,8 +59,8 @@ public:
    */
   std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
 
-  //std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
-  //std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
+  // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
+  // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
   /**
    * @brief Request Time-of-Flight measurements asynchronously on a set of devices.
    * @param[in] devices Vector of devices to trigger.

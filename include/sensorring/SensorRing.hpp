@@ -86,7 +86,7 @@ public:
    * @param[in] params Configuration parameters for the sensor ring
    * @return Unique pointer to the created SensorRing instance
    */
-   static std::unique_ptr<SensorRing> createFromEnumeration(RingParams params);
+  static std::unique_ptr<SensorRing> createFromEnumeration(RingParams params);
 
 private:
   const RingParams _params;

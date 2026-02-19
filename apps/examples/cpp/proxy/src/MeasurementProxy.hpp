@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <sensorring/logger/LoggerClient.hpp>
 #include <sensorring/manager/MeasurementClient.hpp>
 #include <sensorring/logger/LoggerClient.hpp>
 

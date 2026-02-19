@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "sensorring/Parameter.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 

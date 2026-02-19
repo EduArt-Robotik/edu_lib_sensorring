@@ -3,6 +3,7 @@
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
@@ -365,6 +366,20 @@ void MeasurementManagerImpl::StateMachine() {
           } else {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Counted the wrong number of sensors but the parameter \"enforce_topology\" is set to \"false\". Measurements will only include the configured sensors.");
             success = true;
+          }
+        }
+
+        if (success && _params.enforce_topology) {
+          const auto& enum_infos = sensor_bus->getEnumerationInfo();
+          const auto boards      = sensor_bus->getSensorBoards();
+          for (size_t i = 0; i < boards.size() && i < enum_infos.size(); ++i) {
+            const auto configured = boards[i]->getConfiguredBoardType();
+            if (configured != device::SensorBoardType::Undefined && configured != enum_infos[i].type) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
+                  "Board at index " + std::to_string(i) + " is configured as " + std::string(device::SensorBoardManager::getSensorBoardInfo(configured).name)
+                      + " but detected as " + std::string(device::SensorBoardManager::getSensorBoardInfo(enum_infos[i].type).name) + ". enforce_topology is true.");
+              success = false;
+            }
           }
         }
       } else {

@@ -11,7 +11,7 @@
 
 #include <memory>
 
-#include "sensorring/Parameter.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/types/LightMode.hpp"
 
