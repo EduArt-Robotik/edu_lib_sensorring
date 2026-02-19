@@ -35,6 +35,10 @@ const EnumerationInformation& SensorBoard::getEnumInfo() const {
   return _enum_info;
 }
 
+SensorBoardType SensorBoard::getBoardType() const {
+  return _params.board_type;
+}
+
 std::vector<BaseDevice*> SensorBoard::getDevices() const {
   std::vector<BaseDevice*> devices;
   devices.reserve(_device_vec.size());

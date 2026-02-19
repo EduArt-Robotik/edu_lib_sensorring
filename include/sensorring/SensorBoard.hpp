@@ -25,21 +25,68 @@ class ComInterface;
 
 namespace device {
 
+/**
+ * @struct SensorBoard
+ * @brief One sensor board on a bus: holds configured devices and receives COM callbacks for enumeration and data.
+ */
 struct SensorBoard : com::ComObserver, IDevice {
 public:
+  /**
+   * @brief Construct the board with parameters, communication interface, index, and owned devices.
+   * @param[in] params Board configuration (pose, device params).
+   * @param[in] interface Communication interface for this board.
+   * @param[in] idx Board index on the bus.
+   * @param[in] devices Owned devices (sensors/actuators) on this board.
+   */
   SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices);
+  /// Destructor
   ~SensorBoard();
 
+  /**
+   * @brief Report whether this board has completed enumeration.
+   * @return true if enumeration response has been received.
+   */
   bool isEnumerated() const;
+  /**
+   * @brief Return the enumeration info received from the hardware.
+   * @return Const reference to enumeration information.
+   */
   const EnumerationInformation& getEnumInfo() const;
+  /**
+   * @brief Board type from configuration (undefined if not set). Used for topology enforcement.
+   * @return Board type.
+   */
+  SensorBoardType getBoardType() const;
 
+  /**
+   * @brief Return non-owning pointers to all devices on this board.
+   * @return Vector of BaseDevice pointers.
+   */
   std::vector<BaseDevice*> getDevices() const;
 
+  /**
+   * @brief Reset all boards on all interfaces (broadcast reset command).
+   * @return true on success.
+   */
   static bool resetBoards();
 
+  /**
+   * @brief Send bit-rate switching command on the given interface.
+   * @param[in] interface Communication interface.
+   * @param[in] enable Whether to enable BRS.
+   */
   static void cmdSetBrs(com::ComInterface* interface, bool enable);
+  /**
+   * @brief Send enumeration command on the given interface so boards respond with CMD_ACTIVE_DEVICE_RESPONSE.
+   * @param[in] interface Communication interface to enumerate.
+   */
   static void cmdEnumerateBoards(com::ComInterface* interface);
 
+  /**
+   * @brief Handle incoming COM message; used for enumeration and device data.
+   * @param[in] source Endpoint that received the message.
+   * @param[in] data Raw message payload.
+   */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
