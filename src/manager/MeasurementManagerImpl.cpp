@@ -1,5 +1,6 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
+#include "interface/ComInterface.hpp"
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/device/IDevice.hpp"
@@ -352,7 +353,7 @@ void MeasurementManagerImpl::StateMachine() {
     for (auto sensor_bus : _sensor_ring->getInterfaces()) {
       logger::Logger::getInstance()->log(
           logger::LogVerbosity::Info,
-          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getInterfaceName() + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
+          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getID().name + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
 
       if (sensor_bus->getSensorCount() && _params.print_topology) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
@@ -373,11 +374,11 @@ void MeasurementManagerImpl::StateMachine() {
           const auto& enum_infos = sensor_bus->getEnumerationInfo();
           const auto boards      = sensor_bus->getSensorBoards();
           for (size_t i = 0; i < boards.size() && i < enum_infos.size(); ++i) {
-            const auto configured = boards[i]->getConfiguredBoardType();
+            const auto configured = boards[i]->getBoardType();
             if (configured != device::SensorBoardType::Undefined && configured != enum_infos[i].type) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Error,
-                  "Board at index " + std::to_string(i) + " is configured as " + std::string(device::SensorBoardManager::getSensorBoardInfo(configured).name)
-                      + " but detected as " + std::string(device::SensorBoardManager::getSensorBoardInfo(enum_infos[i].type).name) + ". enforce_topology is true.");
+              logger::Logger::getInstance()->log(
+                  logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " is configured as " + std::string(device::SensorBoardManager::getSensorBoardInfo(configured).name) + " but detected as "
+                                                   + std::string(device::SensorBoardManager::getSensorBoardInfo(enum_infos[i].type).name) + ". enforce_topology is true.");
               success = false;
             }
           }

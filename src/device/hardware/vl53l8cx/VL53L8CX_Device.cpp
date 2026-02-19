@@ -3,15 +3,16 @@
 #include <unordered_map>
 
 #include "device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
+#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 
 namespace eduart {
 
 namespace device {
 
-VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), interface, com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
-    , _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, interface, idx)) {
+VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
+    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
+    , _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 
 VL53L8CX_Device::~VL53L8CX_Device() {

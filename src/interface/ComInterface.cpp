@@ -4,11 +4,11 @@ namespace eduart {
 
 namespace com {
 
-ComInterface::ComInterface()
+ComInterface::ComInterface(ComInterfaceID id)
     : _communication_error(false)
     , _listener_is_running(false)
     , _shut_down_listener(false)
-    , _interface_name("")
+    , _id(id)
     , _thread{ nullptr } {
 }
 
@@ -16,8 +16,8 @@ ComInterface::~ComInterface() {
   stopListener();
 }
 
-std::string ComInterface::getInterfaceName() const {
-  return _interface_name;
+ComInterfaceID ComInterface::getID() const {
+  return _id;
 }
 
 bool ComInterface::registerObserver(ComObserver* observer) {

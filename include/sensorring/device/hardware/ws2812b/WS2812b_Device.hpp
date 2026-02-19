@@ -11,8 +11,9 @@
 
 #include <memory>
 
-#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
@@ -32,7 +33,7 @@ public:
    * @param[in] params    LED strip configuration parameters.
    * @param[in] interface Communication interface used to talk to the device.
    */
-  WS2812b_Device(WS2812b_Params params, com::ComInterface* interface);
+  WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface);
   /// Destructor
   ~WS2812b_Device();
 

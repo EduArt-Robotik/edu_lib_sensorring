@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "sensorring/interface/ComEndpoint.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
 namespace eduart {
@@ -21,7 +22,7 @@ public:
   /**
    * Constructor
    */
-  ComInterface();
+  ComInterface(ComInterfaceID id);
 
   /**
    * Destructor
@@ -29,10 +30,10 @@ public:
   virtual ~ComInterface();
 
   /**
-   * Get the interface name of the ComInterface object
-   * @return name of the interface
+   * Get the ComInterfaceID of the ComInterface object
+   * @return ComInterfaceID of the interface
    */
-  std::string getInterfaceName() const;
+  ComInterfaceID getID() const;
 
   /**
    * Get all known ComEndpoints.
@@ -81,7 +82,7 @@ public:
    * Open the communication interface.
    * @return success==true
    */
-  virtual bool openInterface(std::string interface_name) = 0;
+  virtual bool openInterface() = 0;
 
   /**
    * Close the communication interface.
@@ -134,11 +135,11 @@ protected:
 
   std::atomic<bool> _shut_down_listener;
 
-  std::string _interface_name;
-
   std::mutex _mutex;
 
   std::unordered_set<ComObserver*> _observers;
+
+  ComInterfaceID _id;
 
 private:
   std::unique_ptr<std::thread> _thread;

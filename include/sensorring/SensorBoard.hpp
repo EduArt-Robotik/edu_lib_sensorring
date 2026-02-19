@@ -15,6 +15,7 @@
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
 namespace eduart {
@@ -34,11 +35,11 @@ public:
   /**
    * @brief Construct the board with parameters, communication interface, index, and owned devices.
    * @param[in] params Board configuration (pose, device params).
-   * @param[in] interface Communication interface for this board.
+   * @param[in] interface Communication interface ID for this board.
    * @param[in] idx Board index on the bus.
    * @param[in] devices Owned devices (sensors/actuators) on this board.
    */
-  SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices);
+  SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices);
   /// Destructor
   ~SensorBoard();
 
@@ -72,15 +73,15 @@ public:
 
   /**
    * @brief Send bit-rate switching command on the given interface.
-   * @param[in] interface Communication interface.
+   * @param[in] interface Communication interface ID.
    * @param[in] enable Whether to enable BRS.
    */
-  static void cmdSetBrs(com::ComInterface* interface, bool enable);
+  static void cmdSetBrs(com::ComInterfaceID interface, bool enable);
   /**
    * @brief Send enumeration command on the given interface so boards respond with CMD_ACTIVE_DEVICE_RESPONSE.
-   * @param[in] interface Communication interface to enumerate.
+   * @param[in] interface Communication interface ID to enumerate.
    */
-  static void cmdEnumerateBoards(com::ComInterface* interface);
+  static void cmdEnumerateBoards(com::ComInterfaceID interface);
 
   /**
    * @brief Handle incoming COM message; used for enumeration and device data.

@@ -4,10 +4,11 @@
 #include <thread>
 
 #include "interface/ComInterface.hpp"
+#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/BaseSensor.hpp"
-#include "sensorring/logger/Logger.hpp"
 #include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 
@@ -17,13 +18,17 @@ namespace {
 
 class EnumerationCollector : public com::ComObserver {
 public:
-  explicit EnumerationCollector(com::ComInterface* interface, std::vector<device::EnumerationInformation>& out) : _interface(interface), _out(out) {
+  explicit EnumerationCollector(com::ComInterface* interface, std::vector<device::EnumerationInformation>& out)
+      : _interface(interface)
+      , _out(out) {
     subscribeToEndpoint(com::ComEndpoint("broadcast"));
     _interface->registerObserver(this);
   }
-  ~EnumerationCollector() {
-    _interface->unregisterObserver(this);
-  }
+
+  ~EnumerationCollector() { _interface->unregisterObserver(this); }
+
+  void trigger() { device::SensorBoard::cmdEnumerateBoards(_interface->getID()); }
+
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override {
     (void)source;
     if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
@@ -40,8 +45,8 @@ private:
 
 } // namespace
 
-SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
-    : _interface(interface)
+SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
+    : _interface(com::ComManager::getInstance()->getInterface(interface))
     , _board_vec(std::move(board_vec))
     , _enumeration_flag(false)
     , _enumeration_count(0) {
@@ -86,7 +91,7 @@ const std::vector<device::EnumerationInformation>& SensorBus::getEnumerationInfo
 }
 
 void SensorBus::setBrs(bool brs_enable) {
-  device::SensorBoard::cmdSetBrs(_interface, brs_enable);
+  device::SensorBoard::cmdSetBrs(_interface->getID(), brs_enable);
 }
 
 int SensorBus::enumerateDevices() {
@@ -94,7 +99,7 @@ int SensorBus::enumerateDevices() {
   _enumeration_flag  = true;
   _enumeration_count = 0;
 
-  device::SensorBoard::cmdEnumerateBoards(_interface);
+  device::SensorBoard::cmdEnumerateBoards(_interface->getID());
 
   // wait until all sensors sent their response. 100 ms timeout
   unsigned int watchdog = 0;
@@ -125,13 +130,15 @@ int SensorBus::enumerateDevices() {
   return _enumeration_count;
 }
 
-std::vector<device::EnumerationInformation> SensorBus::enumerateInterface(com::ComInterface* interface) {
-  std::vector<device::EnumerationInformation> result;
-  if (!interface) {
-    return result;
+std::vector<device::EnumerationInformation> SensorBus::enumerateInterface(com::ComInterfaceID interface) {
+  auto* iface = com::ComManager::getInstance()->getInterface(interface);
+  if (!iface) {
+    return {};
   }
-  EnumerationCollector collector(result);
-  device::SensorBoard::cmdEnumerateBoards(interface);
+
+  std::vector<device::EnumerationInformation> result;
+  EnumerationCollector collector(iface, result);
+  collector.trigger();
   std::this_thread::sleep_for(std::chrono::milliseconds(150));
   return result;
 }

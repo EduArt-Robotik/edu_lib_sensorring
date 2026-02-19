@@ -17,12 +17,9 @@
 
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 
 namespace eduart {
-
-namespace com {
-class ComInterface;
-} // namespace com
 
 namespace device {
 
@@ -154,11 +151,11 @@ public:
    * @brief Create a SensorBoard for the given board type using the static board database; device set depends on board type (or all types if Undefined).
    * @param[in] board_type Hardware board type (Headlight, Taillight, etc.; Undefined creates all supported device types).
    * @param[in] params Board configuration parameters.
-   * @param[in] interface Communication interface for the board.
+   * @param[in] interface Communication interface ID for the board.
    * @param[in] idx Board index on the bus.
    * @return Unique pointer to the created SensorBoard.
    */
-  static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterface* interface, unsigned int idx);
+  static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
 
 private:
   // Per-device-type static infos (shared across all boards).

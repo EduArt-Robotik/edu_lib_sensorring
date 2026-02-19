@@ -14,9 +14,9 @@
 #include <memory>
 #include <vector>
 
-#include "interface/ComInterface.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
@@ -38,7 +38,7 @@ public:
    * @param[in] interface Communication interface used to talk to the device.
    * @param[in] idx       Index of the sensor on the bus.
    */
-  VL53L8CX_Device(VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx);
+  VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx);
   /// Destructor
   ~VL53L8CX_Device();
 

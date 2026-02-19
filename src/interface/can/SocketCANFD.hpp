@@ -38,7 +38,7 @@ public:
    * @param[in] interface_name CAN interface name specified with slcand.
    * @return success==true
    */
-  bool openInterface(std::string interface_name) override;
+  bool openInterface() override;
 
   /**
    * Send generic communication messsage.

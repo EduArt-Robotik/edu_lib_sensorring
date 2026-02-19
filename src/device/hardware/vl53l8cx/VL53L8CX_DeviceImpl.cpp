@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 
@@ -103,9 +104,7 @@ measurement::TofMeasurement VL53L8CX_DeviceImpl::processMeasurement(int frame_id
   return result;
 }
 
-measurement::TofMeasurement VL53L8CX_DeviceImpl::transformTofMeasurements(const measurement::TofMeasurement& measurement,
-                                                                           const math::Matrix3 rotation,
-                                                                           const math::Vector3 translation) {
+measurement::TofMeasurement VL53L8CX_DeviceImpl::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
   auto transformed_measurement = measurement;
 
   for (unsigned int i = 0; i < transformed_measurement.point_cloud.data.size(); i++) {
@@ -118,4 +117,3 @@ measurement::TofMeasurement VL53L8CX_DeviceImpl::transformTofMeasurements(const 
 } // namespace device
 
 } // namespace eduart
-

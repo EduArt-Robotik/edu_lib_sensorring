@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
 #include "SensorBoard.hpp"
@@ -33,10 +34,11 @@ class SensorBus : public com::ComObserver {
 public:
   /**
    * @brief Construct the bus with a communication interface and owned sensor boards.
-   * @param[in] interface Communication interface for this bus.
+   * @param[in] interface Communication interface ID for this bus.
    * @param[in] board_vec Owned sensor boards.
    */
-  SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec);
+  SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec);
+
   /// Destructor
   ~SensorBus();
 
@@ -45,11 +47,13 @@ public:
    * @return Number of boards.
    */
   size_t getSensorCount() const;
+
   /**
    * @brief Number of boards that have responded during the last enumeration.
    * @return Enumeration response count.
    */
   size_t getEnumerationCount() const;
+
   /**
    * @brief Enumeration info for each board that responded (order matches response order).
    * @return Const reference to vector of EnumerationInformation.
@@ -75,12 +79,11 @@ public:
   int enumerateDevices();
 
   /**
-   * @brief Enumerate boards on an interface without pre-created SensorBoards (for AutoDetect creation).
-   * Sends the enumeration command and collects all CMD_ACTIVE_DEVICE_RESPONSE replies within a fixed timeout.
-   * @param[in] interface Communication interface to enumerate.
-   * @return Vector of enumeration info (one per responding board); may be empty if none or on error.
+   * @brief Enumerate boards on an interface.
+   * @param[in] interface Communication interface ID to enumerate.
+   * @return Vector of enumeration info. May be empty if none or on error.
    */
-  static std::vector<device::EnumerationInformation> enumerateInterface(com::ComInterface* interface);
+  static std::vector<device::EnumerationInformation> enumerateInterface(com::ComInterfaceID interface);
 
   /**
    * @brief Enable or disable bit rate switching on the bus interface.

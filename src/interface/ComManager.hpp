@@ -25,20 +25,12 @@ public:
 
   /**
    * Create or retrieve a communication interface
-   * @param[in] interface_name Name of the interface to create or retrieve
-   * @param[in] type Type of the interface to create
-   * @return Raw pointer to the ComInterface, or nullptr on failure
+   * @param[in] id ID of the interface to create or retrieve
+   * @param[in] create_if_unknown If true, create the interface if it does not exist
+   * @return Raw pointer to the ComInterface, or nullptr if the interface does not exist and create_if_unknown is false
    * @note The returned pointer is valid for the lifetime of the ComManager singleton instance.
    */
-  ComInterface* createInterface(std::string interface_name, InterfaceType type);
-
-  /**
-   * Retrieve an existing communication interface by name
-   * @param[in] interface_name Name of the interface to retrieve
-   * @return Raw pointer to the ComInterface if found, or nullptr if not found
-   * @note The returned pointer is valid for the lifetime of the ComManager singleton instance.
-   */
-  ComInterface* getInterface(std::string interface_name);
+  ComInterface* getInterface(com::ComInterfaceID id, bool create_if_unknown = true);
 
   /**
    * Get all communication interfaces

@@ -21,14 +21,18 @@ ComManager* ComManager::getInstance() noexcept {
   return instance;
 }
 
-ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
+ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_unknown) {
 
   // Check if interface already exists
-  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
-    return interface->getInterfaceName() == interface_name;
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&id](const auto& it) {
+    return (it->getID() == id);
   });
   if (it != _interfaces.end())
     return it->get();
+
+  if (!create_if_unknown) {
+    return nullptr;
+  }
 
   // No interface options specified
 #if !(defined(USE_SOCKETCAN) || defined(USE_USBTINGO))
@@ -36,10 +40,10 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 #endif
 
   // Interface does not exist, create a new one
-  switch (type) {
+  switch (id.type) {
   case InterfaceType::SOCKETCAN:
 #ifdef USE_SOCKETCAN
-    _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+    _interfaces.emplace_back(std::make_unique<SocketCANFD>(id.name));
     break;
 #else
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a SocketCAN interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
@@ -48,7 +52,7 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 
   case InterfaceType::USBTINGO:
 #ifdef USE_USBTINGO
-    _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+    _interfaces.emplace_back(std::make_unique<USBtingo>(id.name));
     break;
 #else
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
@@ -59,7 +63,7 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Got an undefined interface type. Trying to open a the interface by its name.");
     try {
 #ifdef USE_SOCKETCAN
-      _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+      _interfaces.emplace_back(std::make_unique<SocketCANFD>(id.name));
       logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened SocketCAN interface by name. Please correct the interface type in the parameters.");
       break;
 #endif
@@ -68,7 +72,7 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 
     try {
 #ifdef USE_USBTINGO
-      _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+      _interfaces.emplace_back(std::make_unique<USBtingo>(id.name));
       logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened USBtingo interface by name. Please correct the interface type in the parameters.");
       break;
 #endif
@@ -85,14 +89,6 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
   }
 
   return _interfaces.back().get();
-}
-
-ComInterface* ComManager::getInterface(std::string interface_name) {
-
-  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
-    return interface->getInterfaceName() == interface_name;
-  });
-  return (it != _interfaces.end()) ? it->get() : nullptr;
 }
 
 std::vector<ComInterface*> ComManager::getInterfaces() {

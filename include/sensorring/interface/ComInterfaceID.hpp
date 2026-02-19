@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -35,7 +37,21 @@ struct SENSORRING_EXPORT ComInterfaceID {
 
   /// Name of the communication interface.
   std::string name = "";
+
+  /// Equality operator
+  bool operator==(const ComInterfaceID& other) const;
+
+  /// Inequality operator
+  bool operator!=(const ComInterfaceID& other) const;
 };
+
+inline bool ComInterfaceID::operator==(const ComInterfaceID& other) const {
+  return type == other.type && name == other.name;
+}
+
+inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
+  return !(type == other.type && name == other.name);
+}
 
 } // namespace com
 

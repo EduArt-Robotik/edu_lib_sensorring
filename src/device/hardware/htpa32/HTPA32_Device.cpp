@@ -1,25 +1,26 @@
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
-#include "device/hardware/htpa32/HTPA32_DeviceImpl.hpp"
 
 #include <unordered_map>
 
+#include "device/hardware/htpa32/HTPA32_DeviceImpl.hpp"
+#include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 
 namespace eduart {
 
 namespace device {
 
-HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }),
-                 interface,
-                 com::ComEndpoint("thermal" + std::to_string(idx) + "_data"),
-                 params.enable)
-    , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, interface, idx)) {}
+HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
+    : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
+    , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
+}
 
 HTPA32_Device::~HTPA32_Device() {
 }
 
-HTPA32_Params HTPA32_Device::getParams() const { return _impl->getParams(); }
+HTPA32_Params HTPA32_Device::getParams() const {
+  return _impl->getParams();
+}
 
 std::pair<const measurement::GrayscaleImage&, SensorState> HTPA32_Device::getLatestGrayscaleImage() const {
   return _impl->getLatestGrayscaleImage();

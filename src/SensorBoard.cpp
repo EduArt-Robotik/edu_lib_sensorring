@@ -11,9 +11,9 @@ namespace eduart {
 
 namespace device {
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterface* interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
     : _idx(idx)
-    , _interface(interface)
+    , _interface(com::ComManager::getInstance()->getInterface(interface))
     , _params(params)
     , _enum_info()
     , _device_vec(std::move(devices)) {
@@ -57,14 +57,20 @@ bool SensorBoard::resetBoards() {
   return success;
 }
 
-void SensorBoard::cmdSetBrs(com::ComInterface* interface, bool enable) {
-  std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
-  interface->send(com::ComEndpoint("broadcast"), tx_buf);
+void SensorBoard::cmdSetBrs(com::ComInterfaceID interface, bool enable) {
+  auto* iface = com::ComManager::getInstance()->getInterface(interface);
+  if (iface) {
+    std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
+    iface->send(com::ComEndpoint("broadcast"), tx_buf);
+  }
 }
 
-void SensorBoard::cmdEnumerateBoards(com::ComInterface* interface) {
-  std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
-  interface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
+void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
+  auto* iface = com::ComManager::getInstance()->getInterface(interface);
+  if (iface) {
+    std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
+    iface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
+  }
 }
 
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {

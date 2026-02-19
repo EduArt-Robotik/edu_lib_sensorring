@@ -31,10 +31,10 @@ class SensorRing {
 public:
   /**
    * @brief Constructor
-   * @param[in] params Configuration parameters for the sensor ring
    * @param[in] bus_vec Vector of sensor buses to manage
    */
-  SensorRing(RingParams params, std::vector<std::unique_ptr<bus::SensorBus> > bus_vec);
+  SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec);
+
   /// Destructor
   ~SensorRing();
 
@@ -69,27 +69,29 @@ public:
   std::string printTopology() const noexcept;
 
   /**
-   * @brief Get the configuration parameters with which this SensorRing was created.
-   * @return RingParams used at construction
+   * @brief Get the topology of the sensor ring.
+   * @return RingTopology
    */
-  RingParams getParams() const noexcept;
+  RingTopology getTopology() const noexcept;
 
   /**
-   * @brief Create a SensorRing instance from configuration parameters.
-   * @param[in] params Configuration parameters for the sensor ring
-   * @return Unique pointer to the created SensorRing instance
+   * @brief Verify if the topology of the sensor ring matches the actual connected hardware.
+   * @return true if the topology matches, false otherwise
    */
-  static std::unique_ptr<SensorRing> create(RingParams params);
+  bool verifyTopology() const;
 
   /**
    * @brief Enumerate the connected devices that are connected on the specified interfaces and create a sensor ring from what is connected.
-   * @param[in] params Configuration parameters for the sensor ring
+   * @param[in] interfaces Vector of communication interface parameters.
    * @return Unique pointer to the created SensorRing instance
    */
-  static std::unique_ptr<SensorRing> createFromEnumeration(RingParams params);
+  static std::unique_ptr<SensorRing> createFromEnumeration(std::vector<com::ComInterfaceID> interfaces);
 
 private:
-  const RingParams _params;
+  /// Topology of the sensor ring as configured upon creation.
+  RingTopology _topology;
+
+  /// Vector of sensor buses managed by this sensor ring.
   std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
 };
 

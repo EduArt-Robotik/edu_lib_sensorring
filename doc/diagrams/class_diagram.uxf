@@ -219,8 +219,7 @@ vector&lt;ComInterface&gt;
 + ComManager() = delete
 + getInstance( ) : ComManager*
 
-+ createInterface(name : string, sensor_count : size_t)
-+ getInterface(name : string)
++ getInterface(name : string, create_if_unknown : true)
 
 
 bg=white

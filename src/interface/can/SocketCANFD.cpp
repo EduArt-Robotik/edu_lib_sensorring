@@ -21,14 +21,14 @@ namespace eduart {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface()
+    : ComInterface({ InterfaceType::SOCKETCAN, interface_name })
     , _soc(0) {
 
   try {
-    openInterface(interface_name);
+    openInterface();
   } catch (std::runtime_error& e) {
     closeInterface();
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface " + _interface_name + ": " + e.what());
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface " + _id.name + ": " + e.what());
   }
 
   startListener();
@@ -39,7 +39,7 @@ SocketCANFD::~SocketCANFD() {
   closeInterface();
 }
 
-bool SocketCANFD::openInterface(std::string interface_name) {
+bool SocketCANFD::openInterface() {
   ifreq ifr;
   sockaddr_can addr;
 
@@ -53,7 +53,7 @@ bool SocketCANFD::openInterface(std::string interface_name) {
     throw std::runtime_error("Unable to set CAN FD mode");
   }
 
-  strcpy(ifr.ifr_name, interface_name.c_str());
+  strcpy(ifr.ifr_name, _id.name.c_str());
   ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 
   // Get interface flags
@@ -62,11 +62,11 @@ bool SocketCANFD::openInterface(std::string interface_name) {
   }
 
   if (!(ifr.ifr_flags & IFF_UP)) {
-    throw std::runtime_error("CAN interface \"" + interface_name + "\" is DOWN");
+    throw std::runtime_error("CAN interface \"" + _id.name + "\" is DOWN");
   }
 
   if (!(ifr.ifr_flags & IFF_RUNNING)) {
-    throw std::runtime_error("CAN interface \"" + interface_name + "\" is UP but not RUNNING (no carrier)");
+    throw std::runtime_error("CAN interface \"" + _id.name + "\" is UP but not RUNNING (no carrier)");
   }
 
   // Get interface index
@@ -81,7 +81,6 @@ bool SocketCANFD::openInterface(std::string interface_name) {
     throw std::runtime_error("Unable to bind socket: " + std::string(strerror(errno)) + " [" + std::to_string(errno) + "]");
   }
 
-  _interface_name      = interface_name;
   _communication_error = false;
   return true;
 }
@@ -145,7 +144,7 @@ bool SocketCANFD::listener() {
   timeval timeout = { 0, 100 };
   fd_set readSet;
 
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _interface_name);
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _id.name);
 
   _listener_is_running = true;
   while (!_shut_down_listener) {
@@ -165,7 +164,7 @@ bool SocketCANFD::listener() {
                   observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
               }
             } catch (const std::exception&) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _interface_name);
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _id.name);
             }
           }
         }
@@ -174,7 +173,7 @@ bool SocketCANFD::listener() {
 
     std::this_thread::sleep_for(std::chrono::microseconds(1));
   }
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _interface_name);
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _id.name);
 
   _listener_is_running = false;
   return true;
@@ -192,7 +191,7 @@ bool SocketCANFD::repairInterface() {
   stopListener();
   closeInterface();
 
-  if (openInterface(_interface_name)) {
+  if (openInterface()) {
     if (startListener())
       return true;
   }

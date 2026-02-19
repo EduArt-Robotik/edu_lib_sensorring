@@ -15,9 +15,18 @@ namespace eduart {
 
 namespace ring {
 
-SensorRing::SensorRing(RingParams params, std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
-    : _params(params)
-    , _bus_vec(std::move(bus_vec)) {
+SensorRing::SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
+    : _bus_vec(std::move(bus_vec)) {
+
+  for (const auto& bus : _bus_vec) {
+    bus::BusTopology bt;
+    bt.interface = bus->getInterface()->getID();
+
+    for (const auto& board : bus->getSensorBoards()) {
+      bt.board_type_vec.push_back(board->getBoardType());
+    }
+    _topology.bus_topology_vec.push_back(std::move(bt));
+  }
 }
 
 SensorRing::~SensorRing() {
@@ -69,7 +78,7 @@ std::string SensorRing::printTopology() const noexcept {
   for (const auto& bus : getInterfaces()) {
     ss << std::endl << std::endl;
     ss << "=================================================" << std::endl;
-    ss << "Topology of the sensors on " << bus->getInterface()->getInterfaceName() << ":" << std::endl;
+    ss << "Topology of the sensors on " << bus->getInterface()->getID().name << ":" << std::endl;
     ss << std::endl;
 
     auto enum_info_vec = bus->getEnumerationInfo();
@@ -108,30 +117,32 @@ std::string SensorRing::printTopology() const noexcept {
   return ss.str();
 }
 
-RingParams SensorRing::getParams() const noexcept {
-  return _params;
+RingTopology SensorRing::getTopology() const noexcept {
+  return _topology;
 }
 
-std::unique_ptr<SensorRing> SensorRing::create(RingParams params) {
+bool SensorRing::verifyTopology() const {
+  return true;
+}
+
+std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::ComInterfaceID> interfaces) {
   std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
-  for (const auto& bus_params : params.bus_param_vec) {
-    auto interface = com::ComManager::getInstance()->createInterface(bus_params.interface_name, bus_params.type);
-
-    unsigned int idx = 0;
-    std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
-    for (const auto& board_params : bus_params.board_param_vec) {
-      std::vector<std::unique_ptr<device::BaseDevice> > devices;
-      devices.push_back(std::make_unique<device::VL53L8CX_Device>(board_params.vl53l8cx_params, interface, idx));
-      devices.push_back(std::make_unique<device::HTPA32_Device>(board_params.htpa32_params, interface, idx));
-      devices.push_back(std::make_unique<device::WS2812b_Device>(board_params.ws2812b_params, interface));
-
-      board_vec.push_back(std::make_unique<device::SensorBoard>(board_params, interface, idx, std::move(devices)));
-      idx++;
+  for (const auto& id : interfaces) {
+    if (!com::ComManager::getInstance()->createInterface(id)) {
+      continue;
     }
 
-    bus_vec.push_back(std::make_unique<bus::SensorBus>(interface, std::move(board_vec)));
+    std::vector<device::EnumerationInformation> enum_infos = bus::SensorBus::enumerateInterface(id);
+    std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
+    for (const auto& enum_info : enum_infos) {
+      unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+      device::SensorBoardParams board_params;
+      board_params.board_type = enum_info.type;
+      board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info.type, board_params, id, idx));
+    }
+    bus_vec.push_back(std::make_unique<bus::SensorBus>(id, std::move(board_vec)));
   }
-  return std::make_unique<SensorRing>(params, std::move(bus_vec));
+  return std::make_unique<SensorRing>(std::move(bus_vec));
 }
 
 } // namespace ring

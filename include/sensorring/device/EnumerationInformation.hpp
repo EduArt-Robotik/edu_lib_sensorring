@@ -119,7 +119,7 @@ std::string toString(EnumerationState state);
  * @brief Information reported by a board during enumeration: index, version, commit hash, board type, and state.
  */
 struct EnumerationInformation {
-  /// Board index (e.g. on the bus).
+  /// Board index.
   unsigned int idx       = 0;
   /// Firmware/board version from enumeration response.
   Version version        = {};

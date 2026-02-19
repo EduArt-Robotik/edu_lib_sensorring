@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "interface/ComInterface.hpp"
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -147,11 +148,9 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
             }
 
             if (_params.auto_min_max) {
-              _latest_measurement.grayscale_img
-                  = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+              _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
             } else {
-              _latest_measurement.grayscale_img
-                  = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
+              _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
             }
 
             rotateLeftImage(_latest_measurement.grayscale_img);
@@ -187,12 +186,7 @@ std::future<bool> HTPA32_DeviceImpl::getEpromAsync(std::chrono::milliseconds tim
   });
 }
 
-measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id,
-                                                                       const uint8_t* data,
-                                                                       const htpa32::HTPA32Eeprom& eeprom,
-                                                                       uint16_t vdd,
-                                                                       uint16_t ptat,
-                                                                       std::size_t len) const {
+measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const {
   uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
   uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
@@ -235,10 +229,9 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
     if ((table_row < NROFADELEMENTS) && (table_col < NROFTAELEMENTS)) {
       std::int32_t dta = std::lround(t_ambient - htpa32::XTATemps[table_col]);
 
-      double vx = ((((std::int32_t)htpa32::TempTable[table_row][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE)
-          + (std::int32_t)htpa32::TempTable[table_row][table_col];
-      double vy = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE)
-          + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
+      double vx = ((((std::int32_t)htpa32::TempTable[table_row][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row][table_col];
+      double vy
+          = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
       buffer[i] = (std::uint32_t)((vy - vx) * ((std::int32_t)(buffer[i] + TABLEOFFSET) - (std::int32_t)htpa32::YADValues[table_row]) / (std::int32_t)ADEQUIDISTANCE + (std::int32_t)vx);
 
       result.temp_data_deg_c.data[i] = (buffer[i] - 2732.0F) / 10.0F;
@@ -256,9 +249,7 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
   return result;
 }
 
-measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c,
-                                                                        double t_min_deg_c,
-                                                                        double t_max_deg_c) const {
+measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, double t_min_deg_c, double t_max_deg_c) const {
   measurement::GrayscaleImage result;
 
   double delta_t = (t_max_deg_c - t_min_deg_c);
@@ -302,4 +293,3 @@ void HTPA32_DeviceImpl::rotateLeftImage(measurement::GrayscaleImage& image) cons
 } // namespace device
 
 } // namespace eduart
-

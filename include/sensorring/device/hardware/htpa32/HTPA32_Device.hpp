@@ -14,9 +14,9 @@
 #include <memory>
 #include <vector>
 
-#include "interface/ComInterface.hpp"
-#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 
 namespace eduart {
@@ -37,7 +37,7 @@ public:
    * @param[in] interface Communication interface used to talk to the device.
    * @param[in] idx      Index of the sensor on the bus.
    */
-  HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx);
+  HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx);
   /// Destructor
   ~HTPA32_Device();
 
