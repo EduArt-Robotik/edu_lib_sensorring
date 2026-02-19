@@ -1,3 +1,12 @@
+// Copyright (c) 2026 EduArt Robotik GmbH
+
+/**
+ * @file   SensorBus.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  One communication bus owning multiple sensor boards.
+ * @date   2025-02-19
+ */
+
 #pragma once
 
 #include <memory>

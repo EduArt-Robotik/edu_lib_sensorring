@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   LoggerTypes.hpp
@@ -37,17 +37,16 @@ enum class LogVerbosity {
  * @param[in] verbosity to be converted to a string
  * @return Name of the verbosity level written out as string
  */
- SENSORRING_EXPORT std::string toString(LogVerbosity verbosity) noexcept;
+SENSORRING_EXPORT std::string toString(LogVerbosity verbosity) noexcept;
 
- /**
-  * @brief  Output stream operator for the LogVerbosity enum class members
-  * @param[in] os output stream to write to
-  * @param[in] verbosity to be printed as stream
-  * @return Stream with the verbosity name written out
-  */
- SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept;
+/**
+ * @brief  Output stream operator for the LogVerbosity enum class members
+ * @param[in] os output stream to write to
+ * @param[in] verbosity to be printed as stream
+ * @return Stream with the verbosity name written out
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept;
 
- 
-}
+} // namespace logger
 
-}
+} // namespace eduart

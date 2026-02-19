@@ -1,3 +1,12 @@
+// Copyright (c) 2026 EduArt Robotik GmbH
+
+/**
+ * @file   SubscriberToken.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Opaque token identifying a subscription.
+ * @date   2026-02-19
+ */
+
 #pragma once
 
 #include <atomic>

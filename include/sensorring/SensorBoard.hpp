@@ -1,3 +1,12 @@
+// Copyright (c) 2026 EduArt Robotik GmbH
+
+/**
+ * @file   SensorBoard.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Abstraction of a single sensor board
+ * @date   2025-02-19
+ */
+
 #pragma once
 
 #include <memory>

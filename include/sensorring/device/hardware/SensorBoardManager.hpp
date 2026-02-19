@@ -1,3 +1,12 @@
+// Copyright (c) 2026 EduArt Robotik GmbH
+
+/**
+ * @file   SensorBoardManager.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Static board database and factory for creating SensorBoards by hardware type.
+ * @date   2025-02-19
+ */
+
 #pragma once
 
 #include <string_view>

@@ -1,3 +1,12 @@
+// Copyright (c) 2026 EduArt Robotik GmbH
+
+/**
+ * @file   EnumerationInformation.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Version, commit hash, and board enumeration info reported by hardware.
+ * @date   2025-02-19
+ */
+
 #pragma once
 
 #include <cstdint>

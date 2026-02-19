@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 #pragma once
 
