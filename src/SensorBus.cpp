@@ -7,10 +7,38 @@
 #include "interface/can/canprotocol.hpp"
 #include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/logger/Logger.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 
 namespace eduart {
 
 namespace bus {
+
+namespace {
+
+class EnumerationCollector : public com::ComObserver {
+public:
+  explicit EnumerationCollector(com::ComInterface* interface, std::vector<device::EnumerationInformation>& out) : _interface(interface), _out(out) {
+    subscribeToEndpoint(com::ComEndpoint("broadcast"));
+    _interface->registerObserver(this);
+  }
+  ~EnumerationCollector() {
+    _interface->unregisterObserver(this);
+  }
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override {
+    (void)source;
+    if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
+      auto info  = device::EnumerationInformation::fromBuffer(data);
+      info.state = device::EnumerationState::ConfiguredAndConnected;
+      _out.push_back(std::move(info));
+    }
+  }
+
+private:
+  com::ComInterface* _interface;
+  std::vector<device::EnumerationInformation>& _out;
+};
+
+} // namespace
 
 SensorBus::SensorBus(com::ComInterface* interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
     : _interface(interface)
@@ -95,6 +123,17 @@ int SensorBus::enumerateDevices() {
   }
 
   return _enumeration_count;
+}
+
+std::vector<device::EnumerationInformation> SensorBus::enumerateInterface(com::ComInterface* interface) {
+  std::vector<device::EnumerationInformation> result;
+  if (!interface) {
+    return result;
+  }
+  EnumerationCollector collector(result);
+  device::SensorBoard::cmdEnumerateBoards(interface);
+  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  return result;
 }
 
 void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
