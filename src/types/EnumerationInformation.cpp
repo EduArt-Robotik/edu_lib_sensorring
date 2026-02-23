@@ -49,9 +49,15 @@ std::string toString(EnumerationState state) {
     return "Configured but unconnected";
   case EnumerationState::ConnectedNotConfigured:
     return "Connected but unconfigured";
+  case EnumerationState::ConfiguredByEnumeration:
+    return "Configured by enumeration";
   default:
     return "Unknown";
   }
+}
+
+std::ostream& operator<<(std::ostream& os, const EnumerationState state) noexcept {
+  return os << toString(state);
 }
 
 bool EnumerationInformation::isUndefined() const noexcept {
@@ -61,13 +67,29 @@ bool EnumerationInformation::isUndefined() const noexcept {
 
 EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint8_t>& buffer) {
   EnumerationInformation info;
-  if (buffer.size() >= 10) {
-    info.idx     = static_cast<unsigned int>(buffer[1]);
-    info.type    = static_cast<SensorBoardType>(buffer[2]);
-    info.version = Version{ buffer[3], buffer[4], buffer[5] };
-    info.hash    = CommitHash::fromBits(buffer[6], buffer[7], buffer[8], buffer[9]);
+  if (buffer.size() >= 12) {
+    info.idx            = static_cast<unsigned int>(buffer[1]);
+    info.type           = static_cast<SensorBoardType>(buffer[2]);
+    info.version        = Version{ buffer[3], buffer[4], buffer[5] };
+    info.hash           = CommitHash::fromBits(buffer[6], buffer[7], buffer[8], buffer[9]);
+    info.device_options = static_cast<std::uint16_t>((static_cast<std::uint16_t>(buffer[10]) << 8) | static_cast<std::uint16_t>(buffer[11]));
+
+    for (int i = 0; i < 16; i++) {
+      auto device_type = static_cast<DeviceType>(i);
+      if (info.hasDevice(device_type)) {
+        info.devices.push_back(device_type);
+      }
+    }
   }
   return info;
+}
+
+bool EnumerationInformation::hasDevice(DeviceType type) const noexcept {
+  if (type == DeviceType::UNDEFINED) {
+    return false;
+  }
+  const auto bit = static_cast<std::uint16_t>(1u) << static_cast<std::uint8_t>(type);
+  return (device_options & bit) != 0u;
 }
 
 bool operator==(const EnumerationInformation& lhs, unsigned int rhs) noexcept {

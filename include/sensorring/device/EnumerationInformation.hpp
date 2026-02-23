@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 
 namespace eduart {
@@ -104,7 +105,8 @@ enum class EnumerationState {
   Undefined,
   ConfiguredAndConnected,
   ConfiguredNotConnected,
-  ConnectedNotConfigured
+  ConnectedNotConfigured,
+  ConfiguredByEnumeration
 };
 
 /**
@@ -112,7 +114,15 @@ enum class EnumerationState {
  * @param[in] state Enumeration state.
  * @return String representation of state.
  */
-std::string toString(EnumerationState state);
+SENSORRING_EXPORT std::string toString(EnumerationState state);
+
+/**
+ * @brief Stream enumeration state as string.
+ * @param[in] os Output stream.
+ * @param[in] state Enumeration state to print.
+ * @return Reference to os.
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const EnumerationState state) noexcept;
 
 /**
  * @struct EnumerationInformation
@@ -120,13 +130,23 @@ std::string toString(EnumerationState state);
  */
 struct EnumerationInformation {
   /// Board index.
-  unsigned int idx       = 0;
+  unsigned int idx = 0;
+
   /// Firmware/board version from enumeration response.
-  Version version        = {};
+  Version version = {};
+
   /// Commit hash from enumeration response.
-  CommitHash hash        = {};
+  CommitHash hash = {};
+
   /// Detected or configured board type.
-  SensorBoardType type   = SensorBoardType::Undefined;
+  SensorBoardType type = SensorBoardType::Undefined;
+
+  ///  Bitmask describing which devices are physically populated on the board.
+  std::uint16_t device_options = 0;
+
+  /// Devices on the board.
+  std::vector<DeviceType> devices;
+
   /// Configuration/connection state after enumeration.
   EnumerationState state = EnumerationState::Undefined;
 
@@ -142,6 +162,13 @@ struct EnumerationInformation {
    * @return Parsed EnumerationInformation.
    */
   static EnumerationInformation fromBuffer(const std::vector<uint8_t>& buffer);
+
+  /**
+   * @brief Check if a specific device type is reported as populated.
+   * @param[in] type Device type to check.
+   * @return true if the corresponding bit is set in device_options.
+   */
+  bool hasDevice(DeviceType type) const noexcept;
 
   /**
    * @brief Compare enumeration index to an integer.

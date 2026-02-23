@@ -24,7 +24,7 @@ struct SENSORRING_EXPORT DeviceParams {
   DeviceID id;
 
   /// Whether the device is enabled at creation.
-  bool enable;
+  bool enable = true;
 };
 
 } // namespace device
