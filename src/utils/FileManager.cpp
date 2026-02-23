@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "device/hardware/htpa32/heimann_htpa32.hpp"
+#include "device/hardware/htpa32/HTPA32_Constants.hpp"
 #include "platform/Platform.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/types/Image.hpp"

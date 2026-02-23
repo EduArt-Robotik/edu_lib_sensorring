@@ -33,6 +33,20 @@ enum class DeviceType {
   UNDEFINED
 };
 
+/**
+ * @brief Format device type as string.
+ * @return Device type string.
+ */
+SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
+
+/**
+ * @brief Stream device type as string.
+ * @param[in] os Output stream.
+ * @param[in] type Device type to print.
+ * @return Reference to os.
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept;
+
 } // namespace device
 
 } // namespace eduart

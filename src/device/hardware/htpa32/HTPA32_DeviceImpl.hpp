@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "heimann_htpa32.hpp"
+#include "HTPA32_Constants.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"

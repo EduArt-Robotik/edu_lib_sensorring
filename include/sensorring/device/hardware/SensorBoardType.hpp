@@ -8,6 +8,11 @@
 
 #pragma once
 
+#include <ostream>
+#include <string>
+
+#include "sensorring/platform/SensorringExport.hpp"
+
 namespace eduart {
 
 namespace device {
@@ -20,6 +25,20 @@ enum class SensorBoardType {
   Minipanel = 0x03,
   Undefined = 0xff
 };
+
+/**
+ * @brief Format sensor board type as string.
+ * @return Sensor board type string.
+ */
+SENSORRING_EXPORT std::string toString(SensorBoardType type) noexcept;
+
+/**
+ * @brief Stream sensor board type as string.
+ * @param[in] os Output stream.
+ * @param[in] type Sensor board type to print.
+ * @return Reference to os.
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const SensorBoardType type) noexcept;
 
 } // namespace device
 

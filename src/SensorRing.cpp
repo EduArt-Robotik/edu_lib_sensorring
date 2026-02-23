@@ -91,21 +91,8 @@ std::string SensorRing::printTopology() const noexcept {
       ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
 
       for (const auto& dev : board_infos.devices) {
-        std::string device_info_name = "unknown";
-
-        std::visit(
-            [&](const auto& info) {
-              using T = std::decay_t<decltype(info)>;
-              if constexpr (std::is_same_v<T, std::monostate>) {
-                device_info_name = "unknown";
-              } else {
-                device_info_name = std::string(info.name);
-              }
-            },
-            dev.info);
-
         ss << "    Device:         " << dev.id.name;
-        ss << " (" << device_info_name << ")";
+        ss << " (" << device::toString(dev.id.getType()) << ")";
         ss << std::endl;
       }
 

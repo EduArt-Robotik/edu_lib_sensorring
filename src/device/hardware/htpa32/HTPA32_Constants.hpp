@@ -1,14 +1,23 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 #include "platform/Platform.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 
 namespace eduart {
 
 namespace device {
 
 namespace htpa32 {
+
+/// Device name.
+static constexpr std::string_view NAME = "Heimann HTPA32";
+
+static constexpr int RES_X = 32;
+static constexpr int RES_Y = 32;
+static constexpr double MAX_RATE = 15.0;
 
 // Needs to be packed because µC memory is directly copied to this struct
 PACK(struct HTPA32Eeprom {

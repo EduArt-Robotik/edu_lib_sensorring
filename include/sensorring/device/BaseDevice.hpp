@@ -56,6 +56,7 @@ public:
    * @param[in] enable Whether the device is enabled.
    */
   BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  
   /// Destructor
   virtual ~BaseDevice() = default;
 

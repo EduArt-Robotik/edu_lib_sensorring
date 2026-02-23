@@ -27,54 +27,6 @@ struct SensorBoardParams;
 struct SensorBoard;
 
 /**
- * @struct VL53L8CX_DeviceInfo
- * @brief Static info for a VL53L8CX ToF device (name, FOV, resolution, max rate).
- */
-struct VL53L8CX_DeviceInfo {
-  /// Device name.
-  std::string_view name;
-  /// Field of view x in degrees.
-  double fov_x;
-  /// Field of view y in degrees.
-  double fov_y;
-  /// Resolution in x.
-  int res_x;
-  /// Resolution in y.
-  int res_y;
-  /// Maximum sample rate in Hz.
-  double max_rate;
-};
-
-/**
- * @struct HTPA32_DeviceInfo
- * @brief Static info for an HTPA32 thermal device (name, resolution, max rate).
- */
-struct HTPA32_DeviceInfo {
-  /// Device name.
-  std::string_view name;
-  /// Resolution in x.
-  int res_x;
-  /// Resolution in y.
-  int res_y;
-  /// Maximum sample rate in Hz.
-  double max_rate;
-};
-
-/**
- * @struct WS2812b_DeviceInfo
- * @brief Static info for a WS2812b LED device (name, LED count).
- */
-struct WS2812b_DeviceInfo {
-  /// Device name.
-  std::string_view name;
-  /// Number of LEDs.
-  unsigned int count;
-};
-
-/// Variant of device-specific static info (VL53L8CX, HTPA32, WS2812b) or empty.
-using AnyDeviceInfo = std::variant<std::monostate, VL53L8CX_DeviceInfo, HTPA32_DeviceInfo, WS2812b_DeviceInfo>;
-
-/**
  * @struct BoardDeviceInfo
  * @brief Description of one physical device on a board: ID, pose offset, and type-specific info.
  */
@@ -83,8 +35,6 @@ struct BoardDeviceInfo {
   DeviceID id;
   /// Pose offset relative to board center.
   DevicePoseOffset pose_offset;
-  /// Type-specific static info (VL53L8CX, HTPA32, or WS2812b).
-  AnyDeviceInfo info;
 };
 
 /**
@@ -132,22 +82,6 @@ public:
   }
 
   /**
-   * @brief Look up type-specific static device info for a device on a given board type.
-   * @param[in] board_type Board type.
-   * @param[in] id Device ID (type used for lookup).
-   * @return Pointer to AnyDeviceInfo if found, nullptr otherwise.
-   */
-  static inline const AnyDeviceInfo* getDeviceInfo(SensorBoardType board_type, const DeviceID& id) {
-    const auto& board = sensorBoardDatabase.at(board_type);
-    for (const auto& dev : board.devices) {
-      if (dev.id.getType() == id.getType()) {
-        return &dev.info;
-      }
-    }
-    return nullptr;
-  }
-
-  /**
    * @brief Create a SensorBoard for the given board type using the static board database; device set depends on board type (or all types if Undefined).
    * @param[in] board_type Hardware board type (Headlight, Taillight, etc.; Undefined creates all supported device types).
    * @param[in] params Board configuration parameters.
@@ -158,35 +92,30 @@ public:
   static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
 
 private:
-  // Per-device-type static infos (shared across all boards).
-  static inline const VL53L8CX_DeviceInfo VL53L8CX_INFO{ "ST VL53L8CX", 45.0, 45.0, 8, 8, 15.0 };
-
-  static inline const HTPA32_DeviceInfo HTPA32_INFO{ "Heimann HTPA32", 32, 32, 15.0 };
-
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {
     { SensorBoardType::Headlight,
      { "Headlight",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, VL53L8CX_INFO },
-            BoardDeviceInfo{ DeviceID{ DeviceType::HTPA32, "Thermal Sensor", 0 }, DevicePoseOffset{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, HTPA32_INFO },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, WS2812b_DeviceInfo{ "WS2812b (11 LEDs)", 11 } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }},
+            BoardDeviceInfo{ DeviceID{ DeviceType::HTPA32, "Thermal Sensor", 0 }, DevicePoseOffset{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Taillight,
      { "Taillight",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, VL53L8CX_INFO },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, WS2812b_DeviceInfo{ "WS2812b (8 LEDs)", 8 } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Sidepanel,
      { "Sidepanel",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, VL53L8CX_INFO },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, WS2812b_DeviceInfo{ "WS2812b (2 LEDs)", 2 } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Minipanel,
      { "Minipanel",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }, VL53L8CX_INFO },
+            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Undefined,
      { "Unknown",

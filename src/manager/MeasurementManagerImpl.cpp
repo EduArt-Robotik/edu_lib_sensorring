@@ -3,8 +3,8 @@
 #include "interface/ComInterface.hpp"
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
+#include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/IDevice.hpp"
-#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
@@ -377,8 +377,7 @@ void MeasurementManagerImpl::StateMachine() {
             const auto configured = boards[i]->getBoardType();
             if (configured != device::SensorBoardType::Undefined && configured != enum_infos[i].type) {
               logger::Logger::getInstance()->log(
-                  logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " is configured as " + std::string(device::SensorBoardManager::getSensorBoardInfo(configured).name) + " but detected as "
-                                                   + std::string(device::SensorBoardManager::getSensorBoardInfo(enum_infos[i].type).name) + ". enforce_topology is true.");
+                  logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " is configured as " + device::toString(configured) + " but detected as " + device::toString(enum_infos[i].type) + ". enforce_topology is true.");
               success = false;
             }
           }

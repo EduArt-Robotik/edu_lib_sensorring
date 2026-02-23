@@ -10,7 +10,7 @@
 #include "sensorring/math/Math.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 #include "sensorring/device/BaseSensor.hpp"
-#include "st_vl53l8cx.hpp"
+#include "VL53L8CX_Constants.hpp"
 
 namespace eduart {
 
