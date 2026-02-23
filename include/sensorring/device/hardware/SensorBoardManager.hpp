@@ -32,7 +32,7 @@ struct SensorBoard;
  */
 struct BoardDeviceInfo {
   /// Logical device ID (type, name, index).
-  DeviceID id;
+  DeviceType type;
   /// Pose offset relative to board center.
   DevicePoseOffset pose_offset;
 };
@@ -70,7 +70,7 @@ public:
   static inline DevicePoseOffset getDevicePoseOffset(SensorBoardType board_type, const DeviceID& id) {
     const auto& board = sensorBoardDatabase.at(board_type);
     for (const auto& dev : board.devices) {
-      if (dev.id.getType() == id.getType()) {
+      if (dev.type == id.getType()) {
         return dev.pose_offset;
       }
     }
@@ -96,26 +96,26 @@ private:
     { SensorBoardType::Headlight,
      { "Headlight",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } }},
-            BoardDeviceInfo{ DeviceID{ DeviceType::HTPA32, "Thermal Sensor", 0 }, DevicePoseOffset{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::HTPA32, DevicePoseOffset{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Taillight,
      { "Taillight",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Sidepanel,
      { "Sidepanel",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            BoardDeviceInfo{ DeviceID{ DeviceType::WS2812b, "Light", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Minipanel,
      { "Minipanel",
         {
-            BoardDeviceInfo{ DeviceID{ DeviceType::VL53L8CX, "Tof Sensor", 0 }, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Undefined,
      { "Unknown",
