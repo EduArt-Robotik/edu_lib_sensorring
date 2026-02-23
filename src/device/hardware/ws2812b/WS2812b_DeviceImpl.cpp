@@ -10,8 +10,7 @@ namespace device {
 WS2812b_DeviceImpl::WS2812b_DeviceImpl(WS2812b_Device& parent, WS2812b_Params params, com::ComInterface* interface)
     : _parent(parent)
     , _params(params) {
-  // Register endpoint on the given interface.
-  interface->addLightSensorEndpoint();
+  (void)interface;
 }
 
 WS2812b_DeviceImpl::~WS2812b_DeviceImpl() {

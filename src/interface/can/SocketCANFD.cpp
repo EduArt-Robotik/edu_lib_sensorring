@@ -198,22 +198,6 @@ bool SocketCANFD::repairInterface() {
   return false;
 }
 
-void SocketCANFD::addSensorBoardEndpoint() {
-  CanEndpointMap::getInstance()->addSensorBoardEndpoint();
-}
-
-void SocketCANFD::addTofSensorEndpoint(std::size_t idx) {
-  CanEndpointMap::getInstance()->addTofSensorEndpoint(idx);
-}
-
-void SocketCANFD::addThermalSensorEndpoint(std::size_t idx) {
-  CanEndpointMap::getInstance()->addThermalSensorEndpoint(idx);
-}
-
-void SocketCANFD::addLightSensorEndpoint() {
-  CanEndpointMap::getInstance()->addLightSensorEndpoint();
-}
-
 } // namespace com
 
 } // namespace eduart

@@ -102,28 +102,6 @@ public:
    */
   bool hasError() const;
 
-  /**
-   * Add endpoint for a new sensor board
-   */
-  virtual void addSensorBoardEndpoint() = 0;
-
-  /**
-   * Add endpoint for a new tof sensor
-   * @param[in] idx index of the sensor
-   */
-  virtual void addTofSensorEndpoint(std::size_t idx) = 0;
-
-  /**
-   * Add endpoint for a new thermal sensor
-   * @param[in] idx index of the sensor
-   */
-  virtual void addThermalSensorEndpoint(std::size_t idx) = 0;
-
-  /**
-   * Add endpoint for a new light sensor
-   */
-  virtual void addLightSensorEndpoint() = 0;
-
 protected:
   using LockGuard = std::lock_guard<std::mutex>;
 

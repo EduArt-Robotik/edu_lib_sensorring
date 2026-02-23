@@ -151,21 +151,6 @@ bool USBtingo::repairInterface() {
   return false;
 }
 
-void USBtingo::addSensorBoardEndpoint() {
-  CanEndpointMap::getInstance()->addSensorBoardEndpoint();
-}
-
-void USBtingo::addTofSensorEndpoint(std::size_t idx) {
-  CanEndpointMap::getInstance()->addTofSensorEndpoint(idx);
-}
-
-void USBtingo::addThermalSensorEndpoint(std::size_t idx) {
-  CanEndpointMap::getInstance()->addThermalSensorEndpoint(idx);
-}
-
-void USBtingo::addLightSensorEndpoint() {
-  CanEndpointMap::getInstance()->addLightSensorEndpoint();
-}
 
 } // namespace com
 

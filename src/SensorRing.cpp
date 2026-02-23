@@ -115,7 +115,7 @@ bool SensorRing::verifyTopology() const {
 std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::ComInterfaceID> interfaces) {
   std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
   for (const auto& id : interfaces) {
-    if (!com::ComManager::getInstance()->createInterface(id)) {
+    if (!com::ComManager::getInstance()->getInterface(id)) {
       continue;
     }
 

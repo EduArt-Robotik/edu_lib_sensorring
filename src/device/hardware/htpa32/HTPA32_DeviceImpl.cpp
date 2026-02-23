@@ -18,7 +18,8 @@ HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params
     : _parent(parent)
     , _params(params) {
   _rx_buffer_offset = 0;
-  interface->addThermalSensorEndpoint(idx);
+  (void)interface;
+  (void)idx;
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 
   _vdd  = 0;

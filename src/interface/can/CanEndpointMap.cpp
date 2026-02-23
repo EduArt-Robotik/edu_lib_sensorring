@@ -16,52 +16,64 @@ CanEndpointMap* CanEndpointMap::getInstance() noexcept {
   return instance;
 }
 
-void CanEndpointMap::addSensorBoardEndpoint() {
-  CanProtocol::canid canid_tof_status, canid_tof_request, canid_broadcast;
-  CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status, canid_tof_request, canid_broadcast);
-
-  _id_map[ComEndpoint("broadcast")] = canid_broadcast;
+CanEndpointMap::CanEndpointMap() {
+  buildMap();
 }
 
-void CanEndpointMap::addTofSensorEndpoint(std::size_t idx) {
-  CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
-  CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
-
-  if ((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+void CanEndpointMap::buildMap() {
+  // Sensor board broadcast (ToF status broadcast)
+  {
+    CanProtocol::canid canid_tof_status, canid_tof_request, canid_broadcast;
+    CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status, canid_tof_request, canid_broadcast);
+    _id_map[ComEndpoint("broadcast")] = canid_broadcast;
   }
 
-  _id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] = static_cast<CanProtocol::canid>(canid_tof_data_in + idx);
+  // ToF: shared status/request + per-index data
+  {
+    CanProtocol::canid canid_tof_status, canid_tof_request, canid_broadcast_status;
+    CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status, canid_tof_request, canid_broadcast_status);
+    _id_map[ComEndpoint("tof_status")]  = canid_tof_status;
+    _id_map[ComEndpoint("tof_request")] = canid_tof_request;
 
-  CanProtocol::canid canid_tof_status, canid_tof_request, canid_broadcast_status;
-  CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_STATUS, canid_tof_status, canid_tof_request, canid_broadcast_status);
-
-  _id_map[ComEndpoint("tof_status")]  = canid_tof_status;
-  _id_map[ComEndpoint("tof_request")] = canid_tof_request;
-}
-
-void CanEndpointMap::addThermalSensorEndpoint(std::size_t idx) {
-  CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
-  CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
-
-  if ((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Sensor index +" + std::to_string(idx) + " results in a CAN address that is outside the numeric limits of CAN addresses.");
+    CanProtocol::canid canid_tof_data_in, canid_tof_data_out, canid_broadcast;
+    CanProtocol::makeCanStdID(SYSID_TOF, NODEID_TOF_DATA, canid_tof_data_in, canid_tof_data_out, canid_broadcast);
+    for (std::size_t idx = 0; idx < MAX_SENSOR_BOARDS; ++idx) {
+      if ((canid_tof_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Exception,
+            "ToF index " + std::to_string(idx) + " would exceed CAN ID limit.");
+        break;
+      }
+      _id_map[ComEndpoint("tof" + std::to_string(idx) + "_data")] =
+          static_cast<CanProtocol::canid>(canid_tof_data_in + idx);
+    }
   }
 
-  _id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] = static_cast<CanProtocol::canid>(canid_thermal_data_in + idx);
+  // Thermal: shared status/request + per-index data
+  {
+    CanProtocol::canid canid_thermal_status, canid_thermal_request, canid_thermal_broadcast_status;
+    CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status, canid_thermal_request, canid_thermal_broadcast_status);
+    _id_map[ComEndpoint("thermal_status")]  = canid_thermal_status;
+    _id_map[ComEndpoint("thermal_request")] = canid_thermal_request;
 
-  CanProtocol::canid canid_thermal_status, canid_thermal_request, canid_thermal_broadcast_status;
-  CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, canid_thermal_status, canid_thermal_request, canid_thermal_broadcast_status);
+    CanProtocol::canid canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast;
+    CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_DATA, canid_thermal_data_in, canid_thermal_data_out, canid_thermal_broadcast);
+    for (std::size_t idx = 0; idx < MAX_SENSOR_BOARDS; ++idx) {
+      if ((canid_thermal_data_in + idx) > std::numeric_limits<CanProtocol::canid>::max()) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Exception,
+            "Thermal index " + std::to_string(idx) + " would exceed CAN ID limit.");
+        break;
+      }
+      _id_map[ComEndpoint("thermal" + std::to_string(idx) + "_data")] =
+          static_cast<CanProtocol::canid>(canid_thermal_data_in + idx);
+    }
+  }
 
-  _id_map[ComEndpoint("thermal_status")]  = canid_thermal_status;
-  _id_map[ComEndpoint("thermal_request")] = canid_thermal_request;
-}
-
-void CanEndpointMap::addLightSensorEndpoint() {
-  CanProtocol::canid canid_light_in, canid_light_out, canid_light;
-  CanProtocol::makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
-
-  _id_map[ComEndpoint("light")] = canid_light;
+  // Light (single endpoint)
+  {
+    CanProtocol::canid canid_light_in, canid_light_out, canid_light;
+    CanProtocol::makeCanStdID(SYSID_LIGHT, NODEID_HEADLEFT, canid_light_in, canid_light_out, canid_light);
+    _id_map[ComEndpoint("light")] = canid_light;
+  }
 }
 
 CanProtocol::canid CanEndpointMap::mapEndpointToId(ComEndpoint endpoint) const {

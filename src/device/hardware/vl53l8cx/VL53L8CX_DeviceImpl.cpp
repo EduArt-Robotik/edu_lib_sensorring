@@ -14,7 +14,8 @@ VL53L8CX_DeviceImpl::VL53L8CX_DeviceImpl(VL53L8CX_Device& parent, VL53L8CX_Param
     : _parent(parent)
     , _params(params) {
   _rx_buffer_offset = 0;
-  interface->addTofSensorEndpoint(idx);
+  (void)interface;
+  (void)idx;
   std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 }
 

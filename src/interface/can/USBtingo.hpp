@@ -59,28 +59,6 @@ public:
    */
   bool repairInterface() override;
 
-  /**
-   * Add endpoint for a new sensor board
-   */
-  void addSensorBoardEndpoint() override;
-
-  /**
-   * Add endpoint for a new tof sensor
-   * @param[in] idx index of the sensor
-   */
-  void addTofSensorEndpoint(std::size_t idx) override;
-
-  /**
-   * Add endpoint for a new thermal sensor
-   * @param[in] idx index of the sensor
-   */
-  void addThermalSensorEndpoint(std::size_t idx) override;
-
-  /**
-   * Add endpoint for a new light sensor
-   */
-  void addLightSensorEndpoint() override;
-
 private:
   bool listener() override;
 

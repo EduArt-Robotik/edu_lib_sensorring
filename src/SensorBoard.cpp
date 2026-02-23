@@ -17,8 +17,6 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _params(params)
     , _enum_info()
     , _device_vec(std::move(devices)) {
-  _interface->addSensorBoardEndpoint();
-
   subscribeToEndpoint(com::ComEndpoint("broadcast"));
   _interface->registerObserver(this);
 }

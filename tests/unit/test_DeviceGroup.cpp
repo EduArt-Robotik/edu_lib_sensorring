@@ -25,10 +25,6 @@ public:
   bool openInterface(std::string) override { return true; }
   bool closeInterface() override { return true; }
   bool repairInterface() override { return true; }
-  void addSensorBoardEndpoint() override {}
-  void addTofSensorEndpoint(std::size_t) override {}
-  void addThermalSensorEndpoint(std::size_t) override {}
-  void addLightSensorEndpoint() override {}
 
 protected:
   bool listener() override { return false; }
