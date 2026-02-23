@@ -106,7 +106,7 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<
         auto& group = groups[iface];
         group.devices.push_back(dev);
         futures.emplace_back(dev->beginDataAvailableWait());
-        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
+        group.active_sensors |= (1u << dev->getIdx());
       }
     }
 
@@ -162,7 +162,7 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(const std::vector<VL
         dev->clearDataFlag();
         futures.emplace_back(dev->beginMeasurementWait());
 
-        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
+        group.active_sensors |= (1u << dev->getIdx());
       }
     }
 

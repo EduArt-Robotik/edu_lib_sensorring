@@ -91,7 +91,7 @@ public:
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
 private:
-  int _idx;
+  unsigned int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
   EnumerationInformation _enum_info;

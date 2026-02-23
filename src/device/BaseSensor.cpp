@@ -7,7 +7,7 @@ namespace eduart {
 
 namespace device {
 
-BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable)
+BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
     : ComObserver()
     , _idx(idx)
     , _error(SensorState::SensorInit)
@@ -21,7 +21,7 @@ BaseSensor::~BaseSensor() {
   _interface->unregisterObserver(this);
 }
 
-std::size_t BaseSensor::getIdx() const {
+unsigned int BaseSensor::getIdx() const {
   return _idx;
 }
 

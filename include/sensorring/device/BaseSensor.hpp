@@ -50,7 +50,7 @@ public:
    * @param[in] idx Index of the sensor instance.
    * @param[in] enable Initial enabled state of the sensor.
    */
-  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, std::size_t idx, bool enable);
+  BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
   /// Destructor
   ~BaseSensor();
 
@@ -58,7 +58,7 @@ public:
    * @brief Get the index of this sensor instance.
    * @return Sensor index.
    */
-  std::size_t getIdx() const;
+  unsigned int getIdx() const;
 
   /**
    * @brief Query if the sensor is currently enabled.
@@ -132,7 +132,7 @@ protected:
   virtual void onClearDataFlag() = 0;
 
   /// Index of this sensor instance within its group.
-  std::size_t _idx;
+  unsigned int _idx;
   /// Current health state of the sensor.
   SensorState _error;
   /// Communication interface used to talk to the sensor.

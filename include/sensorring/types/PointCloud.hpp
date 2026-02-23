@@ -33,7 +33,7 @@ struct SENSORRING_EXPORT PointData {
   double sigma = 0.0;
 
   /// User assigned index of the sensor that measured the point
-  int user_idx = 0;
+  unsigned int user_idx = 0;
 };
 
 /**

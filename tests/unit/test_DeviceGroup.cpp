@@ -33,8 +33,8 @@ protected:
 // Minimal BaseDevice-derived type for tests (implements BaseSensor and ComObserver pure virtuals).
 class TestDeviceA : public BaseDevice {
 public:
-  TestDeviceA(ComInterface* iface, std::size_t idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, "test_a", static_cast<unsigned>(idx) }, iface, ComEndpoint("test_a"), false) {}
+  TestDeviceA(ComInterface* iface, unsigned int idx = 0)
+      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, "test_a", idx }, iface, ComEndpoint("test_a"), false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}
@@ -44,8 +44,8 @@ public:
 // Second derived type for getDevicesOfType / createFromDevicesOfType tests.
 class TestDeviceB : public BaseDevice {
 public:
-  TestDeviceB(ComInterface* iface, std::size_t idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::HTPA32, "test_b", static_cast<unsigned>(idx) }, iface, ComEndpoint("test_b"), false) {}
+  TestDeviceB(ComInterface* iface, unsigned int idx = 0)
+      : BaseDevice(DeviceID{ DeviceType::HTPA32, "test_b", idx }, iface, ComEndpoint("test_b"), false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}

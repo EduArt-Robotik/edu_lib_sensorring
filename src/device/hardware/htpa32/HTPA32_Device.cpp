@@ -115,7 +115,7 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vecto
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
-        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
+        group.active_sensors |= (1u << dev->getIdx());
       }
     }
 
@@ -161,7 +161,7 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<
         dev->clearDataFlag();
         futures.emplace_back(dev->beginMeasurementWait());
 
-        group.active_sensors |= (1u << static_cast<unsigned int>(dev->getIdx()));
+        group.active_sensors |= (1u << dev->getIdx());
       }
     }
 
