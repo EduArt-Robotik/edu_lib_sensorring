@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "sensorring/device/DeviceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -20,7 +21,8 @@ namespace device {
  */
 struct SENSORRING_EXPORT DeviceParams {
   /// Device identifier (type, name, index).
-  int user_idx;
+  DeviceID id;
+
   /// Whether the device is enabled at creation.
   bool enable;
 };

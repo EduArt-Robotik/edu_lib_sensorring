@@ -98,7 +98,7 @@ measurement::TofMeasurement VL53L8CX_DeviceImpl::processMeasurement(int frame_id
       point.z() = point_distance;
     }
 
-    result.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.user_idx }));
+    result.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.id.index }));
   }
 
   result.point_cloud.data.shrink_to_fit();

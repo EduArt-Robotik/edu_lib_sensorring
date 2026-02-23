@@ -194,7 +194,7 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
   std::vector<double> buffer(len);
 
   measurement::ThermalMeasurement result;
-  result.user_idx  = _params.user_idx;
+  result.user_idx  = _params.id.index;
   result.frame_id  = frame_id;
   result.min_deg_c = 1e6;
 
