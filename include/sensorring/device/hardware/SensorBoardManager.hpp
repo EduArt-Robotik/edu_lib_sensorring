@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 
@@ -89,7 +90,9 @@ public:
    * @param[in] idx Board index on the bus.
    * @return Unique pointer to the created SensorBoard.
    */
-  static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
+  static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx); //ToDo: Maybe remove this overload
+
+  static std::unique_ptr<SensorBoard> createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
 
 private:
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {

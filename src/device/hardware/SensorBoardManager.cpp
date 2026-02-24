@@ -29,7 +29,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(SensorBoardTy
 
     // Create only the devices that are defined for this concrete hardware board.
     for (const auto& dev : board_info.devices) {
-      switch (dev.id.getType()) {
+      switch (dev.type) {
       case DeviceType::VL53L8CX:
         devices.push_back(std::make_unique<VL53L8CX_Device>(VL53L8CX_Params{}, interface, idx));
         break;
@@ -43,6 +43,29 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(SensorBoardTy
         // Unknown or unsupported device type – ignore for now.
         break;
       }
+    }
+  }
+
+  return std::make_unique<SensorBoard>(params, interface, idx, std::move(devices));
+}
+
+std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx) {
+  std::vector<std::unique_ptr<BaseDevice> > devices;
+
+  for (const auto& device_type : enum_info.devices) {
+    switch (device_type) {
+    case DeviceType::VL53L8CX:
+      devices.push_back(std::make_unique<VL53L8CX_Device>(VL53L8CX_Params{}, interface, idx));
+      break;
+    case DeviceType::HTPA32:
+      devices.push_back(std::make_unique<HTPA32_Device>(HTPA32_Params{}, interface, idx));
+      break;
+    case DeviceType::WS2812b:
+      devices.push_back(std::make_unique<WS2812b_Device>(WS2812b_Params{}, interface));
+      break;
+    default:
+      // Unknown or unsupported device type – ignore for now.
+      break;
     }
   }
 
