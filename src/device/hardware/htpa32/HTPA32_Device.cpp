@@ -11,7 +11,7 @@ namespace eduart {
 namespace device {
 
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::HTPA32, "thermal", idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
+    : BaseDevice(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
     , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 

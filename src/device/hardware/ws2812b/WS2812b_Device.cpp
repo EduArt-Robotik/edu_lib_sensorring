@@ -9,7 +9,7 @@ namespace eduart {
 namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface)
-    : BaseDevice(DeviceID({ DeviceType::WS2812b, "light", 0 }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("light"), params.enable)
+    : BaseDevice(DeviceID({ DeviceType::WS2812b, 0 }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("light"), params.enable)
     , _impl(std::make_unique<WS2812b_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface))) {
 }
 

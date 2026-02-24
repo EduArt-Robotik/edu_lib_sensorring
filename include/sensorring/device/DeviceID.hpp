@@ -27,9 +27,6 @@ public:
   /// Hardware device type.
   DeviceType type = DeviceType::UNDEFINED;
 
-  /// Human-readable device name.
-  std::string name = "";
-
   /// Instance index when multiple devices of same type exist.
   unsigned int index = 0;
 
@@ -38,12 +35,6 @@ public:
    * @return DeviceType of this ID.
    */
   DeviceType getType() const;
-
-  /**
-   * @brief Returns the human-readable device name.
-   * @return Name string.
-   */
-  std::string getName() const;
 
   /**
    * @brief Returns the instance index when multiple devices of the same type exist.
@@ -62,16 +53,12 @@ inline DeviceType DeviceID::getType() const {
   return type;
 }
 
-inline std::string DeviceID::getName() const {
-  return name;
-}
-
 inline unsigned int DeviceID::getIndex() const {
   return index;
 }
 
 inline bool DeviceID::isValid() const {
-  return type != DeviceType::UNDEFINED && name != "";
+  return type != DeviceType::UNDEFINED;
 }
 
 } // namespace device

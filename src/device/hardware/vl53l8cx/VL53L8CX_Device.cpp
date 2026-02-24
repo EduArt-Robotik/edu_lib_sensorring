@@ -11,7 +11,7 @@ namespace eduart {
 namespace device {
 
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, "tof", idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
+    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("tof" + std::to_string(idx) + "_data"), params.enable)
     , _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 
