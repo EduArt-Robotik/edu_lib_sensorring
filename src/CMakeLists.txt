@@ -30,6 +30,7 @@ target_sources(sensorring
   device/BaseDevice.cpp
   device/DeviceType.cpp
   device/DeviceGroup.cpp
+  device/DeviceEnumerator.cpp;
   device/hardware/SensorBoardType.cpp
   device/hardware/SensorBoardManager.cpp
   device/hardware/vl53l8cx/VL53L8CX_Device.cpp

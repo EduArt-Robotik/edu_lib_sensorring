@@ -42,7 +42,7 @@ public:
    * @brief Get all sensor bus interfaces managed by this ring.
    * @return Vector of const pointers to all sensor buses.
    */
-  std::vector<const bus::SensorBus*> getInterfaces() const;
+  std::vector<bus::SensorBus*> getSensorBuses() const;
 
   /**
    * @brief Enable or disable bit rate switching on CAN bus interfaces.
@@ -57,16 +57,10 @@ public:
   std::vector<device::IDevice*> getDevices() const;
 
   /**
-   * @brief Enumerate devices on all sensor buses.
-   * @return true if enumeration succeeded on all buses
-   */
-  bool enumerateDevices();
-
-  /**
    * @brief Get a string representation of the topology of the connected sensors.
    * @return Formatted string describing the topology
    */
-  std::string printTopology() const noexcept;
+  std::string printTopology() noexcept;
 
   /**
    * @brief Get the topology of the sensor ring.

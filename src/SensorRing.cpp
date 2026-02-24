@@ -32,10 +32,10 @@ SensorRing::SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
 SensorRing::~SensorRing() {
 }
 
-std::vector<const bus::SensorBus*> SensorRing::getInterfaces() const {
+std::vector<bus::SensorBus*> SensorRing::getSensorBuses() const {
 
-  std::vector<const bus::SensorBus*> ref_vec;
-  for (const auto& sensor_bus : _bus_vec) {
+  std::vector<bus::SensorBus*> ref_vec;
+  for (auto& sensor_bus : _bus_vec) {
     ref_vec.push_back(sensor_bus.get());
   }
 
@@ -55,44 +55,30 @@ std::vector<device::IDevice*> SensorRing::getDevices() const {
   return devices;
 }
 
-bool SensorRing::enumerateDevices() {
-  size_t sensor_count = 0;
-  bool success        = true;
-
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_count = sensor_bus->enumerateDevices();
-    success &= (sensor_bus->getSensorCount() == sensor_count);
-  }
-
-  return success;
-}
-
 void SensorRing::setBrs(bool brs_enable) {
   for (auto& sensor_bus : _bus_vec) {
     sensor_bus->setBrs(brs_enable);
   }
 }
 
-std::string SensorRing::printTopology() const noexcept {
+std::string SensorRing::printTopology() noexcept {
   std::stringstream ss;
-  for (const auto& bus : getInterfaces()) {
+  for (const auto& bus : _bus_vec) {
     ss << std::endl << std::endl;
     ss << "=================================================" << std::endl;
     ss << "Topology of the sensors on " << bus->getInterface()->getID().name << ":" << std::endl;
     ss << std::endl;
 
-    auto enum_info_vec = bus->getEnumerationInfo();
-    for (const auto& enum_info : enum_info_vec) {
-      const auto& board_infos = device::SensorBoardManager::getSensorBoardInfo(enum_info.type);
+    auto enum_results = bus->getLatestEnumerationResult();
+    for (const auto& device : enum_results) {
 
-      ss << "sensor " << enum_info.idx << std::endl;
-      ss << "    Type:           " << board_infos.name << std::endl;
-      ss << "    State:          " << device::toString(enum_info.state) << std::endl;
-      ss << "    FW revision:    " << enum_info.version << " (" << enum_info.hash << ")" << std::endl;
+      ss << "sensor " << device.idx << std::endl;
+      ss << "    Type:           " << device.type << std::endl;
+      ss << "    State:          " << device.state << std::endl;
+      ss << "    FW revision:    " << device.version << " (" << device.hash << ")" << std::endl;
 
-      for (const auto& dev : board_infos.devices) {
-        ss << "    Device:         " << dev.id.name;
-        ss << " (" << device::toString(dev.id.getType()) << ")";
+      for (const auto& dev : device.devices) {
+        ss << "    Device:         " << dev;
         ss << std::endl;
       }
 
@@ -125,11 +111,13 @@ std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::C
 
     std::vector<device::EnumerationInformation> enum_infos = bus::SensorBus::queryConnectedDevices(id);
     std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
+    board_vec.reserve(enum_infos.size());
+
     for (const auto& enum_info : enum_infos) {
       unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
       device::SensorBoardParams board_params;
       board_params.board_type = enum_info.type;
-      board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info.type, board_params, id, idx));
+      board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx));
     }
     bus_vec.push_back(std::make_unique<bus::SensorBus>(id, std::move(board_vec)));
   }

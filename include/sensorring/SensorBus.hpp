@@ -26,6 +26,8 @@ class ComInterface;
 
 namespace bus {
 
+using namespace std::chrono_literals;
+
 /**
  * @class SensorBus
  * @brief One communication interface (e.g. CAN) owning multiple SensorBoards; runs enumeration and forwards COM messages.
@@ -43,22 +45,16 @@ public:
   ~SensorBus();
 
   /**
+   * @brief Enable or disable bit rate switching on the bus interface.
+   * @param[in] brs_enable Enable flag.
+   */
+  void setBrs(bool brs_enable);
+
+  /**
    * @brief Total number of sensor boards on this bus.
    * @return Number of boards.
    */
   size_t getSensorCount() const;
-
-  /**
-   * @brief Number of boards that have responded during the last enumeration.
-   * @return Enumeration response count.
-   */
-  size_t getEnumerationCount() const;
-
-  /**
-   * @brief Enumeration info for each board that responded (order matches response order).
-   * @return Const reference to vector of EnumerationInformation.
-   */
-  const std::vector<device::EnumerationInformation>& getEnumerationInfo() const;
 
   /**
    * @brief Communication interface used by this bus.
@@ -73,24 +69,32 @@ public:
   std::vector<device::SensorBoard*> getSensorBoards() const;
 
   /**
-   * @brief Trigger enumeration on this bus and wait for board responses.
-   * @return 0 on success, non-zero on failure.
+   * @brief Verify that the configured devices that were used to construct the SensorBus actually exist on the physical interface. Calling this method triggers a new enumeration.
+   * @return Returns true if the configured devices are actually present on the physical interface.
    */
-  int enumerateDevices();
+  bool verifyTopology();
 
   /**
    * @brief Enumerate boards on an interface.
    * @param[in] interface Communication interface ID to enumerate.
    * @return Vector of enumeration info. May be empty if none or on error.
    */
-  static std::vector<device::EnumerationInformation> enumerateInterface(com::ComInterfaceID interface);
+  std::vector<device::EnumerationInformation> enumerateDevices();
 
   /**
-   * @brief Enable or disable bit rate switching on the bus interface.
-   * @param[in] brs_enable Enable flag.
+   * @brief Enumeration info for each board that responded (order matches response order). Will trigger a new enumeration if none has been done before.
+   * @return Const reference to vector of EnumerationInformation.
    */
-  void setBrs(bool brs_enable);
+  const std::vector<device::EnumerationInformation>& getLatestEnumerationResult();
 
+  /**
+   * @brief Enumerate boards on an interface.
+   * @param[in] interface Communication interface ID to enumerate.
+   * @return Vector of enumeration info. May be empty if none or on error.
+   */
+  static std::vector<device::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface);
+
+private:
   /**
    * @brief Handle incoming COM message; used for enumeration counts and forwarding to boards.
    * @param[in] source Endpoint that received the message.
@@ -98,13 +102,13 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
+  static constexpr std::chrono::milliseconds ENUMERATION_TIMEOUT = 250ms;
+
   com::ComInterface* _interface;
-  std::vector<device::EnumerationInformation> _enumeration_vec;
-  std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
 
   std::atomic<bool> _enumeration_flag;
-  std::atomic<unsigned int> _enumeration_count;
+  std::vector<device::EnumerationInformation> _enumeration_vec;
+  std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
 };
 
 } // namespace bus

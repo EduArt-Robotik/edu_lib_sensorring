@@ -3,9 +3,9 @@
 #include <chrono>
 #include <thread>
 
+#include "device/DeviceEnumerator.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
-#include "interface/can/canprotocol.hpp"
 #include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -14,42 +14,11 @@ namespace eduart {
 
 namespace bus {
 
-namespace {
-
-class EnumerationCollector : public com::ComObserver {
-public:
-  explicit EnumerationCollector(com::ComInterface* interface, std::vector<device::EnumerationInformation>& out)
-      : _interface(interface)
-      , _out(out) {
-    subscribeToEndpoint(com::ComEndpoint("broadcast"));
-    _interface->registerObserver(this);
-  }
-
-  ~EnumerationCollector() { _interface->unregisterObserver(this); }
-
-  void trigger() { device::SensorBoard::cmdEnumerateBoards(_interface->getID()); }
-
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override {
-    (void)source;
-    if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
-      auto info  = device::EnumerationInformation::fromBuffer(data);
-      info.state = device::EnumerationState::ConfiguredAndConnected;
-      _out.push_back(std::move(info));
-    }
-  }
-
-private:
-  com::ComInterface* _interface;
-  std::vector<device::EnumerationInformation>& _out;
-};
-
-} // namespace
-
 SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
     : _interface(com::ComManager::getInstance()->getInterface(interface))
-    , _board_vec(std::move(board_vec))
     , _enumeration_flag(false)
-    , _enumeration_count(0) {
+    , _enumeration_vec()
+    , _board_vec(std::move(board_vec)) {
   if (!_interface) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open com interface");
   }
@@ -82,35 +51,37 @@ size_t SensorBus::getSensorCount() const {
   return _board_vec.size();
 }
 
-size_t SensorBus::getEnumerationCount() const {
-  return _enumeration_count;
-}
-
-const std::vector<device::EnumerationInformation>& SensorBus::getEnumerationInfo() const {
-  return _enumeration_vec;
-}
-
 void SensorBus::setBrs(bool brs_enable) {
   device::SensorBoard::cmdSetBrs(_interface->getID(), brs_enable);
 }
 
-int SensorBus::enumerateDevices() {
-  _enumeration_vec.clear();
-  _enumeration_flag  = true;
-  _enumeration_count = 0;
+bool SensorBus::verifyTopology() {
+  enumerateDevices();
 
-  device::SensorBoard::cmdEnumerateBoards(_interface->getID());
-
-  // wait until all sensors sent their response. 100 ms timeout
-  unsigned int watchdog = 0;
-  while (_enumeration_count < getSensorCount() && watchdog < 1e3) {
-    watchdog += 1;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  if (_enumeration_vec.size() != _board_vec.size()) {
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Warning,
+        "Mismatch while verifying the topology on interface " + _interface->getID().name + ": " + std::to_string(_board_vec.size()) + "devices are configured but " + std::to_string(_enumeration_vec.size()) + " are connected!");
+    return false;
   }
 
-  // wait a little longer in case there are more sensors than specified
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  _enumeration_flag = false;
+  std::size_t idx = 0;
+  for (const auto& enum_device : _enumeration_vec) {
+    if (enum_device.type != _board_vec.at(idx)->getBoardType()) {
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Warning, "Mismatch while verifying the topology on interface " + _interface->getID().name + ": Device " + std::to_string(idx) + " is configured as " + toString(_board_vec.at(idx)->getBoardType()) + " but a "
+                                             + toString(enum_device.type) + " is connected!");
+      return false;
+    }
+    idx++;
+  }
+
+  return true;
+}
+
+std::vector<device::EnumerationInformation> SensorBus::enumerateDevices() {
+
+  _enumeration_vec = queryConnectedDevices(_interface->getID());
 
   for (auto i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
     auto idx = static_cast<unsigned int>(i + 1);
@@ -127,37 +98,30 @@ int SensorBus::enumerateDevices() {
     }
   }
 
-  return _enumeration_count;
+  _enumeration_flag = true;
+  return _enumeration_vec;
 }
 
-std::vector<device::EnumerationInformation> SensorBus::enumerateInterface(com::ComInterfaceID interface) {
+const std::vector<device::EnumerationInformation>& SensorBus::getLatestEnumerationResult() {
+  if (!_enumeration_flag) {
+    enumerateDevices();
+  }
+  return _enumeration_vec;
+}
+
+std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (!iface) {
     return {};
   }
 
-  std::vector<device::EnumerationInformation> result;
-  EnumerationCollector collector(iface, result);
-  collector.trigger();
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
-  return result;
+  device::DeviceEnumerator enumerator(iface);
+  enumerator.startEnumeration();
+  std::this_thread::sleep_for(ENUMERATION_TIMEOUT);
+  return enumerator.getResult();
 }
 
 void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
-
-  if (source == com::ComEndpoint("broadcast")) { // general sensor board status
-    // enumeration message
-    if (_enumeration_flag && data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
-
-      // The bus has to listen to respones to register any boards that are not specified in the configuration
-      // Querying the SensorBoards if each has been enumerated can't detect additional boards
-      _enumeration_count++;
-
-      auto info  = device::EnumerationInformation::fromBuffer(data);
-      info.state = _enumeration_count <= _board_vec.size() ? device::EnumerationState::ConfiguredAndConnected : device::EnumerationState::ConnectedNotConfigured;
-      _enumeration_vec.push_back(std::move(info));
-    }
-  }
 }
 
 } // namespace bus
