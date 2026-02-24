@@ -114,12 +114,16 @@ bool SensorRing::verifyTopology() const {
 
 std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::ComInterfaceID> interfaces) {
   std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
-  for (const auto& id : interfaces) {
-    if (!com::ComManager::getInstance()->getInterface(id)) {
+  for (const auto& interface : interfaces) {
+
+    auto iface = com::ComManager::getInstance()->getInterface(interface);
+    if (!iface) {
       continue;
     }
 
-    std::vector<device::EnumerationInformation> enum_infos = bus::SensorBus::enumerateInterface(id);
+    auto id = iface->getID(); // If the iface was automatically generated (e.g. USBTINGO & Serial 0) the actual id is different from the one passed to this method -> have to fetch the actual one
+
+    std::vector<device::EnumerationInformation> enum_infos = bus::SensorBus::queryConnectedDevices(id);
     std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
     for (const auto& enum_info : enum_infos) {
       unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;

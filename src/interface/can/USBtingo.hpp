@@ -33,19 +33,18 @@ public:
   ~USBtingo();
 
   /**
-   * Open CAN interface.
-   * @param[in] interface_name CAN interface name specified with slcand.
-   * @return success==true
-   */
-  bool openInterface(std::string interface_name) override;
-
-  /**
    * Send generic communication messsage.
    * @param[in] target ComEndpoint to which the message is sent.
    * @param[in] data Message payload.
    * @return success==true
    */
   bool send(ComEndpoint target, const std::vector<uint8_t>& data) override;
+
+  /**
+   * Open CAN interface.
+   * @return success==true
+   */
+  bool openInterface() override;
 
   /**
    * Close device file link.
