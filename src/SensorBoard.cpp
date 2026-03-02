@@ -79,7 +79,7 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, co
 
     if (_enum_info.isUndefined()) {
       _enum_info       = EnumerationInformation::fromBuffer(data);
-      _enum_info.state = EnumerationState::ConfiguredAndConnected;
+      _enum_info.state = ConnectionState::Connected;
 
       const auto board_type = _enum_info.type;
 

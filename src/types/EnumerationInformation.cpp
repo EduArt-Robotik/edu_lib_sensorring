@@ -39,24 +39,20 @@ bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept {
 
 namespace device {
 
-std::string toString(EnumerationState state) {
+std::string toString(ConnectionState state) {
   switch (state) {
-  case EnumerationState::Undefined:
+  case ConnectionState::Undefined:
     return "Undefined";
-  case EnumerationState::ConfiguredAndConnected:
-    return "Configured and connected";
-  case EnumerationState::ConfiguredNotConnected:
-    return "Configured but unconnected";
-  case EnumerationState::ConnectedNotConfigured:
-    return "Connected but unconfigured";
-  case EnumerationState::ConfiguredByEnumeration:
-    return "Configured by enumeration";
+  case ConnectionState::Connected:
+    return "Connected";
+  case ConnectionState::Unconnected:
+    return "Unconnected";
   default:
     return "Unknown";
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const EnumerationState state) noexcept {
+std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept {
   return os << toString(state);
 }
 

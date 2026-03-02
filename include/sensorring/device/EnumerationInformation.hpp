@@ -98,15 +98,13 @@ struct CommitHash {
 namespace device {
 
 /**
- * @enum EnumerationState
+ * @enum ConnectionState
  * @brief State of a board relative to configuration and connection after enumeration.
  */
-enum class EnumerationState {
+enum class ConnectionState {
   Undefined,
-  ConfiguredAndConnected,
-  ConfiguredNotConnected,
-  ConnectedNotConfigured,
-  ConfiguredByEnumeration
+  Connected,
+  Unconnected
 };
 
 /**
@@ -114,7 +112,7 @@ enum class EnumerationState {
  * @param[in] state Enumeration state.
  * @return String representation of state.
  */
-SENSORRING_EXPORT std::string toString(EnumerationState state);
+SENSORRING_EXPORT std::string toString(ConnectionState state);
 
 /**
  * @brief Stream enumeration state as string.
@@ -122,7 +120,7 @@ SENSORRING_EXPORT std::string toString(EnumerationState state);
  * @param[in] state Enumeration state to print.
  * @return Reference to os.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const EnumerationState state) noexcept;
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept;
 
 /**
  * @struct EnumerationInformation
@@ -148,7 +146,7 @@ struct EnumerationInformation {
   std::vector<DeviceType> devices;
 
   /// Configuration/connection state after enumeration.
-  EnumerationState state = EnumerationState::Undefined;
+  ConnectionState state = ConnectionState::Undefined;
 
   /**
    * @brief Return true if this instance has not been filled from a valid enumeration response.

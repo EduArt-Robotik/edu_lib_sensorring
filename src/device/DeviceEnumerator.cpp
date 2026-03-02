@@ -32,7 +32,7 @@ void DeviceEnumerator::comCallback(const com::ComEndpoint, const std::vector<uin
 
   if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE) {
     auto info  = device::EnumerationInformation::fromBuffer(data);
-    info.state = device::EnumerationState::ConfiguredAndConnected;
+    info.state = device::ConnectionState::Connected;
     _enumeration_vec.push_back(std::move(info));
   }
 }

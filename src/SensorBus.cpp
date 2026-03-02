@@ -67,6 +67,10 @@ bool SensorBus::verifyTopology() {
 
   std::size_t idx = 0;
   for (const auto& enum_device : _enumeration_vec) {
+    if (enum_device.state != device::ConnectionState::Connected) {
+      return false;
+    }
+
     if (enum_device.type != _board_vec.at(idx)->getBoardType()) {
       logger::Logger::getInstance()->log(
           logger::LogVerbosity::Warning, "Mismatch while verifying the topology on interface " + _interface->getID().name + ": Device " + std::to_string(idx) + " is configured as " + toString(_board_vec.at(idx)->getBoardType()) + " but a "
@@ -83,17 +87,17 @@ std::vector<device::EnumerationInformation> SensorBus::enumerateDevices() {
 
   _enumeration_vec = queryConnectedDevices(_interface->getID());
 
+  // Add configured but unconnected sensors to the enumeration list
   for (auto i = _enumeration_vec.size(); i < _board_vec.size(); i++) {
     auto idx = static_cast<unsigned int>(i + 1);
 
-    // Add configured but unconnected sensors to the enumeration list
     device::EnumerationInformation info;
     info.idx   = idx;
-    info.state = device::EnumerationState::ConfiguredNotConnected;
+    info.state = device::ConnectionState::Unconnected;
     _enumeration_vec.push_back(std::move(info));
 
     // Disable sensors that are configured but unconnected
-    for (device::BaseDevice* device : _board_vec.at(i)->getDevices()) {
+    for (auto* device : _board_vec.at(i)->getDevices()) {
       static_cast<device::BaseSensor*>(device)->setEnable(false);
     }
   }
