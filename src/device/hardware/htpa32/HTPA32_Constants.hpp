@@ -12,44 +12,6 @@ namespace device {
 
 namespace htpa32 {
 
-// Needs to be packed because µC memory is directly copied to this struct
-PACK(struct HTPA32Eeprom {
-  float pixc_min;
-  float pixc_max;
-  std::uint8_t grad_scale;
-  std::uint16_t tablenumber;
-  std::uint8_t epsilon;
-  std::uint8_t mbit_calib;
-  std::uint8_t bias_calib;
-  std::uint8_t clk_calib;
-  std::uint8_t bpa_calib;
-  std::uint8_t pu_calib;
-  std::uint8_t arraytype;
-  std::uint16_t vddth1;
-  std::uint16_t vddth2;
-  float ptat_gradient;
-  float ptat_offset;
-  std::uint16_t ptat_th1;
-  std::uint16_t ptat_th2;
-  std::uint8_t vddsc_gradient;
-  std::uint8_t vddsc_offset;
-  std::uint8_t global_offset;
-  std::uint16_t global_gain;
-  std::uint8_t mbit_user;
-  std::uint8_t bias_user;
-  std::uint8_t clk_user;
-  std::uint8_t bpa_user;
-  std::uint8_t pu_user;
-  std::uint32_t device_id;
-  std::uint8_t norof_deadpix;
-  std::uint16_t deadpix_addr[24];
-  std::uint16_t deadpix_mask[12];
-  std::int16_t vddcomp_gradient[256];
-  std::int16_t vddcomp_offset[256];
-  std::int16_t th_gradient[1024];
-  std::int16_t th_offset[1024];
-  std::uint16_t p[1024];
-});
 
 // DEVICE ADDRESS
 #define SENSOR_ADDRESS 0x1A

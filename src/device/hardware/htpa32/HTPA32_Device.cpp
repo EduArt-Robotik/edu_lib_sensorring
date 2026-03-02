@@ -6,6 +6,8 @@
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
 
+#include "htpa32_eeprom.h"
+
 namespace eduart {
 
 namespace device {

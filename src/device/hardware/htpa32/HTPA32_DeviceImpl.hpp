@@ -8,11 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "HTPA32_Constants.hpp"
+#include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/device/BaseSensor.hpp"
+
+#include "HTPA32_Constants.hpp"
+#include "HTPA32_Eeprom.hpp"
 
 namespace eduart {
 
@@ -51,36 +53,31 @@ public:
 private:
   void rotateLeftImage(measurement::GrayscaleImage& image) const;
   measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
-  measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c,
-                                                      double t_min_deg_c,
-                                                      double t_max_deg_c) const;
-  measurement::ThermalMeasurement processMeasurement(uint8_t frame_id,
-                                                     const uint8_t* data,
-                                                     const htpa32::HTPA32Eeprom& eeprom,
-                                                     uint16_t vdd,
-                                                     uint16_t ptat,
-                                                     std::size_t len) const;
+  measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, double t_min_deg_c, double t_max_deg_c) const;
+  measurement::ThermalMeasurement processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const;
 
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
   HTPA32_Device& _parent;
 
   const HTPA32_Params _params;
-  htpa32::HTPA32Eeprom _eeprom{};
+  htpa32::HTPA32_Eeprom _eeprom{};
+  std::vector<uint8_t> _eeprom_buffer;
 
-  uint16_t _vdd = 0;
+  uint16_t _vdd  = 0;
   uint16_t _ptat = 0;
   measurement::ThermalMeasurement _latest_measurement;
 
   uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2]{};
   std::size_t _rx_buffer_offset = 0;
 
+  std::atomic<bool> _read_eeprom{ false };
   std::atomic<bool> _got_eeprom{ false };
-  bool _got_calibration = false;
-  bool _calibration_active = false;
-  double _calibration_average = 0.0;
+  bool _got_calibration                  = false;
+  bool _calibration_active               = false;
+  double _calibration_average            = 0.0;
   std::size_t _calibration_count_current = 0;
-  std::size_t _calibration_count_goal = 0;
+  std::size_t _calibration_count_goal    = 0;
   std::string _eeprom_filename;
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;
@@ -91,4 +88,3 @@ private:
 } // namespace device
 
 } // namespace eduart
-

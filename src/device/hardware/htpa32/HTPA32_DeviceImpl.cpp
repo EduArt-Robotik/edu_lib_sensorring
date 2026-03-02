@@ -10,6 +10,8 @@
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
 
+#include "HTPA32_Eeprom.hpp"
+
 namespace eduart {
 
 namespace device {
@@ -36,7 +38,7 @@ HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params
   _calibration_filename = "sensor" + std::to_string(_parent.getIdx()) + "_hpta32_calibration.txt";
 
   if (_params.use_eeprom_file) {
-    _got_eeprom = filemanager::StructHandler<htpa32::HTPA32Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+    _got_eeprom = filemanager::StructHandler<htpa32::HTPA32_Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
   }
 
   if (_params.use_calibration_file) {
@@ -97,19 +99,26 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
   std::size_t msg_size = data.size();
 
-  if (!_got_eeprom) {
-    if ((_rx_buffer_offset + msg_size) < (int)sizeof(htpa32::HTPA32Eeprom) + MAX_MSG_LENGTH) {
-      std::size_t len = (int)sizeof(htpa32::HTPA32Eeprom) - _rx_buffer_offset;
+  if (_read_eeprom) {
+    if ((_eeprom_buffer.size() + msg_size) < htpa32::HTPA32_Eeprom::SERIALIZED_SIZE + MAX_MSG_LENGTH) {
+      std::size_t len = (int)htpa32::HTPA32_Eeprom::SERIALIZED_SIZE - _eeprom_buffer.size();
       if (len > msg_size) {
         len = msg_size;
       }
 
-      std::copy_n(data.begin(), len, (uint8_t*)&_eeprom + _rx_buffer_offset);
-      _rx_buffer_offset += len;
+      _eeprom_buffer.insert(_eeprom_buffer.end(), data.begin(), data.begin() + len);
 
-      if (_rx_buffer_offset >= (int)sizeof(htpa32::HTPA32Eeprom)) {
-        _got_eeprom = true;
-        filemanager::StructHandler<htpa32::HTPA32Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+      if (_eeprom_buffer.size() >= htpa32::HTPA32_Eeprom::SERIALIZED_SIZE) {
+        auto result = htpa32::HTPA32_Eeprom::deserialize(_eeprom_buffer.data(), _eeprom_buffer.size());
+        if (!result.has_value()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getIdx()));
+        } else {
+          _eeprom = result.value();
+          filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+          _got_eeprom = true;
+        }
+
+        _read_eeprom = false;
         _eeprom_condition.notify_all();
       }
     }
@@ -169,12 +178,15 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
 
 std::future<bool> HTPA32_DeviceImpl::getEpromAsync(std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [this, timeout]() {
-    if (_got_eeprom) {
-      return true;
+    if (_read_eeprom) {
+      return false;
     }
+    _eeprom_buffer.reserve(htpa32::HTPA32_Eeprom::SERIALIZED_SIZE);
 
-    uint8_t sensor_select_high  = (uint8_t)((_parent.getIdx() >> 8) & 0xFF);
-    uint8_t sensor_select_low   = (uint8_t)((_parent.getIdx() >> 0) & 0xFF);
+    _read_eeprom                = true;
+    uint16_t sensor_select      = (1u << _parent.getIdx());
+    uint8_t sensor_select_high  = (uint8_t)(sensor_select >> 8);
+    uint8_t sensor_select_low   = (uint8_t)(sensor_select >> 0);
     std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
     _parent._interface->send(com::ComEndpoint("thermal_request"), tx_buf);
 
@@ -187,7 +199,7 @@ std::future<bool> HTPA32_DeviceImpl::getEpromAsync(std::chrono::milliseconds tim
   });
 }
 
-measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const {
+measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const {
   uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
   uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
@@ -198,7 +210,7 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
   result.frame_id  = frame_id;
   result.min_deg_c = 1e6;
 
-  float t_ambient        = _ptat * eeprom.ptat_gradient + eeprom.ptat_offset;
+  float t_ambient        = _ptat * eeprom.data.ptat_gradient + eeprom.data.ptat_offset;
   result.t_ambient_deg_c = (t_ambient - 2732) / 10.0F;
 
   for (unsigned int i = 0; i < len; i++) {
@@ -209,12 +221,12 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
 
     uint16_t raw_pixel = (((uint8_t*)raw_pixel_data)[i * 2 + 0] << 8) | (((uint8_t*)raw_pixel_data)[i * 2 + 1] << 0);
 
-    buffer[i] = raw_pixel - ((double)(eeprom.th_gradient[i] * ptat) / pow(2, eeprom.grad_scale)) - eeprom.th_offset[i];
+    buffer[i] = raw_pixel - ((double)(eeprom.data.th_gradient[i] * ptat) / pow(2, eeprom.data.grad_scale)) - eeprom.data.th_offset[i];
 
     buffer[i] -= offset_data[idx];
 
-    double vdd_comp_val1 = ((double)(_eeprom.vddcomp_gradient[idx] * ptat) / std::pow(2, _eeprom.vddsc_gradient) + _eeprom.vddcomp_offset[idx]) / std::pow(2, _eeprom.vddsc_offset);
-    double vdd_comp_val2 = (vdd - _eeprom.vddth1 - ((double)(_eeprom.vddth2 - _eeprom.vddth1) / (_eeprom.ptat_th2 - _eeprom.ptat_th1)) * (ptat - _eeprom.ptat_th1));
+    double vdd_comp_val1 = ((double)(_eeprom.data.vddcomp_gradient[idx] * ptat) / std::pow(2, _eeprom.data.vddsc_gradient) + _eeprom.data.vddcomp_offset[idx]) / std::pow(2, _eeprom.data.vddsc_offset);
+    double vdd_comp_val2 = (vdd - _eeprom.data.vddth1 - ((double)(_eeprom.data.vddth2 - _eeprom.data.vddth1) / (_eeprom.data.ptat_th2 - _eeprom.data.ptat_th1)) * (ptat - _eeprom.data.ptat_th1));
     buffer[i]            = buffer[i] - (vdd_comp_val1 * vdd_comp_val2);
 
     std::size_t table_col = 0;
