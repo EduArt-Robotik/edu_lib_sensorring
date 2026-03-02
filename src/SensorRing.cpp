@@ -99,9 +99,11 @@ bool SensorRing::verifyTopology() const {
 }
 
 std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::ComInterfaceID> interfaces) {
-  std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
-  for (const auto& interface : interfaces) {
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Creating a SensorRing from enumeration.");
 
+  std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
+
+  for (const auto& interface : interfaces) {
     auto iface = com::ComManager::getInstance()->getInterface(interface);
     if (!iface) {
       continue;
@@ -109,18 +111,31 @@ std::unique_ptr<SensorRing> SensorRing::createFromEnumeration(std::vector<com::C
 
     auto id = iface->getID(); // If the iface was automatically generated (e.g. USBTINGO & Serial 0) the actual id is different from the one passed to this method -> have to fetch the actual one
 
-    std::vector<device::EnumerationInformation> enum_infos = bus::SensorBus::queryConnectedDevices(id);
-    std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
-    board_vec.reserve(enum_infos.size());
+    auto enum_infos = bus::SensorBus::queryConnectedDevices(id);
 
-    for (const auto& enum_info : enum_infos) {
-      unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
-      device::SensorBoardParams board_params;
-      board_params.board_type = enum_info.type;
-      board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx));
+    if (!enum_infos.empty()) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Found " + std::to_string(enum_infos.size()) + " sensor boards on interface " + id.name + " during creation.");
+
+      std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
+      board_vec.reserve(enum_infos.size());
+
+      for (const auto& enum_info : enum_infos) {
+        unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+        device::SensorBoardParams board_params;
+        board_params.board_type = enum_info.type;
+        board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx));
+      }
+      bus_vec.push_back(std::make_unique<bus::SensorBus>(id, std::move(board_vec)));
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Found no sensor boards on interface " + id.name + " during creation. Skipping this interface.");
     }
-    bus_vec.push_back(std::make_unique<bus::SensorBus>(id, std::move(board_vec)));
   }
+
+  if (bus_vec.empty()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Found no sensor boards on any of the provided interfaces. Failed to create SensorRing.");
+    return nullptr;
+  }
+
   return std::make_unique<SensorRing>(std::move(bus_vec));
 }
 

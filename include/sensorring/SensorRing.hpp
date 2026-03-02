@@ -77,7 +77,7 @@ public:
   /**
    * @brief Enumerate the connected devices that are connected on the specified interfaces and create a sensor ring from what is connected.
    * @param[in] interfaces Vector of communication interface parameters.
-   * @return Unique pointer to the created SensorRing instance
+   * @return Unique pointer to the created SensorRing instance. Returns nullptr if no sensor boards were found on any of the provided interfaces.
    */
   static std::unique_ptr<SensorRing> createFromEnumeration(std::vector<com::ComInterfaceID> interfaces);
 
