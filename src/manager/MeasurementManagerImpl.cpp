@@ -348,50 +348,38 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::enumerate_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Enumerating all connected sensors");
 
-    success = _sensor_ring->enumerateDevices();
+    success = false;
+    std::vector<device::EnumerationInformation> enum_result;
 
-    for (auto sensor_bus : _sensor_ring->getInterfaces()) {
+    // Enumerate all boards from all devices
+    for (auto bus : _sensor_ring->getSensorBuses()) {
+      auto result = bus->enumerateDevices();
+
+      auto connected_count = std::count_if(result.begin(), result.end(), [](const device::EnumerationInformation& info) {
+        return info.state == device::ConnectionState::Connected;
+      });
+
+      success |= (connected_count > 0);
       logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Info,
-          "Counted " + std::to_string(sensor_bus->getEnumerationCount()) + " sensor boards on interface " + sensor_bus->getInterface()->getID().name + ", " + std::to_string(sensor_bus->getSensorCount()) + " are configured.");
+          logger::LogVerbosity::Info, "Counted " + std::to_string(connected_count) + " sensor boards on interface " + bus->getInterface()->getID().name + ", " + std::to_string(bus->getSensorCount()) + " are configured.");
 
-      if (sensor_bus->getSensorCount() && _params.print_topology) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
+      if (_params.enforce_topology) {
+        success &= bus->verifyTopology();
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Verifying the topology of interface " + bus->getInterface()->getID().name + (success ? " succeeded" : " failed"));
       }
 
-      if (sensor_bus->getEnumerationCount() > 0) {
-
-        if (sensor_bus->getSensorCount() != sensor_bus->getEnumerationCount()) {
-          if (_params.enforce_topology) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted the wrong number of sensors and the parameter \"enforce_topology\" is set to \"true\". Check topology and restart.");
-          } else {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Counted the wrong number of sensors but the parameter \"enforce_topology\" is set to \"false\". Measurements will only include the configured sensors.");
-            success = true;
-          }
-        }
-
-        if (success && _params.enforce_topology) {
-          const auto& enum_infos = sensor_bus->getEnumerationInfo();
-          const auto boards      = sensor_bus->getSensorBoards();
-          for (size_t i = 0; i < boards.size() && i < enum_infos.size(); ++i) {
-            const auto configured = boards[i]->getBoardType();
-            if (configured != device::SensorBoardType::Undefined && configured != enum_infos[i].type) {
-              logger::Logger::getInstance()->log(
-                  logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " is configured as " + device::toString(configured) + " but detected as " + device::toString(enum_infos[i].type) + ". enforce_topology is true.");
-              success = false;
-            }
-          }
-        }
-      } else {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Counted 0 sensor boards, no work to do here. Check topology and restart.");
-      }
+      enum_result.reserve(enum_result.size() + result.size());
+      enum_result.insert(enum_result.end(), result.begin(), result.end());
     }
 
     // state transition
     if (success) {
+      if (_params.print_topology) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
+      }
       _measurement_state = MeasurementState::get_eeprom;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to enumerate sensors");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Found no connected sensor boards. Check connections and restart.");
       _measurement_state = MeasurementState::shutdown;
     }
     break;
