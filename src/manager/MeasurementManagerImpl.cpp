@@ -646,7 +646,7 @@ void MeasurementManagerImpl::StateMachine() {
       // Try to fix the error
 
       bool communication_error = false;
-      for (auto& bus : _sensor_ring->getInterfaces()) {
+      for (auto& bus : _sensor_ring->getSensorBuses()) {
         auto interface = bus->getInterface();
         communication_error |= interface->hasError();
       }
@@ -657,7 +657,7 @@ void MeasurementManagerImpl::StateMachine() {
         do {
           attempts++;
           success = true;
-          for (auto& bus : _sensor_ring->getInterfaces()) {
+          for (auto& bus : _sensor_ring->getSensorBuses()) {
             auto interface = bus->getInterface();
             if (interface->hasError()) {
               try {
