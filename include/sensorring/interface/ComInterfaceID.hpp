@@ -21,7 +21,7 @@ namespace com {
  * @enum InterfaceType
  * @brief Type of the communication interface.
  */
-enum class SENSORRING_EXPORT InterfaceType {
+enum class InterfaceType {
   UNDEFINED,
   SOCKETCAN,
   USBTINGO
