@@ -473,12 +473,8 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::request_thermal_measurement: {
     if (_thermal_enabled && !_thermal_measurement_flag) {
-      bool measure_thermal = true;
-      if (_is_thermal_throttled) {
-        if ((std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp) < _thermal_measurement_period)
-          measure_thermal = false;
-      }
-      if (measure_thermal) {
+
+      if (!_is_thermal_throttled || ((std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp) > _thermal_measurement_period)) {
         auto thermal_devices = _device_groups.at(device::DeviceType::HTPA32).getDevicesOfType<device::HTPA32_Device>();
         if (!thermal_devices.empty()) {
           _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(thermal_devices, _params.timeout);
