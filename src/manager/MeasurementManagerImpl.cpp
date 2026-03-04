@@ -44,15 +44,11 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 
-  // check if there are active tof or thermal sensors (device-group based)
-  _device_groups.at(device::DeviceType::VL53L8CX).invokeForEachDevice([this](device::IDevice* device) {
-    if (dynamic_cast<device::VL53L8CX_Device*>(device)->getEnable())
-      _tof_enabled = true;
-  });
-  _device_groups.at(device::DeviceType::HTPA32).invokeForEachDevice([this](device::IDevice* device) {
-    if (dynamic_cast<device::HTPA32_Device*>(device)->getEnable())
-      _thermal_enabled = true;
-  });
+  if (_sensor_ring->getDevices().empty()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Empty SensorRing passed to MeasurementManager");
+    return;
+  }
+
   // prepare state machine
   _manager_state = ManagerState::Initialized;
 }
@@ -244,15 +240,13 @@ bool MeasurementManagerImpl::measureSome() noexcept {
   bool success = false;
 
   if (!_is_running) {
-    if (_tof_enabled || _thermal_enabled) {
-      notifyState(ManagerState::Running);
-      try {
-        StateMachine();
-        success = true;
-      } catch (const std::exception& e) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in state machine: " + std::string(e.what()));
-        _measurement_state = MeasurementState::error_handler_communication;
-      }
+    notifyState(ManagerState::Running);
+    try {
+      StateMachine();
+      success = true;
+    } catch (const std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in state machine: " + std::string(e.what()));
+      _measurement_state = MeasurementState::error_handler_communication;
     }
   }
 
@@ -261,12 +255,10 @@ bool MeasurementManagerImpl::measureSome() noexcept {
 
 bool MeasurementManagerImpl::startMeasuring() noexcept {
   if (!_is_running) {
-    if (_tof_enabled || _thermal_enabled) {
-      _is_running    = true;
-      _worker_thread = std::thread(&MeasurementManagerImpl::StateMachineWorker, this);
-      notifyState(ManagerState::Running);
-      return true;
-    }
+    _is_running    = true;
+    _worker_thread = std::thread(&MeasurementManagerImpl::StateMachineWorker, this);
+    notifyState(ManagerState::Running);
+    return true;
   }
 
   return false;
@@ -348,10 +340,8 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::enumerate_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Enumerating all connected sensors");
 
-    success = false;
-    std::vector<device::EnumerationInformation> enum_result;
-
     // Enumerate all boards from all devices
+    std::vector<device::EnumerationInformation> enum_result;
     for (auto bus : _sensor_ring->getSensorBuses()) {
       auto result = bus->enumerateDevices();
 
@@ -359,7 +349,6 @@ void MeasurementManagerImpl::StateMachine() {
         return info.state == device::ConnectionState::Connected;
       });
 
-      success |= (connected_count > 0);
       logger::Logger::getInstance()->log(
           logger::LogVerbosity::Info, "Counted " + std::to_string(connected_count) + " sensor boards on interface " + bus->getInterface()->getID().name + ", " + std::to_string(bus->getSensorCount()) + " are configured.");
 
@@ -372,12 +361,30 @@ void MeasurementManagerImpl::StateMachine() {
       enum_result.insert(enum_result.end(), result.begin(), result.end());
     }
 
-    // state transition
+    //  check if there are active vl53l8 devices
+    _tof_enabled = std::find_if(
+                       enum_result.begin(), enum_result.end(),
+                       [](const device::EnumerationInformation& info) {
+                         return info.hasDevice(device::DeviceType::VL53L8CX) && info.state == device::ConnectionState::Connected;
+                       })
+                   != enum_result.end();
+
+    //  check if there are active htpa32 devices
+    _thermal_enabled = std::find_if(
+                           enum_result.begin(), enum_result.end(),
+                           [](const device::EnumerationInformation& info) {
+                             return info.hasDevice(device::DeviceType::HTPA32) && info.state == device::ConnectionState::Connected;
+                           })
+                       != enum_result.end();
+
+    success &= (_tof_enabled || _thermal_enabled);
+
     if (success) {
       if (_params.print_topology) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
       }
       _measurement_state = MeasurementState::get_eeprom;
+
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Found no connected sensor boards. Check connections and restart.");
       _measurement_state = MeasurementState::shutdown;
