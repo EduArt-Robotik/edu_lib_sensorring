@@ -21,8 +21,11 @@ using eduart::device::DeviceType;
 // Minimal ComInterface implementation for unit tests (no I/O).
 class MockComInterface : public ComInterface {
 public:
+  MockComInterface()
+      : ComInterface(eduart::com::ComInterfaceID{}) {}
+
   bool send(ComEndpoint, const std::vector<std::uint8_t>&) override { return true; }
-  bool openInterface(std::string) override { return true; }
+  bool openInterface() override { return true; }
   bool closeInterface() override { return true; }
   bool repairInterface() override { return true; }
 
@@ -34,7 +37,7 @@ protected:
 class TestDeviceA : public BaseDevice {
 public:
   TestDeviceA(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, "test_a", idx }, iface, ComEndpoint("test_a"), false) {}
+      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, idx }, iface, ComEndpoint("test_a"), false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}
@@ -45,7 +48,7 @@ public:
 class TestDeviceB : public BaseDevice {
 public:
   TestDeviceB(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::HTPA32, "test_b", idx }, iface, ComEndpoint("test_b"), false) {}
+      : BaseDevice(DeviceID{ DeviceType::HTPA32, idx }, iface, ComEndpoint("test_b"), false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}

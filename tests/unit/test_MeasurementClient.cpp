@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "sensorring/manager/ManagerTypes.hpp"
+#include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
