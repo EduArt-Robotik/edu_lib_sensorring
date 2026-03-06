@@ -32,7 +32,8 @@ namespace device {
 enum class SensorState {
   SensorInit,
   SensorOK,
-  ReceiveError
+  ReceiveError,
+  ProcessError
 };
 
 /**

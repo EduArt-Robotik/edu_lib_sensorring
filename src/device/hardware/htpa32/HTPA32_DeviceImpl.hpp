@@ -54,7 +54,7 @@ private:
   void rotateLeftImage(measurement::GrayscaleImage& image) const;
   measurement::FalseColorImage convertToFalseColorImage(const measurement::GrayscaleImage& image) const;
   measurement::GrayscaleImage convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, double t_min_deg_c, double t_max_deg_c) const;
-  measurement::ThermalMeasurement processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const;
+  std::pair<measurement::ThermalMeasurement, SensorState> processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const;
 
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 

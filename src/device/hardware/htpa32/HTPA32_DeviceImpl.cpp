@@ -133,40 +133,45 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
           _rx_buffer_offset += msg_size;
 
           if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
-            _latest_measurement = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+            std::tie(_latest_measurement, _parent._error) = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+            if (_parent._error == SensorState::SensorOK) {
+              if (_calibration_active) {
+                if (_calibration_count_current < _calibration_count_goal) {
+                  _calibration_image += _latest_measurement.temp_data_deg_c;
+                  _calibration_count_current++;
+                }
+                if (_calibration_count_current >= _calibration_count_goal) {
+                  _calibration_image /= static_cast<double>(_calibration_count_current);
+                  _calibration_average = _calibration_image.avg();
+                  _calibration_active  = false;
+                  _got_calibration     = true;
 
-            if (_calibration_active) {
-              if (_calibration_count_current < _calibration_count_goal) {
-                _calibration_image += _latest_measurement.temp_data_deg_c;
-                _calibration_count_current++;
-              }
-              if (_calibration_count_current >= _calibration_count_goal) {
-                _calibration_image /= static_cast<double>(_calibration_count_current);
-                _calibration_average = _calibration_image.avg();
-                _calibration_active  = false;
-                _got_calibration     = true;
-
-                if (_params.use_calibration_file) {
-                  filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
+                  if (_params.use_calibration_file) {
+                    filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
+                  }
                 }
               }
-            }
 
-            if (!_calibration_active && _got_calibration) {
-              _latest_measurement.temp_data_deg_c -= _calibration_image;
-              _latest_measurement.temp_data_deg_c += _calibration_average;
-            }
+              if (!_calibration_active && _got_calibration) {
+                _latest_measurement.temp_data_deg_c -= _calibration_image;
+                _latest_measurement.temp_data_deg_c += _calibration_average;
+              }
 
-            if (_params.auto_min_max) {
-              _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+              if (_params.auto_min_max) {
+                _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+              } else {
+                _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
+              }
+
+              rotateLeftImage(_latest_measurement.grayscale_img);
+              _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
+              _has_ready_measurement             = true;
+              _parent.setMeasurementReady(true);
+
             } else {
-              _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
+              _has_ready_measurement = false;
+              _parent.setMeasurementReady(true); // ToDo: Debug hack. Don't return true here. -> Maybe a more differentiated return value (e.g. MeasurementError::ProcessError).
             }
-
-            rotateLeftImage(_latest_measurement.grayscale_img);
-            _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
-            _has_ready_measurement             = true;
-            _parent.setMeasurementReady(true);
           }
         } else {
           _parent._error = SensorState::ReceiveError;
@@ -199,7 +204,7 @@ std::future<bool> HTPA32_DeviceImpl::getEpromAsync(std::chrono::milliseconds tim
   });
 }
 
-measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const {
+std::pair<measurement::ThermalMeasurement, SensorState> HTPA32_DeviceImpl::processMeasurement(uint8_t frame_id, const uint8_t* data, const htpa32::HTPA32_Eeprom& eeprom, uint16_t vdd, uint16_t ptat, std::size_t len) const {
   uint16_t* offset_data    = (uint16_t*)(data + 0);   //  256 bytes of buffer are top offset values
   uint16_t* raw_pixel_data = (uint16_t*)(data + 512); // 2048 bytes of buffer are pixel values
 
@@ -255,11 +260,12 @@ measurement::ThermalMeasurement HTPA32_DeviceImpl::processMeasurement(uint8_t fr
         result.max_deg_c = result.temp_data_deg_c.data[i];
       }
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error occurred while processing thermal image");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Processing thermal image failed for pixel " + std::to_string(i));
+      return { result, SensorState::ProcessError };
     }
   }
 
-  return result;
+  return { result, SensorState::SensorOK };
 }
 
 measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, double t_min_deg_c, double t_max_deg_c) const {
