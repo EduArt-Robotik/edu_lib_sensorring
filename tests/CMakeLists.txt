@@ -13,6 +13,7 @@ add_executable(sensorring_tests
     unit/test_DeviceGroup.cpp
     unit/test_SubscriberToken.cpp
     unit/test_MeasurementClient.cpp
+    unit/test_HTPA32_Eeprom.cpp
 )
 
 target_include_directories(sensorring_tests PRIVATE
