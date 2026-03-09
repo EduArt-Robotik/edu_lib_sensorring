@@ -82,7 +82,8 @@ private:
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;
   mutable std::condition_variable _eeprom_condition;
-  bool _has_ready_measurement = false;
+  bool _has_ready_measurement   = false;
+  int _measurement_init_counter = 0;
 };
 
 } // namespace device

@@ -114,7 +114,10 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getIdx()));
         } else {
           _eeprom = result.value();
-          filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+          if (_params.use_eeprom_file) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving EEPROM data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
+            filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
+          }
           _got_eeprom = true;
         }
 
@@ -135,7 +138,7 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
           if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
             std::tie(_latest_measurement, _parent._error) = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
             if (_parent._error == SensorState::SensorOK) {
-              if (_calibration_active) {
+              if (_calibration_active && _measurement_init_counter > 5) {
                 if (_calibration_count_current < _calibration_count_goal) {
                   _calibration_image += _latest_measurement.temp_data_deg_c;
                   _calibration_count_current++;
@@ -146,10 +149,14 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
                   _calibration_active  = false;
                   _got_calibration     = true;
 
+                  logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Calibration finished for sensor " + std::to_string(_parent.getIdx()) + ". Average temperature: " + std::to_string(_calibration_average) + " deg C.");
                   if (_params.use_calibration_file) {
+                    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving calibration data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
                     filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
                   }
                 }
+              } else {
+                _measurement_init_counter++;
               }
 
               if (!_calibration_active && _got_calibration) {
@@ -170,11 +177,13 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
 
             } else {
               _has_ready_measurement = false;
-              _parent.setMeasurementReady(true); // ToDo: Debug hack. Don't return true here. -> Maybe a more differentiated return value (e.g. MeasurementError::ProcessError).
+              //_parent._error         = SensorState::ProcessError;
+              _parent.setMeasurementReady(false); // ToDo: Add more fine-grained error handling here again on error conditions -> Return SensorState
             }
           }
         } else {
           _parent._error = SensorState::ReceiveError;
+          _parent.setMeasurementReady(false);
         }
       }
     }

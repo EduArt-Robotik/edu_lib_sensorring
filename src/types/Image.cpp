@@ -47,6 +47,7 @@ template <typename T, std::size_t RESOLUTION> GenericGrayscaleImage<T, RESOLUTIO
   std::size_t i = 0;
   for (auto& element : data) {
     element += other.data[i];
+    i++;
   }
   return *this;
 }

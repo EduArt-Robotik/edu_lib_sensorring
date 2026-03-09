@@ -20,13 +20,13 @@ namespace device {
  */
 struct SENSORRING_EXPORT HTPA32_Params : public DeviceParams {
   /// Minimal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
-  double t_min_deg_c = 0;
+  double t_min_deg_c = 20;
 
   /// Maximal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
-  double t_max_deg_c = 0;
+  double t_max_deg_c = 30;
 
   /// Enable automatic color scaling of the thermal images using the coldest and the hottest temperature in each image.
-  bool auto_min_max = false;
+  bool auto_min_max = true;
 
   /// Save the thermal sensors eeprom content to a local file to only require a transfer once.
   bool use_eeprom_file = false;
