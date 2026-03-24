@@ -70,15 +70,34 @@ std::string SensorRing::printTopology() noexcept {
     ss << std::endl;
 
     auto enum_results = bus->getLatestEnumerationResult();
-    for (const auto& device : enum_results) {
+    for (const auto& board : enum_results) {
 
-      ss << "sensor " << device.idx << std::endl;
-      ss << "    Type:           " << device.type << std::endl;
-      ss << "    State:          " << device.state << std::endl;
-      ss << "    FW revision:    " << device.version << " (" << device.hash << ")" << std::endl;
+      ss << "Board " << board.idx << std::endl;
+      ss << "    Type:           " << board.type << std::endl;
+      ss << "    Connection:     " << board.state << std::endl;
+      ss << "    Configuration:  " << board.config_state << std::endl;
 
-      for (const auto& dev : device.devices) {
-        ss << "    Device:         " << dev;
+      if (board.state == device::ConnectionState::Connected) {
+        ss << "    FW revision:    " << board.version << " (" << board.hash << ")" << std::endl;
+      }
+
+      if (!board.devices.empty()) {
+        ss << "    Devices (HW):   ";
+        for (std::size_t i = 0; i < board.devices.size(); ++i) {
+          if (i > 0)
+            ss << ", ";
+          ss << board.devices[i];
+        }
+        ss << std::endl;
+      }
+
+      if (!board.configured_devices.empty() && board.configured_devices != board.devices) {
+        ss << "    Devices (used): ";
+        for (std::size_t i = 0; i < board.configured_devices.size(); ++i) {
+          if (i > 0)
+            ss << ", ";
+          ss << board.configured_devices[i];
+        }
         ss << std::endl;
       }
 

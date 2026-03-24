@@ -56,6 +56,23 @@ std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept
   return os << toString(state);
 }
 
+std::string toString(ConfigurationState state) {
+  switch (state) {
+  case ConfigurationState::Undefined:
+    return "Undefined";
+  case ConfigurationState::Configured:
+    return "Configured";
+  case ConfigurationState::Unconfigured:
+    return "Unconfigured";
+  default:
+    return "Unknown";
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const ConfigurationState state) noexcept {
+  return os << toString(state);
+}
+
 bool EnumerationInformation::isUndefined() const noexcept {
   static const EnumerationInformation undefined_ref = EnumerationInformation{};
   return *this == undefined_ref;

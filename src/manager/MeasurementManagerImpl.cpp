@@ -380,9 +380,6 @@ void MeasurementManagerImpl::StateMachine() {
     success &= (_tof_enabled || _thermal_enabled);
 
     if (success) {
-      if (_params.print_topology) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, _sensor_ring->printTopology());
-      }
       _measurement_state = MeasurementState::get_eeprom;
 
     } else {

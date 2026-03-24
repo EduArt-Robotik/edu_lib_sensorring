@@ -99,7 +99,7 @@ namespace device {
 
 /**
  * @enum ConnectionState
- * @brief State of a board relative to configuration and connection after enumeration.
+ * @brief Physical connection state of a board after enumeration.
  */
 enum class ConnectionState {
   Undefined,
@@ -108,19 +108,41 @@ enum class ConnectionState {
 };
 
 /**
- * @brief Convert enumeration state to a human-readable string.
- * @param[in] state Enumeration state.
+ * @enum ConfigurationState
+ * @brief Whether a board or device was declared by the user via the factory.
+ */
+enum class ConfigurationState {
+  /// State has not been determined yet.
+  Undefined,
+  /// The board/device was declared by the user (expectBoard) and matched by the factory.
+  Configured,
+  /// The board/device was discovered by hardware but not declared by the user.
+  Unconfigured
+};
+
+/**
+ * @brief Convert connection state to a human-readable string.
+ * @param[in] state Connection state.
  * @return String representation of state.
  */
 SENSORRING_EXPORT std::string toString(ConnectionState state);
 
 /**
- * @brief Stream enumeration state as string.
- * @param[in] os Output stream.
- * @param[in] state Enumeration state to print.
- * @return Reference to os.
+ * @brief Convert configuration state to a human-readable string.
+ * @param[in] state Configuration state.
+ * @return String representation of state.
+ */
+SENSORRING_EXPORT std::string toString(ConfigurationState state);
+
+/**
+ * @brief Stream connection state as string.
  */
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept;
+
+/**
+ * @brief Stream configuration state as string.
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const ConfigurationState state) noexcept;
 
 /**
  * @struct EnumerationInformation
@@ -147,6 +169,12 @@ struct EnumerationInformation {
 
   /// Configuration/connection state after enumeration.
   ConnectionState state = ConnectionState::Undefined;
+
+  /// Configuration state set by the factory during build().
+  ConfigurationState config_state = ConfigurationState::Undefined;
+
+  /// Device types that were instantiated by the factory (subset of devices).
+  std::vector<DeviceType> configured_devices;
 
   /**
    * @brief Return true if this instance has not been filled from a valid enumeration response.
