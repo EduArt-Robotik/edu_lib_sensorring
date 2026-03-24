@@ -17,6 +17,7 @@ target_sources(sensorring
   SensorRing.cpp
   SensorBus.cpp
   SensorBoard.cpp
+  SensorRingFactory.cpp
   interface/ComInterface.cpp
   interface/ComManager.cpp
   interface/ComObserver.cpp
