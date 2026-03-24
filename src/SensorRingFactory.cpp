@@ -54,8 +54,10 @@ void SensorRingFactory::reset() {
 // build()  —  enumerate + reconcile + assemble
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<SensorRing> SensorRingFactory::build() {
+std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::build() – starting.");
+
+  const bool strict = (mode == ValidationMode::Strict);
 
   std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
 
@@ -73,8 +75,11 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
     if (enum_infos.empty()) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "No boards found on interface " + id.name + ".");
       if (iface_cfg.has_expectations) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none.");
-        return nullptr;
+        if (strict) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none.");
+          return nullptr;
+        }
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none – skipping interface (relaxed mode).");
       }
       continue;
     }
@@ -125,20 +130,34 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
 
       // Validate board count.
       if (enum_infos.size() != iface_cfg.expected_boards.size()) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + ".");
-        return nullptr;
+        if (strict) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + ".");
+          return nullptr;
+        }
+        logger::Logger::getInstance()->log(
+            logger::LogVerbosity::Warning,
+            "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + " – reconciling available boards (relaxed mode).");
       }
 
-      for (std::size_t i = 0; i < enum_infos.size(); ++i) {
+      // Iterate only over boards that have both an expectation and a discovered counterpart.
+      const auto board_count = std::min(enum_infos.size(), iface_cfg.expected_boards.size());
+
+      for (std::size_t i = 0; i < board_count; ++i) {
         const auto& enum_info   = enum_infos[i];
         const auto& expectation = iface_cfg.expected_boards[i];
         unsigned int idx        = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
 
         // Validate board type if specified.
         if (expectation.params.board_type != device::SensorBoardType::Undefined && expectation.params.board_type != enum_info.type) {
+          if (strict) {
+            logger::Logger::getInstance()->log(
+                logger::LogVerbosity::Error, "Board type mismatch at index " + std::to_string(i) + " on " + id.name + ": expected " + device::toString(expectation.params.board_type) + ", found " + device::toString(enum_info.type) + ".");
+            return nullptr;
+          }
           logger::Logger::getInstance()->log(
-              logger::LogVerbosity::Error, "Board type mismatch at index " + std::to_string(i) + " on " + id.name + ": expected " + device::toString(expectation.params.board_type) + ", found " + device::toString(enum_info.type) + ".");
-          return nullptr;
+              logger::LogVerbosity::Warning, "Board type mismatch at index " + std::to_string(i) + " on " + id.name + ": expected " + device::toString(expectation.params.board_type) + ", found " + device::toString(enum_info.type)
+                                                 + " – skipping board (relaxed mode).");
+          continue;
         }
 
         // Use the enumerated board type when the user didn't constrain it.
@@ -156,15 +175,24 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
           }
 
           // Validate that the hardware has all requested device types.
+          bool devices_ok = true;
           for (const auto& [required_type, _] : params_map) {
             if (std::find(enum_info.devices.begin(), enum_info.devices.end(), required_type) == enum_info.devices.end()) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " on " + id.name + " does not have required device type " + device::toString(required_type) + ".");
-              return nullptr;
+              if (strict) {
+                logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " on " + id.name + " does not have required device type " + device::toString(required_type) + ".");
+                return nullptr;
+              }
+              logger::Logger::getInstance()->log(
+                  logger::LogVerbosity::Warning,
+                  "Board at index " + std::to_string(i) + " on " + id.name + " does not have required device type " + device::toString(required_type) + " – skipping board (relaxed mode).");
+              devices_ok = false;
+              break;
             }
           }
+          if (!devices_ok) {
+            continue;
+          }
 
-          // Apply defaults for device types that are in the map but not explicitly provided.
-          // (all entries were explicit here, so no defaults needed)
           board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
         } else {
           // No explicit device params → use all devices from hardware, apply defaults where available.

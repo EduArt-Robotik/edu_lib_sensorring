@@ -27,6 +27,18 @@ namespace eduart {
 namespace ring {
 
 /**
+ * @enum ValidationMode
+ * @brief Controls how build() handles mismatches between expectations and discovered hardware.
+ */
+enum class ValidationMode {
+  /// All expectations must match exactly; build() returns nullptr on any mismatch.
+  Strict,
+  /// Mismatches are logged as warnings; boards that don't match are skipped and
+  /// build() succeeds with whatever subset could be reconciled.
+  Relaxed
+};
+
+/**
  * @class SensorRingFactory
  * @brief Factory for creating a SensorRing.
  *
@@ -42,6 +54,11 @@ namespace ring {
  * If no expectBoard() calls are made for an interface, build() operates in pure
  * auto-discovery mode: every board found on the bus is used with default (or
  * setDefaultDeviceParams) configuration.
+ *
+ * When expectations are present, the validation mode controls how mismatches are
+ * handled:
+ *  - Strict (default): any mismatch fails the build.
+ *  - Relaxed: mismatches are logged as warnings; only matching boards are used.
  */
 class SENSORRING_EXPORT SensorRingFactory {
 public:
@@ -85,9 +102,11 @@ public:
    * @brief Enumerate hardware on all added interfaces, validate against
    *        expectations, and construct the SensorRing.
    *
+   * @param[in] mode Validation mode (default: Strict). In Relaxed mode,
+   *            mismatched boards are skipped instead of aborting.
    * @return Unique pointer to the SensorRing, or nullptr on failure.
    */
-  std::unique_ptr<SensorRing> build();
+  std::unique_ptr<SensorRing> build(ValidationMode mode = ValidationMode::Strict);
 
   /**
    * @brief Reset the factory to its initial state.
