@@ -113,106 +113,157 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
       } else {
         // ── Configured mode ──
 
-        // Validate board count.
-        if (enum_infos.size() != iface_cfg.expected_boards.size()) {
-          if (strict) {
+        if (strict) {
+          // ── Strict: index-ordered 1:1 matching ──
+
+          // Validate board count.
+          if (enum_infos.size() != iface_cfg.expected_boards.size()) {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + ".");
             return nullptr;
           }
-          logger::Logger::getInstance()->log(
-              logger::LogVerbosity::Warning,
-              "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + " – reconciling available boards (relaxed mode).");
-        }
 
-        // Iterate only over boards that have both an expectation and a discovered counterpart.
-        const auto board_count = std::min(enum_infos.size(), iface_cfg.expected_boards.size());
+          for (std::size_t i = 0; i < enum_infos.size(); ++i) {
+            auto& enum_info         = enum_infos[i];
+            const auto& expectation = iface_cfg.expected_boards[i];
+            unsigned int idx        = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
 
-        for (std::size_t i = 0; i < board_count; ++i) {
-          auto& enum_info         = enum_infos[i];
-          const auto& expectation = iface_cfg.expected_boards[i];
-          unsigned int idx        = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
-
-          // Validate board type if specified.
-          if (expectation.params.board_type != device::SensorBoardType::Undefined && expectation.params.board_type != enum_info.type) {
-            if (strict) {
+            // Validate board type if specified.
+            if (expectation.params.board_type != device::SensorBoardType::Undefined && expectation.params.board_type != enum_info.type) {
               logger::Logger::getInstance()->log(
                   logger::LogVerbosity::Error, "Board type mismatch at index " + std::to_string(i) + " on " + id.name + ": expected " + device::toString(expectation.params.board_type) + ", found " + device::toString(enum_info.type) + ".");
               return nullptr;
             }
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Warning,
-                "Board type mismatch at index " + std::to_string(i) + " on " + id.name + ": expected " + device::toString(expectation.params.board_type) + ", found " + device::toString(enum_info.type) + " – skipping board (relaxed mode).");
-            // Still record this board as connected but unconfigured (type mismatch).
-            enum_info.config_state = device::ConfigurationState::Unconfigured;
-            enriched_enum.push_back(enum_info);
-            continue;
-          }
 
-          // Use the enumerated board type when the user didn't constrain it.
-          device::SensorBoardParams board_params = expectation.params;
-          if (board_params.board_type == device::SensorBoardType::Undefined) {
-            board_params.board_type = enum_info.type;
-          }
-
-          if (expectation.has_explicit_devices) {
-            // Build a params map from the user-provided device params.
-            device::SensorBoardManager::DeviceParamsMap params_map;
-            std::vector<device::DeviceType> configured_devs;
-            for (const auto& dp : expectation.device_params) {
-              auto dt        = deviceTypeFromVariant(dp);
-              params_map[dt] = dp;
-              configured_devs.push_back(dt);
+            device::SensorBoardParams board_params = expectation.params;
+            if (board_params.board_type == device::SensorBoardType::Undefined) {
+              board_params.board_type = enum_info.type;
             }
 
-            // Validate that the hardware has all requested device types.
-            bool devices_ok = true;
-            for (const auto& [required_type, _] : params_map) {
-              if (std::find(enum_info.devices.begin(), enum_info.devices.end(), required_type) == enum_info.devices.end()) {
-                if (strict) {
+            if (expectation.has_explicit_devices) {
+              device::SensorBoardManager::DeviceParamsMap params_map;
+              std::vector<device::DeviceType> configured_devs;
+              for (const auto& dp : expectation.device_params) {
+                auto dt        = deviceTypeFromVariant(dp);
+                params_map[dt] = dp;
+                configured_devs.push_back(dt);
+              }
+
+              for (const auto& [required_type, _] : params_map) {
+                if (std::find(enum_info.devices.begin(), enum_info.devices.end(), required_type) == enum_info.devices.end()) {
                   logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Board at index " + std::to_string(i) + " on " + id.name + " does not have required device type " + device::toString(required_type) + ".");
                   return nullptr;
                 }
-                logger::Logger::getInstance()->log(
-                    logger::LogVerbosity::Warning, "Board at index " + std::to_string(i) + " on " + id.name + " does not have required device type " + device::toString(required_type) + " – skipping board (relaxed mode).");
-                devices_ok = false;
-                break;
               }
-            }
-            if (!devices_ok) {
-              enum_info.config_state = device::ConfigurationState::Unconfigured;
-              enriched_enum.push_back(enum_info);
-              continue;
-            }
 
-            enum_info.config_state       = device::ConfigurationState::Configured;
-            enum_info.configured_devices = std::move(configured_devs);
-            board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
-          } else {
-            // No explicit device params → use all devices from hardware, apply defaults where available.
-            auto params_map = buildDefaultParamsMap(enum_info.devices);
+              enum_info.config_state       = device::ConfigurationState::Configured;
+              enum_info.configured_devices = std::move(configured_devs);
+              board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
+            } else {
+              auto params_map = buildDefaultParamsMap(enum_info.devices);
 
-            enum_info.config_state       = device::ConfigurationState::Configured;
-            enum_info.configured_devices = enum_info.devices; // all devices used
-            board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
+              enum_info.config_state       = device::ConfigurationState::Configured;
+              enum_info.configured_devices = enum_info.devices;
+              board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
+            }
+            enriched_enum.push_back(enum_info);
           }
-          enriched_enum.push_back(enum_info);
-        }
+        } else {
+          // ── Relaxed: search-based matching ──
+          // For each expectation, search through unclaimed boards for the first
+          // compatible one. This allows expectations to match boards regardless
+          // of their physical position on the bus.
 
-        // Any remaining discovered boards beyond the expectation count are connected but unconfigured.
-        for (std::size_t i = board_count; i < enum_infos.size(); ++i) {
-          auto& extra        = enum_infos[i];
-          extra.config_state = device::ConfigurationState::Unconfigured;
-          enriched_enum.push_back(extra);
-        }
+          if (enum_infos.size() != iface_cfg.expected_boards.size()) {
+            logger::Logger::getInstance()->log(
+                logger::LogVerbosity::Warning,
+                "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + " – searching for compatible boards (relaxed mode).");
+          }
 
-        // Any remaining expectations beyond the discovered count are configured but unconnected.
-        for (std::size_t i = enum_infos.size(); i < iface_cfg.expected_boards.size(); ++i) {
-          device::EnumerationInformation unconnected;
-          unconnected.idx          = static_cast<unsigned int>(i + 1);
-          unconnected.state        = device::ConnectionState::Unconnected;
-          unconnected.config_state = device::ConfigurationState::Configured;
-          unconnected.type         = iface_cfg.expected_boards[i].params.board_type;
-          enriched_enum.push_back(unconnected);
+          std::vector<bool> claimed(enum_infos.size(), false);
+
+          for (std::size_t exp_i = 0; exp_i < iface_cfg.expected_boards.size(); ++exp_i) {
+            const auto& expectation = iface_cfg.expected_boards[exp_i];
+            bool matched            = false;
+
+            for (std::size_t j = 0; j < enum_infos.size(); ++j) {
+              if (claimed[j]) {
+                continue;
+              }
+
+              auto& enum_info = enum_infos[j];
+
+              // Check board type constraint.
+              if (expectation.params.board_type != device::SensorBoardType::Undefined && expectation.params.board_type != enum_info.type) {
+                continue;
+              }
+
+              // Check required device types (only when explicit devices are specified).
+              if (expectation.has_explicit_devices) {
+                bool has_all = true;
+                for (const auto& dp : expectation.device_params) {
+                  auto dt = deviceTypeFromVariant(dp);
+                  if (std::find(enum_info.devices.begin(), enum_info.devices.end(), dt) == enum_info.devices.end()) {
+                    has_all = false;
+                    break;
+                  }
+                }
+                if (!has_all) {
+                  continue;
+                }
+              }
+
+              // ── Match found ──
+              claimed[j]       = true;
+              matched          = true;
+              unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+
+              device::SensorBoardParams board_params = expectation.params;
+              if (board_params.board_type == device::SensorBoardType::Undefined) {
+                board_params.board_type = enum_info.type;
+              }
+
+              if (expectation.has_explicit_devices) {
+                device::SensorBoardManager::DeviceParamsMap params_map;
+                std::vector<device::DeviceType> configured_devs;
+                for (const auto& dp : expectation.device_params) {
+                  auto dt        = deviceTypeFromVariant(dp);
+                  params_map[dt] = dp;
+                  configured_devs.push_back(dt);
+                }
+
+                enum_info.config_state       = device::ConfigurationState::Configured;
+                enum_info.configured_devices = std::move(configured_devs);
+                board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
+              } else {
+                auto params_map = buildDefaultParamsMap(enum_info.devices);
+
+                enum_info.config_state       = device::ConfigurationState::Configured;
+                enum_info.configured_devices = enum_info.devices;
+                board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
+              }
+              break;
+            }
+
+            if (!matched) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "No compatible board found for expectation " + std::to_string(exp_i) + " on " + id.name + " – skipping (relaxed mode).");
+
+              device::EnumerationInformation unconnected;
+              unconnected.idx          = static_cast<unsigned int>(exp_i + 1);
+              unconnected.state        = device::ConnectionState::Unconnected;
+              unconnected.config_state = device::ConfigurationState::Configured;
+              unconnected.type         = expectation.params.board_type;
+              enriched_enum.push_back(unconnected);
+            }
+          }
+
+          // Record all discovered boards in enrichment order (matched ones already
+          // have their config_state set; unclaimed ones are marked unconfigured).
+          for (std::size_t j = 0; j < enum_infos.size(); ++j) {
+            if (!claimed[j]) {
+              enum_infos[j].config_state = device::ConfigurationState::Unconfigured;
+            }
+            enriched_enum.push_back(enum_infos[j]);
+          }
         }
       }
 

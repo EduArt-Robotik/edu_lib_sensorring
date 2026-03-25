@@ -33,10 +33,11 @@ namespace ring {
  * @brief Controls how build() handles mismatches between expectations and discovered hardware.
  */
 enum class ValidationMode {
-  /// All expectations must match exactly; build() returns nullptr on any mismatch.
+  /// All expectations must match exactly by index; build() returns nullptr on any mismatch.
   Strict,
-  /// Mismatches are logged as warnings; boards that don't match are skipped and
-  /// build() succeeds with whatever subset could be reconciled.
+  /// Expectations are matched by searching for compatible boards (board type and
+  /// required devices) rather than by index. Unmatched expectations are logged
+  /// as warnings; build() succeeds with whatever subset could be reconciled.
   Relaxed
 };
 
@@ -59,8 +60,10 @@ enum class ValidationMode {
  *
  * When expectations are present, the validation mode controls how mismatches are
  * handled:
- *  - Strict (default): any mismatch fails the build.
- *  - Relaxed: mismatches are logged as warnings; only matching boards are used.
+ *  - Strict (default): boards are matched by index; any mismatch fails the build.
+ *  - Relaxed: for each expectation, the factory searches all unclaimed boards
+ *    for the first one with a compatible board type and the required device
+ *    types. Boards that are not claimed by any expectation remain unconfigured.
  */
 class SENSORRING_EXPORT SensorRingFactory {
 public:
