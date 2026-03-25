@@ -998,6 +998,8 @@ WARN_LOGFILE           =
 INPUT                  = pages/01_hardware.md \
                          pages/02_installation.md \
                          pages/03_software.md \
+                         pages/05_examples.md \
+                         pages/06_wrappers.md \
                          ../include/sensorring \
                          ../README.md
 
