@@ -82,6 +82,7 @@ int main(int, char*[]) {
     // Create a SensorRing with one HTPA32 board via auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
+    factory.expectBoard({}, { device::HTPA32_Params{} });
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::HTPA32_Params{} });
     auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);

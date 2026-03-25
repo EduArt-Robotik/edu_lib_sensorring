@@ -98,6 +98,7 @@ int main(int, char*[]) {
     // Create a SensorRing with one VL53L8CX board via auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
+    factory.expectBoard({}, { device::VL53L8CX_Params{} });
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::VL53L8CX_Params{} });
     auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
