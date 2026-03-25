@@ -83,7 +83,7 @@ class MeasurementProxy(sensorring.SensorringClient):
 def main():
   print("\33c")
   print("==========================")
-  print("Minimal sensorring example")
+  print("Depth map example")
   print("==========================")
 
   # Create the parameter structure that is used to instantiate the sensorring
@@ -103,7 +103,6 @@ def main():
 
   ring = sensorring.RingParams()
   ring.bus_param_vec.append(bus)
-  ring.timeout_ms = 1000
 
   params.ring_params = ring
   
@@ -122,12 +121,17 @@ def main():
 
     # Start the measurements
     manager.startMeasuring()
-        
-    while (manager.isMeasuring()):
-      time.sleep(1)
 
-    # Stop the measurements
-    manager.stopMeasuring()
+    while (not proxy.gotFirstMeasurement() and manager.isMeasuring()):
+      time.sleep(0.1)
+
+    if (manager.isMeasuring()):
+
+      while (manager.isMeasuring()):
+        time.sleep(1)
+
+      # Stop the measurements
+      manager.stopMeasuring()
     
   except Exception as e:
     print("Caught: ", e)

@@ -77,7 +77,6 @@ def main():
 
   ring = sensorring.RingParams()
   ring.bus_param_vec.append(bus)
-  ring.timeout_ms = 1000
 
   params.ring_params = ring
   

@@ -93,9 +93,9 @@ The following examples show how to use the Sensor Ring library in your own C++ p
 
 The following examples show how to use the Sensor Ring library in your own Python project:
 
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp): Displays the current measurement rate
-- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Displays a depth map of the ToF measurement on the command line
-- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_view/src/main.cpp): Displays a 3D plot of the ToF measurement on the command line using [matplotlib](https://matplotlib.org/)
+- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/minimal.py): Displays the current measurement rate
+- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map.py): Displays a depth map of the ToF measurement on the command line
+- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_view/depth_view.py): Displays a 3D plot of the ToF measurement using [matplotlib](https://matplotlib.org/)
 
 <div align=center>
 <table style="border: none;">

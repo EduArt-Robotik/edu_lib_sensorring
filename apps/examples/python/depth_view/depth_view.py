@@ -66,7 +66,7 @@ class MeasurementProxy(sensorring.SensorringClient):
 
 def main():
   print("==========================")
-  print("Minimal sensorring example")
+  print("Depth view example")
   print("==========================")
 
   # Create the parameter structure that is used to instantiate the sensorring
@@ -86,7 +86,6 @@ def main():
 
   ring = sensorring.RingParams()
   ring.bus_param_vec.append(bus)
-  ring.timeout_ms = 1000
 
   params.ring_params = ring
   
