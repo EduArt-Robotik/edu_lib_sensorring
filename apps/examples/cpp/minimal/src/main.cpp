@@ -10,6 +10,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -22,8 +23,13 @@ using Duration  = Clock::duration;
 using TimePoint = Clock::time_point;
 using toSeconds = std::chrono::duration<double>;
 
-static constexpr std::string_view INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+// Default CAN interface (expects a SocketCAN interface named "can0" to be available)
+static constexpr std::string_view CAN_INTERFACE_NAME        = "can0";
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE      = com::InterfaceType::SOCKETCAN;
+
+// Default USBtingo interface (uses the first available USBtingo device)
+static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 struct Rate {
   std::mutex mutex;
@@ -65,64 +71,77 @@ int main(int, char*[]) {
 
   // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
-  ring::RingParams ring;
-  {
-    device::VL53L8CX_Params tof;
-    tof.user_idx = 0;
-    tof.enable   = true;
+  params.frequency_thermal_hz = 5.0;
 
-    device::SensorBoardParams board;
-    board.vl53l8cx_params = tof;
+  auto vl53l8cx_rate = std::make_unique<Rate>();
+  auto htpa32_rate   = std::make_unique<Rate>();
 
-    bus::BusParams bus;
-    bus.interface_name = INTERFACE_NAME;
-    bus.type           = INTERFACE_TYPE;
-    bus.board_param_vec.push_back(board);
+  com::ComInterfaceID can_interface;
+  can_interface.type = CAN_INTERFACE_TYPE;
+  can_interface.name = CAN_INTERFACE_NAME;
 
-    ring.bus_param_vec.push_back(bus);
-  }
+  com::ComInterfaceID usbtingo_interface;
+  usbtingo_interface.type = USBTINGO_INTERFACE_TYPE;
+  usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
 
-  // Instantiate a Measurement proxy
-  auto rate = std::make_unique<Rate>();
 
   try {
-    // Create SensorRing from ring params, then instantiate MeasurementManager
-    auto sensor_ring = ring::SensorRing::create(ring);
-    auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Subscribe to the log messages
+    auto log_sub = logger::Logger::getInstance()->subscribe([](const logger::LogVerbosity verbosity, const std::string& msg) {
+      // if (verbosity > logger::LogVerbosity::Debug)
+      std::cout << "[" << verbosity << "] " << msg << std::endl;
+    });
+
+    // Create the SensorRing via auto-discovery
+    ring::SensorRingFactory factory;
+    factory.addInterface(can_interface);
+    factory.addInterface(usbtingo_interface);
+    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
+
+    if (!sensor_ring) {
+      std::cout << "Failed to create SensorRing from enumeration. Exiting example application." << std::endl;
+      return 1;
+    }
+
+    // Create the MeasurementManager with the SensorRing
+    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
 
     // Subscribe to the state changes to get the measurements
     auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
-      std::cout << "State changed to: " << state << std::endl;
+      std::cout << "[State] State changed to: " << state << std::endl;
     });
 
     // Subscribe to the ToF device group to get the measurements
-    auto tof_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&rate](const device::DeviceGroup&) {
-      rate->tick();
+    std::atomic<unsigned int> vl53l8cx_sensor_count = 0;
+    auto vl53l8cx_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&vl53l8cx_rate, &vl53l8cx_sensor_count](const device::DeviceGroup& group) {
+      vl53l8cx_rate->tick();
+      vl53l8cx_sensor_count = group.getDeviceCount();
     });
 
-    // Subscribe to the log messages
-    auto log_sub = logger::Logger::getInstance()->subscribe([](const logger::LogVerbosity verbosity, const std::string& msg) {
-      std::cout << "[" << verbosity << "] " << msg << std::endl;
+    // Subscribe to the Thermal device group to get the measurements
+    std::atomic<unsigned int> htpa32_sensor_count = 0;
+    auto htpa32_sub = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, [&htpa32_rate, &htpa32_sensor_count](const device::DeviceGroup& group) {
+      htpa32_rate->tick();
+      htpa32_sensor_count = group.getDeviceCount();
     });
 
     // Start the measurements
     manager->startMeasuring();
 
-    while (!rate->gotFirstMeasurement() && manager->isMeasuring()) {
+    while (!vl53l8cx_rate->gotFirstMeasurement() && manager->isMeasuring()) {
     }
 
     if (manager->isMeasuring()) {
       std::cout << std::endl << "Start printing measurement rate." << std::endl;
-      unsigned int counter = 0;
-      while (manager->isMeasuring() && counter < 10) {
-        std::cout << "Current measurement rate: " << std::fixed << std::setprecision(2) << std::setw(5) << rate->getRate() << " Hz\r" << std::flush;
+      while (manager->isMeasuring()) {
+        std::cout << "Current measurement rate: " << std::fixed << std::setprecision(2) << std::setw(5) << vl53l8cx_rate->getRate() << " Hz (ToF) from " << vl53l8cx_sensor_count << " sensors, " << std::setw(5) << htpa32_rate->getRate() << " Hz (Thermal) from " << htpa32_sensor_count << " sensors\r" << std::flush;
         std::this_thread::sleep_for(1s);
-        counter++;
       }
 
       // Unsubscribe from manager before stopping (optional)
       manager->unsubscribe(state_sub);
-      manager->unsubscribe(tof_sub);
+      manager->unsubscribe(vl53l8cx_sub);
+      manager->unsubscribe(htpa32_sub);
 
       // Unsubscribe from logger before stopping (optional)
       logger::Logger::getInstance()->unsubscribe(log_sub);
@@ -132,7 +151,8 @@ int main(int, char*[]) {
     }
 
   } catch (const std::exception& e) {
-    std::cout << "Caught: " << e.what() << std::endl;
+    std::cout << "Caught exception in example application: " << e.what() << std::endl;
+    return 1;
   }
 
   return 0;

@@ -11,11 +11,10 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <sensorring/manager/MeasurementManager.hpp>
+#include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
-
-#include "MeasurementProxy.hpp"
 
 using namespace eduart;
 using namespace std::chrono_literals;
@@ -36,45 +35,42 @@ int main(int, char*[]) {
   std::cout << "===============================" << std::endl;
   std::cout << std::endl;
 
-  // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
-  ring::RingParams ring;
-  {
-    device::VL53L8CX_Params tof;
-    tof.user_idx = 0;
-    tof.enable   = true;
 
-    device::SensorBoardParams board;
-    board.vl53l8cx_params = tof;
-
-    bus::BusParams bus;
-    bus.interface_name = INTERFACE_NAME;
-    bus.type           = INTERFACE_TYPE;
-    bus.board_param_vec.push_back(board);
-    bus.board_param_vec.push_back(board);
-
-    ring.bus_param_vec.push_back(bus);
-  }
-
-  // Instantiate a Measurement proxy
-  auto proxy = std::make_unique<MeasurementProxy>();
+  com::ComInterfaceID interface;
+  interface.type = INTERFACE_TYPE;
+  interface.name = INTERFACE_NAME;
 
   try {
-    // Create SensorRing from ring params, then instantiate MeasurementManager
-    auto sensor_ring = ring::SensorRing::create(ring);
-    auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Create SensorRing via factory with 2 boards on 1 bus
+    ring::SensorRingFactory factory;
+    factory.addInterface(interface);
+    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    // Register the proxy with the LogMeasurementManager to get the measurements
-    proxy->registerClient(manager.get());
+    if (!sensor_ring) {
+      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
+      return 1;
+    }
+
+    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+
+    // Subscribe to ToF device group for rate tracking
+    std::atomic<bool> got_first       = false;
+    std::atomic<unsigned int> counter = 0;
+    auto tof_sub                      = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&got_first, &counter](const device::DeviceGroup&) {
+      got_first = true;
+      counter++;
+    });
 
     // Start the measurements
     manager->startMeasuring();
 
-    while (!proxy->gotFirstMeasurement() && manager->isMeasuring()) {
+    while (!got_first && manager->isMeasuring()) {
     }
 
     if (manager->isMeasuring()) {
-      std::cout << std::endl << "Printing measurement rate:" << std::endl;
+      std::cout << std::endl << "Sensorring successfully initialized." << std::endl;
+      std::cout << std::endl << "Start printing animation frames:" << std::endl;
 
       float phase     = 0.0f;
       auto last_print = std::chrono::steady_clock::now();
@@ -101,11 +97,13 @@ int main(int, char*[]) {
         });
 
         if (std::chrono::steady_clock::now() - last_print > 1s) {
-          std::cout << "Current rate: " << std::fixed << std::setprecision(2) << std::setw(5) << proxy->getRate() << " Hz\r" << std::flush;
+          std::cout << "Current frame: " << counter.load() << "\r" << std::flush;
           last_print = std::chrono::steady_clock::now();
         }
         std::this_thread::sleep_for(50ms);
       }
+
+      manager->unsubscribe(tof_sub);
 
       // Stop the measurements
       manager->stopMeasuring();

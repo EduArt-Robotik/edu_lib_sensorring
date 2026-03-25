@@ -10,6 +10,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
@@ -27,34 +28,29 @@ int main(int, char*[]) {
   std::cout << "==============================" << std::endl;
   std::cout << std::endl;
 
-  // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
-  ring::RingParams ring;
-  {
-    device::VL53L8CX_Params tof;
-    tof.user_idx = 0;
-    tof.enable   = true;
 
-    device::SensorBoardParams board;
-    board.vl53l8cx_params = tof;
-
-    bus::BusParams bus;
-    bus.interface_name = INTERFACE_NAME;
-    bus.type           = INTERFACE_TYPE;
-    bus.board_param_vec.push_back(board);
-
-    ring.bus_param_vec.push_back(bus);
-  }
+  com::ComInterfaceID interface;
+  interface.type = INTERFACE_TYPE;
+  interface.name = INTERFACE_NAME;
 
   // Instantiate a Measurement proxy
   auto proxy = std::make_unique<MeasurementProxy>();
 
   try {
-    // Create SensorRing from ring params, then instantiate MeasurementManager
-    auto sensor_ring = ring::SensorRing::create(ring);
-    auto manager     = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Create SensorRing via factory auto-discovery
+    ring::SensorRingFactory factory;
+    factory.addInterface(interface);
+    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    // Register the proxy with the LogMeasurementManager to get the measurements
+    if (!sensor_ring) {
+      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
+      return 1;
+    }
+
+    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+
+    // Register the proxy with the MeasurementManager to get the measurements
     proxy->registerClient(manager.get());
 
     // Start the measurements

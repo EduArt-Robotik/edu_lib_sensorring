@@ -10,11 +10,7 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
-
-#include "device/BaseDevice.hpp"
-#include "sensorring/Parameter.hpp"
 
 #include "SensorBus.hpp"
 
@@ -56,18 +52,7 @@ public:
    */
   std::vector<device::IDevice*> getDevices() const;
 
-  /**
-   * @brief Get the topology of the sensor ring.
-   * @return RingTopology
-   */
-  RingTopology getTopology() const noexcept;
-
-
-
 private:
-  /// Topology of the sensor ring as configured upon creation.
-  RingTopology _topology;
-
   /// Vector of sensor buses managed by this sensor ring.
   std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
 };

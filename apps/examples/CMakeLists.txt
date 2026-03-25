@@ -1,4 +1,13 @@
 # Compile examples
+
+add_executable(minimal
+    cpp/minimal/src/main.cpp
+)
+
+target_link_libraries(minimal
+    PRIVATE sensorring::sensorring
+)
+
 add_executable(depth_map
     cpp/depth_map/src/main.cpp
     cpp/depth_map/src/MeasurementProxy.cpp
@@ -8,20 +17,19 @@ target_link_libraries(depth_map
     PRIVATE sensorring::sensorring
 )
 
-add_executable(extra_action
-    cpp/extra_action/src/main.cpp
-    cpp/extra_action/src/MeasurementProxy.cpp
+add_executable(thermal_map
+    cpp/thermal_map/src/main.cpp
 )
 
-target_link_libraries(extra_action
+target_link_libraries(thermal_map
     PRIVATE sensorring::sensorring
 )
 
-add_executable(minimal
-    cpp/minimal/src/main.cpp
+add_executable(extra_action
+    cpp/extra_action/src/main.cpp
 )
 
-target_link_libraries(minimal
+target_link_libraries(extra_action
     PRIVATE sensorring::sensorring
 )
 
@@ -37,10 +45,11 @@ target_link_libraries(proxy
 if(SENSORRING_INSTALL)
   # Install compiled examples
   install( TARGETS
-      minimal
-      proxy
-      depth_map
-      extra_action
+    minimal
+    proxy
+    depth_map
+    thermal_map
+    extra_action
     RUNTIME DESTINATION ${SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR} COMPONENT Examples
   )
 

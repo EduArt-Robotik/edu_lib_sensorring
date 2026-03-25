@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 
+#include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/types/InterfaceType.hpp"
@@ -44,29 +45,23 @@ enum class TestResult {
 };
 
 TestResult run_single_interface_test(const std::string& interface_name, InterfaceType type) {
-  // Configure one bus with a single ToF-enabled board, similar to minimal example.
   ManagerParams params;
-  eduart::ring::RingParams ring;
-  {
-    eduart::device::VL53L8CX_Params tof;
-    tof.user_idx = 0;
-    tof.enable   = true;
 
-    eduart::device::SensorBoardParams board;
-    board.vl53l8cx_params = tof;
-
-    eduart::bus::BusParams bus;
-    bus.interface_name = interface_name;
-    bus.type           = type;
-    bus.board_param_vec.push_back(board);
-
-    ring.bus_param_vec.push_back(bus);
-  }
+  eduart::com::ComInterfaceID interface;
+  interface.type = type;
+  interface.name = interface_name;
 
   TofCaptureClient client;
 
   try {
-    auto sensor_ring = eduart::ring::SensorRing::create(ring);
+    eduart::ring::SensorRingFactory factory;
+    factory.addInterface(interface);
+    auto sensor_ring = factory.build(eduart::ring::ValidationMode::Relaxed);
+
+    if (!sensor_ring) {
+      return TestResult::NotAvailable;
+    }
+
     MeasurementManager manager(params, std::move(sensor_ring));
     client.registerClient(&manager);
 

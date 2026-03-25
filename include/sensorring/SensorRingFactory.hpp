@@ -14,15 +14,14 @@
 #include <variant>
 #include <vector>
 
-#include "sensorring/SensorBoard.hpp"
-#include "sensorring/SensorBus.hpp"
+#include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/EnumerationInformation.hpp"
-#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -156,6 +155,9 @@ private:
   };
 
   static device::DeviceType deviceTypeFromVariant(const DeviceParamsVariant& v);
+
+  /// Build a DeviceParamsMap for the given device types, applying user defaults where available.
+  std::unordered_map<device::DeviceType, DeviceParamsVariant> buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
 
   std::vector<InterfaceConfig> _interfaces;
   std::unordered_map<device::DeviceType, DeviceParamsVariant> _default_device_params;

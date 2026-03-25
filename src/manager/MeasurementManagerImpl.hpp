@@ -11,16 +11,12 @@
 
 #include <atomic>
 #include <chrono>
-#include <cstdint>
 #include <functional>
 #include <future>
 #include <memory>
 #include <queue>
-#include <set>
-#include <string>
 #include <thread>
 #include <unordered_map>
-#include <vector>
 
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceGroup.hpp"

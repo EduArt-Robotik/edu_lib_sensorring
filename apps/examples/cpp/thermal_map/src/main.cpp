@@ -11,7 +11,6 @@
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/hardware/htpa32/HTPA32_Device.hpp>
-#include <sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -73,8 +72,10 @@ int main(int, char*[]) {
       reset_cursor = false;
     });
 
-    // Create the SensorRing
-    auto sensor_ring = ring::SensorRing::createFromEnumeration({ interface });
+    // Create the SensorRing via auto-discovery
+    factory.addInterface(interface);
+    factory.expectBoard({}, { device::HTPA32_Params{} });
+    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {
       std::cout << "Failed to create SensorRing from enumeration. Exiting example application." << std::endl;
@@ -107,7 +108,7 @@ int main(int, char*[]) {
     if (manager->isMeasuring()) {
 
       manager->enqueueExtraAction([&manager]() {
-        auto devs = device::DeviceGroup(manager->getSensorRing()->getDevices());
+        auto devs   = device::DeviceGroup(manager->getSensorRing()->getDevices());
         auto htpa32 = devs.getDevicesOfType<device::HTPA32_Device>().at(0);
         std::cout << "Starting calibration of thermal sensors." << std::endl;
         htpa32->startCalibration(20);

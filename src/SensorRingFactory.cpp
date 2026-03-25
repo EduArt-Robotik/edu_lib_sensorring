@@ -5,9 +5,6 @@
 
 #include "interface/ComManager.hpp"
 #include "sensorring/device/hardware/SensorBoardManager.hpp"
-#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
@@ -108,27 +105,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
           if (_default_device_params.empty()) {
             board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx));
           } else {
-            device::SensorBoardManager::DeviceParamsMap params_map;
-            for (const auto& dev_type : enum_info.devices) {
-              auto def_it = _default_device_params.find(dev_type);
-              if (def_it != _default_device_params.end()) {
-                params_map[dev_type] = def_it->second;
-              } else {
-                switch (dev_type) {
-                case device::DeviceType::VL53L8CX:
-                  params_map[dev_type] = device::VL53L8CX_Params{};
-                  break;
-                case device::DeviceType::HTPA32:
-                  params_map[dev_type] = device::HTPA32_Params{};
-                  break;
-                case device::DeviceType::WS2812b:
-                  params_map[dev_type] = device::WS2812b_Params{};
-                  break;
-                default:
-                  break;
-                }
-              }
-            }
+            auto params_map = buildDefaultParamsMap(enum_info.devices);
             board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
           }
           enriched_enum.push_back(enum_info);
@@ -212,27 +189,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
             board_vec.push_back(device::SensorBoardManager::createSensorBoard(enum_info, board_params, id, idx, params_map));
           } else {
             // No explicit device params → use all devices from hardware, apply defaults where available.
-            device::SensorBoardManager::DeviceParamsMap params_map;
-            for (const auto& dev_type : enum_info.devices) {
-              auto def_it = _default_device_params.find(dev_type);
-              if (def_it != _default_device_params.end()) {
-                params_map[dev_type] = def_it->second;
-              } else {
-                switch (dev_type) {
-                case device::DeviceType::VL53L8CX:
-                  params_map[dev_type] = device::VL53L8CX_Params{};
-                  break;
-                case device::DeviceType::HTPA32:
-                  params_map[dev_type] = device::HTPA32_Params{};
-                  break;
-                case device::DeviceType::WS2812b:
-                  params_map[dev_type] = device::WS2812b_Params{};
-                  break;
-                default:
-                  break;
-                }
-              }
-            }
+            auto params_map = buildDefaultParamsMap(enum_info.devices);
 
             enum_info.config_state       = device::ConfigurationState::Configured;
             enum_info.configured_devices = enum_info.devices; // all devices used
@@ -335,6 +292,31 @@ std::string SensorRingFactory::printTopology() const {
   }
 
   return ss.str();
+}
+
+std::unordered_map<device::DeviceType, SensorRingFactory::DeviceParamsVariant> SensorRingFactory::buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const {
+  std::unordered_map<device::DeviceType, DeviceParamsVariant> params_map;
+  for (const auto& dev_type : devices) {
+    auto def_it = _default_device_params.find(dev_type);
+    if (def_it != _default_device_params.end()) {
+      params_map[dev_type] = def_it->second;
+    } else {
+      switch (dev_type) {
+      case device::DeviceType::VL53L8CX:
+        params_map[dev_type] = device::VL53L8CX_Params{};
+        break;
+      case device::DeviceType::HTPA32:
+        params_map[dev_type] = device::HTPA32_Params{};
+        break;
+      case device::DeviceType::WS2812b:
+        params_map[dev_type] = device::WS2812b_Params{};
+        break;
+      default:
+        break;
+      }
+    }
+  }
+  return params_map;
 }
 
 device::DeviceType SensorRingFactory::deviceTypeFromVariant(const DeviceParamsVariant& v) {

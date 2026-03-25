@@ -1,23 +1,11 @@
 #include "sensorring/SensorRing.hpp"
 
-#include "interface/ComInterface.hpp"
-
 namespace eduart {
 
 namespace ring {
 
 SensorRing::SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
     : _bus_vec(std::move(bus_vec)) {
-
-  for (const auto& bus : _bus_vec) {
-    bus::BusTopology bt;
-    bt.interface = bus->getInterface()->getID();
-
-    for (const auto& board : bus->getSensorBoards()) {
-      bt.board_type_vec.push_back(board->getBoardType());
-    }
-    _topology.bus_topology_vec.push_back(std::move(bt));
-  }
 }
 
 SensorRing::~SensorRing() {
@@ -51,12 +39,6 @@ void SensorRing::setBrs(bool brs_enable) {
     sensor_bus->setBrs(brs_enable);
   }
 }
-
-RingTopology SensorRing::getTopology() const noexcept {
-  return _topology;
-}
-
-
 
 } // namespace ring
 

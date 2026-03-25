@@ -9,12 +9,9 @@
 
 #pragma once
 
-#include <vector>
-
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-
 
 namespace eduart {
 
