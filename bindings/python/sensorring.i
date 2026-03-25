@@ -58,7 +58,6 @@ else:
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/Image.hpp"
 #include "sensorring/types/LightMode.hpp"
-#include "sensorring/types/InterfaceType.hpp"
 #include "sensorring/types/PointCloud.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
@@ -67,11 +66,22 @@ else:
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Vector3.hpp"
 #include "sensorring/math/Matrix3.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/DeviceID.hpp"
+#include "sensorring/device/DeviceParams.hpp"
+#include "sensorring/device/hardware/SensorBoardType.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/SensorBoardParams.hpp"
+#include "sensorring/SensorRing.hpp"
+#include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/Parameter.hpp"
 %}
 
 
@@ -190,7 +200,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/types/LightMode.hpp"
 
 
-%include "sensorring/types/InterfaceType.hpp"
+%include "sensorring/interface/ComInterfaceID.hpp"
 
 
 %include "sensorring/types/PointCloud.hpp"
@@ -211,6 +221,40 @@ typedef ::int64_t int64_t;
 %include "sensorring/types/ThermalMeasurement.hpp"
 
 
+/****
+ * Device type hierarchy
+ */
+
+%rename (DeviceTypeToString) eduart::device::toString(DeviceType);
+%include "sensorring/device/DeviceType.hpp"
+
+
+%include "sensorring/device/DeviceID.hpp"
+
+
+%include "sensorring/device/DeviceParams.hpp"
+
+
+%include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+
+
+%include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+
+
+%include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
+
+
+%rename (SensorBoardTypeToString) eduart::device::toString(SensorBoardType);
+%include "sensorring/device/hardware/SensorBoardType.hpp"
+
+
+%include "sensorring/SensorBoardParams.hpp"
+
+
+/****
+ * Manager parameters
+ */
+
 %typemap(in) std::chrono::milliseconds {
     if (PyLong_Check($input)) {
         long long v = PyLong_AsLongLong($input);
@@ -222,14 +266,88 @@ typedef ::int64_t int64_t;
 %typemap(out) std::chrono::milliseconds {
     $result = PyLong_FromLongLong($1.count());
 }
-%rename(timeout_ms) eduart::ring::RingParams::timeout;
-%template (BusParamVector) std::vector<eduart::bus::BusParams>;
-%template (BoardParamVector) std::vector<eduart::device::SensorBoardParams>;
-%include "sensorring/Parameter.hpp"
+%rename(timeout_ms) eduart::manager::ManagerParams::timeout;
+%include "sensorring/manager/ManagerParams.hpp"
+
+
+/****
+ * Enumeration information
+ */
+
+%rename (ConnectionStateToString) eduart::device::toString(ConnectionState);
+%rename (ConfigurationStateToString) eduart::device::toString(ConfigurationState);
+%template (DeviceTypeVector) std::vector<eduart::device::DeviceType>;
+%include "sensorring/enumeration/EnumerationInformation.hpp"
 
 %rename (ManagerStateToString) eduart::manager::toString(ManagerState);
-%include "sensorring/device/DeviceType.hpp"
 %include "sensorring/manager/ManagerState.hpp"
+
+
+/****
+ * SensorRingFactory
+ */
+
+// SWIG cannot handle std::variant or std::unique_ptr natively.
+// We ignore the C++ methods that use them and provide typed alternatives.
+%ignore eduart::ring::SensorRingFactory::DeviceParamsVariant;
+%ignore eduart::ring::SensorRingFactory::EnumerationMap;
+%ignore eduart::ring::SensorRingFactory::build;
+%ignore eduart::ring::SensorRingFactory::enumerate;
+%ignore eduart::ring::SensorRingFactory::getLatestEnumerationResult;
+%ignore eduart::ring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
+%ignore eduart::ring::SensorRingFactory::setDefaultDeviceParams;
+%ignore eduart::ring::SensorRingFactory::buildDefaultParamsMap;
+
+%include "sensorring/SensorRingFactory.hpp"
+
+// Typed alternatives for std::variant-based methods
+%extend eduart::ring::SensorRingFactory {
+    void setDefaultVL53L8CXParams(eduart::device::VL53L8CX_Params params) {
+        $self->setDefaultDeviceParams(std::move(params));
+    }
+    void setDefaultHTPA32Params(eduart::device::HTPA32_Params params) {
+        $self->setDefaultDeviceParams(std::move(params));
+    }
+    void setDefaultWS2812bParams(eduart::device::WS2812b_Params params) {
+        $self->setDefaultDeviceParams(std::move(params));
+    }
+}
+
+// Factory returning raw pointer from unique_ptr (ownership transferred to Python)
+%inline %{
+namespace eduart { namespace ring {
+
+  eduart::ring::SensorRing* SensorRingFactory_build(eduart::ring::SensorRingFactory* factory, eduart::ring::ValidationMode mode = eduart::ring::ValidationMode::Strict) {
+    auto ptr = factory->build(mode);
+    return ptr.release();
+  }
+
+  std::string SensorRingFactory_enumerate_str(eduart::ring::SensorRingFactory* factory) {
+    factory->enumerate();
+    return factory->printTopology();
+  }
+
+}}
+%}
+%newobject eduart::ring::SensorRingFactory_build;
+
+%exception eduart::ring::SensorRingFactory_build {
+    try {
+        $action
+    } catch (const std::exception& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+}
+
+// Attach factory wrappers as methods on the Python SensorRingFactory class
+%pythoncode %{
+def _SensorRingFactory_build(self, mode=ValidationMode.Strict):
+    return SensorRingFactory_build(self, mode)
+def _SensorRingFactory_enumerate(self):
+    return SensorRingFactory_enumerate_str(self)
+SensorRingFactory.build = _SensorRingFactory_build
+SensorRingFactory.enumerate = _SensorRingFactory_enumerate
+%}
 
 // --- MeasurementManager: SWIG cannot wrap std::unique_ptr. We ignore the C++ ctor
 // and expose a factory that takes a raw pointer (ownership transferred from Python).
@@ -264,7 +382,6 @@ namespace eduart { namespace manager {
         SWIG_exception(SWIG_RuntimeError, e.what());
     }
 }
-%catches(std::runtime_error) eduart::manager::MeasurementManager::measureSome(const LogVerbosity, const std::string);
 %include "sensorring/manager/MeasurementManager.hpp"
 
 // Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
