@@ -3,7 +3,7 @@
 #include <chrono>
 #include <thread>
 
-#include "device/DeviceEnumerator.hpp"
+#include "enumeration/DeviceEnumerator.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"

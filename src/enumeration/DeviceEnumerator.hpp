@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/enumeration/EnumerationInformation.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
 namespace eduart {

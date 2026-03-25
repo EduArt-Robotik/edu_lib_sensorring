@@ -31,7 +31,6 @@ target_sources(sensorring
   device/BaseDevice.cpp
   device/DeviceType.cpp
   device/DeviceGroup.cpp
-  device/DeviceEnumerator.cpp;
   device/hardware/SensorBoardType.cpp
   device/hardware/SensorBoardManager.cpp
   device/hardware/vl53l8cx/VL53L8CX_Device.cpp
@@ -42,9 +41,10 @@ target_sources(sensorring
   device/hardware/htpa32/HTPA32_DeviceImpl.cpp
   device/hardware/ws2812b/WS2812b_Device.cpp
   device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
+  enumeration/DeviceEnumerator.cpp
+  enumeration/EnumerationInformation.cpp
   types/Image.cpp
   types/PointCloud.cpp
-  types/EnumerationInformation.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

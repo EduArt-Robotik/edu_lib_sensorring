@@ -1,4 +1,4 @@
-#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/enumeration/EnumerationInformation.hpp"
 
 #include <iomanip>
 #include <sstream>

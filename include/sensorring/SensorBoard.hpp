@@ -14,7 +14,7 @@
 
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/enumeration/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 
