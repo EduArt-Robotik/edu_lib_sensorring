@@ -2,6 +2,7 @@
 
 add_executable(minimal
     cpp/minimal/src/main.cpp
+    cpp/minimal/src/Rate.cpp
 )
 
 target_link_libraries(minimal
@@ -10,7 +11,6 @@ target_link_libraries(minimal
 
 add_executable(depth_map
     cpp/depth_map/src/main.cpp
-    cpp/depth_map/src/MeasurementProxy.cpp
 )
 
 target_link_libraries(depth_map
@@ -33,12 +33,23 @@ target_link_libraries(extra_action
     PRIVATE sensorring::sensorring
 )
 
-add_executable(proxy
-    cpp/proxy/src/main.cpp
-    cpp/proxy/src/MeasurementProxy.cpp
+add_executable(proxy_class
+    cpp/proxy_class/src/main.cpp
+    cpp/proxy_class/src/CustomProxy.cpp
+    cpp/proxy_class/src/Rate.cpp
 )
 
-target_link_libraries(proxy
+target_link_libraries(proxy_class
+    PRIVATE sensorring::sensorring
+)
+
+add_executable(client_interface
+    cpp/client_interface/src/main.cpp
+    cpp/client_interface/src/CustomClient.cpp
+    cpp/client_interface/src/Rate.cpp
+)
+
+target_link_libraries(client_interface
     PRIVATE sensorring::sensorring
 )
 
@@ -46,7 +57,8 @@ if(SENSORRING_INSTALL)
   # Install compiled examples
   install( TARGETS
     minimal
-    proxy
+    proxy_class
+    client_interface
     depth_map
     thermal_map
     extra_action

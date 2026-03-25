@@ -6,7 +6,6 @@ find_package(sensorring REQUIRED)
 
 add_executable(thermal_map
     src/main.cpp
-    src/MeasurementProxy.cpp
 )
 
 target_link_libraries(thermal_map

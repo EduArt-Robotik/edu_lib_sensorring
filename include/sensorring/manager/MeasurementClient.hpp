@@ -28,7 +28,8 @@ namespace manager {
  * @class MeasurementClient
  * @brief Observer interface of the MeasurementManager class. Defines the
  * callback methods that are triggered by the MeasurementManager. It is possible
- * to implement only one or a selection of the callback methods.
+ * to implement only one or a selection of the callback methods. The MeasurementClient
+ * is a completely optional and independent interface for the MeasurementManager.
  */
 class SENSORRING_EXPORT MeasurementClient {
 public:

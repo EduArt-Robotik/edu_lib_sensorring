@@ -4,11 +4,10 @@ project(extra_action_example)
 
 find_package(sensorring REQUIRED)
 
-add_executable(extra_action_example
+add_executable(extra_action
     src/main.cpp
-    src/MeasurementProxy.cpp
 )
 
-target_link_libraries(extra_action_example
+target_link_libraries(extra_action
     sensorring::sensorring
 )

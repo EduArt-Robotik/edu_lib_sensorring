@@ -3,7 +3,7 @@
 /**
  * @file   main.cpp
  * @author EduArt Robotik GmbH
- * @brief  This example receives measurements and prints the current measurement rate to the command line.
+ * @brief  This example demonstrates how to use enqueueExtraAction() to control WS2812b LEDs with a smooth color cycling animation.
  * @date 2025-11-18
  */
 
@@ -19,8 +19,13 @@
 using namespace eduart;
 using namespace std::chrono_literals;
 
-static constexpr std::string_view INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+// Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
+static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+
+// Default USBtingo interface (cross-platform, uses the first available USBtingo device)
+static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 // Parameters for smooth color cycling of the WS2812b lights.
 
@@ -37,14 +42,19 @@ int main(int, char*[]) {
 
   manager::ManagerParams params;
 
-  com::ComInterfaceID interface;
-  interface.type = INTERFACE_TYPE;
-  interface.name = INTERFACE_NAME;
+  com::ComInterfaceID can_interface;
+  can_interface.type = CAN_INTERFACE_TYPE;
+  can_interface.name = CAN_INTERFACE_NAME;
+
+  com::ComInterfaceID usbtingo_interface;
+  usbtingo_interface.type = USBTINGO_INTERFACE_TYPE;
+  usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
 
   try {
-    // Create SensorRing via factory with 2 boards on 1 bus
+    // Create SensorRing via factory auto-discovery
     ring::SensorRingFactory factory;
-    factory.addInterface(interface);
+    factory.addInterface(can_interface);
+    factory.addInterface(usbtingo_interface);
     auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {

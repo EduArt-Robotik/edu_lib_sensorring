@@ -3,7 +3,7 @@
 /**
  * @file   main.cpp
  * @author EduArt Robotik GmbH
- * @brief  This example prints a depth map of the first connected ToF Sensor on the command line.
+ * @brief  This example prints a false-color thermal image of the first connected HTPA32 sensor on the command line.
  * @date 2025-11-18
  */
 
@@ -18,8 +18,13 @@
 using namespace eduart;
 using namespace std::chrono_literals;
 
-static constexpr std::string_view INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+// Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
+static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+
+// Default USBtingo interface (cross-platform, uses the first available USBtingo device)
+static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 std::string colorStringCommand(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
@@ -46,39 +51,43 @@ void printFalseColorImage(const measurement::FalseColorImage& img, bool reset_cu
 int main(int, char*[]) {
 
   std::cout << "\33c";
-  std::cout << "============================" << std::endl;
-  std::cout << "Depth map sensorring example" << std::endl;
-  std::cout << "============================" << std::endl;
+  std::cout << "==============================" << std::endl;
+  std::cout << "Thermal map sensorring example" << std::endl;
+  std::cout << "==============================" << std::endl;
   std::cout << std::endl;
 
   std::atomic<bool> reset_cursor = false;
+  std::atomic<bool> got_first_measurement = false;
 
-  // Create the parameter structure that is used to instantiate the sensorring
   manager::ManagerParams params;
-  params.timeout              = 1h;
   params.frequency_thermal_hz = 5.0;
 
-  com::ComInterfaceID interface;
-  interface.type = INTERFACE_TYPE;
-  interface.name = INTERFACE_NAME;
+  com::ComInterfaceID can_interface;
+  can_interface.type = CAN_INTERFACE_TYPE;
+  can_interface.name = CAN_INTERFACE_NAME;
 
-  ring::SensorRingFactory factory;
+  com::ComInterfaceID usbtingo_interface;
+  usbtingo_interface.type = USBTINGO_INTERFACE_TYPE;
+  usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
 
   try {
     // Subscribe to the log messages
     auto log_sub = logger::Logger::getInstance()->subscribe([&reset_cursor](const logger::LogVerbosity verbosity, const std::string& msg) {
-      // if (verbosity > logger::LogVerbosity::Debug)
-      std::cout << "[" << verbosity << "] " << msg << std::endl;
-      reset_cursor = false;
+      if (verbosity > logger::LogVerbosity::Debug) {
+        std::cout << "[" << verbosity << "] " << msg << std::endl;
+        reset_cursor = false;
+      }
     });
 
-    // Create the SensorRing via auto-discovery
-    factory.addInterface(interface);
+    // Create a SensorRing with one HTPA32 board via auto-discovery
+    ring::SensorRingFactory factory;
+    factory.addInterface(can_interface);
+    factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::HTPA32_Params{} });
     auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing from enumeration. Exiting example application." << std::endl;
+      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
       return 1;
     }
 
@@ -90,7 +99,6 @@ int main(int, char*[]) {
       std::cout << "[State] State changed to: " << state << std::endl;
     });
 
-    std::atomic<bool> got_first_measurement = false;
     // Subscribe to the Thermal device group to get the measurements
     auto htpa32_sub = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, [&got_first_measurement, &reset_cursor](const device::DeviceGroup& devs) {
       got_first_measurement = true;
@@ -118,16 +126,17 @@ int main(int, char*[]) {
         std::this_thread::sleep_for(1s);
       }
 
-      // Stop the measurements
+      // Unsubscribe from manager and logger before stopping (optional)
       manager->unsubscribe(state_sub);
       manager->unsubscribe(htpa32_sub);
-      manager->stopMeasuring();
-
       logger::Logger::getInstance()->unsubscribe(log_sub);
+
+      // Stop the measurements
+      manager->stopMeasuring();
     }
 
   } catch (const std::exception& e) {
-    std::cout << "Caught exception in example application: " << e.what() << std::endl;
+    std::cout << "Caught: " << e.what() << std::endl;
   }
 
   return 0;

@@ -37,7 +37,7 @@ struct SENSORRING_EXPORT ManagerParams {
   double frequency_tof_hz = 0.0;
 
   /// Target frequency for the thermal measurement. If set to 0.0 the measurements are executed as fast as possible.
-  double frequency_thermal_hz = 1.0;
+  double frequency_thermal_hz = 5.0;
 };
 
 } // namespace manager
