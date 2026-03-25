@@ -355,9 +355,7 @@ void MeasurementManagerImpl::StateMachine() {
       _device_groups.at(device::DeviceType::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         if (device->getEnable()) {
           auto fut = device->getEpromAsync(timeout_ms);
-          if (!fut.get()) {
-            success = false;
-          }
+          success = fut.get();
         }
       });
     }
