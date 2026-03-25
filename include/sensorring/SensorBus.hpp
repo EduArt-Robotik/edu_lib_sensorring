@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -30,7 +29,7 @@ using namespace std::chrono_literals;
 
 /**
  * @class SensorBus
- * @brief One communication interface (e.g. CAN) owning multiple SensorBoards; runs enumeration and forwards COM messages.
+ * @brief One communication interface (e.g. CAN) owning multiple SensorBoards and forwarding COM messages.
  */
 class SensorBus : public com::ComObserver {
 public:
@@ -69,25 +68,6 @@ public:
   std::vector<device::SensorBoard*> getSensorBoards() const;
 
   /**
-   * @brief Verify that the configured devices that were used to construct the SensorBus actually exist on the physical interface. Calling this method triggers a new enumeration.
-   * @return Returns true if the configured devices are actually present on the physical interface.
-   */
-  bool verifyTopology();
-
-  /**
-   * @brief Enumerate boards on an interface.
-   * @param[in] interface Communication interface ID to enumerate.
-   * @return Vector of enumeration info. May be empty if none or on error.
-   */
-  std::vector<device::EnumerationInformation> enumerateDevices();
-
-  /**
-   * @brief Enumeration info for each board that responded (order matches response order). Will trigger a new enumeration if none has been done before.
-   * @return Const reference to vector of EnumerationInformation.
-   */
-  const std::vector<device::EnumerationInformation>& getLatestEnumerationResult();
-
-  /**
    * @brief Enumerate boards on an interface.
    * @param[in] interface Communication interface ID to enumerate.
    * @return Vector of enumeration info. May be empty if none or on error.
@@ -106,8 +86,6 @@ private:
 
   com::ComInterface* _interface;
 
-  std::atomic<bool> _enumeration_flag;
-  std::vector<device::EnumerationInformation> _enumeration_vec;
   std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
 };
 

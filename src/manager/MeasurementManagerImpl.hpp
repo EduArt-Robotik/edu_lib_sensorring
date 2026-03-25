@@ -125,7 +125,6 @@ private:
   enum class MeasurementState {
     init,
     reset_sensors,
-    enumerate_sensors,
     sync_lights,
     get_eeprom,
     pre_loop_init,
@@ -169,8 +168,6 @@ private:
   std::atomic<MeasurementState> _measurement_state;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 
-  bool _tof_enabled;
-  bool _thermal_enabled;
   bool _first_measurement;
   std::chrono::duration<double> _tof_measurement_period;
   std::chrono::duration<double> _thermal_measurement_period;
@@ -189,6 +186,8 @@ private:
   std::exception_ptr worker_exception;
 
   std::unordered_map<device::DeviceType, device::DeviceGroup, DeviceTypeHash> _device_groups;
+  bool _tof_enabled;
+  bool _thermal_enabled;
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 

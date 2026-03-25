@@ -219,6 +219,12 @@ struct EnumerationInformation {
    * @return true if lhs.idx < rhs.idx.
    */
   friend bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept;
+
+  /**
+   * @brief Format this board's enumeration info as a human-readable string.
+   * @return Multi-line string describing the board.
+   */
+  std::string toString() const;
 };
 
 } // namespace device

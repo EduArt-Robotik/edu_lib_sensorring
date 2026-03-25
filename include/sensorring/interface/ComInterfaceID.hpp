@@ -56,3 +56,15 @@ inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
 } // namespace com
 
 } // namespace eduart
+
+namespace std {
+
+template <> struct hash<eduart::com::ComInterfaceID> {
+  std::size_t operator()(const eduart::com::ComInterfaceID& id) const noexcept {
+    auto h1 = std::hash<int>{}(static_cast<int>(id.type));
+    auto h2 = std::hash<std::string>{}(id.name);
+    return h1 ^ (h2 << 1);
+  }
+};
+
+} // namespace std

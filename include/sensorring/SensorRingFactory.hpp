@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -17,6 +18,8 @@
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
@@ -64,6 +67,9 @@ class SENSORRING_EXPORT SensorRingFactory {
 public:
   using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
 
+  /// Per-interface enumeration results, keyed by interface ID.
+  using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<device::EnumerationInformation> >;
+
   /**
    * @brief Add a communication interface (bus) to scan during build().
    *
@@ -109,7 +115,30 @@ public:
   std::unique_ptr<SensorRing> build(ValidationMode mode = ValidationMode::Strict);
 
   /**
-   * @brief Reset the factory to its initial state.
+   * @brief Enumerate hardware on all added interfaces without building a SensorRing.
+   *
+   * Useful for interactive applications that want to discover connected boards
+   * before committing to a build. Results are stored and retrievable via
+   * getLatestEnumerationResult(). Also called internally by build().
+   *
+   * @return Per-interface enumeration results.
+   */
+  EnumerationMap enumerate();
+
+  /**
+   * @brief Return the enumeration results from the last enumerate() or build() call.
+   * @return Per-interface enumeration results. Empty if neither method has been called yet.
+   */
+  const EnumerationMap& getLatestEnumerationResult() const;
+
+  /**
+   * @brief Format the latest enumeration results as a human-readable topology string.
+   * @return Formatted topology string. Empty if no enumeration has been performed.
+   */
+  std::string printTopology() const;
+
+  /**
+   * @brief Reset the factory to its initial state. Enumeration results are preserved.
    */
   void reset();
 
@@ -130,6 +159,7 @@ private:
 
   std::vector<InterfaceConfig> _interfaces;
   std::unordered_map<device::DeviceType, DeviceParamsVariant> _default_device_params;
+  EnumerationMap _enumeration_results;
 };
 
 } // namespace ring

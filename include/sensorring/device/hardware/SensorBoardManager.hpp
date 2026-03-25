@@ -85,18 +85,8 @@ public:
     };
   }
 
-  /**
-   * @brief Create a SensorBoard for the given board type using the static board database; device set depends on board type (or all types if Undefined).
-   * @param[in] board_type Hardware board type (Headlight, Taillight, etc.; Undefined creates all supported device types).
-   * @param[in] params Board configuration parameters.
-   * @param[in] interface Communication interface ID for the board.
-   * @param[in] idx Board index on the bus.
-   * @return Unique pointer to the created SensorBoard.
-   */
   using DeviceParamsVariant = std::variant<VL53L8CX_Params, HTPA32_Params, WS2812b_Params>;
   using DeviceParamsMap     = std::unordered_map<DeviceType, DeviceParamsVariant>;
-
-  // static std::unique_ptr<SensorBoard> createSensorBoard(SensorBoardType board_type, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx); //ToDo: Maybe remove this overload
 
   static std::unique_ptr<SensorBoard> createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
 

@@ -21,8 +21,6 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _manager_state(ManagerState::Uninitialized)
     , _measurement_state(MeasurementState::init)
     , _sensor_ring(std::move(sensor_ring))
-    , _tof_enabled(false)
-    , _thermal_enabled(false)
     , _first_measurement(true)
     , _tof_measurement_period(1.0F / params.frequency_tof_hz)
     , _thermal_measurement_period(1.0F / params.frequency_thermal_hz)
@@ -32,21 +30,23 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _is_thermal_throttled(params.frequency_thermal_hz > 0.0)
     , _thermal_measurement_flag(false)
     , _is_running(false)
-    , _device_groups(
-          {
-              { device::DeviceType::VL53L8CX, device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices()) },
-              { device::DeviceType::HTPA32,   device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())   },
-              { device::DeviceType::WS2812b,  device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices())  },
-}) {
-  if (_params.timeout == 0ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
-  } else if (_params.timeout < 200ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
-  }
+    , _device_groups{
+      {device::DeviceType::VL53L8CX, device::DeviceGroup::createFromDevicesOfType<device::VL53L8CX_Device>(_sensor_ring->getDevices())},
+      {device::DeviceType::HTPA32,   device::DeviceGroup::createFromDevicesOfType<device::HTPA32_Device>(_sensor_ring->getDevices())  },
+      {device::DeviceType::WS2812b,  device::DeviceGroup::createFromDevicesOfType<device::WS2812b_Device>(_sensor_ring->getDevices()) },
+    }
+    ,_tof_enabled(_device_groups.at(device::DeviceType::VL53L8CX).getDeviceCount() > 0)
+    ,_thermal_enabled(_device_groups.at(device::DeviceType::HTPA32).getDeviceCount() > 0) {
 
   if (_sensor_ring->getDevices().empty()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Empty SensorRing passed to MeasurementManager");
     return;
+  }
+
+  if (_params.timeout == 0ms) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
+  } else if (_params.timeout < 200ms) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 
   // prepare state machine
@@ -147,7 +147,9 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
           } catch (const std::exception& e) {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(
+                logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown "
+                                             "exception.");
           }
         }
       }
@@ -181,7 +183,9 @@ int MeasurementManagerImpl::notifyHTPA32() {
           } catch (const std::exception& e) {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(
+                logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown "
+                                             "exception.");
           }
         }
       }
@@ -204,7 +208,9 @@ void MeasurementManagerImpl::notifyWS2812B() {
           } catch (const std::exception& e) {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
           } catch (...) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown exception.");
+            logger::Logger::getInstance()->log(
+                logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown "
+                                             "exception.");
           }
         }
       }
@@ -333,59 +339,7 @@ void MeasurementManagerImpl::StateMachine() {
     device::WS2812b_Device::setLight(light::LightMode::Pulsation, 0, 0, 0);
 
     // state transition
-    _measurement_state = MeasurementState::enumerate_sensors;
-    break;
-  }
-
-  case MeasurementState::enumerate_sensors: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Enumerating all connected sensors");
-
-    // Enumerate all boards from all devices
-    std::vector<device::EnumerationInformation> enum_result;
-    for (auto bus : _sensor_ring->getSensorBuses()) {
-      auto result = bus->enumerateDevices();
-
-      auto connected_count = std::count_if(result.begin(), result.end(), [](const device::EnumerationInformation& info) {
-        return info.state == device::ConnectionState::Connected;
-      });
-
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Info, "Counted " + std::to_string(connected_count) + " sensor boards on interface " + bus->getInterface()->getID().name + ", " + std::to_string(bus->getSensorCount()) + " are configured.");
-
-      if (_params.enforce_topology) {
-        success &= bus->verifyTopology();
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Verifying the topology of interface " + bus->getInterface()->getID().name + (success ? " succeeded" : " failed"));
-      }
-
-      enum_result.reserve(enum_result.size() + result.size());
-      enum_result.insert(enum_result.end(), result.begin(), result.end());
-    }
-
-    //  check if there are active vl53l8 devices
-    _tof_enabled = std::find_if(
-                       enum_result.begin(), enum_result.end(),
-                       [](const device::EnumerationInformation& info) {
-                         return info.hasDevice(device::DeviceType::VL53L8CX) && info.state == device::ConnectionState::Connected;
-                       })
-                   != enum_result.end();
-
-    //  check if there are active htpa32 devices
-    _thermal_enabled = std::find_if(
-                           enum_result.begin(), enum_result.end(),
-                           [](const device::EnumerationInformation& info) {
-                             return info.hasDevice(device::DeviceType::HTPA32) && info.state == device::ConnectionState::Connected;
-                           })
-                       != enum_result.end();
-
-    success &= (_tof_enabled || _thermal_enabled);
-
-    if (success) {
-      _measurement_state = MeasurementState::get_eeprom;
-
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Found no connected sensor boards. Check connections and restart.");
-      _measurement_state = MeasurementState::shutdown;
-    }
+    _measurement_state = MeasurementState::get_eeprom;
     break;
   }
 
@@ -408,7 +362,9 @@ void MeasurementManagerImpl::StateMachine() {
     if (success) {
       _measurement_state = MeasurementState::pre_loop_init;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check "
+                                       "configuration and restart.");
       _measurement_state = MeasurementState::shutdown;
     }
     break;
@@ -632,7 +588,9 @@ void MeasurementManagerImpl::StateMachine() {
         _measurement_state = MeasurementState::reset_sensors;
       }
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"repair_errors\" is set to \"false\".");
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter "
+                                      "\"repair_errors\" is set to \"false\".");
       _measurement_state = MeasurementState::shutdown;
     }
     break;
@@ -654,7 +612,9 @@ void MeasurementManagerImpl::StateMachine() {
       }
 
       if (communication_error) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Communication error detected. Trying to restart affected interfaces.");
+        logger::Logger::getInstance()->log(
+            logger::LogVerbosity::Info, "Communication error detected. Trying "
+                                        "to restart affected interfaces.");
 
         do {
           attempts++;
@@ -685,7 +645,9 @@ void MeasurementManagerImpl::StateMachine() {
         _measurement_state = MeasurementState::shutdown;
       }
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"repair_errors\" is set to \"false\".");
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter "
+                                      "\"repair_errors\" is set to \"false\".");
       _measurement_state = MeasurementState::shutdown;
     }
     break;

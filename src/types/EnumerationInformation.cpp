@@ -117,6 +117,40 @@ bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& 
   return lhs.idx < rhs.idx;
 }
 
+std::string EnumerationInformation::toString() const {
+  std::ostringstream ss;
+  ss << "Board " << idx << "\n";
+  ss << "    Type:           " << type << "\n";
+  ss << "    Connection:     " << state << "\n";
+  ss << "    Configuration:  " << config_state << "\n";
+
+  if (state == ConnectionState::Connected) {
+    ss << "    FW revision:    " << version << " (" << hash << ")" << "\n";
+  }
+
+  if (!devices.empty()) {
+    ss << "    Devices (HW):   ";
+    for (std::size_t i = 0; i < devices.size(); ++i) {
+      if (i > 0)
+        ss << ", ";
+      ss << devices[i];
+    }
+    ss << "\n";
+  }
+
+  if (!configured_devices.empty() && configured_devices != devices) {
+    ss << "    Devices (used): ";
+    for (std::size_t i = 0; i < configured_devices.size(); ++i) {
+      if (i > 0)
+        ss << ", ";
+      ss << configured_devices[i];
+    }
+    ss << "\n";
+  }
+
+  return ss.str();
+}
+
 } // namespace device
 
 } // namespace eduart

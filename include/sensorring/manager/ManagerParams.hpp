@@ -33,9 +33,6 @@ struct SENSORRING_EXPORT ManagerParams {
   /// If set to true error handling is enabled to try to repair communication and timing errors. When set to false the MeasurementManager instantly shuts down when an error is detected.
   bool repair_errors = true;
 
-  /// If set to true the MeasurementManager will only start when the configured topology matches the actual connected devices. If set to false the MeasurementManager will still start but only use the properly configured sensors.
-  bool enforce_topology = false;
-
   /// Target frequency for the time of flight measurement. If set to 0.0 the measurements are executed as fast as possible.
   double frequency_tof_hz = 0.0;
 
