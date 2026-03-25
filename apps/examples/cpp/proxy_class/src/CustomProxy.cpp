@@ -15,24 +15,19 @@
 
 namespace eduart {
 
-CustomProxy::CustomProxy(manager::MeasurementManager* manager) noexcept : _manager(manager) {
+CustomProxy::CustomProxy(manager::MeasurementManager* manager) noexcept {
 
-  _logger_subscription = logger::Logger::getInstance()->subscribe(std::bind(&CustomProxy::onLogOutput, this, std::placeholders::_1, std::placeholders::_2));
+  _subscriptions.emplace_back(logger::Logger::getInstance()->subscribe(std::bind(&CustomProxy::onLogOutput, this, std::placeholders::_1, std::placeholders::_2)));
 
   // Subscribe to the manager state changes and measurements
-  _manager_subscriptions.emplace_back(manager->subscribeToStateChanges(std::bind(&CustomProxy::onManagerStateChange, this, std::placeholders::_1)));
-  _manager_subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&CustomProxy::onVL53L8CXCallback, this, std::placeholders::_1)));
-  _manager_subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&CustomProxy::onHTPA32Callback, this, std::placeholders::_1)));
-  _manager_subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::WS2812b, std::bind(&CustomProxy::onWS2812bCallback, this, std::placeholders::_1)));
+  _subscriptions.emplace_back(manager->subscribeToStateChanges(std::bind(&CustomProxy::onManagerStateChange, this, std::placeholders::_1)));
+  _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&CustomProxy::onVL53L8CXCallback, this, std::placeholders::_1)));
+  _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&CustomProxy::onHTPA32Callback, this, std::placeholders::_1)));
+  _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::WS2812b, std::bind(&CustomProxy::onWS2812bCallback, this, std::placeholders::_1)));
 }
 
 CustomProxy::~CustomProxy() noexcept {
-
-  logger::Logger::getInstance()->unsubscribe(_logger_subscription);
-
-  for (const auto& sub : _manager_subscriptions) {
-    _manager->unsubscribe(sub);
-  }
+  // All subscriptions are automatically cancelled when the vector is destroyed
 }
 
 void CustomProxy::onLogOutput(logger::LogVerbosity verbosity, const std::string& msg) {

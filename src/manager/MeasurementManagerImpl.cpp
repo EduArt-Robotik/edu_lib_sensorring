@@ -78,25 +78,29 @@ void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
 ==========================================================================================
 */
 
-SubscriberToken MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   if (!callback) {
-    return SubscriberToken();
+    return Subscription();
   }
   auto token = SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _state_subscriptions.emplace(token, std::move(callback));
-  return token;
+  return Subscription(token, [this, token]() {
+    unsubscribe(token);
+  });
 }
 
-SubscriberToken MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
+Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
   if (!callback) {
-    return SubscriberToken();
+    return Subscription();
   }
   auto token = SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
   key_subs.emplace(token, std::move(callback));
-  return token;
+  return Subscription(token, [this, token]() {
+    unsubscribe(token);
+  });
 }
 
 void MeasurementManagerImpl::unsubscribe(SubscriberToken token) {

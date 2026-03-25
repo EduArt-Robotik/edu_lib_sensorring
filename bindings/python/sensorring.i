@@ -63,6 +63,7 @@ else:
 #include "sensorring/types/TofMeasurement.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/types/Subscription.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Vector3.hpp"
 #include "sensorring/math/Matrix3.hpp"
@@ -196,6 +197,9 @@ typedef ::int64_t int64_t;
 
 
 %include "sensorring/types/SubscriberToken.hpp"
+
+
+%include "sensorring/types/Subscription.hpp"
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;

@@ -10,15 +10,17 @@ Logger* Logger::getInstance() noexcept {
   return instance;
 }
 
-SubscriberToken Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
+Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
   if (!callback) {
-    return SubscriberToken();
+    return Subscription();
   }
 
   auto token = SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _subscriptions.emplace(token, std::move(callback));
-  return token;
+  return Subscription(token, [this, token]() {
+    unsubscribe(token);
+  });
 }
 
 void Logger::unsubscribe(SubscriberToken token) {

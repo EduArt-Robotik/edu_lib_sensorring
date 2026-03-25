@@ -29,12 +29,12 @@ std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept {
 
 LoggerClient::LoggerClient() noexcept {
   // Register the client with the Logger to get the log output
-  _token = logger::Logger::getInstance()->subscribe(std::bind(&LoggerClient::onOutputLog, this, std::placeholders::_1, std::placeholders::_2));
+  _subscription = logger::Logger::getInstance()->subscribe(std::bind(&LoggerClient::onOutputLog, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 LoggerClient::~LoggerClient() noexcept {
   // Unregister the client from the Logger to stop receiving log output
-  logger::Logger::getInstance()->unsubscribe(_token);
+  _subscription.cancel();
 }
 
 } // namespace logger

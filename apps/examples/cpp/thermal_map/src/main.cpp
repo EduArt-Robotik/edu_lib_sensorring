@@ -126,10 +126,10 @@ int main(int, char*[]) {
         std::this_thread::sleep_for(1s);
       }
 
-      // Unsubscribe from manager and logger before stopping (optional)
-      manager->unsubscribe(state_sub);
-      manager->unsubscribe(htpa32_sub);
-      logger::Logger::getInstance()->unsubscribe(log_sub);
+      // Cancel subscriptions before stopping (optional — destruction also cancels)
+      state_sub.cancel();
+      htpa32_sub.cancel();
+      log_sub.cancel();
 
       // Stop the measurements
       manager->stopMeasuring();

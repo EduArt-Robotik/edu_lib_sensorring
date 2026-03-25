@@ -17,6 +17,7 @@
 
 #include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/types/Subscription.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
@@ -41,9 +42,9 @@ public:
   /**
    * @brief Subscribe to log messages
    * @param[in] callback Callback function to be called when a log message is received
-   * @return Token to pass to unsubscribe
+   * @return RAII Subscription that auto-cancels on destruction
    */
-  SubscriberToken subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
+  Subscription subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
 
   /**
    * @brief Unsubscribe from log messages

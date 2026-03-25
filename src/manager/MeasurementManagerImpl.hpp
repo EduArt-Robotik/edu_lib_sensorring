@@ -23,6 +23,7 @@
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
+#include "sensorring/types/Subscription.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
@@ -72,17 +73,17 @@ public:
   /**
    * @brief Subscribe to state changes; callback is invoked when the state changes.
    * @param[in] callback Invoked with the updated ManagerState.
-   * @return Token to pass to unsubscribe.
+   * @return RAII Subscription that auto-cancels on destruction.
    */
-  SubscriberToken subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
+  Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
 
   /**
    * @brief Subscribe to device group updates; callback is invoked when the group is updated.
    * @param[in] key Device group to subscribe to.
    * @param[in] callback Invoked with the updated DeviceGroup.
-   * @return Token to pass to unsubscribe.
+   * @return RAII Subscription that auto-cancels on destruction.
    */
-  SubscriberToken subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
+  Subscription subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription (state or device group).

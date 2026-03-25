@@ -113,7 +113,7 @@ int main(int, char*[]) {
         std::this_thread::sleep_for(50ms);
       }
 
-      manager->unsubscribe(tof_sub);
+      tof_sub.cancel();
 
       // Stop the measurements
       manager->stopMeasuring();

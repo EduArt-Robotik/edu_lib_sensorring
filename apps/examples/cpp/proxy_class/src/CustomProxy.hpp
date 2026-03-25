@@ -14,7 +14,7 @@
 
 #include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/types/Subscription.hpp"
 
 #include "Rate.hpp"
 
@@ -68,9 +68,7 @@ public:
   Rate htpa32_rate;
 
 private:
-  manager::MeasurementManager* _manager;
-  SubscriberToken _logger_subscription;
-  std::vector<SubscriberToken> _manager_subscriptions;
+  std::vector<Subscription> _subscriptions;
 };
 
 } // namespace eduart

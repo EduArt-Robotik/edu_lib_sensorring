@@ -14,7 +14,7 @@
 
 #include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/types/Subscription.hpp"
 
 namespace eduart {
 
@@ -40,7 +40,7 @@ public:
   virtual void onOutputLog(LogVerbosity verbosity, const std::string& msg) = 0;
 
 private:
-  SubscriberToken _token;
+  Subscription _subscription;
 };
 
 } // namespace logger

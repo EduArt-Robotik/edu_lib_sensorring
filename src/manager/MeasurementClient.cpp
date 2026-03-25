@@ -20,12 +20,10 @@ bool MeasurementClient::registerClient(MeasurementManager* manager) {
 
   if (_managers.find(manager) == _managers.end()) {
     _managers.insert(manager);
-    auto state_token                = manager->subscribeToStateChanges(std::bind(&MeasurementClient::onStateChange, this, std::placeholders::_1));
-    auto tof_token                  = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1));
-    auto thermal_token              = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1));
-    _state_subscriptions[manager]   = state_token;
-    _tof_subscriptions[manager]     = tof_token;
-    _thermal_subscriptions[manager] = thermal_token;
+    auto& subs = _subscriptions[manager];
+    subs.emplace_back(manager->subscribeToStateChanges(std::bind(&MeasurementClient::onStateChange, this, std::placeholders::_1)));
+    subs.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&MeasurementClient::onTofDispatcher, this, std::placeholders::_1)));
+    subs.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&MeasurementClient::onThermalDispatcher, this, std::placeholders::_1)));
     return true;
   }
   return false;
@@ -35,12 +33,11 @@ bool MeasurementClient::unregisterClient() {
   bool success = false;
   for (auto manager : _managers) {
     if (manager) {
-      manager->unsubscribe(_state_subscriptions[manager]);
-      manager->unsubscribe(_tof_subscriptions[manager]);
-      manager->unsubscribe(_thermal_subscriptions[manager]);
-      success = _managers.erase(manager);
+      _subscriptions.erase(manager);
+      success = true;
     }
   }
+  _managers.clear();
   return success;
 }
 
@@ -52,12 +49,7 @@ bool MeasurementClient::unregisterClient(MeasurementManager* manager) {
   if (it == _managers.end()) {
     return false;
   }
-  manager->unsubscribe(_state_subscriptions[manager]);
-  manager->unsubscribe(_tof_subscriptions[manager]);
-  manager->unsubscribe(_thermal_subscriptions[manager]);
-  _state_subscriptions.erase(manager);
-  _tof_subscriptions.erase(manager);
-  _thermal_subscriptions.erase(manager);
+  _subscriptions.erase(manager);
   _managers.erase(it);
   return true;
 }
