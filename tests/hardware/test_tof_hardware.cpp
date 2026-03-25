@@ -6,7 +6,7 @@
 #include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/types/InterfaceType.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 
 using eduart::com::InterfaceType;
 using eduart::manager::ManagerParams;
