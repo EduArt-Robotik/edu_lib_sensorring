@@ -15,9 +15,9 @@ The following examples show how to use the Sensor Ring library in your own C++ p
 
 The first three examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp) (**function-based**): Subscribes to device groups and state changes using lambda callbacks directly on the `MeasurementManager`
-- [Proxy Class Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/proxy_class/src/main.cpp) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member functions as callbacks via `std::bind`
-- [Client Interface Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/client_interface/src/main.cpp) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
+- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_lambdas.cpp) (**function-based**): Subscribes to device groups and state changes using lambda callbacks directly on the `MeasurementManager`
+- [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_proxy_class.cpp) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member functions as callbacks via `std::bind`
+- [Using Client Interface](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_client_interface.cpp) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
 
 ### Visualization and Action Examples
 

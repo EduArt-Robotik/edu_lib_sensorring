@@ -20,10 +20,35 @@ struct Rate {
   using TimePoint = Clock::time_point;
   using toSeconds = std::chrono::duration<double>;
 
-  void tick(unsigned int sensor_count = 0);
-  double getRate();
-  unsigned int getSensorCount();
-  bool gotFirstMeasurement();
+  void tick(unsigned int sensor_count = 0) {
+    std::lock_guard<std::mutex> lock(mutex);
+    init_flag = true;
+    duration += Clock::now() - last_measurement;
+    last_measurement = Clock::now();
+    counter++;
+    this->sensor_count = sensor_count;
+  }
+
+  double getRate() {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (init_flag) {
+      auto rate = static_cast<double>(counter) / toSeconds(duration).count();
+      duration  = Duration::zero();
+      counter   = 0;
+      return rate;
+    }
+    return 0.0;
+  }
+
+  unsigned int getSensorCount() {
+    std::lock_guard<std::mutex> lock(mutex);
+    return sensor_count;
+  }
+
+  bool gotFirstMeasurement() {
+    std::lock_guard<std::mutex> lock(mutex);
+    return init_flag;
+  }
 
 private:
   std::mutex mutex;

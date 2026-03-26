@@ -15,6 +15,7 @@
 #include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 
 using namespace eduart;
 using namespace std::chrono_literals;
@@ -54,9 +55,9 @@ int main(int, char*[]) {
     // Create SensorRing via factory auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
-    factory.expectBoard({}, { device::WS2812b_Params{} });
+    factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
     factory.addInterface(usbtingo_interface);
-    factory.expectBoard({}, { device::WS2812b_Params{} });
+    factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
     auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {

@@ -1,7 +1,7 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
- * @file   main.cpp
+ * @file   using_client_interface.cpp
  * @author EduArt Robotik GmbH
  * @brief  This example shows how to use the optional MeasurementClient and LoggerClient interfaces.
  * @date 2025-11-18
@@ -27,9 +27,9 @@ static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
 static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
 
 int main(int, char*[]) {
-  std::cout << "========================================" << std::endl;
-  std::cout << "Client interface sensorring example" << std::endl;
-  std::cout << "========================================" << std::endl;
+  std::cout << "====================================================" << std::endl;
+  std::cout << "Minimal sensorring example (using client interface)" << std::endl;
+  std::cout << "====================================================" << std::endl;
   std::cout << std::endl;
 
   manager::ManagerParams params;
