@@ -18,6 +18,7 @@
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/types/Subscription.hpp"
 
 namespace eduart {
 
@@ -28,10 +29,10 @@ class ComInterface;
 namespace device {
 
 /**
- * @struct SensorBoard
+ * @class SensorBoard
  * @brief One sensor board on a bus: holds configured devices and receives COM callbacks for enumeration and data.
  */
-struct SENSORRING_EXPORT SensorBoard : com::ComObserver, IDevice {
+class SENSORRING_EXPORT SensorBoard : public com::ComObserver, public IDevice {
 public:
   /**
    * @brief Construct the board with parameters, communication interface, index, and owned devices.
@@ -101,6 +102,8 @@ private:
 
   mutable std::recursive_mutex _com_mutex;
   using LockGuard = std::lock_guard<std::recursive_mutex>;
+
+  Subscription _com_subscription;
 };
 
 } // namespace device

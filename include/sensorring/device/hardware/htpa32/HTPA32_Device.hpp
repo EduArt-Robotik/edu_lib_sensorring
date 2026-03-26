@@ -27,10 +27,10 @@ namespace device {
 class HTPA32_DeviceImpl;
 
 /**
- * @struct HTPA32_Device
+ * @class HTPA32_Device
  * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
  */
-struct SENSORRING_EXPORT HTPA32_Device : BaseDevice {
+class SENSORRING_EXPORT HTPA32_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new HTPA32 device instance.

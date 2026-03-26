@@ -24,10 +24,10 @@ namespace device {
 class WS2812b_DeviceImpl;
 
 /**
- * @struct WS2812b_Device
+ * @class WS2812b_Device
  * @brief  Device wrapper for WS2812b LED strips controlled via the sensorring bus.
  */
-struct SENSORRING_EXPORT WS2812b_Device : BaseDevice {
+class SENSORRING_EXPORT WS2812b_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new WS2812b device instance.

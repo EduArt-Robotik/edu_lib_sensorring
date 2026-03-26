@@ -28,10 +28,10 @@ namespace device {
 class VL53L8CX_DeviceImpl;
 
 /**
- * @struct VL53L8CX_Device
+ * @class VL53L8CX_Device
  * @brief  Device wrapper for a VL53L8CX Time-of-Flight sensor on the sensorring bus.
  */
-struct SENSORRING_EXPORT VL53L8CX_Device : BaseDevice {
+class SENSORRING_EXPORT VL53L8CX_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new VL53L8CX device instance.
