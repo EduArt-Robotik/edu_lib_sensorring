@@ -5,6 +5,9 @@ namespace eduart {
 namespace logger {
 
 Logger* Logger::getInstance() noexcept {
+  // Intentional leak: the singleton is allocated once and never deleted.
+  // This avoids the static destruction order fiasco, ensuring the Logger
+  // remains available until process exit.
   static Logger* instance = new Logger;
   return instance;
 }

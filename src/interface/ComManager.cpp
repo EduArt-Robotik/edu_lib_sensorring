@@ -17,6 +17,9 @@ namespace eduart {
 namespace com {
 
 ComManager* ComManager::getInstance() noexcept {
+  // Intentional leak: the singleton is allocated once and never deleted.
+  // This avoids the static destruction order fiasco, ensuring the ComManager
+  // remains available until process exit.
   static ComManager* instance = new ComManager;
   return instance;
 }
