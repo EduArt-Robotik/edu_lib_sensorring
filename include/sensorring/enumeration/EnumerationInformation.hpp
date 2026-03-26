@@ -16,6 +16,7 @@
 
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -23,7 +24,7 @@ namespace eduart {
  * @struct Version
  * @brief Semantic version (major, minor, patch) for firmware or board.
  */
-struct Version {
+struct SENSORRING_EXPORT Version {
   /// Major version number.
   unsigned int major = 0;
   /// Minor version number.
@@ -47,26 +48,24 @@ struct Version {
 
   /**
    * @brief Compare two versions for equality.
-   * @param[in] lhs First version.
-   * @param[in] rhs Second version.
+   * @param[in] other Version to compare with.
    * @return true if equal.
    */
-  friend bool operator==(const Version& lhs, const Version& rhs) noexcept;
+  bool operator==(const Version& other) const noexcept;
 
   /**
    * @brief Lexicographic less-than comparison (major, minor, patch).
-   * @param[in] lhs First version.
-   * @param[in] rhs Second version.
-   * @return true if lhs < rhs.
+   * @param[in] other Version to compare with.
+   * @return true if *this < other.
    */
-  friend bool operator<(const Version& lhs, const Version& rhs) noexcept;
+  bool operator<(const Version& other) const noexcept;
 };
 
 /**
  * @struct CommitHash
  * @brief 32-bit commit hash (e.g. from firmware) with byte-wise construction and string output.
  */
-struct CommitHash {
+struct SENSORRING_EXPORT CommitHash {
   /// 32-bit hash value.
   std::uint32_t hash = 0;
 
@@ -78,7 +77,7 @@ struct CommitHash {
    * @param[in] d Fourth byte.
    * @return CommitHash with hash = (a<<24)|(b<<16)|(c<<8)|d.
    */
-  static inline CommitHash fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept;
+  static CommitHash fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept;
 
   /**
    * @brief Format hash as hex string.
@@ -96,11 +95,10 @@ struct CommitHash {
 
   /**
    * @brief Compare two commit hashes for equality.
-   * @param[in] lhs First CommitHash.
-   * @param[in] rhs Second CommitHash.
+   * @param[in] other CommitHash to compare with.
    * @return true if equal.
    */
-  friend bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept;
+  bool operator==(const CommitHash& other) const noexcept;
 };
 
 namespace device {
@@ -156,7 +154,7 @@ SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const Configuration
  * @struct EnumerationInformation
  * @brief Information reported by a board during enumeration: index, version, commit hash, board type, and state.
  */
-struct EnumerationInformation {
+struct SENSORRING_EXPORT EnumerationInformation {
   /// Board index.
   unsigned int idx = 0;
 
@@ -206,27 +204,24 @@ struct EnumerationInformation {
 
   /**
    * @brief Compare enumeration index to an integer.
-   * @param[in] lhs Enumeration information.
-   * @param[in] rhs Index to compare with lhs.idx.
-   * @return true if lhs.idx == rhs.
+   * @param[in] other Index to compare with idx.
+   * @return true if idx == other.
    */
-  friend bool operator==(const EnumerationInformation& lhs, unsigned int rhs) noexcept;
+  bool operator==(unsigned int other) const noexcept;
 
   /**
    * @brief Compare two EnumerationInformation values for equality.
-   * @param[in] lhs First value.
-   * @param[in] rhs Second value.
+   * @param[in] other Value to compare with.
    * @return true if all fields are equal.
    */
-  friend bool operator==(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept;
+  bool operator==(const EnumerationInformation& other) const noexcept;
 
   /**
    * @brief Order by index for sorting.
-   * @param[in] lhs First value.
-   * @param[in] rhs Second value.
-   * @return true if lhs.idx < rhs.idx.
+   * @param[in] other Value to compare with.
+   * @return true if idx < other.idx.
    */
-  friend bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept;
+  bool operator<(const EnumerationInformation& other) const noexcept;
 
   /**
    * @brief Format this board's enumeration info as a human-readable string.

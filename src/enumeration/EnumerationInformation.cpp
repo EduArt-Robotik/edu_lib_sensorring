@@ -15,19 +15,19 @@ std::ostream& operator<<(std::ostream& os, const Version& v) noexcept {
   return os << v.toString();
 }
 
-bool operator==(const Version& lhs, const Version& rhs) noexcept {
-  return lhs.major == rhs.major && lhs.minor == rhs.minor && lhs.patch == rhs.patch;
+bool Version::operator==(const Version& other) const noexcept {
+  return major == other.major && minor == other.minor && patch == other.patch;
 }
 
-bool operator<(const Version& lhs, const Version& rhs) noexcept {
-  if (lhs.major != rhs.major)
-    return lhs.major < rhs.major;
-  if (lhs.minor != rhs.minor)
-    return lhs.minor < rhs.minor;
-  return lhs.patch < rhs.patch;
+bool Version::operator<(const Version& other) const noexcept {
+  if (major != other.major)
+    return major < other.major;
+  if (minor != other.minor)
+    return minor < other.minor;
+  return patch < other.patch;
 }
 
-inline CommitHash CommitHash::fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept {
+CommitHash CommitHash::fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept {
   return CommitHash{ (static_cast<std::uint32_t>(a) << 24) | (static_cast<std::uint32_t>(b) << 16) | (static_cast<std::uint32_t>(c) << 8) | (static_cast<std::uint32_t>(d)) };
 }
 
@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& os, const CommitHash& ch) noexcept {
   return os << ch.toString();
 }
 
-bool operator==(const CommitHash& lhs, const CommitHash& rhs) noexcept {
-  return lhs.hash == rhs.hash;
+bool CommitHash::operator==(const CommitHash& other) const noexcept {
+  return hash == other.hash;
 }
 
 namespace device {
@@ -113,16 +113,16 @@ bool EnumerationInformation::hasDevice(DeviceType type) const noexcept {
   return (device_options & bit) != 0u;
 }
 
-bool operator==(const EnumerationInformation& lhs, unsigned int rhs) noexcept {
-  return lhs.idx == rhs;
+bool EnumerationInformation::operator==(unsigned int other) const noexcept {
+  return idx == other;
 }
 
-bool operator==(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept {
-  return lhs.idx == rhs.idx;
+bool EnumerationInformation::operator==(const EnumerationInformation& other) const noexcept {
+  return idx == other.idx;
 }
 
-bool operator<(const EnumerationInformation& lhs, const EnumerationInformation& rhs) noexcept {
-  return lhs.idx < rhs.idx;
+bool EnumerationInformation::operator<(const EnumerationInformation& other) const noexcept {
+  return idx < other.idx;
 }
 
 std::string EnumerationInformation::toString() const {
