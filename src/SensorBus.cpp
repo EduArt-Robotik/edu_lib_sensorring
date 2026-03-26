@@ -18,15 +18,6 @@ SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<
   if (!_interface) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open com interface");
   }
-
-  subscribeToEndpoint(com::ComEndpoint("broadcast"));
-  subscribeToEndpoint(com::ComEndpoint("tof_status"));
-  subscribeToEndpoint(com::ComEndpoint("thermal_status"));
-  _interface->registerObserver(this);
-}
-
-SensorBus::~SensorBus() {
-  _interface->unregisterObserver(this);
 }
 
 com::ComInterface* SensorBus::getInterface() const {
@@ -51,7 +42,7 @@ void SensorBus::setBrs(bool brs_enable) {
   device::SensorBoard::cmdSetBrs(_interface->getID(), brs_enable);
 }
 
-std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface) {
+std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (!iface) {
     return {};
@@ -59,11 +50,8 @@ std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com
 
   device::DeviceEnumerator enumerator(iface);
   enumerator.startEnumeration();
-  std::this_thread::sleep_for(ENUMERATION_TIMEOUT);
+  std::this_thread::sleep_for(timeout);
   return enumerator.getResult();
-}
-
-void SensorBus::comCallback([[maybe_unused]] const com::ComEndpoint source, [[maybe_unused]] const std::vector<uint8_t>& data) {
 }
 
 } // namespace bus

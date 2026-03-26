@@ -16,7 +16,6 @@
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/enumeration/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/Subscription.hpp"
 
@@ -32,7 +31,7 @@ namespace device {
  * @class SensorBoard
  * @brief One sensor board on a bus: holds configured devices and receives COM callbacks for enumeration and data.
  */
-class SENSORRING_EXPORT SensorBoard : public com::ComObserver, public IDevice {
+class SENSORRING_EXPORT SensorBoard : public IDevice {
 public:
   /**
    * @brief Construct the board with parameters, communication interface, index, and owned devices.
@@ -90,7 +89,7 @@ public:
    * @param[in] source Endpoint that received the message.
    * @param[in] data Raw message payload.
    */
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
 private:
   unsigned int _idx;

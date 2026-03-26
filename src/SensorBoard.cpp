@@ -17,12 +17,15 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _params(params)
     , _enum_info()
     , _device_vec(std::move(devices)) {
-  subscribeToEndpoint(com::ComEndpoint("broadcast"));
-  _interface->registerObserver(this);
+  _com_subscription = _interface->subscribe(
+      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
+        this->comCallback(source, data);
+      },
+      { com::ComEndpoint("broadcast") });
 }
 
 SensorBoard::~SensorBoard() {
-  _interface->unregisterObserver(this);
+  // _com_subscription auto-cancels via RAII.
 }
 
 bool SensorBoard::isEnumerated() const {

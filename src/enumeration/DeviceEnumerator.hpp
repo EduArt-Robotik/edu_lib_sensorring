@@ -14,7 +14,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/enumeration/EnumerationInformation.hpp"
-#include "sensorring/interface/ComObserver.hpp"
+#include "sensorring/types/Subscription.hpp"
 
 namespace eduart {
 
@@ -24,7 +24,7 @@ class ComInterface;
 
 namespace device {
 
-class DeviceEnumerator : public com::ComObserver {
+class DeviceEnumerator {
 public:
   DeviceEnumerator(com::ComInterface* interface);
 
@@ -34,7 +34,7 @@ public:
 
   std::vector<device::EnumerationInformation> getResult();
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
 private:
   using Mutex     = std::mutex;
@@ -44,6 +44,8 @@ private:
 
   com::ComInterface* _interface;
   std::vector<device::EnumerationInformation> _enumeration_vec;
+
+  Subscription _com_subscription;
 };
 
 } // namespace device

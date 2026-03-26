@@ -20,7 +20,6 @@ target_sources(sensorring
   SensorRingFactory.cpp
   interface/ComInterface.cpp
   interface/ComManager.cpp
-  interface/ComObserver.cpp
   interface/ComEndpoint.cpp
   interface/can/CanEndpointMap.cpp
   interface/can/canprotocol.cpp

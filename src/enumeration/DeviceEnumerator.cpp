@@ -1,7 +1,7 @@
 #include "DeviceEnumerator.hpp"
 
-#include "sensorring/SensorBoard.hpp"
 #include "interface/can/canprotocol.hpp"
+#include "sensorring/SensorBoard.hpp"
 
 namespace eduart {
 
@@ -10,12 +10,15 @@ namespace device {
 DeviceEnumerator::DeviceEnumerator(com::ComInterface* interface)
     : _interface(interface)
     , _enumeration_vec() {
-  subscribeToEndpoint(com::ComEndpoint("broadcast"));
-  _interface->registerObserver(this);
+  _com_subscription = _interface->subscribe(
+      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
+        this->comCallback(source, data);
+      },
+      { com::ComEndpoint("broadcast") });
 }
 
 DeviceEnumerator::~DeviceEnumerator() {
-  _interface->unregisterObserver(this);
+  // _com_subscription auto-cancels via RAII.
 }
 
 void DeviceEnumerator::startEnumeration() {
