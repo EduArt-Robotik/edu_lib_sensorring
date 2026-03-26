@@ -82,6 +82,8 @@ else:
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
+#include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/DeviceGroup.hpp"
 %}
 
 
@@ -252,6 +254,21 @@ typedef ::int64_t int64_t;
 
 
 /****
+ * Device group (read-only wrapper for subscription callbacks)
+ */
+
+%import "sensorring/device/IDevice.hpp"
+%ignore eduart::device::DeviceGroup::DeviceGroup;
+%ignore eduart::device::DeviceGroup::getDevices;
+%ignore eduart::device::DeviceGroup::invokeForEachDevice;
+%ignore eduart::device::DeviceGroup::getDevicesOfType;
+%ignore eduart::device::DeviceGroup::invokeForEachDeviceOfType;
+%ignore eduart::device::DeviceGroup::createFromDevicesOfType;
+%ignore eduart::device::DeviceGroup::waitForAll;
+%include "sensorring/device/DeviceGroup.hpp"
+
+
+/****
  * Manager parameters
  */
 
@@ -341,7 +358,7 @@ namespace eduart { namespace ring {
 
 // Attach factory wrappers as methods on the Python SensorRingFactory class
 %pythoncode %{
-def _SensorRingFactory_build(self, mode=ValidationMode.Strict):
+def _SensorRingFactory_build(self, mode=ValidationMode_Strict):
     return SensorRingFactory_build(self, mode)
 def _SensorRingFactory_enumerate(self):
     return SensorRingFactory_enumerate_str(self)
@@ -382,6 +399,10 @@ namespace eduart { namespace manager {
         SWIG_exception(SWIG_RuntimeError, e.what());
     }
 }
+%ignore MeasurementManager::subscribeToStateChanges;
+%ignore MeasurementManager::subscribeToDeviceGroup;
+%ignore MeasurementManager::unsubscribe;
+%ignore MeasurementManager::enqueueExtraAction;
 %include "sensorring/manager/MeasurementManager.hpp"
 
 // Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
@@ -400,4 +421,132 @@ MeasurementManager.__init__ = _MeasurementManager_init
 
 %catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
 %ignore Logger::log(const LogVerbosity, const std::stringstream);
+%ignore Logger::subscribe;
+%ignore Logger::unsubscribe;
 %include "sensorring/logger/Logger.hpp" 
+
+
+/****
+ * Function-based subscription helpers (Python callable -> std::function)
+ *
+ * These allow Python code to use manager.subscribeToStateChanges(callback) and
+ * manager.subscribeToDeviceGroup(DeviceType, callback) with plain Python
+ * callables, mirroring the C++ lambda-based API.
+ */
+
+%{
+#include <memory>
+
+static eduart::Subscription* Logger_subscribe_py(
+    eduart::logger::Logger* logger, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto sub = logger->subscribe(
+    [prevent_leak](const eduart::logger::LogVerbosity verbosity, const std::string& msg) {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      PyObject* py_verb = PyLong_FromLong(static_cast<int>(verbosity));
+      PyObject* py_msg = PyUnicode_FromStringAndSize(msg.c_str(), static_cast<Py_ssize_t>(msg.size()));
+      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_verb, py_msg, nullptr);
+      Py_XDECREF(py_verb);
+      Py_XDECREF(py_msg);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+  return new eduart::Subscription(std::move(sub));
+}
+
+static eduart::Subscription* Manager_subscribeToStateChanges_py(
+    eduart::manager::MeasurementManager* mgr, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto sub = mgr->subscribeToStateChanges(
+    [prevent_leak](const eduart::manager::ManagerState state) {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      PyObject* py_state = PyLong_FromLong(static_cast<int>(state));
+      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_state, nullptr);
+      Py_XDECREF(py_state);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+  return new eduart::Subscription(std::move(sub));
+}
+
+static eduart::Subscription* Manager_subscribeToDeviceGroup_py(
+    eduart::manager::MeasurementManager* mgr,
+    eduart::device::DeviceType key,
+    PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto sub = mgr->subscribeToDeviceGroup(key,
+    [prevent_leak](const eduart::device::DeviceGroup& group) {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      swig_type_info* group_ti = SWIG_TypeQuery("eduart::device::DeviceGroup *");
+      PyObject* py_group = SWIG_NewPointerObj(
+        const_cast<eduart::device::DeviceGroup*>(&group), group_ti, 0);
+      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_group, nullptr);
+      Py_XDECREF(py_group);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+  return new eduart::Subscription(std::move(sub));
+}
+%}
+
+// Declare the helpers for SWIG to generate Python wrappers
+%newobject Logger_subscribe_py;
+%newobject Manager_subscribeToStateChanges_py;
+%newobject Manager_subscribeToDeviceGroup_py;
+
+eduart::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
+eduart::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
+eduart::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
+
+// Attach the subscribe helpers as methods on the Python wrapper classes
+%pythoncode %{
+def _Logger_subscribe(self, callback):
+    """Subscribe to log messages with a Python callable: callback(verbosity, msg)."""
+    return Logger_subscribe_py(self, callback)
+Logger.subscribe = _Logger_subscribe
+
+def _MeasurementManager_subscribeToStateChanges(self, callback):
+    """Subscribe to state changes: callback(state)."""
+    return Manager_subscribeToStateChanges_py(self, callback)
+MeasurementManager.subscribeToStateChanges = _MeasurementManager_subscribeToStateChanges
+
+def _MeasurementManager_subscribeToDeviceGroup(self, device_type, callback):
+    """Subscribe to a device group: callback(device_group)."""
+    return Manager_subscribeToDeviceGroup_py(self, device_type, callback)
+MeasurementManager.subscribeToDeviceGroup = _MeasurementManager_subscribeToDeviceGroup
+%}
+
+
+/****
+ * Client interfaces (director-enabled so Python classes can inherit and override)
+ */
+
+%template (TofMeasurementVector) std::vector<eduart::measurement::TofMeasurement>;
+%template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
+
+%feature("director") eduart::logger::LoggerClient;
+%include "sensorring/logger/LoggerClient.hpp"
+
+%feature("director") eduart::manager::MeasurementClient;
+%include "sensorring/manager/MeasurementClient.hpp"
