@@ -72,8 +72,7 @@ void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
 }
 
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  // ToDo: Eliminate offset of index
-  if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx + 1)) {
+  if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx)) {
 
     LockGuard lock(_com_mutex);
 

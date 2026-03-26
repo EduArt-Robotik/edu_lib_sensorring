@@ -111,7 +111,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
         // ── Auto-discovery mode ──
         // All discovered boards are Unconfigured (no user expectations).
         for (auto& enum_info : enum_infos) {
-          unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+          unsigned int idx = enum_info.idx;
           device::SensorBoardParams board_params;
           board_params.board_type = enum_info.type;
 
@@ -141,7 +141,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
           for (std::size_t i = 0; i < enum_infos.size(); ++i) {
             auto& enum_info         = enum_infos[i];
             const auto& expectation = iface_cfg.expected_boards[i];
-            unsigned int idx        = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+            unsigned int idx        = enum_info.idx;
 
             // Validate board type if specified.
             if (expectation.params.board_type != device::SensorBoardType::Undefined && expectation.params.board_type != enum_info.type) {
@@ -231,7 +231,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
               // ── Match found ──
               claimed[j]       = true;
               matched          = true;
-              unsigned int idx = (enum_info.idx > 0u) ? enum_info.idx - 1u : 0u;
+              unsigned int idx = enum_info.idx;
 
               device::SensorBoardParams board_params = expectation.params;
               if (board_params.board_type == device::SensorBoardType::Undefined) {
@@ -264,7 +264,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
               logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "No compatible board found for expectation " + std::to_string(exp_i) + " on " + id.name + " – skipping (relaxed mode).");
 
               device::EnumerationInformation unconnected;
-              unconnected.idx          = static_cast<unsigned int>(exp_i + 1);
+              unconnected.idx          = static_cast<unsigned int>(exp_i);
               unconnected.state        = device::ConnectionState::Unconnected;
               unconnected.config_state = device::ConfigurationState::Configured;
               unconnected.type         = expectation.params.board_type;
