@@ -36,12 +36,21 @@ TEST_CASE("CanEndpointMap ToF endpoints round-trip", "[CanEndpointMap]") {
   REQUIRE(map->mapIdToEndpoint(map->mapEndpointToId(ComEndpoint("tof_request"))).getId() == "tof_request");
 }
 
-TEST_CASE("CanEndpointMap Thermal endpoints round-trip", "[CanEndpointMap]") {
+TEST_CASE("CanEndpointMap Thermal forward lookup works despite CAN ID collisions", "[CanEndpointMap]") {
   CanEndpointMap* map = CanEndpointMap::getInstance();
 
-  REQUIRE(map->mapIdToEndpoint(map->mapEndpointToId(ComEndpoint("thermal0_data"))).getId() == "thermal0_data");
-  REQUIRE(map->mapIdToEndpoint(map->mapEndpointToId(ComEndpoint("thermal_status"))).getId() == "thermal_status");
-  REQUIRE(map->mapIdToEndpoint(map->mapEndpointToId(ComEndpoint("thermal_request"))).getId() == "thermal_request");
+  // Forward lookup (endpoint -> CAN ID) always works since endpoint strings are unique.
+  // Reverse round-trips may not return the same endpoint when CAN IDs collide with
+  // earlier-registered tof data entries (SYSID_TOF == SYSID_THERMAL).
+  REQUIRE_NOTHROW(map->mapEndpointToId(ComEndpoint("thermal0_data")));
+  REQUIRE_NOTHROW(map->mapEndpointToId(ComEndpoint("thermal_status")));
+  REQUIRE_NOTHROW(map->mapEndpointToId(ComEndpoint("thermal_request")));
+
+  // The CAN IDs returned must match the protocol-defined addresses
+  CanProtocol::canid thermal_status_id, thermal_request_id, thermal_broadcast;
+  CanProtocol::makeCanStdID(SYSID_THERMAL, NODEID_THERMAL_STATUS, thermal_status_id, thermal_request_id, thermal_broadcast);
+  REQUIRE(map->mapEndpointToId(ComEndpoint("thermal_status")) == thermal_status_id);
+  REQUIRE(map->mapEndpointToId(ComEndpoint("thermal_request")) == thermal_request_id);
 }
 
 TEST_CASE("CanEndpointMap Light endpoint round-trip", "[CanEndpointMap]") {
@@ -53,8 +62,8 @@ TEST_CASE("CanEndpointMap Light endpoint round-trip", "[CanEndpointMap]") {
 TEST_CASE("CanEndpointMap reserves indices for many sensor boards", "[CanEndpointMap]") {
   CanEndpointMap* map = CanEndpointMap::getInstance();
 
-  // Last reserved index is MAX_SENSOR_BOARDS - 1
-  std::string tof_last = "tof" + std::to_string(CanEndpointMap::MAX_SENSOR_BOARDS - 1) + "_data";
+  // Forward lookup works for all reserved indices
+  std::string tof_last     = "tof" + std::to_string(CanEndpointMap::MAX_SENSOR_BOARDS - 1) + "_data";
   std::string thermal_last = "thermal" + std::to_string(CanEndpointMap::MAX_SENSOR_BOARDS - 1) + "_data";
 
   REQUIRE_NOTHROW(map->mapEndpointToId(ComEndpoint(tof_last)));

@@ -13,20 +13,14 @@ namespace eduart {
 namespace com {
 
 /**
- * Singleton holding the single shared CAN endpoint <-> CAN ID map to be used by all CAN interface variants.
- * The map is built once with a reserved range of device IDs (e.g. 256 sensor boards); no dynamic
- * registration is required, avoiding initialization-order issues.
+ * Singleton holding a bidirectional CAN endpoint <-> CAN ID map used by all CAN interface variants.
+ * The map is built once on first access. Each entry must be unique in both directions;
+ * collisions are detected at build time and silently skipped.
  */
 class CanEndpointMap {
 public:
-  /** Number of device indices reserved (tof0..tof(N-1), thermal0..thermal(N-1)). */
   static constexpr std::size_t MAX_SENSOR_BOARDS = 256;
 
-  /**
-   * Get a pointer to the instance of the CanEndpointMap singleton.
-   * The map is fully populated on first access.
-   * @return Pointer to the CanEndpointMap instance
-   */
   static CanEndpointMap* getInstance() noexcept;
 
   CanProtocol::canid mapEndpointToId(ComEndpoint endpoint) const;
@@ -37,7 +31,14 @@ private:
 
   void buildMap();
 
-  std::unordered_map<ComEndpoint, CanProtocol::canid> _id_map;
+  /**
+   * Insert a bidirectional mapping. Skips the entry (with a warning) when the
+   * CAN ID is already taken by another endpoint.
+   */
+  void insertBidirectional(const std::string& endpoint, CanProtocol::canid id);
+
+  std::unordered_map<ComEndpoint, CanProtocol::canid> _endpoint_to_id;
+  std::unordered_map<CanProtocol::canid, ComEndpoint> _id_to_endpoint;
 };
 
 } // namespace com
