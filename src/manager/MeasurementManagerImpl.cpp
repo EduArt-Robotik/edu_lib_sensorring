@@ -139,24 +139,32 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
     }
   });
 
+  // Copy subscriber callbacks under lock, then invoke outside of lock.
+  // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
+  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
   {
     LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& tof_group = _device_groups.at(device::DeviceType::VL53L8CX);
-    auto it                              = _device_subscriptions.find(device::DeviceType::VL53L8CX);
+    auto it = _device_subscriptions.find(device::DeviceType::VL53L8CX);
     if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
+      callbacks.reserve(it->second.size());
+      for (const auto& sub : it->second) {
         if (sub.second) {
-          try {
-            sub.second(tof_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown "
-                                             "exception.");
-          }
+          callbacks.push_back(sub.second);
         }
       }
+    }
+  }
+
+  const device::DeviceGroup& tof_group = _device_groups.at(device::DeviceType::VL53L8CX);
+  for (const auto& cb : callbacks) {
+    try {
+      cb(tof_group);
+    } catch (const std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
+    } catch (...) {
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown "
+                                       "exception.");
     }
   }
 
@@ -175,24 +183,31 @@ int MeasurementManagerImpl::notifyHTPA32() {
     }
   });
 
+  // Copy subscriber callbacks under lock, then invoke outside of lock.
+  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
   {
     LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& thermal_group = _device_groups.at(device::DeviceType::HTPA32);
-    auto it                                  = _device_subscriptions.find(device::DeviceType::HTPA32);
+    auto it = _device_subscriptions.find(device::DeviceType::HTPA32);
     if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
+      callbacks.reserve(it->second.size());
+      for (const auto& sub : it->second) {
         if (sub.second) {
-          try {
-            sub.second(thermal_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown "
-                                             "exception.");
-          }
+          callbacks.push_back(sub.second);
         }
       }
+    }
+  }
+
+  const device::DeviceGroup& thermal_group = _device_groups.at(device::DeviceType::HTPA32);
+  for (const auto& cb : callbacks) {
+    try {
+      cb(thermal_group);
+    } catch (const std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
+    } catch (...) {
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown "
+                                       "exception.");
     }
   }
 
@@ -200,39 +215,55 @@ int MeasurementManagerImpl::notifyHTPA32() {
 }
 
 void MeasurementManagerImpl::notifyWS2812B() {
+  // Copy subscriber callbacks under lock, then invoke outside of lock.
+  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
   {
     LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& ws2812b_group = _device_groups.at(device::DeviceType::WS2812b);
-    auto it                                  = _device_subscriptions.find(device::DeviceType::WS2812b);
+    auto it = _device_subscriptions.find(device::DeviceType::WS2812b);
     if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
+      callbacks.reserve(it->second.size());
+      for (const auto& sub : it->second) {
         if (sub.second) {
-          try {
-            sub.second(ws2812b_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown "
-                                             "exception.");
-          }
+          callbacks.push_back(sub.second);
         }
       }
+    }
+  }
+
+  const device::DeviceGroup& ws2812b_group = _device_groups.at(device::DeviceType::WS2812b);
+  for (const auto& cb : callbacks) {
+    try {
+      cb(ws2812b_group);
+    } catch (const std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
+    } catch (...) {
+      logger::Logger::getInstance()->log(
+          logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown "
+                                       "exception.");
     }
   }
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
-  LockGuard lock(_subscriber_mutex);
-  for (auto& sub : _state_subscriptions) {
-    if (sub.second) {
-      try {
-        sub.second(state);
-      } catch (const std::exception& e) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw: " + std::string(e.what()));
-      } catch (...) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw unknown exception.");
+  // Copy subscriber callbacks under lock, then invoke outside of lock.
+  std::vector<std::function<void(const ManagerState)>> callbacks;
+  {
+    LockGuard lock(_subscriber_mutex);
+    callbacks.reserve(_state_subscriptions.size());
+    for (const auto& sub : _state_subscriptions) {
+      if (sub.second) {
+        callbacks.push_back(sub.second);
       }
+    }
+  }
+
+  for (const auto& cb : callbacks) {
+    try {
+      cb(state);
+    } catch (const std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw: " + std::string(e.what()));
+    } catch (...) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw unknown exception.");
     }
   }
 }
