@@ -3,10 +3,11 @@
 # Copyright (c) 2026 EduArt Robotik GmbH
 
 """
- @file   minimal.py
+ @file   proxy_class.py
  @author EduArt Robotik GmbH
- @brief  This example receives measurements and prints the current measurement rate to the command line.
-         It uses the function-based subscription API with plain Python callbacks.
+ @brief  This example shows how to use the SensorRing with a proxy class for object-oriented measurement handling.
+         Instead of using lambdas or the client interface, a custom proxy class binds its own member methods
+         as subscription callbacks.
  @date 2025-11-18
 """
 
@@ -56,16 +57,56 @@ class Rate:
     return self._init_flag
 
 
+class CustomProxy:
+  """Proxy class that subscribes its own member methods as callbacks."""
+
+  def __init__(self, manager):
+    self.vl53l8cx_rate = Rate()
+    self.htpa32_rate = Rate()
+    self._subscriptions = []
+
+    # Subscribe member methods using bound methods as callbacks
+    self._subscriptions.append(
+      sensorring.Logger.getInstance().subscribe(self.on_log_output))
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self.on_manager_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self.on_vl53l8cx_callback))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self.on_htpa32_callback))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_WS2812b, self.on_ws2812b_callback))
+
+  def cancel_all(self):
+    """Cancel all subscriptions."""
+    for sub in self._subscriptions:
+      sub.cancel()
+    self._subscriptions.clear()
+
+  def on_log_output(self, verbosity, msg):
+    if verbosity > sensorring.LogVerbosity_Debug:
+      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+
+  def on_manager_state_change(self, state):
+    print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
+
+  def on_vl53l8cx_callback(self, group):
+    self.vl53l8cx_rate.tick(group.getDeviceCount())
+
+  def on_htpa32_callback(self, group):
+    self.htpa32_rate.tick(group.getDeviceCount())
+
+  def on_ws2812b_callback(self, group):
+    pass
+
+
 def main():
-  print("==========================")
-  print("Minimal sensorring example")
-  print("==========================")
+  print("==============================")
+  print("Proxy class sensorring example")
+  print("==============================")
   print()
 
   params = sensorring.ManagerParams()
-
-  vl53l8cx_rate = Rate()
-  htpa32_rate = Rate()
 
   can_interface = sensorring.ComInterfaceID()
   can_interface.type = CAN_INTERFACE_TYPE
@@ -76,14 +117,7 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
-    # Subscribe to the log messages
-    log_sub = sensorring.Logger.getInstance().subscribe(
-      lambda verbosity, msg:
-        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
-        if verbosity > sensorring.LogVerbosity_Debug else None
-    )
-
-    # Create the SensorRing via auto-discovery
+    # Create SensorRing via factory auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
     factory.addInterface(usbtingo_interface)
@@ -96,43 +130,23 @@ def main():
     # Create the MeasurementManager with the SensorRing
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
-    # Subscribe to the state changes
-    state_sub = manager.subscribeToStateChanges(
-      lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
-    )
-
-    # Subscribe to the ToF device group to get the measurements
-    vl53l8cx_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_VL53L8CX,
-      lambda group: vl53l8cx_rate.tick(group.getDeviceCount())
-    )
-
-    # Subscribe to the Thermal device group to get the measurements
-    htpa32_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_HTPA32,
-      lambda group: htpa32_rate.tick(group.getDeviceCount())
-    )
+    # Instantiate a Measurement proxy
+    proxy = CustomProxy(manager)
 
     # Start the measurements
     manager.startMeasuring()
 
-    while not (vl53l8cx_rate.got_first_measurement() or htpa32_rate.got_first_measurement()) and manager.isMeasuring():
+    while not (proxy.vl53l8cx_rate.got_first_measurement() or proxy.htpa32_rate.got_first_measurement()) and manager.isMeasuring():
       time.sleep(0.1)
 
     if manager.isMeasuring():
       print("\nStart printing measurement rate.")
       while manager.isMeasuring():
         print(
-          f"\rCurrent measurement rate: {vl53l8cx_rate.get_rate():5.2f} Hz (ToF) from {vl53l8cx_rate.get_sensor_count()} sensors, "
-          f"{htpa32_rate.get_rate():5.2f} Hz (Thermal) from {htpa32_rate.get_sensor_count()} sensors",
+          f"\rCurrent measurement rate: {proxy.vl53l8cx_rate.get_rate():5.2f} Hz (ToF) from {proxy.vl53l8cx_rate.get_sensor_count()} sensors, "
+          f"{proxy.htpa32_rate.get_rate():5.2f} Hz (Thermal) from {proxy.htpa32_rate.get_sensor_count()} sensors",
           end="", flush=True)
         time.sleep(1)
-
-      # Cancel subscriptions before stopping (optional - destruction also cancels)
-      state_sub.cancel()
-      vl53l8cx_sub.cancel()
-      htpa32_sub.cancel()
-      log_sub.cancel()
 
       # Stop the measurements
       manager.stopMeasuring()
