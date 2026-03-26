@@ -31,14 +31,29 @@ void Logger::unsubscribe(subscription::SubscriberToken token) {
 }
 
 void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
-  LockGuard sub_lock(_subscriber_mutex);
-  for (auto& sub : _subscriptions) {
-    if (sub.second) {
-      try {
-        sub.second(verbosity, msg);
-      } catch (const std::exception& e) {
+  // Copy the subscriber list under lock, then release before invoking callbacks.
+  // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
+  std::vector<std::function<void(const LogVerbosity, const std::string&)>> callbacks;
+  {
+    LockGuard sub_lock(_subscriber_mutex);
+    callbacks.reserve(_subscriptions.size());
+    for (const auto& sub : _subscriptions) {
+      if (sub.second) {
+        callbacks.push_back(sub.second);
+      }
+    }
+  }
+
+  for (const auto& cb : callbacks) {
+    try {
+      cb(verbosity, msg);
+    } catch (const std::exception& e) {
+      // Avoid recursive logging by not calling log() here for Exception verbosity.
+      if (verbosity != LogVerbosity::Exception) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Logger subscription callback threw: " + std::string(e.what()));
-      } catch (...) {
+      }
+    } catch (...) {
+      if (verbosity != LogVerbosity::Exception) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Logger subscription callback threw unknown exception.");
       }
     }

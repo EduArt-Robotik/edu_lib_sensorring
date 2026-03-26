@@ -72,7 +72,7 @@ private:
   /// Private constructor. The Logger is a singleton.
   Logger() = default;
 
-  using Mutex     = std::recursive_mutex;
+  using Mutex     = std::mutex;
   using LockGuard = std::lock_guard<Mutex>;
 
   mutable Mutex _subscriber_mutex;
