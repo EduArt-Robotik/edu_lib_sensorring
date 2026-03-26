@@ -3,10 +3,11 @@
 # Copyright (c) 2026 EduArt Robotik GmbH
 
 """
- @file   client_interface.py
+ @file   using_proxy_class.py
  @author EduArt Robotik GmbH
- @brief  This example shows how to use the optional MeasurementClient and LoggerClient interfaces.
-         A custom client class inherits from both interfaces and overrides their virtual callback methods.
+ @brief  This example shows how to use the SensorRing with a proxy class for object-oriented measurement handling.
+         Instead of using lambdas or the client interface, a custom proxy class binds its own member methods
+         as subscription callbacks.
  @date 2025-11-18
 """
 
@@ -56,37 +57,53 @@ class Rate:
     return self._init_flag
 
 
-class CustomClient(sensorring.MeasurementClient, sensorring.LoggerClient):
-  """Client class inheriting from both MeasurementClient and LoggerClient."""
+class CustomProxy:
+  """Proxy class that subscribes its own member methods as callbacks."""
 
   def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
-    sensorring.LoggerClient.__init__(self)
     self.vl53l8cx_rate = Rate()
     self.htpa32_rate = Rate()
-    self.registerClient(manager)
+    self._subscriptions = []
 
-  def __del__(self):
-    self.unregisterClient()
+    # Subscribe member methods using bound methods as callbacks
+    self._subscriptions.append(
+      sensorring.Logger.getInstance().subscribe(self.on_log_output))
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self.on_manager_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self.on_vl53l8cx_callback))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self.on_htpa32_callback))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_WS2812b, self.on_ws2812b_callback))
 
-  def onStateChange(self, state):
-    print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
+  def cancel_all(self):
+    """Cancel all subscriptions."""
+    for sub in self._subscriptions:
+      sub.cancel()
+    self._subscriptions.clear()
 
-  def onRawTofMeasurement(self, measurement_vec):
-    self.vl53l8cx_rate.tick(len(measurement_vec))
-
-  def onThermalMeasurement(self, measurement_vec):
-    self.htpa32_rate.tick(len(measurement_vec))
-
-  def onOutputLog(self, verbosity, msg):
+  def on_log_output(self, verbosity, msg):
     if verbosity > sensorring.LogVerbosity_Debug:
       print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
 
+  def on_manager_state_change(self, state):
+    print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
+
+  def on_vl53l8cx_callback(self, group):
+    self.vl53l8cx_rate.tick(group.getDeviceCount())
+
+  def on_htpa32_callback(self, group):
+    self.htpa32_rate.tick(group.getDeviceCount())
+
+  def on_ws2812b_callback(self, group):
+    pass
+
 
 def main():
-  print("========================================")
-  print("Client interface sensorring example")
-  print("========================================")
+  print("===============================================")
+  print("Minimal sensorring example (using proxy class)")
+  print("===============================================")
   print()
 
   params = sensorring.ManagerParams()
@@ -113,21 +130,21 @@ def main():
     # Create the MeasurementManager with the SensorRing
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
-    # Instantiate a CustomClient that registers itself with the manager
-    client = CustomClient(manager)
+    # Instantiate a Measurement proxy
+    proxy = CustomProxy(manager)
 
     # Start the measurements
     manager.startMeasuring()
 
-    while not (client.vl53l8cx_rate.got_first_measurement() or client.htpa32_rate.got_first_measurement()) and manager.isMeasuring():
+    while not (proxy.vl53l8cx_rate.got_first_measurement() or proxy.htpa32_rate.got_first_measurement()) and manager.isMeasuring():
       time.sleep(0.1)
 
     if manager.isMeasuring():
       print("\nStart printing measurement rate.")
       while manager.isMeasuring():
         print(
-          f"\rCurrent measurement rate: {client.vl53l8cx_rate.get_rate():5.2f} Hz (ToF) from {client.vl53l8cx_rate.get_sensor_count()} sensors, "
-          f"{client.htpa32_rate.get_rate():5.2f} Hz (Thermal) from {client.htpa32_rate.get_sensor_count()} sensors",
+          f"\rCurrent measurement rate: {proxy.vl53l8cx_rate.get_rate():5.2f} Hz (ToF) from {proxy.vl53l8cx_rate.get_sensor_count()} sensors, "
+          f"{proxy.htpa32_rate.get_rate():5.2f} Hz (Thermal) from {proxy.htpa32_rate.get_sensor_count()} sensors",
           end="", flush=True)
         time.sleep(1)
 

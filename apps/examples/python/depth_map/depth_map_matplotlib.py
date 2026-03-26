@@ -3,10 +3,12 @@
 # Copyright (c) 2026 EduArt Robotik GmbH
 
 """
- @file   sigma_histogram.py
+ @file   depth_map_matplotlib.py
  @author EduArt Robotik GmbH
- @brief  Live histogram of sigma (std deviation) of valid points from the first ToF sensor.
- @date 2026-01-29
+ @brief  This example shows the measurement of the first connected ToF sensor in a live matplotlib window.
+         It displays two subplots: a 3D scatter plot of the point cloud to the left, and a histogram of the
+         sigma (standard deviation) distribution of valid points to the right.
+ @date 2025-11-18
 """
 
 import time
@@ -24,16 +26,22 @@ CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
 USBTINGO_INTERFACE_NAME = "0"
 USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
 
+# Distance range for axis limits (in meters)
+MIN_DIST = 0.0
+MAX_DIST = 2.0
 
-class SigmaHistogramClient(sensorring.MeasurementClient, sensorring.LoggerClient):
-  """Client that extracts sigma values from ToF point clouds for histogram visualization."""
+# Fixed bin range for sigma histogram (in meters, typically very small)
+SIGMA_MAX = 0.01
+
+
+class DepthMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+  """Client that copies ToF point clouds to a NumPy buffer for visualization."""
 
   def __init__(self, manager):
     sensorring.MeasurementClient.__init__(self)
     sensorring.LoggerClient.__init__(self)
-    # Buffer for point cloud data: 64 points max, 6 columns (x, y, z, raw_distance, sigma, user_idx)
+    # Buffer for point cloud data: 64 points, 6 columns (x, y, z, raw_distance, sigma, user_idx)
     self._points_np = np.zeros((64, 6), dtype=np.float64)
-    self._sigma_values = np.array([], dtype=np.float64)
     self._got_measurement = False
     self._state = sensorring.ManagerState_Uninitialized
     self.registerClient(manager)
@@ -42,12 +50,7 @@ class SigmaHistogramClient(sensorring.MeasurementClient, sensorring.LoggerClient
     self._state = state
 
   def onRawTofMeasurement(self, measurement_vec):
-    # Copy point cloud data to numpy array to avoid SWIG lifetime issues
     measurement_vec[0].point_cloud.copyTo(self._points_np)
-
-    # Extract valid points: raw_distance > 0 (column 3), sigma is in column 4
-    valid_mask = self._points_np[:, 3] > 0.0
-    self._sigma_values = self._points_np[valid_mask, 4].copy()
     self._got_measurement = True
 
   def onOutputLog(self, verbosity, msg):
@@ -55,17 +58,17 @@ class SigmaHistogramClient(sensorring.MeasurementClient, sensorring.LoggerClient
       print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
 
   def wait_for_new_measurement(self):
-    """Block until the next measurement arrives and return a copy of the sigma values."""
+    """Block until the next measurement arrives and return the NumPy point buffer."""
     self._got_measurement = False
     while not self._got_measurement and self._state != sensorring.ManagerState_Shutdown:
       time.sleep(0.001)
-    return self._sigma_values.copy()
+    return self._points_np
 
 
 def main():
-  print("====================================")
-  print("Sigma histogram sensorring example")
-  print("====================================")
+  print("=========================================")
+  print("Depth map matplotlib sensorring example")
+  print("=========================================")
   print()
 
   params = sensorring.ManagerParams()
@@ -94,46 +97,57 @@ def main():
     # Create the MeasurementManager with the SensorRing
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
-    # Instantiate a SigmaHistogramClient that registers itself with the manager
-    client = SigmaHistogramClient(manager)
+    # Instantiate a DepthMapClient that registers itself with the manager
+    client = DepthMapClient(manager)
 
     # Start the measurements
     manager.startMeasuring()
 
-    # Set up the histogram plot
-    fig, ax = plt.subplots()
-    ax.set_xlabel("Sigma (m)")
-    ax.set_ylabel("Count")
-    ax.set_title("Sigma of valid ToF points (live)")
-    ax.set_ylim(0, 20)
+    # Create matplotlib figure with two subplots: 3D scatter (left) and sigma histogram (right)
+    fig = plt.figure(figsize=(12, 5))
+    ax_3d = fig.add_subplot(1, 2, 1, projection="3d")
+    ax_hist = fig.add_subplot(1, 2, 2)
+
+    # Configure the 3D scatter plot
+    d = np.tan(np.deg2rad(22.5)) * MAX_DIST
+    ax_3d.set(xlim3d=(-d, d), xlabel='X')
+    ax_3d.set(ylim3d=(-d, d), ylabel='Y')
+    ax_3d.set(zlim3d=(MIN_DIST, MAX_DIST), zlabel='Z')
+    ax_3d.set_aspect('equal')
+    scatter = ax_3d.scatter([], [], [])
+
+    # Configure the sigma histogram
+    sigma_bins = np.linspace(0, SIGMA_MAX, 64)#121)
+
     plt.ion()
+    plt.tight_layout()
     plt.show(block=False)
 
-    # Fixed bin range so the plot stays stable; sigma is in meters, typically small
-    sigma_max = 0.003
-    bins = np.linspace(0, sigma_max, 121)
-
     while manager.isMeasuring():
-      sigmas = client.wait_for_new_measurement()
+      points = client.wait_for_new_measurement()
+      valid = points[:, 3] > 0
 
+      # Update 3D scatter plot
+      scatter._offsets3d = (points[valid, 0], points[valid, 1], points[valid, 2])
+      ax_3d.relim()
+      ax_3d.autoscale_view()
+
+      # Update sigma histogram
+      ax_hist.clear()
+      ax_hist.set_xlim(0, SIGMA_MAX)
+      sigmas = points[valid, 4]
       if len(sigmas) > 0:
-        sigmas_clipped = np.clip(sigmas, 0, sigma_max)
-        ax.clear()
-        ax.hist(sigmas_clipped, bins=bins, edgecolor="black", alpha=0.7)
-        ax.set_xlabel("Sigma (m)")
-        ax.set_ylabel("Count")
-        ax.set_title("Sigma of valid ToF points (live)")
-        ax.set_ylim(0, 64)
+        sigmas_clipped = np.clip(sigmas, 0, SIGMA_MAX)
+        ax_hist.hist(sigmas_clipped, bins=sigma_bins, edgecolor="black", alpha=0.7)
         mean_sigma = np.mean(sigmas)
-        ax.axvline(mean_sigma, color="red", linestyle="--", label=f"mean = {mean_sigma:.5f} m")
-        ax.legend()
+        ax_hist.axvline(mean_sigma, color="red", linestyle="--", label=f"mean = {mean_sigma:.5f} m")
+        ax_hist.legend()
+        ax_hist.set_ylim(0, 64)
       else:
-        ax.clear()
-        ax.set_xlabel("Sigma (m)")
-        ax.set_ylabel("Count")
-        ax.set_title("Sigma of valid ToF points (live) - no valid points")
-        ax.set_ylim(0, 20)
-        print("No valid points in last frame")
+        ax_hist.set_ylim(0, 20)
+      ax_hist.set_xlabel("Sigma (m)")
+      ax_hist.set_ylabel("Count")
+      ax_hist.set_title("Sigma distribution of valid ToF points")
 
       fig.canvas.draw()
       fig.canvas.flush_events()
@@ -143,9 +157,6 @@ def main():
 
   except Exception as e:
     print(f"Caught: {e}")
-  finally:
-    plt.ioff()
-    plt.show(block=True)
 
 
 if __name__ == "__main__":

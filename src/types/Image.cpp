@@ -1,5 +1,6 @@
 #include "sensorring/types/Image.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 
@@ -10,6 +11,7 @@ namespace measurement {
 // Explicit template instantiation for the used types
 template struct GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION>;
 template struct GenericGrayscaleImage<double, THERMAL_RESOLUTION>;
+template struct GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>;
 
 template <typename T, std::size_t RESOLUTION> double GenericGrayscaleImage<T, RESOLUTION>::avg() {
   double result = 0;
@@ -80,6 +82,24 @@ template <typename T, std::size_t RESOLUTION> template <typename U> GenericGrays
     data[i] -= static_cast<T>(other.data[i]);
   }
   return *this;
+}
+
+template <typename T, std::size_t RESOLUTION> void GenericGrayscaleImage<T, RESOLUTION>::copyTo(T* buffer, int size) {
+  const std::size_t count = std::min(static_cast<std::size_t>(size), RESOLUTION);
+  for (std::size_t i = 0; i < count; ++i) {
+    buffer[i] = data[i];
+  }
+}
+
+template <typename T, std::size_t RESOLUTION> void GenericRGBImage<T, RESOLUTION>::copyTo(T* buffer, int size) {
+  static constexpr std::size_t CHANNELS = 3;
+  const std::size_t max_pixels = static_cast<std::size_t>(size) / CHANNELS;
+  const std::size_t count      = std::min(max_pixels, RESOLUTION);
+  for (std::size_t i = 0; i < count; ++i) {
+    buffer[i * CHANNELS + 0] = data[i][0];
+    buffer[i * CHANNELS + 1] = data[i][1];
+    buffer[i * CHANNELS + 2] = data[i][2];
+  }
 }
 
 } // namespace measurement

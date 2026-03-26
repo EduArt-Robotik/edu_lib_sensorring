@@ -3,9 +3,9 @@
 # Copyright (c) 2026 EduArt Robotik GmbH
 
 """
- @file   thermal_map.py
+ @file   depth_map_terminal.py
  @author EduArt Robotik GmbH
- @brief  This example prints a false-color thermal image of the first connected HTPA32 sensor on the command line.
+ @brief  This example prints a depth map of the first connected ToF Sensor on the command line.
  @date 2025-11-18
 """
 
@@ -21,28 +21,44 @@ CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
 USBTINGO_INTERFACE_NAME = "0"
 USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
 
+# Distance range for color mapping (in meters)
+MIN_DIST = 0.0
+MAX_DIST = 1.0
 
-def color_string_command(r, g, b):
-  """Return an ANSI true-color escape sequence for the given RGB values."""
+
+def depth_to_color(depth, min_d, max_d):
+  """Map a depth value to an ANSI true-color escape sequence."""
+  if depth > max_d or depth < 0:
+    depth = max_d
+  elif depth < min_d:
+    depth = min_d
+
+  d = (depth - min_d) / (max_d - min_d)
+
+  # Color gradient: red (near) -> yellow -> green -> blue (far)
+  r = int(255 * (1 - d))
+  g = int(255 * (1 - abs(0.5 - d) * 2))
+  b = int(255 * d)
+
   return f"\033[38;2;{r};{g};{b}m"
 
 
-def print_false_color_image(img, reset_cursor):
-  """Print a 32x32 false-color thermal image to the terminal."""
+def print_depth_map(points, reset_cursor):
+  """Print an 8x8 colored depth map to the terminal."""
   if reset_cursor:
-    print("\033[32F", end="")
+    print("\033[8F", end="")
 
-  for row in range(32):
-    for col in range(32):
-      idx = row * 32 + col
-      print(color_string_command(img.data[idx][0], img.data[idx][1], img.data[idx][2]) + "██", end="")
+  for row in range(8):
+    for col in range(8):
+      idx = row * 8 + col
+      print(depth_to_color(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
     print("\033[0m")
 
   print("", end="", flush=True)
 
 
-class ThermalMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
-  """Client that prints a false-color thermal image from the first HTPA32 sensor."""
+class DepthMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+  """Client that prints a colored depth map from the first ToF sensor."""
 
   def __init__(self, manager):
     sensorring.MeasurementClient.__init__(self)
@@ -54,9 +70,9 @@ class ThermalMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
   def onStateChange(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def onThermalMeasurement(self, measurement_vec):
+  def onRawTofMeasurement(self, measurement_vec):
     self._init_flag = True
-    print_false_color_image(measurement_vec[0].falsecolor_img, self._reset_cursor)
+    print_depth_map(measurement_vec[0].point_cloud, self._reset_cursor)
     self._reset_cursor = True
 
   def onOutputLog(self, verbosity, msg):
@@ -70,13 +86,12 @@ class ThermalMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
 
 def main():
   print("\33c")
-  print("==============================")
-  print("Thermal map sensorring example")
-  print("==============================")
+  print("====================================")
+  print("Depth map terminal sensorring example")
+  print("====================================")
   print()
 
   params = sensorring.ManagerParams()
-  params.frequency_thermal_hz = 5.0
 
   can_interface = sensorring.ComInterfaceID()
   can_interface.type = CAN_INTERFACE_TYPE
@@ -87,12 +102,12 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
-    # Create a SensorRing with one HTPA32 board via auto-discovery
+    # Create a SensorRing with one VL53L8CX board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
-    factory.expectBoard(sensorring.SensorBoardParams())
+    factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
-    factory.expectBoard(sensorring.SensorBoardParams())
+    factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
     sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
     if sensor_ring is None:
@@ -102,8 +117,8 @@ def main():
     # Create the MeasurementManager with the SensorRing
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
-    # Instantiate a ThermalMapClient that registers itself with the manager
-    client = ThermalMapClient(manager)
+    # Instantiate a DepthMapClient that registers itself with the manager
+    client = DepthMapClient(manager)
 
     # Start the measurements
     manager.startMeasuring()

@@ -84,6 +84,9 @@ else:
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 %}
 
 
@@ -133,10 +136,10 @@ typedef ::int64_t int64_t;
 
 // Type mappings for methods coping data to NumPy
 %apply (double*  INPLACE_ARRAY_FLAT, int DIM_FLAT) {(double*  buffer, int size)};
+%apply (unsigned char*  INPLACE_ARRAY_FLAT, int DIM_FLAT) {(unsigned char*  buffer, int size)};
 
 
-// Type mappings for methods coping data to NumPy
-//%apply (unsigned char*  INPLACE_ARRAY_FLAT, int DIM_FLAT) {(unsigned char*  destination, int size)};
+// Type mappings for methods coping data to NumPy (unused)
 //%apply (unsigned short* INPLACE_ARRAY_FLAT, int DIM_FLAT) {(unsigned short* destination, int size)};
 //%apply (float*          INPLACE_ARRAY_FLAT, int DIM_FLAT) {(float*          destination, int size)};
 
@@ -328,6 +331,21 @@ typedef ::int64_t int64_t;
     void setDefaultWS2812bParams(eduart::device::WS2812b_Params params) {
         $self->setDefaultDeviceParams(std::move(params));
     }
+
+    // expectBoard with explicit device params (replaces the std::variant overload).
+    // Called from Python via the expectBoard() wrapper below.
+    void _expectBoardWithDevices(
+        eduart::device::SensorBoardParams board_params,
+        eduart::device::VL53L8CX_Params* vl53,
+        eduart::device::HTPA32_Params* htpa,
+        eduart::device::WS2812b_Params* ws)
+    {
+        std::vector<eduart::ring::SensorRingFactory::DeviceParamsVariant> device_params;
+        if (vl53) device_params.push_back(*vl53);
+        if (htpa) device_params.push_back(*htpa);
+        if (ws)   device_params.push_back(*ws);
+        $self->expectBoard(std::move(board_params), std::move(device_params));
+    }
 }
 
 // Factory returning raw pointer from unique_ptr (ownership transferred to Python)
@@ -362,8 +380,31 @@ def _SensorRingFactory_build(self, mode=ValidationMode_Strict):
     return SensorRingFactory_build(self, mode)
 def _SensorRingFactory_enumerate(self):
     return SensorRingFactory_enumerate_str(self)
+
+# Override expectBoard to accept optional device params:
+#   factory.expectBoard(board_params)                           -> auto-discovery
+#   factory.expectBoard(board_params, VL53L8CX_Params())       -> explicit devices
+#   factory.expectBoard(board_params, VL53L8CX_Params(), WS2812b_Params())
+_orig_expectBoard = SensorRingFactory.expectBoard
+def _SensorRingFactory_expectBoard(self, board_params, *device_params):
+    if not device_params:
+        _orig_expectBoard(self, board_params)
+    else:
+        vl53 = htpa = ws = None
+        for p in device_params:
+            if isinstance(p, VL53L8CX_Params):
+                vl53 = p
+            elif isinstance(p, HTPA32_Params):
+                htpa = p
+            elif isinstance(p, WS2812b_Params):
+                ws = p
+            else:
+                raise TypeError(f"Unknown device param type: {type(p).__name__}")
+        self._expectBoardWithDevices(board_params, vl53, htpa, ws)
+
 SensorRingFactory.build = _SensorRingFactory_build
 SensorRingFactory.enumerate = _SensorRingFactory_enumerate
+SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 %}
 
 // --- MeasurementManager: SWIG cannot wrap std::unique_ptr. We ignore the C++ ctor
@@ -405,6 +446,29 @@ namespace eduart { namespace manager {
 %ignore MeasurementManager::enqueueExtraAction;
 %include "sensorring/manager/MeasurementManager.hpp"
 
+// enqueueExtraAction helper: accepts a Python callable and wraps it in std::function<void()>
+%{
+static void Manager_enqueueExtraAction_py(
+    eduart::manager::MeasurementManager* mgr, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  mgr->enqueueExtraAction(
+    [prevent_leak]() {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      PyObject* result = PyObject_CallObject(prevent_leak.get(), nullptr);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+}
+%}
+void Manager_enqueueExtraAction_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
+
 // Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
 %pythoncode %{
 def _MeasurementManager_init(self, params, sensor_ring):
@@ -413,6 +477,63 @@ def _MeasurementManager_init(self, params, sensor_ring):
     self.thisown = other.thisown
 MeasurementManager.__init__ = _MeasurementManager_init
 %}
+
+// WS2812b_Device: only expose the static setLight/syncLight helpers, not the full device class.
+%{
+static bool WS2812b_setLight(int mode, int red, int green, int blue) {
+  return eduart::device::WS2812b_Device::setLight(
+    static_cast<eduart::light::LightMode>(mode),
+    static_cast<std::uint8_t>(red),
+    static_cast<std::uint8_t>(green),
+    static_cast<std::uint8_t>(blue));
+}
+static bool WS2812b_syncLight() {
+  return eduart::device::WS2812b_Device::syncLight();
+}
+%}
+bool WS2812b_setLight(int mode, int red, int green, int blue);
+bool WS2812b_syncLight();
+
+
+// DeviceGroup typed query helpers: access device-specific data without exposing
+// the templated getDevicesOfType<T>() or the full device classes.
+%{
+static std::size_t DeviceGroup_getVL53L8CXCount(const eduart::device::DeviceGroup& group) {
+  return group.getDevicesOfType<eduart::device::VL53L8CX_Device>().size();
+}
+static eduart::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::device::DeviceGroup& group, int index) {
+  auto devs = group.getDevicesOfType<eduart::device::VL53L8CX_Device>();
+  if (index < 0 || index >= static_cast<int>(devs.size()))
+    throw std::out_of_range("VL53L8CX device index out of range");
+  return devs[index]->getLatestRawMeasurement().first;
+}
+static std::size_t DeviceGroup_getHTPA32Count(const eduart::device::DeviceGroup& group) {
+  return group.getDevicesOfType<eduart::device::HTPA32_Device>().size();
+}
+static eduart::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::device::DeviceGroup& group, int index) {
+  auto devs = group.getDevicesOfType<eduart::device::HTPA32_Device>();
+  if (index < 0 || index >= static_cast<int>(devs.size()))
+    throw std::out_of_range("HTPA32 device index out of range");
+  return devs[index]->getLatestMeasurement().first;
+}
+%}
+%catches(std::out_of_range) DeviceGroup_getVL53L8CXMeasurement;
+%catches(std::out_of_range) DeviceGroup_getHTPA32Measurement;
+std::size_t DeviceGroup_getVL53L8CXCount(const eduart::device::DeviceGroup& group);
+eduart::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::device::DeviceGroup& group, int index);
+std::size_t DeviceGroup_getHTPA32Count(const eduart::device::DeviceGroup& group);
+eduart::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::device::DeviceGroup& group, int index);
+
+// HTPA32 calibration helper: start calibration on all HTPA32 devices reachable from a MeasurementManager.
+%{
+static void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int window) {
+  auto devs = eduart::device::DeviceGroup(mgr->getSensorRing()->getDevices());
+  for (auto* htpa32 : devs.getDevicesOfType<eduart::device::HTPA32_Device>()) {
+    htpa32->startCalibration(static_cast<std::size_t>(window));
+  }
+}
+%}
+void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int window);
 
 
 %rename (LogVerbosityToString) toString(LogVerbosity);
@@ -535,6 +656,11 @@ def _MeasurementManager_subscribeToDeviceGroup(self, device_type, callback):
     """Subscribe to a device group: callback(device_group)."""
     return Manager_subscribeToDeviceGroup_py(self, device_type, callback)
 MeasurementManager.subscribeToDeviceGroup = _MeasurementManager_subscribeToDeviceGroup
+
+def _MeasurementManager_enqueueExtraAction(self, action):
+    """Queue a callable to run once in the next extra-actions slot of the state machine."""
+    Manager_enqueueExtraAction_py(self, action)
+MeasurementManager.enqueueExtraAction = _MeasurementManager_enqueueExtraAction
 %}
 
 

@@ -31,6 +31,14 @@ template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericGr
   std::array<T, RESOLUTION> data = {};
 
   /**
+   * @brief Copy image data to a pre-allocated buffer
+   * @param[out] buffer Pointer to the buffer. Make sure it has sufficient size.
+   * @param[in] size Actual size of the buffer (number of elements). If smaller than
+   *                 RESOLUTION, only a subset of pixels is copied.
+   */
+  void copyTo(T* buffer, int size);
+
+  /**
    * @brief Calculate the average over all pixels
    * @return average
    */
@@ -94,6 +102,14 @@ template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericRG
 
   /// Internal data structure for the image
   std::array<std::array<T, 3>, RESOLUTION> data = {};
+
+  /**
+   * @brief Copy image data to a pre-allocated buffer (flattened: R,G,B,R,G,B,...)
+   * @param[out] buffer Pointer to the buffer. Make sure it has sufficient size.
+   * @param[in] size Actual size of the buffer (number of elements). If smaller than
+   *                 RESOLUTION*3, only a subset of pixels is copied.
+   */
+  void copyTo(T* buffer, int size);
 };
 
 } // namespace measurement
