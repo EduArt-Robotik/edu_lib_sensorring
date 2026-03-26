@@ -33,6 +33,8 @@ The first three examples are **functionally identical** — they all use the `Se
 
 > ⚠️ To use the `sensorring` python package you have to append the location of the package to your `PYTHONPATH` environment variable.
 
+> ⚠️ It is strongly recommended to copy measurements to NumPy arrays before manipulating them in Python. This is shown in the `onRawTofMeasurement()` callback in the `depth_view` and `sigma_histogram` examples using `point_cloud.copyTo()`.
+
 <div class="tabbed">
 
 - <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
@@ -52,11 +54,22 @@ The first three examples are **functionally identical** — they all use the `Se
   </div>
 </div>
 
-The following examples show how to use the Sensor Ring library in your own Python project:
+The following examples show how to use the Sensor Ring library in your own Python project.
 
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp): Displays the current measurement rate
-- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Displays a depth map of the ToF measurement on the command line
-- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_view/src/main.cpp): Displays a 3D plot of the ToF measurement on the command line using [matplotlib](https://matplotlib.org/)
+### Measurement Rate Examples
+
+The first three examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
+
+- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/minimal.py) (**function-based**): Subscribes to device groups and state changes using Python callbacks directly on the `MeasurementManager`
+- [Proxy Class Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/proxy_class/proxy_class.py) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member methods as callbacks
+- [Client Interface Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/client_interface/client_interface.py) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
+
+### Visualization Examples
+
+- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map.py): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
+- [Thermal Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map.py): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
+- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_view/depth_view.py): Displays a live 3D scatter plot of the ToF measurement using [matplotlib](https://matplotlib.org/)
+- [Sigma Histogram Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/sigma_histogram/sigma_histogram.py): Displays a live histogram of the sigma (standard deviation) of valid ToF points using [matplotlib](https://matplotlib.org/)
 
 <div align=center>
 <table style="border: none;">
@@ -73,71 +86,75 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 </table>
 </div>
 
-The use of the Python interface is similar to that of the C++ interface with a few exceptions that are explained below.
-
-C++ has the two client interface classes `MeasurementClient` and `LoggerClient`.
-With the generated Python bindings it is not possible to inherit from both base classes in one python class simultaneously.
-Only the first base class is handled correctly, the second one is not recognized correctly and throws an error when trying to registering it.
-For this reason the Python interface has the additional `SensorringClient` class, which combines the callbacks from both `MeasurementClient` and `LoggerClient` in one class.
-
-> ⚠️ Use the `SensorringClient` base class in Python to inherit from both `MeasurementClient` and `LoggerClient`.
-
-> ⚠️ It is strongly recommended to clone measurements to numyp arrays before manipulating them. This is shown in the `onRawTofMeasurement()` callback below.
-
-Below is a minimal example that shows the Python specialities discussed above:
+Below is a minimal example that shows how to set up the SensorRing and receive measurements in Python using the function-based subscription API:
 
 ```python
-import numpy as np
+import time
 import eduart.sensorring as sensorring
-
-class MeasurementProxy(sensorring.SensorringClient):
-  def __init__(self):
-    # Initialize base class
-    super().__init__()
-    self._points_np = np.zeros((64, 6), dtype=np.float64)
-
-  # Base class callback
-  def onRawTofMeasurement(self, measurement_vec):
-    measurement_vec[0].point_cloud.copyTo(self._points_np)
-  
-  # Base class callback
-  def onOutputLog(self, verbosity, msg):
-    print("[" + sensorring.LogVerbosityToString(verbosity) + "] " + msg)
 
 
 def main():
-  # Create the parameter structure that is used to instantiate the sensorring
   params = sensorring.ManagerParams()
-  # (Actually configure the parameters here...)
 
-  # Instantiate a Measurement proxy
-  proxy = MeasurementProxy()
-
-  # Register the proxy with the Logger to get the log output
-  sensorring.Logger.getInstance().registerClient(proxy)
+  # Set up the communication interface
+  interface = sensorring.ComInterfaceID()
+  interface.type = sensorring.InterfaceType_USBTINGO
+  interface.name = "0"
 
   try:
-    # Instantiate a MeasurementManager with the parameters from above
-    manager = sensorring.MeasurementManager(params)
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+    )
 
-    # Register the proxy with the LogMeasurementManager to get the measurements
-    manager.registerClient(proxy)
+    # Create the SensorRing via auto-discovery
+    factory = sensorring.SensorRingFactory()
+    factory.addInterface(interface)
+    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
+
+    if sensor_ring is None:
+      print("Failed to create SensorRing. Exiting.")
+      return
+
+    # Create the MeasurementManager with the SensorRing
+    manager = sensorring.MeasurementManager(params, sensor_ring)
+
+    # Subscribe to the state changes
+    state_sub = manager.subscribeToStateChanges(
+      lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
+    )
+
+    # Subscribe to the ToF and Thermal device groups
+    tof_sub = manager.subscribeToDeviceGroup(
+      sensorring.DeviceType_VL53L8CX,
+      lambda group: None  # Process ToF measurements here
+    )
+    thermal_sub = manager.subscribeToDeviceGroup(
+      sensorring.DeviceType_HTPA32,
+      lambda group: None  # Process thermal measurements here
+    )
 
     # Start the measurements
     manager.startMeasuring()
 
-    while (manager.isMeasuring()):
-      # (Actually do something useful here ...)
-      pass
+    while manager.isMeasuring():
+      # Do something useful here ...
+      time.sleep(1)
 
-    # Stop the measurements
+    # Cancel subscriptions and stop (optional - destruction also cancels)
+    state_sub.cancel()
+    tof_sub.cancel()
+    thermal_sub.cancel()
+    log_sub.cancel()
     manager.stopMeasuring()
 
   except Exception as e:
-    print("Caught: ", e)
+    print(f"Caught: {e}")
 
 if __name__ == "__main__":
-    main()
+  main()
 ```
 
 <div class="section_buttons"> 
