@@ -16,6 +16,7 @@
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/math/Matrix3.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 // Forward declaration
@@ -42,7 +43,7 @@ enum class SensorState {
  *
  * Provides state tracking, pose handling and notification hooks for derived sensors.
  */
-class BaseSensor : public com::ComObserver {
+class SENSORRING_EXPORT BaseSensor : public com::ComObserver {
 public:
   /**
    * @brief Construct a base sensor and register it with the communication interface.

@@ -11,7 +11,6 @@
 
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -20,7 +19,7 @@ namespace device {
  * @struct SensorBoardParams
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
-struct SENSORRING_EXPORT SensorBoardParams {
+struct SensorBoardParams {
   /// Hardware board type. When set to Undefined, the board is created with all supported device types (backward compatibility).
   SensorBoardType board_type = SensorBoardType::Undefined;
 

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "sensorring/math/Math.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/PointCloud.hpp"
 
 namespace eduart {
@@ -21,7 +20,7 @@ namespace measurement {
  * @class  TofMeasurement
  * @brief  Structure for holding a measurement from a ToF sensor
  */
-struct SENSORRING_EXPORT TofMeasurement {
+struct TofMeasurement {
   /// Frame number of the TofMeasurement
   unsigned int frame_id = 0;
 

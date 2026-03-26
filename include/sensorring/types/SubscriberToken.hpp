@@ -12,14 +12,12 @@
 #include <atomic>
 #include <functional>
 
-#include "sensorring/platform/SensorringExport.hpp"
-
 namespace eduart {
 
 /**
  * @brief Opaque token identifying a subscription (state or device group).
  */
-struct SENSORRING_EXPORT SubscriberToken {
+struct SubscriberToken {
   using TokenType = unsigned long long;
 
   /**
@@ -63,7 +61,7 @@ private:
 #ifndef SWIG
 namespace std {
 
-template <> struct SENSORRING_EXPORT hash<eduart::SubscriberToken> {
+template <> struct hash<eduart::SubscriberToken> {
   std::size_t operator()(const eduart::SubscriberToken& token) const noexcept { return std::hash<eduart::SubscriberToken::TokenType>{}(token.value()); }
 };
 

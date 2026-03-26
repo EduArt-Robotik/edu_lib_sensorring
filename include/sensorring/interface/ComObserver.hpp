@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "sensorring/interface/ComEndpoint.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -16,7 +17,7 @@ namespace com {
  * @author Hannes Duske
  * @date 11.11.2024
  */
-class ComObserver {
+class SENSORRING_EXPORT ComObserver {
 public:
   /**
    * @brief Constructor

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "sensorring/device/DeviceID.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 #include "sensorring/types/TofMeasurement.hpp"
 
@@ -14,7 +13,7 @@ namespace eduart {
 
 namespace device {
 
-template <typename PayloadT> struct SENSORRING_EXPORT Message {
+template <typename PayloadT> struct Message {
   // Metadata
   DeviceID id;
   std::chrono::system_clock::time_point timestamp;

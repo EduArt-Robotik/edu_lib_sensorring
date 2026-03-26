@@ -17,6 +17,7 @@
 #include "sensorring/enumeration/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -30,7 +31,7 @@ namespace device {
  * @struct SensorBoard
  * @brief One sensor board on a bus: holds configured devices and receives COM callbacks for enumeration and data.
  */
-struct SensorBoard : com::ComObserver, IDevice {
+struct SENSORRING_EXPORT SensorBoard : com::ComObserver, IDevice {
 public:
   /**
    * @brief Construct the board with parameters, communication interface, index, and owned devices.

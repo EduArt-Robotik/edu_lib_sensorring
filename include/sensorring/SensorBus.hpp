@@ -14,6 +14,7 @@
 
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/ComObserver.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 #include "SensorBoard.hpp"
 
@@ -31,7 +32,7 @@ using namespace std::chrono_literals;
  * @class SensorBus
  * @brief One communication interface (e.g. CAN) owning multiple SensorBoards and forwarding COM messages.
  */
-class SensorBus : public com::ComObserver {
+class SENSORRING_EXPORT SensorBus : public com::ComObserver {
 public:
   /**
    * @brief Construct the bus with a communication interface and owned sensor boards.

@@ -17,6 +17,7 @@
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/ThermalMeasurement.hpp"
 
 namespace eduart {
@@ -29,7 +30,7 @@ class HTPA32_DeviceImpl;
  * @struct HTPA32_Device
  * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
  */
-struct HTPA32_Device : BaseDevice {
+struct SENSORRING_EXPORT HTPA32_Device : BaseDevice {
 public:
   /**
    * @brief Construct a new HTPA32 device instance.

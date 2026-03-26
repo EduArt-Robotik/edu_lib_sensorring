@@ -14,6 +14,8 @@
 #include <future>
 #include <vector>
 
+#include "sensorring/platform/SensorringExport.hpp"
+
 #include "IDevice.hpp"
 
 namespace eduart {
@@ -24,7 +26,7 @@ namespace device {
  * @class DeviceGroup
  * @brief Holds a set of IDevice pointers and provides type-filtered access and iteration.
  */
-class DeviceGroup {
+class SENSORRING_EXPORT DeviceGroup {
 
 public:
   /**

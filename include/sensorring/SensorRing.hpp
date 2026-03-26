@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "SensorBus.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -22,7 +23,7 @@ namespace ring {
  * @class SensorRing
  * @brief Top-level container managing multiple sensor buses and coordinating operations across them.
  */
-class SensorRing {
+class SENSORRING_EXPORT SensorRing {
 
 public:
   /**

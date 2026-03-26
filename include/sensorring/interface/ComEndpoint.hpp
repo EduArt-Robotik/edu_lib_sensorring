@@ -3,11 +3,13 @@
 #include <string>
 #include <unordered_set>
 
+#include "sensorring/platform/SensorringExport.hpp"
+
 namespace eduart {
 
 namespace com {
 
-class ComEndpoint {
+class SENSORRING_EXPORT ComEndpoint {
 public:
   ComEndpoint(const std::string& id);
 

@@ -12,7 +12,6 @@
 #include <string>
 
 #include "sensorring/device/DeviceType.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -22,7 +21,7 @@ namespace device {
  * @class DeviceID
  * @brief Identifier for a device: type, human-readable name, and index.
  */
-struct SENSORRING_EXPORT DeviceID {
+struct DeviceID {
 public:
   /// Hardware device type.
   DeviceType type = DeviceType::UNDEFINED;

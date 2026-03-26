@@ -25,7 +25,7 @@ class SENSORRING_EXPORT DeviceImpl;
  * @struct DevicePoseOffset
  * @brief Pose offset of a device relative to the center of its sensor board.
  */
-struct SENSORRING_EXPORT DevicePoseOffset {
+struct DevicePoseOffset {
   math::Vector3 board_center_translation_offset;
   math::Vector3 board_center_rotation_offset;
 };

@@ -11,8 +11,6 @@
 
 #include <chrono>
 
-#include "sensorring/platform/SensorringExport.hpp"
-
 namespace eduart {
 
 namespace manager {
@@ -23,7 +21,7 @@ namespace manager {
  * handles the timing and communication of the whole system by running the
  * measurement state machine. One measurement manager manages exactly one sensor ring.
  */
-struct SENSORRING_EXPORT ManagerParams {
+struct ManagerParams {
   /// Timeout for the measurements before the error handler is called.
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
 

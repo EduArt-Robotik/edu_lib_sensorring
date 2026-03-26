@@ -14,6 +14,7 @@
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
@@ -26,7 +27,7 @@ class WS2812b_DeviceImpl;
  * @struct WS2812b_Device
  * @brief  Device wrapper for WS2812b LED strips controlled via the sensorring bus.
  */
-struct WS2812b_Device : BaseDevice {
+struct SENSORRING_EXPORT WS2812b_Device : BaseDevice {
 public:
   /**
    * @brief Construct a new WS2812b device instance.

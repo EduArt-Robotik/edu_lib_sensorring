@@ -11,8 +11,6 @@
 
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
-
 namespace eduart {
 
 namespace com {
@@ -31,7 +29,7 @@ enum class InterfaceType {
  * @struct InterfaceParams
  * @brief Parameters of a communication interface.
  */
-struct SENSORRING_EXPORT ComInterfaceID {
+struct ComInterfaceID {
   /// Type of the communication interface.
   InterfaceType type = InterfaceType::UNDEFINED;
 

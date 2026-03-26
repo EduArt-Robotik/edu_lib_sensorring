@@ -12,7 +12,6 @@
 #include <functional>
 #include <vector>
 
-#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/types/SubscriberToken.hpp"
 
 namespace eduart {
@@ -26,7 +25,7 @@ namespace eduart {
  * subscribe methods. The holder can call cancel() explicitly or simply let the
  * Subscription go out of scope.
  */
-class SENSORRING_EXPORT Subscription {
+class Subscription {
 public:
   /**
    * @brief Default-construct an inactive Subscription.
