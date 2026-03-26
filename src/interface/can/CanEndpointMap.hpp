@@ -19,7 +19,7 @@ namespace com {
  */
 class CanEndpointMap {
 public:
-  static constexpr std::size_t MAX_SENSOR_BOARDS = 256;
+  static constexpr std::size_t MAX_SENSOR_BOARDS = 16;
 
   static CanEndpointMap* getInstance() noexcept;
 
