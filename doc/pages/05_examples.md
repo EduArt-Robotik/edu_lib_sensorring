@@ -33,7 +33,7 @@ The first three examples are **functionally identical** — they all use the `Se
 
 > ⚠️ To use the `sensorring` python package you have to append the location of the package to your `PYTHONPATH` environment variable.
 
-> ⚠️ It is strongly recommended to copy measurements to NumPy arrays before manipulating them in Python. This is shown in the `onRawTofMeasurement()` callback in the `depth_view` and `sigma_histogram` examples using `point_cloud.copyTo()`.
+> ⚠️ It is strongly recommended to copy measurements to NumPy arrays before manipulating them in Python. This is shown in the `onRawTofMeasurement()` callback in the `depth_map_matplotlib` example using `point_cloud.copyTo()`.
 
 <div class="tabbed">
 
@@ -60,27 +60,36 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 
 The first three examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/minimal.py) (**function-based**): Subscribes to device groups and state changes using Python callbacks directly on the `MeasurementManager`
-- [Proxy Class Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/proxy_class/proxy_class.py) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member methods as callbacks
-- [Client Interface Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/client_interface/client_interface.py) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
+- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_lambdas.py) (**function-based**): Subscribes to device groups and state changes using Python callbacks directly on the `MeasurementManager`
+- [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_proxy_class.py) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member methods as callbacks
+- [Using Client Interface](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_client_interface.py) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
 
-### Visualization Examples
+### Depth Map Examples
 
-- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map.py): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
-- [Thermal Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map.py): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
-- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_view/depth_view.py): Displays a live 3D scatter plot of the ToF measurement using [matplotlib](https://matplotlib.org/)
-- [Sigma Histogram Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/sigma_histogram/sigma_histogram.py): Displays a live histogram of the sigma (standard deviation) of valid ToF points using [matplotlib](https://matplotlib.org/)
+- [Depth Map (terminal)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_terminal.py): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
+- [Depth Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_functional.py): Same as above, but uses `subscribeToDeviceGroup()` callbacks matching the C++ example
+- [Depth Map (matplotlib)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_matplotlib.py): Displays a live 3D scatter plot of the ToF point cloud alongside a sigma distribution histogram using [matplotlib](https://matplotlib.org/)
+
+### Thermal Map Examples
+
+- [Thermal Map (terminal)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_terminal.py): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
+- [Thermal Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_functional.py): Same as above, but uses `subscribeToDeviceGroup()` callbacks matching the C++ example
+- [Thermal Map (OpenCV)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_opencv.py): Displays a live false-color thermal image in an [OpenCV](https://opencv.org/) window
+
+### Action Examples
+
+- [Extra Action Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/extra_action/extra_action.py): Demonstrates how to use `enqueueExtraAction()` to control WS2812b LEDs with a smooth color cycling animation
 
 <div align=center>
 <table style="border: none;">
 <tr>
   <td style="text-align:center">
     <img src="../images/example_cpp1.webp" height=500 onerror="this.onerror=null; this.src='example_cpp1.webp';"><br>
-    The `depth_map` example
+    The `depth_map_terminal` example
   </td>
   <td style="text-align:center">
     <img src="../images/example_py1.webp" height=500 onerror="this.onerror=null; this.src='example_py1.webp';"><br>
-    The `depth_view` example.
+    The `depth_map_matplotlib` example.
   </td>
 </tr>
 </table>
