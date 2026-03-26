@@ -52,6 +52,14 @@ struct Version {
    * @return true if equal.
    */
   friend bool operator==(const Version& lhs, const Version& rhs) noexcept;
+
+  /**
+   * @brief Lexicographic less-than comparison (major, minor, patch).
+   * @param[in] lhs First version.
+   * @param[in] rhs Second version.
+   * @return true if lhs < rhs.
+   */
+  friend bool operator<(const Version& lhs, const Version& rhs) noexcept;
 };
 
 /**

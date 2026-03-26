@@ -78,9 +78,25 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
 
       logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Found " + std::to_string(enum_infos.size()) + " board(s) on " + id.name + ".");
 
-      // Mark all discovered boards as Connected.
+      // Mark all discovered boards as Connected and check firmware compatibility.
+      bool firmware_ok = true;
       for (auto& ei : enum_infos) {
         ei.state = device::ConnectionState::Connected;
+
+        if (ei.version < MIN_FIRMWARE_VERSION) {
+          logger::Logger::getInstance()->log(
+              logger::LogVerbosity::Error,
+              "Board " + std::to_string(ei.idx) + " on " + id.name + " has firmware " + ei.version.toString() + " but minimum required is " + MIN_FIRMWARE_VERSION.toString() + ".");
+          firmware_ok = false;
+        }
+      }
+
+      if (!firmware_ok) {
+        if (strict) {
+          return nullptr;
+        }
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "One or more boards on " + id.name + " have incompatible firmware – skipping interface (relaxed mode).");
+        continue;
       }
 
       std::vector<std::unique_ptr<device::SensorBoard> > board_vec;
