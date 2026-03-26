@@ -88,7 +88,7 @@ public:
    * @brief Cancel a subscription.
    * @param[in] token Token returned by subscribeToDeviceGroup or subscribeToStateChanges.
    */
-  void unsubscribe(SubscriberToken token);
+  void unsubscribe(subscription::SubscriberToken token);
 
   /**
    * @brief Return the current health state of the state machine worker.

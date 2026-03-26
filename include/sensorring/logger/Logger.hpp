@@ -50,7 +50,7 @@ public:
    * @brief Unsubscribe from log messages
    * @param[in] token Token returned by subscribe
    */
-  void unsubscribe(SubscriberToken token);
+  void unsubscribe(subscription::SubscriberToken token);
 
   /**
    * @brief Log a message that will be relayed to all registered observers
@@ -76,7 +76,7 @@ private:
   using LockGuard = std::lock_guard<Mutex>;
 
   mutable Mutex _subscriber_mutex;
-  std::unordered_map<SubscriberToken, std::function<void(const LogVerbosity verbosity, const std::string& msg)> > _subscriptions;
+  std::unordered_map<subscription::SubscriberToken, std::function<void(const LogVerbosity verbosity, const std::string& msg)> > _subscriptions;
 };
 
 } // namespace logger

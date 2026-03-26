@@ -89,7 +89,7 @@ public:
    * @brief Cancel a subscription (state or device group).
    * @param[in] token Token returned by subscribeToStateChanges or subscribeToDeviceGroup.
    */
-  void unsubscribe(SubscriberToken token);
+  void unsubscribe(subscription::SubscriberToken token);
 
   /**
    * @brief Return the current health state of the state machine worker.
@@ -189,8 +189,8 @@ private:
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   mutable Mutex _subscriber_mutex;
-  std::unordered_map<SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
-  std::unordered_map<device::DeviceType, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceTypeHash> _device_subscriptions;
+  std::unordered_map<subscription::SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
+  std::unordered_map<device::DeviceType, std::unordered_map<subscription::SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceTypeHash> _device_subscriptions;
 };
 
 } // namespace manager

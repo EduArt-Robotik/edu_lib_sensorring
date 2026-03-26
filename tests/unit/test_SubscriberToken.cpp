@@ -5,7 +5,7 @@
 
 #include "sensorring/types/SubscriberToken.hpp"
 
-using eduart::SubscriberToken;
+using eduart::subscription::SubscriberToken;
 
 TEST_CASE("SubscriberToken construction and validity", "[SubscriberToken]") {
   SECTION("default constructed token is invalid") {

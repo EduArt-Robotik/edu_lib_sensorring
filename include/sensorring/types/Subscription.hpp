@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace subscription {
+
 /**
  * @class Subscription
  * @brief Move-only RAII wrapper that pairs a SubscriberToken with an unsubscribe
@@ -93,5 +95,10 @@ private:
   SubscriberToken _token;
   std::function<void()> _unsubscribe;
 };
+
+} // namespace subscription
+
+// Convenience alias in eduart namespace for backward compatibility.
+using subscription::Subscription;
 
 } // namespace eduart

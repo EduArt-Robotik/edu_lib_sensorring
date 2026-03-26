@@ -82,7 +82,7 @@ Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(
   if (!callback) {
     return Subscription();
   }
-  auto token = SubscriberToken::getNextToken();
+  auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _state_subscriptions.emplace(token, std::move(callback));
   return Subscription(token, [this, token]() {
@@ -94,7 +94,7 @@ Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType k
   if (!callback) {
     return Subscription();
   }
-  auto token = SubscriberToken::getNextToken();
+  auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
   key_subs.emplace(token, std::move(callback));
@@ -103,7 +103,7 @@ Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType k
   });
 }
 
-void MeasurementManagerImpl::unsubscribe(SubscriberToken token) {
+void MeasurementManagerImpl::unsubscribe(subscription::SubscriberToken token) {
   if (!token.isValid()) {
     return;
   }

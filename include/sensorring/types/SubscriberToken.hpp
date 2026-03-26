@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace subscription {
+
 /**
  * @brief Opaque token identifying a subscription (state or device group).
  */
@@ -56,13 +58,15 @@ private:
   TokenType _value;
 };
 
+} // namespace subscription
+
 } // namespace eduart
 
 #ifndef SWIG
 namespace std {
 
-template <> struct hash<eduart::SubscriberToken> {
-  std::size_t operator()(const eduart::SubscriberToken& token) const noexcept { return std::hash<eduart::SubscriberToken::TokenType>{}(token.value()); }
+template <> struct hash<eduart::subscription::SubscriberToken> {
+  std::size_t operator()(const eduart::subscription::SubscriberToken& token) const noexcept { return std::hash<eduart::subscription::SubscriberToken::TokenType>{}(token.value()); }
 };
 
 } // namespace std

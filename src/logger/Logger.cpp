@@ -4,7 +4,6 @@ namespace eduart {
 
 namespace logger {
 
-
 Logger* Logger::getInstance() noexcept {
   static Logger* instance = new Logger;
   return instance;
@@ -15,7 +14,7 @@ Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, 
     return Subscription();
   }
 
-  auto token = SubscriberToken::getNextToken();
+  auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _subscriptions.emplace(token, std::move(callback));
   return Subscription(token, [this, token]() {
@@ -23,7 +22,7 @@ Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, 
   });
 }
 
-void Logger::unsubscribe(SubscriberToken token) {
+void Logger::unsubscribe(subscription::SubscriberToken token) {
   LockGuard lock(_subscriber_mutex);
   _subscriptions.erase(token);
 }

@@ -42,7 +42,7 @@ Subscription MeasurementManager::subscribeToDeviceGroup(device::DeviceType key, 
   return _mm_impl->subscribeToDeviceGroup(key, std::move(callback));
 }
   
-void MeasurementManager::unsubscribe(SubscriberToken token) {
+void MeasurementManager::unsubscribe(subscription::SubscriberToken token) {
   return _mm_impl->unsubscribe(token);
 }
 
