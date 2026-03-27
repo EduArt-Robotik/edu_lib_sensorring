@@ -100,6 +100,7 @@ public:
    */
   static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
 
+private:
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -107,7 +108,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 

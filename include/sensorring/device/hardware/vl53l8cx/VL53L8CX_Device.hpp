@@ -18,8 +18,8 @@
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -77,6 +77,7 @@ public:
    */
   static std::future<bool> fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
 
+private:
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -84,7 +85,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 

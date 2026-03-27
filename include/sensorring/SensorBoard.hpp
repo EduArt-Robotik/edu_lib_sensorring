@@ -66,6 +66,7 @@ public:
    */
   std::vector<BaseDevice*> getDevices() const;
 
+private:
   /**
    * @brief Handle incoming COM message; used for enumeration and device data.
    * @param[in] source Endpoint that received the message.
@@ -73,7 +74,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
-private:
   unsigned int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
