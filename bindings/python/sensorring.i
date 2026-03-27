@@ -505,7 +505,7 @@ static eduart::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(co
   auto devs = group.getDevicesOfType<eduart::device::VL53L8CX_Device>();
   if (index < 0 || index >= static_cast<int>(devs.size()))
     throw std::out_of_range("VL53L8CX device index out of range");
-  return devs[index]->getLatestRawMeasurement().first;
+  return devs[index]->getLatestMeasurement().first;
 }
 static std::size_t DeviceGroup_getHTPA32Count(const eduart::device::DeviceGroup& group) {
   return group.getDevicesOfType<eduart::device::HTPA32_Device>().size();

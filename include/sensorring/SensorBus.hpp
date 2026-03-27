@@ -51,7 +51,7 @@ public:
    * @brief Total number of sensor boards on this bus.
    * @return Number of boards.
    */
-  size_t getSensorCount() const;
+  unsigned int getSensorCount() const;
 
   /**
    * @brief Communication interface used by this bus.

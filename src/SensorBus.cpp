@@ -34,8 +34,8 @@ std::vector<device::SensorBoard*> SensorBus::getSensorBoards() const {
   return ref_vec;
 }
 
-size_t SensorBus::getSensorCount() const {
-  return _board_vec.size();
+unsigned int SensorBus::getSensorCount() const {
+  return static_cast<unsigned int>(_board_vec.size());
 }
 
 void SensorBus::setBitRateSwitching(bool brs_enable) {

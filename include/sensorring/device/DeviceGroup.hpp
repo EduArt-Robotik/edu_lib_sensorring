@@ -48,7 +48,7 @@ public:
    * @brief Returns the number of devices in the group.
    * @return Number of devices in the group.
    */
-  std::size_t getDeviceCount() const;
+  unsigned int getDeviceCount() const;
 
   /**
    * @brief Waits until all futures are ready within the given timeout, then checks each result with a predicate.
