@@ -2,13 +2,13 @@ include(CTest)
 include(Catch)
 
 add_executable(sensorring_tests
-    unit/test_vector3.cpp
-    unit/test_matrix3.cpp
-    unit/test_math_utils.cpp
-    unit/test_pointcloud.cpp
-    unit/test_tof_measurement.cpp
-    unit/test_com_endpoints.cpp
-    unit/test_can_endpoint_map.cpp
+    unit/test_Vector3.cpp
+    unit/test_Matrix3.cpp
+    unit/test_Math.cpp
+    unit/test_PointCloud.cpp
+    unit/test_TofMeasurement.cpp
+    unit/test_ComEndpoint.cpp
+    unit/test_CanEndpointMap.cpp
     unit/test_DeviceID.cpp
     unit/test_DeviceGroup.cpp
     unit/test_SubscriberToken.cpp
@@ -34,7 +34,7 @@ catch_discover_tests(sensorring_tests
 
 if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
-      hardware/test_tof_hardware.cpp
+      hardware/test_TofHardware.cpp
     )
 
     target_link_libraries(sensorring_hardware_tests PRIVATE
