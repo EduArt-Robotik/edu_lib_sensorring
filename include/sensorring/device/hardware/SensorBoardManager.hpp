@@ -29,7 +29,7 @@ namespace eduart {
 namespace device {
 
 struct SensorBoardParams;
-struct SensorBoard;
+class SensorBoard;
 
 /**
  * @struct BoardDeviceInfo
