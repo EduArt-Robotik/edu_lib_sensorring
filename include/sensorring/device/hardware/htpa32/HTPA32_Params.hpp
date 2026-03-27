@@ -7,7 +7,7 @@
 #include <string>
 
 #include "sensorring/device/DeviceParams.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/device/Orientation.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -41,7 +41,7 @@ struct SENSORRING_EXPORT HTPA32_Params : public DeviceParams {
   std::string calibration_dir = "";
 
   /// Orientation of the sensor board. Used to flip the image upside down.
-  Orientation orientation = Orientation::none;
+  Orientation orientation = Orientation::None;
 };
 
 } // namespace device

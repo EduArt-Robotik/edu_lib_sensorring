@@ -4,9 +4,9 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/interface/ComInterfaceID.hpp"
 
 using eduart::com::InterfaceType;
 using eduart::manager::ManagerParams;
@@ -126,7 +126,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 
 TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToFHardware]") {
   // First try USBtingo with serial "0" (first connected device).
-  TestResult usbtingo_result = run_single_interface_test("0", InterfaceType::USBTINGO);
+  TestResult usbtingo_result = run_single_interface_test("0", InterfaceType::UsbTingo);
 
   if (usbtingo_result == TestResult::Passed) {
     SUCCEED("ToF measurement via USBtingo(0) is plausible.");
@@ -134,7 +134,7 @@ TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToF
   }
 
   // Fallback: try SocketCAN on interface "can0".
-  TestResult socketcan_result = run_single_interface_test("can0", InterfaceType::SOCKETCAN);
+  TestResult socketcan_result = run_single_interface_test("can0", InterfaceType::SocketCan);
 
   if (socketcan_result == TestResult::Passed) {
     SUCCEED("ToF measurement via SocketCAN(can0) is plausible.");

@@ -20,9 +20,9 @@ namespace com {
  * @brief Type of the communication interface.
  */
 enum class InterfaceType {
-  UNDEFINED,
-  SOCKETCAN,
-  USBTINGO
+  Undefined,
+  SocketCan,
+  UsbTingo
 };
 
 /**
@@ -31,7 +31,7 @@ enum class InterfaceType {
  */
 struct ComInterfaceID {
   /// Type of the communication interface.
-  InterfaceType type = InterfaceType::UNDEFINED;
+  InterfaceType type = InterfaceType::Undefined;
 
   /// Name of the communication interface.
   std::string name = "";

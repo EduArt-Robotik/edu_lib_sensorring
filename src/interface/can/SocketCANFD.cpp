@@ -21,7 +21,7 @@ namespace eduart {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface({ InterfaceType::SOCKETCAN, interface_name })
+    : ComInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0) {
 
   try {

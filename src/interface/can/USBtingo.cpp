@@ -19,7 +19,7 @@ namespace eduart {
 namespace com {
 
 USBtingo::USBtingo(std::string id)
-    : ComInterface({ InterfaceType::USBTINGO, id }) {
+    : ComInterface({ InterfaceType::UsbTingo, id }) {
   if (!openInterface()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + _id.name);
   }

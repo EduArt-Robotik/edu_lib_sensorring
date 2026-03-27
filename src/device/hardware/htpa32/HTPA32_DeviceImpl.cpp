@@ -313,7 +313,7 @@ measurement::FalseColorImage HTPA32_DeviceImpl::convertToFalseColorImage(const m
 }
 
 void HTPA32_DeviceImpl::rotateLeftImage(measurement::GrayscaleImage& image) const {
-  if (_params.orientation == device::Orientation::left) {
+  if (_params.orientation == device::Orientation::Left) {
     std::reverse(image.data.begin(), image.data.end());
   }
 }

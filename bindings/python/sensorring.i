@@ -70,6 +70,7 @@ else:
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/DeviceID.hpp"
 #include "sensorring/device/DeviceParams.hpp"
+#include "sensorring/device/Orientation.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
@@ -239,6 +240,7 @@ typedef ::int64_t int64_t;
 
 %include "sensorring/device/DeviceParams.hpp"
 
+%include "sensorring/device/Orientation.hpp"
 
 %include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 

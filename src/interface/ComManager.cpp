@@ -44,7 +44,7 @@ ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_un
 
   // Interface does not exist, create a new one
   switch (id.type) {
-  case InterfaceType::SOCKETCAN:
+  case InterfaceType::SocketCan:
 #ifdef USE_SOCKETCAN
     _interfaces.emplace_back(std::make_unique<SocketCANFD>(id.name));
     break;
@@ -53,7 +53,7 @@ ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_un
     return nullptr;
 #endif
 
-  case InterfaceType::USBTINGO:
+  case InterfaceType::UsbTingo:
 #ifdef USE_USBTINGO
     _interfaces.emplace_back(std::make_unique<USBtingo>(id.name));
     break;
@@ -62,7 +62,7 @@ ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_un
     return nullptr;
 #endif
 
-  case InterfaceType::UNDEFINED:
+  case InterfaceType::Undefined:
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Got an undefined interface type. Trying to open a the interface by its name.");
     try {
 #ifdef USE_SOCKETCAN
