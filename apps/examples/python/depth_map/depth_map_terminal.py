@@ -57,13 +57,12 @@ def print_depth_map(points, reset_cursor):
   print("", end="", flush=True)
 
 
-class DepthMapClient(sensorring.LoggerClient):
+class DepthMapClient:
   """Client that prints a colored depth map from the first ToF sensor."""
 
-  def __init__(self, manager):
-    sensorring.LoggerClient.__init__(self)
+  def __init__(self, manager, reset_cursor):
     self._init_flag = False
-    self._reset_cursor = False
+    self._reset_cursor = reset_cursor
     self._subscriptions = []
     self._subscriptions.append(
       manager.subscribeToStateChanges(self._on_state_change))
@@ -76,13 +75,8 @@ class DepthMapClient(sensorring.LoggerClient):
   def _on_vl53l8cx_callback(self, group):
     self._init_flag = True
     measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
-    print_depth_map(measurement.point_cloud, self._reset_cursor)
-    self._reset_cursor = True
-
-  def onOutputLog(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
-      self._reset_cursor = False
+    print_depth_map(measurement.point_cloud, self._reset_cursor[0])
+    self._reset_cursor[0] = True
 
   def got_first_measurement(self):
     return self._init_flag
@@ -95,6 +89,8 @@ def main():
   print("====================================")
   print()
 
+  reset_cursor = [False]
+
   params = sensorring.ManagerParams()
 
   can_interface = sensorring.ComInterfaceID()
@@ -106,6 +102,14 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg: (
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}"),
+        reset_cursor.__setitem__(0, False)
+      ) if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create a SensorRing with one VL53L8CX board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
@@ -122,7 +126,7 @@ def main():
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
     # Instantiate a DepthMapClient that registers itself with the manager
-    client = DepthMapClient(manager)
+    client = DepthMapClient(manager, reset_cursor)
 
     # Start the measurements
     manager.startMeasuring()

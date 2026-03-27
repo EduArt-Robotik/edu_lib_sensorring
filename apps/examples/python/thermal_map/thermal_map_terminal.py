@@ -47,13 +47,12 @@ def print_false_color_image(img, reset_cursor):
   sys.stdout.flush()
 
 
-class ThermalMapClient(sensorring.LoggerClient):
+class ThermalMapClient:
   """Client that prints a false-color thermal image from the first HTPA32 sensor."""
 
-  def __init__(self, manager):
-    sensorring.LoggerClient.__init__(self)
+  def __init__(self, manager, reset_cursor):
     self._init_flag = False
-    self._reset_cursor = False
+    self._reset_cursor = reset_cursor
     self._subscriptions = []
     self._subscriptions.append(
       manager.subscribeToStateChanges(self._on_state_change))
@@ -66,13 +65,8 @@ class ThermalMapClient(sensorring.LoggerClient):
   def _on_htpa32_callback(self, group):
     self._init_flag = True
     measurement = sensorring.DeviceGroup_getHTPA32Measurement(group, 0)
-    print_false_color_image(measurement.falsecolor_img, self._reset_cursor)
-    self._reset_cursor = True
-
-  def onOutputLog(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
-      self._reset_cursor = False
+    print_false_color_image(measurement.falsecolor_img, self._reset_cursor[0])
+    self._reset_cursor[0] = True
 
   def got_first_measurement(self):
     return self._init_flag
@@ -84,6 +78,8 @@ def main():
   print("Thermal map terminal sensorring example")
   print("======================================")
   print()
+
+  reset_cursor = [False]
 
   params = sensorring.ManagerParams()
   params.frequency_thermal_hz = 5.0
@@ -97,6 +93,14 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg: (
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}"),
+        reset_cursor.__setitem__(0, False)
+      ) if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create a SensorRing with one HTPA32 board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
@@ -113,7 +117,7 @@ def main():
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
     # Instantiate a ThermalMapClient that registers itself with the manager
-    client = ThermalMapClient(manager)
+    client = ThermalMapClient(manager, reset_cursor)
 
     # Start the measurements
     manager.startMeasuring()

@@ -67,8 +67,6 @@ class CustomProxy:
 
     # Subscribe member methods using bound methods as callbacks
     self._subscriptions.append(
-      sensorring.Logger.getInstance().subscribe(self.on_log_output))
-    self._subscriptions.append(
       manager.subscribeToStateChanges(self.on_manager_state_change))
     self._subscriptions.append(
       manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self.on_vl53l8cx_callback))
@@ -82,10 +80,6 @@ class CustomProxy:
     for sub in self._subscriptions:
       sub.cancel()
     self._subscriptions.clear()
-
-  def on_log_output(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
 
   def on_manager_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
@@ -117,6 +111,13 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create SensorRing via factory auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
