@@ -17,11 +17,11 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
+CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 # Parameters for smooth color cycling of the WS2812b lights.
 BRIGHTNESS = 0.2

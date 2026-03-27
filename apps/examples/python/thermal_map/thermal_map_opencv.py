@@ -18,11 +18,11 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
+CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 # Display scale factor (32x32 is tiny, scale up for visibility)
 SCALE_FACTOR = 16
