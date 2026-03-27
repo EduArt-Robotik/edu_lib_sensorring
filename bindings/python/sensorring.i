@@ -579,10 +579,10 @@ static eduart::subscription::Subscription* Logger_subscribe_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart:::subscription::Subscription(std::move(sub));
+  return new eduart::subscription::Subscription(std::move(sub));
 }
 
-static eduart:::subscription::Subscription* Manager_subscribeToStateChanges_py(
+static eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(
     eduart::manager::MeasurementManager* mgr, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
@@ -601,10 +601,10 @@ static eduart:::subscription::Subscription* Manager_subscribeToStateChanges_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart:::subscription::Subscription(std::move(sub));
+  return new eduart::subscription::Subscription(std::move(sub));
 }
 
-static eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
+static eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
     eduart::manager::MeasurementManager* mgr,
     eduart::device::DeviceType key,
     PyObject* callable) {
@@ -627,7 +627,7 @@ static eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart:::subscription::Subscription(std::move(sub));
+  return new eduart::subscription::Subscription(std::move(sub));
 }
 %}
 
@@ -636,9 +636,9 @@ static eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
 %newobject Manager_subscribeToStateChanges_py;
 %newobject Manager_subscribeToDeviceGroup_py;
 
-eduart:::subscription::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
-eduart:::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
-eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
+eduart::subscription::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
+eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
+eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
 
 // Attach the subscribe helpers as methods on the Python wrapper classes
 %pythoncode %{
