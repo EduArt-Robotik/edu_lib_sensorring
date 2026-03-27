@@ -49,31 +49,6 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
   return devices;
 }
 
-bool SensorBoard::resetBoards() {
-  bool success                = true;
-  std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
-  for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
-    success &= iface->send(com::ComEndpoint("broadcast"), tx_buf);
-  }
-  return success;
-}
-
-void SensorBoard::cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf);
-  }
-}
-
-void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
-  }
-}
-
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
   if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx)) {
 

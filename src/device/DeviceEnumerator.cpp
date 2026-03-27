@@ -1,7 +1,8 @@
 #include "DeviceEnumerator.hpp"
 
 #include "interface/can/canprotocol.hpp"
-#include "sensorring/SensorBoard.hpp"
+
+#include "SensorBoardCommands.hpp"
 
 namespace eduart {
 
@@ -22,7 +23,7 @@ DeviceEnumerator::~DeviceEnumerator() {
 }
 
 void DeviceEnumerator::startEnumeration() {
-  device::SensorBoard::cmdEnumerateBoards(_interface->getID());
+  device::cmdEnumerateBoards(_interface->getID());
 }
 
 std::vector<device::EnumerationInformation> DeviceEnumerator::getResult() {

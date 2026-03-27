@@ -41,6 +41,7 @@ target_sources(sensorring
   device/hardware/ws2812b/WS2812b_Device.cpp
   device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
   device/DeviceEnumerator.cpp
+  device/SensorBoardCommands.cpp
   device/EnumerationInformation.cpp
   measurement/Image.cpp
   measurement/PointCloud.cpp

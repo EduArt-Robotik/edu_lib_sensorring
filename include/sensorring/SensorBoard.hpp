@@ -67,24 +67,6 @@ public:
   std::vector<BaseDevice*> getDevices() const;
 
   /**
-   * @brief Reset all boards on all interfaces (broadcast reset command).
-   * @return true on success.
-   */
-  static bool resetBoards();
-
-  /**
-   * @brief Send bit-rate switching command on the given interface.
-   * @param[in] interface Communication interface ID.
-   * @param[in] enable Whether to enable BRS.
-   */
-  static void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable);
-  /**
-   * @brief Send enumeration command on the given interface so boards respond with CMD_ACTIVE_DEVICE_RESPONSE.
-   * @param[in] interface Communication interface ID to enumerate.
-   */
-  static void cmdEnumerateBoards(com::ComInterfaceID interface);
-
-  /**
    * @brief Handle incoming COM message; used for enumeration and device data.
    * @param[in] source Endpoint that received the message.
    * @param[in] data Raw message payload.

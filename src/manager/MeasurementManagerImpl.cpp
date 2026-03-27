@@ -1,5 +1,6 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
+#include "device/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
@@ -253,7 +254,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
-    device::SensorBoard::resetBoards();
+    device::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors
 
     // state transition
