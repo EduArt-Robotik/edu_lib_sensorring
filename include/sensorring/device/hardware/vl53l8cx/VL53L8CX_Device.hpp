@@ -50,10 +50,10 @@ public:
   const VL53L8CX_Params& getParams() const;
 
   /**
-   * @brief Get the most recent raw measurement and current sensor state.
-   * @return Pair of latest raw Time-of-Flight measurement and associated sensor state.
+   * @brief Get the most recent measurement and current sensor state.
+   * @return Pair of latest Time-of-Flight measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, SensorState> getLatestMeasurement() const;
   /**
    * @brief Get the most recent transformed measurement and current sensor state.
    * @return Pair of latest transformed Time-of-Flight measurement and associated sensor state.

@@ -41,7 +41,7 @@ public:
   std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
   std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
 
-  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   bool stopCalibration();
   bool startCalibration(std::size_t window);
 

@@ -58,7 +58,7 @@ bool SensorBoard::resetBoards() {
   return success;
 }
 
-void SensorBoard::cmdSetBrs(com::ComInterfaceID interface, bool enable) {
+void SensorBoard::cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (iface) {
     std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };

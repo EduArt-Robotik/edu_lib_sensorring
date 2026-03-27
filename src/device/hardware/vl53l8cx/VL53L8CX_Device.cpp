@@ -22,8 +22,8 @@ const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _impl->getParams();
 }
 
-std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getLatestRawMeasurement() const {
-  return _impl->getLatestRawMeasurement();
+std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getLatestMeasurement() const {
+  return _impl->getLatestMeasurement();
 }
 
 std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_Device::getLatestTransformedMeasurement() const {

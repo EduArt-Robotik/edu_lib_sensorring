@@ -61,7 +61,7 @@ void MeasurementClient::onTofDispatcher(const device::DeviceGroup& group) {
   group.invokeForEachDeviceOfType<device::VL53L8CX_Device>([&raw_measurement_vec, &transformed_measurement_vec](device::VL53L8CX_Device* device) {
     if (!device->getEnable())
       return;
-    auto [raw_meas, raw_state] = device->getLatestRawMeasurement();
+    auto [raw_meas, raw_state] = device->getLatestMeasurement();
     if (raw_state == device::SensorState::SensorOK) {
       if (!raw_meas.point_cloud.data.empty())
         raw_measurement_vec.emplace_back(raw_meas);

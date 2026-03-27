@@ -46,7 +46,7 @@ public:
    * @brief Enable or disable bit rate switching on CAN bus interfaces.
    * @param[in] brs_enable Enable flag
    */
-  void setBrs(bool brs_enable);
+  void setBitRateSwitching(bool brs_enable);
 
   /**
    * @brief Get all devices connected to the sensor ring.

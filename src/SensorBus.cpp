@@ -38,8 +38,8 @@ size_t SensorBus::getSensorCount() const {
   return _board_vec.size();
 }
 
-void SensorBus::setBrs(bool brs_enable) {
-  device::SensorBoard::cmdSetBrs(_interface->getID(), brs_enable);
+void SensorBus::setBitRateSwitching(bool brs_enable) {
+  device::SensorBoard::cmdSetBitRateSwitching(_interface->getID(), brs_enable);
 }
 
 std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {

@@ -190,7 +190,7 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
   }
 }
 
-std::future<bool> HTPA32_DeviceImpl::getEpromAsync(std::chrono::milliseconds timeout) {
+std::future<bool> HTPA32_DeviceImpl::getEepromAsync(std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [this, timeout]() {
     if (_read_eeprom) {
       return false;

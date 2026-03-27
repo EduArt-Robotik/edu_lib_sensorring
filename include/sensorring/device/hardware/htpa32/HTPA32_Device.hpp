@@ -64,7 +64,7 @@ public:
    * @param[in] timeout Maximum time to wait for completion.
    * @return Future resolving to true on success.
    */
-  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   /**
    * @brief Stop any ongoing thermal calibration sequence.
    * @return true on success.

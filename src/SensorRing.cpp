@@ -34,9 +34,9 @@ std::vector<device::IDevice*> SensorRing::getDevices() const {
   return devices;
 }
 
-void SensorRing::setBrs(bool brs_enable) {
+void SensorRing::setBitRateSwitching(bool brs_enable) {
   for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->setBrs(brs_enable);
+    sensor_bus->setBitRateSwitching(brs_enable);
   }
 }
 

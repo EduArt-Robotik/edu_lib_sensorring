@@ -45,7 +45,7 @@ public:
    * @brief Enable or disable bit rate switching on the bus interface.
    * @param[in] brs_enable Enable flag.
    */
-  void setBrs(bool brs_enable);
+  void setBitRateSwitching(bool brs_enable);
 
   /**
    * @brief Total number of sensor boards on this bus.

@@ -120,7 +120,7 @@ int main(int, char*[]) {
     auto vl53l8cx_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&got_first_measurement, &reset_cursor](const device::DeviceGroup& devs) {
       got_first_measurement = true;
       auto vl53l8cx         = devs.getDevicesOfType<device::VL53L8CX_Device>().at(0);
-      printDepthMap(vl53l8cx->getLatestRawMeasurement().first.point_cloud, reset_cursor);
+      printDepthMap(vl53l8cx->getLatestMeasurement().first.point_cloud, reset_cursor);
       reset_cursor = true;
     });
 

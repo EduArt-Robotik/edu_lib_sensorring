@@ -115,7 +115,7 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
   _device_groups.at(device::DeviceType::VL53L8CX).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
     if (!device->getEnable())
       return;
-    auto state = device->getLatestRawMeasurement().second;
+    auto state = device->getLatestMeasurement().second;
     if (state != device::SensorState::SensorOK) {
       error_frames++;
     }
@@ -279,7 +279,7 @@ void MeasurementManagerImpl::StateMachine() {
       const auto timeout_ms = _params.timeout;
       _device_groups.at(device::DeviceType::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         if (device->getEnable()) {
-          auto fut = device->getEpromAsync(timeout_ms);
+          auto fut = device->getEepromAsync(timeout_ms);
           success  = fut.get();
         }
       });
@@ -299,7 +299,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::pre_loop_init: {
     // enable bit rate switching
-    _sensor_ring->setBrs(_params.enable_brs);
+    _sensor_ring->setBitRateSwitching(_params.enable_brs);
 
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now.");
     _last_tof_measurement_timestamp     = std::chrono::steady_clock::now();

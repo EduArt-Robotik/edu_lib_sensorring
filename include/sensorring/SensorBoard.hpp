@@ -77,7 +77,7 @@ public:
    * @param[in] interface Communication interface ID.
    * @param[in] enable Whether to enable BRS.
    */
-  static void cmdSetBrs(com::ComInterfaceID interface, bool enable);
+  static void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable);
   /**
    * @brief Send enumeration command on the given interface so boards respond with CMD_ACTIVE_DEVICE_RESPONSE.
    * @param[in] interface Communication interface ID to enumerate.
