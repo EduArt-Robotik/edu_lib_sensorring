@@ -27,7 +27,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
       devices.push_back(std::make_unique<HTPA32_Device>(HTPA32_Params{}, interface, idx));
       break;
     case DeviceType::WS2812b:
-      devices.push_back(std::make_unique<WS2812b_Device>(WS2812b_Params{}, interface));
+      devices.push_back(std::make_unique<WS2812b_Device>(WS2812b_Params{}, interface, idx));
       break;
     default:
       // Unknown or unsupported device type – ignore for now.
@@ -55,7 +55,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
           } else if constexpr (std::is_same_v<T, HTPA32_Params>) {
             devices.push_back(std::make_unique<HTPA32_Device>(device_params, interface, idx));
           } else if constexpr (std::is_same_v<T, WS2812b_Params>) {
-            devices.push_back(std::make_unique<WS2812b_Device>(device_params, interface));
+            devices.push_back(std::make_unique<WS2812b_Device>(device_params, interface, idx));
           }
         },
         it->second);

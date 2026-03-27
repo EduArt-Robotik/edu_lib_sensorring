@@ -12,10 +12,10 @@
 #include <memory>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/LightMode.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/device/LightMode.hpp"
 
 namespace eduart {
 
@@ -33,8 +33,10 @@ public:
    * @brief Construct a new WS2812b device instance.
    * @param[in] params    LED strip configuration parameters.
    * @param[in] interface Communication interface used to talk to the device.
+   * @param[in] idx       Index of the device on the bus.
    */
-  WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface);
+  WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx);
+
   /// Destructor
   ~WS2812b_Device();
 
