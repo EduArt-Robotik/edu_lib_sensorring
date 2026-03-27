@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include "device/hardware/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
-#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {

@@ -1,4 +1,4 @@
-#include "sensorring/device/hardware/SensorBoardManager.hpp"
+#include "device/hardware/SensorBoardManager.hpp"
 
 #include <memory>
 #include <vector>

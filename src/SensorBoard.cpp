@@ -1,8 +1,8 @@
 #include "sensorring/SensorBoard.hpp"
 
+#include "device/hardware/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
