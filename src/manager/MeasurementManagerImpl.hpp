@@ -23,8 +23,7 @@
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
-#include "sensorring/subscription/SubscriberToken.hpp"
-#include "sensorring/subscription/Subscription.hpp"
+#include "sensorring/subscription/Publisher.hpp"
 
 namespace eduart {
 
@@ -188,9 +187,8 @@ private:
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
-  mutable Mutex _subscriber_mutex;
-  std::unordered_map<subscription::SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
-  std::unordered_map<device::DeviceType, std::unordered_map<subscription::SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceTypeHash> _device_subscriptions;
+  subscription::Publisher<const ManagerState> _state_publisher;
+  std::unordered_map<device::DeviceType, subscription::Publisher<const device::DeviceGroup&>, DeviceTypeHash> _device_publishers;
 };
 
 } // namespace manager

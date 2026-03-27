@@ -10,15 +10,12 @@
 #pragma once
 
 #include <functional>
-#include <mutex>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 
 #include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/subscription/SubscriberToken.hpp"
-#include "sensorring/subscription/Subscription.hpp"
+#include "sensorring/subscription/Publisher.hpp"
 
 namespace eduart {
 
@@ -72,11 +69,7 @@ private:
   /// Private constructor. The Logger is a singleton.
   Logger() = default;
 
-  using Mutex     = std::mutex;
-  using LockGuard = std::lock_guard<Mutex>;
-
-  mutable Mutex _subscriber_mutex;
-  std::unordered_map<subscription::SubscriberToken, std::function<void(const LogVerbosity verbosity, const std::string& msg)> > _subscriptions;
+  subscription::Publisher<const LogVerbosity, const std::string&> _publisher;
 };
 
 } // namespace logger

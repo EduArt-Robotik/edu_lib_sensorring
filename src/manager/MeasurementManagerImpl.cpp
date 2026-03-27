@@ -79,38 +79,20 @@ void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
 */
 
 subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
-  if (!callback) {
-    return subscription::Subscription();
-  }
-  auto token = subscription::SubscriberToken::getNextToken();
-  LockGuard lock(_subscriber_mutex);
-  _state_subscriptions.emplace(token, std::move(callback));
-  return subscription::Subscription(token, [this, token]() {
-    unsubscribe(token);
-  });
+  return _state_publisher.subscribe(std::move(callback));
 }
 
 subscription::Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
-  if (!callback) {
-    return subscription::Subscription();
-  }
-  auto token = subscription::SubscriberToken::getNextToken();
-  LockGuard lock(_subscriber_mutex);
-  auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
-  key_subs.emplace(token, std::move(callback));
-  return subscription::Subscription(token, [this, token]() {
-    unsubscribe(token);
-  });
+  return _device_publishers[key].subscribe(std::move(callback));
 }
 
 void MeasurementManagerImpl::unsubscribe(subscription::SubscriberToken token) {
   if (!token.isValid()) {
     return;
   }
-  LockGuard lock(_subscriber_mutex);
-  _state_subscriptions.erase(token);
-  for (auto& [key, subscriptions] : _device_subscriptions) {
-    subscriptions.erase(token);
+  _state_publisher.unsubscribe(token);
+  for (auto& [key, publisher] : _device_publishers) {
+    publisher.unsubscribe(token);
   }
 }
 
@@ -141,31 +123,9 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
 
   // Copy subscriber callbacks under lock, then invoke outside of lock.
   // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
-  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
-  {
-    LockGuard lock(_subscriber_mutex);
-    auto it = _device_subscriptions.find(device::DeviceType::VL53L8CX);
-    if (it != _device_subscriptions.end()) {
-      callbacks.reserve(it->second.size());
-      for (const auto& sub : it->second) {
-        if (sub.second) {
-          callbacks.push_back(sub.second);
-        }
-      }
-    }
-  }
-
-  const device::DeviceGroup& tof_group = _device_groups.at(device::DeviceType::VL53L8CX);
-  for (const auto& cb : callbacks) {
-    try {
-      cb(tof_group);
-    } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
-    } catch (...) {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown "
-                                       "exception.");
-    }
+  auto it = _device_publishers.find(device::DeviceType::VL53L8CX);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::VL53L8CX));
   }
 
   return error_frames;
@@ -183,89 +143,23 @@ int MeasurementManagerImpl::notifyHTPA32() {
     }
   });
 
-  // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
-  {
-    LockGuard lock(_subscriber_mutex);
-    auto it = _device_subscriptions.find(device::DeviceType::HTPA32);
-    if (it != _device_subscriptions.end()) {
-      callbacks.reserve(it->second.size());
-      for (const auto& sub : it->second) {
-        if (sub.second) {
-          callbacks.push_back(sub.second);
-        }
-      }
-    }
-  }
-
-  const device::DeviceGroup& thermal_group = _device_groups.at(device::DeviceType::HTPA32);
-  for (const auto& cb : callbacks) {
-    try {
-      cb(thermal_group);
-    } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
-    } catch (...) {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown "
-                                       "exception.");
-    }
+  auto it = _device_publishers.find(device::DeviceType::HTPA32);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::HTPA32));
   }
 
   return error_frames;
 }
 
 void MeasurementManagerImpl::notifyWS2812B() {
-  // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
-  {
-    LockGuard lock(_subscriber_mutex);
-    auto it = _device_subscriptions.find(device::DeviceType::WS2812b);
-    if (it != _device_subscriptions.end()) {
-      callbacks.reserve(it->second.size());
-      for (const auto& sub : it->second) {
-        if (sub.second) {
-          callbacks.push_back(sub.second);
-        }
-      }
-    }
-  }
-
-  const device::DeviceGroup& ws2812b_group = _device_groups.at(device::DeviceType::WS2812b);
-  for (const auto& cb : callbacks) {
-    try {
-      cb(ws2812b_group);
-    } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
-    } catch (...) {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown "
-                                       "exception.");
-    }
+  auto it = _device_publishers.find(device::DeviceType::WS2812b);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::WS2812b));
   }
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
-  // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const ManagerState)> > callbacks;
-  {
-    LockGuard lock(_subscriber_mutex);
-    callbacks.reserve(_state_subscriptions.size());
-    for (const auto& sub : _state_subscriptions) {
-      if (sub.second) {
-        callbacks.push_back(sub.second);
-      }
-    }
-  }
-
-  for (const auto& cb : callbacks) {
-    try {
-      cb(state);
-    } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw: " + std::string(e.what()));
-    } catch (...) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw unknown exception.");
-    }
-  }
+  _state_publisher.publish(state);
 }
 
 ManagerState MeasurementManagerImpl::getManagerState() const noexcept {
