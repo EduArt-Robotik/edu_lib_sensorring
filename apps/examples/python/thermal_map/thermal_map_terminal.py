@@ -47,22 +47,26 @@ def print_false_color_image(img, reset_cursor):
   sys.stdout.flush()
 
 
-class ThermalMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+class ThermalMapClient(sensorring.LoggerClient):
   """Client that prints a false-color thermal image from the first HTPA32 sensor."""
 
   def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
     sensorring.LoggerClient.__init__(self)
     self._init_flag = False
     self._reset_cursor = False
-    self.registerClient(manager)
+    self._subscriptions = []
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self._on_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self._on_htpa32_callback))
 
-  def onStateChange(self, state):
+  def _on_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def onThermalMeasurement(self, measurement_vec):
+  def _on_htpa32_callback(self, group):
     self._init_flag = True
-    print_false_color_image(measurement_vec[0].falsecolor_img, self._reset_cursor)
+    measurement = sensorring.DeviceGroup_getHTPA32Measurement(group, 0)
+    print_false_color_image(measurement.falsecolor_img, self._reset_cursor)
     self._reset_cursor = True
 
   def onOutputLog(self, verbosity, msg):

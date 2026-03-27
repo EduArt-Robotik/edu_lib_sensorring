@@ -16,14 +16,6 @@ target_link_libraries(minimal_using_proxy_class
     PRIVATE sensorring::sensorring
 )
 
-add_executable(minimal_using_client_interface
-    cpp/minimal/using_client_interface.cpp
-)
-
-target_link_libraries(minimal_using_client_interface
-    PRIVATE sensorring::sensorring
-)
-
 add_executable(depth_map
     cpp/depth_map/src/main.cpp
 )
@@ -53,7 +45,6 @@ if(SENSORRING_INSTALL)
   install( TARGETS
     minimal_using_lambdas
     minimal_using_proxy_class
-    minimal_using_client_interface
     depth_map
     thermal_map
     extra_action

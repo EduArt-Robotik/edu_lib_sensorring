@@ -14,7 +14,6 @@ add_executable(sensorring_tests
     unit/test_SubscriberToken.cpp
     unit/test_Subscription.cpp
     unit/test_Publisher.cpp
-    unit/test_MeasurementClient.cpp
     unit/test_HTPA32_Eeprom.cpp
 )
 

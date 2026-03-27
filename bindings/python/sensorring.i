@@ -81,7 +81,6 @@ else:
 #include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
-#include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/device/IDevice.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
@@ -675,6 +674,3 @@ MeasurementManager.enqueueExtraAction = _MeasurementManager_enqueueExtraAction
 
 %feature("director") eduart::logger::LoggerClient;
 %include "sensorring/logger/LoggerClient.hpp"
-
-%feature("director") eduart::manager::MeasurementClient;
-%include "sensorring/manager/MeasurementClient.hpp"

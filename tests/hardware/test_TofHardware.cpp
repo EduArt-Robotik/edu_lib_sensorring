@@ -4,9 +4,12 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/device/DeviceGroup.hpp"
+#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 using eduart::com::InterfaceType;
 using eduart::manager::ManagerParams;
@@ -14,29 +17,6 @@ using eduart::manager::MeasurementManager;
 using eduart::measurement::TofMeasurement;
 
 namespace {
-
-// Simple client that captures a few raw ToF measurements.
-class TofCaptureClient : public eduart::manager::MeasurementClient {
-public:
-  void onRawTofMeasurement(const std::vector<TofMeasurement>& measurement_vec) override {
-    if (measurement_vec.empty()) {
-      return;
-    }
-    // if (_count >= _max_frames) {
-    //   return;
-    // }
-    _measurements.push_back(measurement_vec.front());
-    _count++;
-  }
-
-  std::size_t frameCount() const { return _count; }
-  const std::vector<TofMeasurement>& frames() const { return _measurements; }
-
-private:
-  std::vector<TofMeasurement> _measurements;
-  std::size_t _count{ 0 };
-  // static constexpr std::size_t _max_frames = 5;
-};
 
 enum class TestResult {
   NotAvailable,
@@ -51,7 +31,8 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   interface.type = type;
   interface.name = interface_name;
 
-  TofCaptureClient client;
+  std::vector<TofMeasurement> measurements;
+  std::size_t count = 0;
 
   try {
     eduart::ring::SensorRingFactory factory;
@@ -63,7 +44,18 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     }
 
     MeasurementManager manager(params, std::move(sensor_ring));
-    client.registerClient(&manager);
+
+    auto sub = manager.subscribeToDeviceGroup(eduart::device::DeviceType::VL53L8CX, [&measurements, &count](const eduart::device::DeviceGroup& group) {
+      group.invokeForEachDeviceOfType<eduart::device::VL53L8CX_Device>([&measurements, &count](eduart::device::VL53L8CX_Device* device) {
+        if (!device->getEnable())
+          return;
+        auto [meas, state] = device->getLatestMeasurement();
+        if (state == eduart::device::DeviceState::Ok && !meas.point_cloud.data.empty()) {
+          measurements.push_back(meas);
+          count++;
+        }
+      });
+    });
 
     if (!manager.startMeasuring()) {
       manager.stopMeasuring();
@@ -72,19 +64,18 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 
     // Wait up to ~5 seconds for up to 3 frames.
     const auto start = std::chrono::steady_clock::now();
-    while (client.frameCount() < 3 && std::chrono::steady_clock::now() - start < std::chrono::seconds(5)) {
+    while (count < 3 && std::chrono::steady_clock::now() - start < std::chrono::seconds(5)) {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     manager.stopMeasuring();
 
-    if (client.frameCount() == 0) {
+    if (count == 0) {
       // No measurements received – likely no active ToF on this interface.
       return TestResult::NotAvailable;
     }
 
-    const auto& frames = client.frames();
-    const auto& first  = frames.front();
+    const auto& first = measurements.front();
 
     const auto& points = first.point_cloud.data;
     if (points.empty()) {
@@ -104,8 +95,8 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     }
 
     // Heuristic 2: if we observed at least two frames, frame_id should change.
-    if (client.frameCount() >= 2) {
-      const auto& second = frames[1];
+    if (count >= 2) {
+      const auto& second = measurements[1];
       if (second.frame_id == first.frame_id) {
         return TestResult::Failed;
       }

@@ -57,22 +57,26 @@ def print_depth_map(points, reset_cursor):
   print("", end="", flush=True)
 
 
-class DepthMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+class DepthMapClient(sensorring.LoggerClient):
   """Client that prints a colored depth map from the first ToF sensor."""
 
   def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
     sensorring.LoggerClient.__init__(self)
     self._init_flag = False
     self._reset_cursor = False
-    self.registerClient(manager)
+    self._subscriptions = []
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self._on_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self._on_vl53l8cx_callback))
 
-  def onStateChange(self, state):
+  def _on_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def onRawTofMeasurement(self, measurement_vec):
+  def _on_vl53l8cx_callback(self, group):
     self._init_flag = True
-    print_depth_map(measurement_vec[0].point_cloud, self._reset_cursor)
+    measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
+    print_depth_map(measurement.point_cloud, self._reset_cursor)
     self._reset_cursor = True
 
   def onOutputLog(self, verbosity, msg):
