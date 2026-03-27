@@ -117,7 +117,7 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
     if (!device->getEnable())
       return;
     auto state = device->getLatestMeasurement().second;
-    if (state != device::SensorState::SensorOK) {
+    if (state != device::DeviceState::Ok) {
       error_frames++;
     }
   });
@@ -139,7 +139,7 @@ int MeasurementManagerImpl::notifyHTPA32() {
     if (!device->getEnable())
       return;
     auto state = device->getLatestMeasurement().second;
-    if (state != device::SensorState::SensorOK) {
+    if (state != device::DeviceState::Ok) {
       error_frames++;
     }
   });

@@ -39,6 +39,7 @@ public:
    * @param[in] idx      Index of the sensor on the bus.
    */
   HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx);
+  
   /// Destructor
   ~HTPA32_Device();
 
@@ -52,12 +53,12 @@ public:
    * @brief Get the most recent grayscale image and current sensor state.
    * @return Pair of latest grayscale image and associated sensor state.
    */
-  std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
+  std::pair<const measurement::GrayscaleImage&, DeviceState> getLatestGrayscaleImage() const;
   /**
    * @brief Get the most recent false-color image and current sensor state.
    * @return Pair of latest false-color image and associated sensor state.
    */
-  std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
+  std::pair<const measurement::FalseColorImage&, DeviceState> getLatestFalseColorImage() const;
 
   /**
    * @brief Request the EEPROM content asynchronously.
@@ -80,7 +81,7 @@ public:
    * @brief Get the latest thermal measurement and current sensor state.
    * @return Pair of latest thermal measurement and associated sensor state.
    */
-  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
+  std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
 
   // std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);

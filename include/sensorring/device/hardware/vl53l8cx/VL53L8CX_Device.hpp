@@ -53,12 +53,12 @@ public:
    * @brief Get the most recent measurement and current sensor state.
    * @return Pair of latest Time-of-Flight measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
   /**
    * @brief Get the most recent transformed measurement and current sensor state.
    * @return Pair of latest transformed Time-of-Flight measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);

@@ -9,7 +9,7 @@ namespace device {
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
     : _idx(idx)
-    , _error(SensorState::SensorInit)
+    , _error(DeviceState::Undefined)
     , _interface(interface)
     , _enable_flag(enable) {
   _com_subscription = _interface->subscribe(
@@ -87,7 +87,7 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
 void BaseSensor::resetSensorState() {
   // Locking order: _state_mutex → _promise_mutex.
   std::lock_guard<std::mutex> state_lock(_state_mutex);
-  _error = SensorState::SensorOK;
+  _error = DeviceState::Ok;
 
   {
     std::lock_guard<std::mutex> promise_lock(_promise_mutex);
@@ -101,7 +101,7 @@ void BaseSensor::resetSensorState() {
 void BaseSensor::clearDataFlag() {
   // Locking order: _state_mutex → _promise_mutex.
   std::lock_guard<std::mutex> state_lock(_state_mutex);
-  _error = SensorState::SensorOK;
+  _error = DeviceState::Ok;
 
   {
     std::lock_guard<std::mutex> promise_lock(_promise_mutex);

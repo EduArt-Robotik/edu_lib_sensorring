@@ -24,15 +24,15 @@ HTPA32_Params HTPA32_Device::getParams() const {
   return _impl->getParams();
 }
 
-std::pair<const measurement::GrayscaleImage&, SensorState> HTPA32_Device::getLatestGrayscaleImage() const {
+std::pair<const measurement::GrayscaleImage&, DeviceState> HTPA32_Device::getLatestGrayscaleImage() const {
   return _impl->getLatestGrayscaleImage();
 }
 
-std::pair<const measurement::FalseColorImage&, SensorState> HTPA32_Device::getLatestFalseColorImage() const {
+std::pair<const measurement::FalseColorImage&, DeviceState> HTPA32_Device::getLatestFalseColorImage() const {
   return _impl->getLatestFalseColorImage();
 }
 
-std::pair<const measurement::ThermalMeasurement&, SensorState> HTPA32_Device::getLatestMeasurement() const {
+std::pair<const measurement::ThermalMeasurement&, DeviceState> HTPA32_Device::getLatestMeasurement() const {
   return _impl->getLatestMeasurement();
 }
 

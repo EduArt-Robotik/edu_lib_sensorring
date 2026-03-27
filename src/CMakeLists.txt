@@ -28,6 +28,7 @@ target_sources(sensorring
   device/IDevice.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp
+  device/DeviceState.cpp
   device/DeviceType.cpp
   device/DeviceGroup.cpp
   device/hardware/SensorBoardType.cpp

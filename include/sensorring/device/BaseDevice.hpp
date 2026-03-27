@@ -13,6 +13,7 @@
 
 #include "BaseSensor.hpp"
 #include "DeviceID.hpp"
+#include "DeviceState.hpp"
 #include "IDevice.hpp"
 
 namespace eduart {
@@ -33,18 +34,6 @@ struct DevicePoseOffset {
 
   /// Rotation offset from the board center.
   math::Vector3 board_center_rotation_offset;
-};
-
-/**
- * @enum DeviceState
- * @brief Lifecycle and runtime state of a device.
- */
-enum class DeviceState {
-  UNDEFINED,
-  INITIALIZED,
-  IDLE,
-  ERROR,
-  SHUTDOWN
 };
 
 /**

@@ -15,6 +15,7 @@
 #include <optional>
 #include <vector>
 
+#include "sensorring/device/DeviceState.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Matrix3.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
@@ -27,17 +28,6 @@ class ComInterface;
 }
 
 namespace device {
-
-/**
- * @enum SensorState
- * @brief State of a sensor instance.
- */
-enum class SensorState {
-  SensorInit,
-  SensorOK,
-  ReceiveError,
-  ProcessError
-};
 
 /**
  * @class BaseSensor
@@ -145,7 +135,7 @@ protected:
   /// Index of this sensor instance within its group.
   unsigned int _idx;
   /// Current health state of the sensor.
-  SensorState _error;
+  DeviceState _error;
   /// Communication interface used to talk to the sensor.
   com::ComInterface* _interface;
 

@@ -62,12 +62,12 @@ void MeasurementClient::onTofDispatcher(const device::DeviceGroup& group) {
     if (!device->getEnable())
       return;
     auto [raw_meas, raw_state] = device->getLatestMeasurement();
-    if (raw_state == device::SensorState::SensorOK) {
+    if (raw_state == device::DeviceState::Ok) {
       if (!raw_meas.point_cloud.data.empty())
         raw_measurement_vec.emplace_back(raw_meas);
     }
     auto [trans_meas, trans_state] = device->getLatestTransformedMeasurement();
-    if (trans_state == device::SensorState::SensorOK) {
+    if (trans_state == device::DeviceState::Ok) {
       if (!trans_meas.point_cloud.data.empty())
         transformed_measurement_vec.emplace_back(trans_meas);
     }
@@ -88,7 +88,7 @@ void MeasurementClient::onThermalDispatcher(const device::DeviceGroup& group) {
     if (!device->getEnable())
       return;
     auto [meas, state] = device->getLatestMeasurement();
-    if (state == device::SensorState::SensorOK) {
+    if (state == device::DeviceState::Ok) {
       measurement_vec.emplace_back(meas);
     }
   });
