@@ -20,7 +20,7 @@ HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface
 HTPA32_Device::~HTPA32_Device() {
 }
 
-HTPA32_Params HTPA32_Device::getParams() const {
+const HTPA32_Params& HTPA32_Device::getParams() const {
   return _impl->getParams();
 }
 

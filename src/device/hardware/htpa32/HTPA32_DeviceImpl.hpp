@@ -35,7 +35,7 @@ public:
   HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params, com::ComInterface* interface, unsigned int idx);
   ~HTPA32_DeviceImpl();
 
-  HTPA32_Params getParams() const;
+  const HTPA32_Params& getParams() const;
 
   std::pair<const measurement::GrayscaleImage&, DeviceState> getLatestGrayscaleImage() const;
   std::pair<const measurement::FalseColorImage&, DeviceState> getLatestFalseColorImage() const;

@@ -17,8 +17,8 @@
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -39,15 +39,15 @@ public:
    * @param[in] idx      Index of the sensor on the bus.
    */
   HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx);
-  
+
   /// Destructor
   ~HTPA32_Device();
 
   /**
    * @brief Get the sensor parameters used to configure this device.
-   * @return Copy of the HTPA32 parameter struct.
+   * @return Reference to the internal HTPA32 parameter struct.
    */
-  HTPA32_Params getParams() const;
+  const HTPA32_Params& getParams() const;
 
   /**
    * @brief Get the most recent grayscale image and current sensor state.

@@ -50,7 +50,7 @@ HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params
 HTPA32_DeviceImpl::~HTPA32_DeviceImpl() {
 }
 
-HTPA32_Params HTPA32_DeviceImpl::getParams() const {
+const HTPA32_Params& HTPA32_DeviceImpl::getParams() const {
   return _params;
 }
 
