@@ -16,11 +16,11 @@
 #include <vector>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
-#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -86,9 +86,20 @@ public:
     };
   }
 
+  /// Map of device parameters indexed by device type.
   using DeviceParamsVariant = std::variant<VL53L8CX_Params, HTPA32_Params, WS2812b_Params>;
-  using DeviceParamsMap     = std::unordered_map<DeviceType, DeviceParamsVariant>;
+  
+  /// Container for device parameters keyed by device type.
+  using DeviceParamsMap = std::unordered_map<DeviceType, DeviceParamsVariant>;
 
+  /**
+   * @brief Create a basic SensorBoard from enumeration information.
+   * @param[in] enum_info Enumeration result for this board.
+   * @param[in] params Board configuration parameters.
+   * @param[in] interface Communication interface ID.
+   * @param[in] idx Board index on the bus.
+   * @return Unique pointer to the created SensorBoard.
+   */
   static std::unique_ptr<SensorBoard> createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx);
 
   /**

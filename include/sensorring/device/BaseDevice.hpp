@@ -19,6 +19,7 @@ namespace eduart {
 
 namespace device {
 
+/// Forward declaration of implementation of BaseDevice.
 class SENSORRING_EXPORT DeviceImpl;
 
 /**
@@ -26,7 +27,11 @@ class SENSORRING_EXPORT DeviceImpl;
  * @brief Pose offset of a device relative to the center of its sensor board.
  */
 struct DevicePoseOffset {
+
+  /// Translation offset from the board center.
   math::Vector3 board_center_translation_offset;
+
+  /// Rotation offset from the board center.
   math::Vector3 board_center_rotation_offset;
 };
 
@@ -56,9 +61,6 @@ public:
    * @param[in] enable Whether the device is enabled.
    */
   BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
-  
-  /// Destructor
-  virtual ~BaseDevice() = default;
 
   /**
    * @brief Returns the device identifier.
@@ -66,10 +68,16 @@ public:
    */
   DeviceID getDeviceID() const;
 
-  /// Set the pose offset of this device relative to the board center.
+  /**
+   * @brief Set the pose offset of this device relative to the board center.
+   * @param[in] offset The pose offset to set.
+   */
   void setPoseOffset(const DevicePoseOffset& offset) { _pose_offset = offset; }
 
-  /// Get the pose offset of this device relative to the board center.
+  /**
+   * @brief Get the pose offset of this device relative to the board center.
+   * @return The current pose offset.
+   */
   DevicePoseOffset getPoseOffset() const { return _pose_offset; }
 
   // void setEnable(bool enable);
@@ -78,10 +86,13 @@ public:
 protected:
   /// Current lifecycle/runtime state.
   DeviceState _state;
+
   /// Device identifier.
   DeviceID _id;
+
   /// Whether the device is enabled.
   bool _enable;
+
   /// Pose offset of the device relative to the sensor board center.
   DevicePoseOffset _pose_offset{
     { 0.0, 0.0, 0.0 },

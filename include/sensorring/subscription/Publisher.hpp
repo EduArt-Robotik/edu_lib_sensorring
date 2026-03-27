@@ -34,6 +34,7 @@ namespace subscription {
  */
 template <typename... Args> class Publisher {
 public:
+  /// Callback type for subscribers.
   using Callback = std::function<void(Args...)>;
 
   Publisher() = default;

@@ -43,12 +43,13 @@ public:
       : _token(token)
       , _unsubscribe(std::move(unsubscribe)) {}
 
-  // Move-only — prevents double-cancel from copies.
+  /// Move constructor
   Subscription(Subscription&& other) noexcept : _token(other._token), _unsubscribe(std::move(other._unsubscribe)) {
     other._token       = SubscriberToken{};
     other._unsubscribe = nullptr;
   }
 
+  /// Move assignment operator.
   Subscription& operator=(Subscription&& other) noexcept {
     if (this != &other) {
       cancel();

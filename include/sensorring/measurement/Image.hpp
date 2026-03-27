@@ -15,8 +15,11 @@
 
 namespace eduart {
 
+/// Thermal image resolution constant (32x32).
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
-static constexpr unsigned int MAX_MSG_LENGTH     = 64;
+
+/// Maximum message length in bytes.
+static constexpr unsigned int MAX_MSG_LENGTH = 64;
 
 namespace measurement {
 

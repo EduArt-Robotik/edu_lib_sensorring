@@ -20,6 +20,7 @@ namespace subscription {
  * @brief Opaque token identifying a subscription (state or device group).
  */
 struct SubscriberToken {
+  /// Token type.
   using TokenType = unsigned long long;
 
   /**
@@ -46,7 +47,10 @@ struct SubscriberToken {
    */
   TokenType value() const noexcept { return _value; }
 
+  /// Equality comparison operators for SubscriberToken.
   bool operator==(const SubscriberToken& other) const noexcept { return _value == other._value; }
+
+  /// Inequality comparison operators for SubscriberToken.
   bool operator!=(const SubscriberToken& other) const noexcept { return _value != other._value; }
 
 private:
@@ -65,7 +69,16 @@ private:
 #ifndef SWIG
 namespace std {
 
+/**
+ * @struct std::hash<SubscriberToken>
+ * @brief Hash specialization for SubscriberToken to enable use in unordered containers.
+ */
 template <> struct hash<eduart::subscription::SubscriberToken> {
+  /**
+   * @brief Compute hash value for a SubscriberToken.
+   * @param[in] token The token to hash.
+   * @return Hash of the token's underlying value.
+   */
   std::size_t operator()(const eduart::subscription::SubscriberToken& token) const noexcept { return std::hash<eduart::subscription::SubscriberToken::TokenType>{}(token.value()); }
 };
 

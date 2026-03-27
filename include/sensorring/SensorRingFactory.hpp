@@ -67,6 +67,7 @@ enum class ValidationMode {
  */
 class SENSORRING_EXPORT SensorRingFactory {
 public:
+  /// Currently supported devices for explicit configuration in expectBoard().
   using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
 
   /// Per-interface enumeration results, keyed by interface ID.
