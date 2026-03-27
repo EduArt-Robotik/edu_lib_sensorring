@@ -18,7 +18,7 @@
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
 
 namespace eduart {
 

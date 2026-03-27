@@ -56,13 +56,13 @@ else:
 #include "sensorring/logger/LoggerTypes.hpp"
 #include "sensorring/logger/LoggerClient.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Image.hpp"
-#include "sensorring/types/LightMode.hpp"
-#include "sensorring/types/PointCloud.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
-#include "sensorring/types/Subscription.hpp"
+#include "sensorring/measurement/Image.hpp"
+#include "sensorring/device/LightMode.hpp"
+#include "sensorring/measurement/PointCloud.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
+#include "sensorring/subscription/SubscriberToken.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Vector3.hpp"
 #include "sensorring/math/Matrix3.hpp"
@@ -77,7 +77,7 @@ else:
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/SensorRingFactory.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
@@ -199,31 +199,31 @@ typedef ::int64_t int64_t;
 %include "sensorring/math/Math.hpp"
 
 
-%include "sensorring/types/Image.hpp"
+%include "sensorring/measurement/Image.hpp"
 
 
-%include "sensorring/types/LightMode.hpp"
+%include "sensorring/device/LightMode.hpp"
 
 
 %include "sensorring/interface/ComInterfaceID.hpp"
 
 
-%include "sensorring/types/PointCloud.hpp"
+%include "sensorring/measurement/PointCloud.hpp"
 
 
-%include "sensorring/types/SubscriberToken.hpp"
+%include "sensorring/subscription/SubscriberToken.hpp"
 
 
-%include "sensorring/types/Subscription.hpp"
+%include "sensorring/subscription/Subscription.hpp"
 
 
 %template (PointDataVector) std::vector<eduart::measurement::PointData>;
-%include "sensorring/types/TofMeasurement.hpp"
+%include "sensorring/measurement/TofMeasurement.hpp"
 
 %template (TemperatureImageTemplate) eduart::measurement::GenericGrayscaleImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
 %template (GrayscaleImageTemplate) eduart::measurement::GenericGrayscaleImage<double, eduart::THERMAL_RESOLUTION>;
 %template (FalseColorImageTemplate) eduart::measurement::GenericRGBImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
-%include "sensorring/types/ThermalMeasurement.hpp"
+%include "sensorring/measurement/ThermalMeasurement.hpp"
 
 
 /****
@@ -297,7 +297,7 @@ typedef ::int64_t int64_t;
 %rename (ConnectionStateToString) eduart::device::toString(ConnectionState);
 %rename (ConfigurationStateToString) eduart::device::toString(ConfigurationState);
 %template (DeviceTypeVector) std::vector<eduart::device::DeviceType>;
-%include "sensorring/enumeration/EnumerationInformation.hpp"
+%include "sensorring/device/EnumerationInformation.hpp"
 
 %rename (ManagerStateToString) eduart::manager::toString(ManagerState);
 %include "sensorring/manager/ManagerState.hpp"
@@ -482,7 +482,7 @@ MeasurementManager.__init__ = _MeasurementManager_init
 %{
 static bool WS2812b_setLight(int mode, int red, int green, int blue) {
   return eduart::device::WS2812b_Device::setLight(
-    static_cast<eduart::light::LightMode>(mode),
+    static_cast<eduart::device::LightMode>(mode),
     static_cast<std::uint8_t>(red),
     static_cast<std::uint8_t>(green),
     static_cast<std::uint8_t>(blue));
@@ -558,7 +558,7 @@ void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int windo
 %{
 #include <memory>
 
-static eduart::Subscription* Logger_subscribe_py(
+static eduart::subscription::Subscription* Logger_subscribe_py(
     eduart::logger::Logger* logger, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
@@ -579,10 +579,10 @@ static eduart::Subscription* Logger_subscribe_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::Subscription(std::move(sub));
+  return new eduart:::subscription::Subscription(std::move(sub));
 }
 
-static eduart::Subscription* Manager_subscribeToStateChanges_py(
+static eduart:::subscription::Subscription* Manager_subscribeToStateChanges_py(
     eduart::manager::MeasurementManager* mgr, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
@@ -601,10 +601,10 @@ static eduart::Subscription* Manager_subscribeToStateChanges_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::Subscription(std::move(sub));
+  return new eduart:::subscription::Subscription(std::move(sub));
 }
 
-static eduart::Subscription* Manager_subscribeToDeviceGroup_py(
+static eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
     eduart::manager::MeasurementManager* mgr,
     eduart::device::DeviceType key,
     PyObject* callable) {
@@ -627,7 +627,7 @@ static eduart::Subscription* Manager_subscribeToDeviceGroup_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::Subscription(std::move(sub));
+  return new eduart:::subscription::Subscription(std::move(sub));
 }
 %}
 
@@ -636,9 +636,9 @@ static eduart::Subscription* Manager_subscribeToDeviceGroup_py(
 %newobject Manager_subscribeToStateChanges_py;
 %newobject Manager_subscribeToDeviceGroup_py;
 
-eduart::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
-eduart::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
-eduart::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
+eduart:::subscription::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
+eduart:::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
+eduart:::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
 
 // Attach the subscribe helpers as methods on the Python wrapper classes
 %pythoncode %{

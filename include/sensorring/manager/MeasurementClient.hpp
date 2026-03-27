@@ -16,10 +16,10 @@
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Subscription.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
@@ -83,7 +83,7 @@ public:
 
 private:
   std::unordered_set<MeasurementManager*> _managers;
-  std::unordered_map<MeasurementManager*, std::vector<Subscription>> _subscriptions;
+  std::unordered_map<MeasurementManager*, std::vector<subscription::Subscription> > _subscriptions;
 
   void onTofDispatcher(const device::DeviceGroup& group);
   void onThermalDispatcher(const device::DeviceGroup& group);

@@ -1,6 +1,6 @@
 #include <catch2/catch_all.hpp>
 
-#include "sensorring/types/TofMeasurement.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 
 using eduart::measurement::TofMeasurement;
 

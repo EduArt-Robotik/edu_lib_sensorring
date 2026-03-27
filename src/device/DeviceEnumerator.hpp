@@ -13,8 +13,8 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
-#include "sensorring/types/Subscription.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
@@ -45,7 +45,7 @@ private:
   com::ComInterface* _interface;
   std::vector<device::EnumerationInformation> _enumeration_vec;
 
-  Subscription _com_subscription;
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

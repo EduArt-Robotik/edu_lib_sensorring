@@ -3,14 +3,14 @@
 #include <chrono>
 #include <thread>
 
-#include "enumeration/DeviceEnumerator.hpp"
+#include "device/DeviceEnumerator.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
 
-namespace bus {
+namespace ring {
 
 SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
     : _interface(com::ComManager::getInstance()->getInterface(interface))
@@ -54,6 +54,6 @@ std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com
   return enumerator.getResult();
 }
 
-} // namespace bus
+} // namespace ring
 
 } // namespace eduart

@@ -12,7 +12,7 @@
 #include <functional>
 #include <vector>
 
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/subscription/SubscriberToken.hpp"
 
 namespace eduart {
 
@@ -97,8 +97,5 @@ private:
 };
 
 } // namespace subscription
-
-// Convenience alias in eduart namespace for backward compatibility.
-using subscription::Subscription;
 
 } // namespace eduart

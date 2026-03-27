@@ -5,11 +5,12 @@
 #include <mutex>
 #include <vector>
 
+#include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
-#include "sensorring/device/BaseSensor.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
+
 #include "VL53L8CX_Constants.hpp"
 
 namespace eduart {
@@ -41,9 +42,7 @@ public:
   void onResetSensorState();
   void onClearDataFlag();
 
-  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement,
-                                                              const math::Matrix3 rotation,
-                                                              const math::Vector3 translation);
+  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
   measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
@@ -64,4 +63,3 @@ private:
 } // namespace device
 
 } // namespace eduart
-

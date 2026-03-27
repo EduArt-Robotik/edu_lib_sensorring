@@ -7,8 +7,8 @@
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementClient.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 
 using eduart::manager::ManagerState;
 using eduart::manager::MeasurementClient;
@@ -18,9 +18,7 @@ using eduart::measurement::TofMeasurement;
 
 // Client subclass that records callback invocations for testing.
 struct RecordingClient : MeasurementClient {
-  void onStateChange(const ManagerState state) override {
-    state_changes.push_back(state);
-  }
+  void onStateChange(const ManagerState state) override { state_changes.push_back(state); }
   void onRawTofMeasurement(const std::vector<TofMeasurement>& measurement_vec) override {
     raw_tof_calls++;
     raw_tof_last_size = measurement_vec.size();
@@ -35,18 +33,17 @@ struct RecordingClient : MeasurementClient {
   }
 
   std::vector<ManagerState> state_changes;
-  int raw_tof_calls = 0;
-  std::size_t raw_tof_last_size = 0;
-  int transformed_tof_calls = 0;
+  int raw_tof_calls                     = 0;
+  std::size_t raw_tof_last_size         = 0;
+  int transformed_tof_calls             = 0;
   std::size_t transformed_tof_last_size = 0;
-  int thermal_calls = 0;
-  std::size_t thermal_last_size = 0;
+  int thermal_calls                     = 0;
+  std::size_t thermal_last_size         = 0;
 };
 
 // Sentinel pointer used only for testing unregisterClient(ptr) when ptr is not in the client's set.
 // We never dereference it; we only pass it to unregisterClient to verify erase returns false.
-static MeasurementManager* const kUnregisteredManager =
-    reinterpret_cast<MeasurementManager*>(static_cast<uintptr_t>(1));
+static MeasurementManager* const kUnregisteredManager = reinterpret_cast<MeasurementManager*>(static_cast<uintptr_t>(1));
 
 TEST_CASE("MeasurementClient registerClient", "[MeasurementClient]") {
   SECTION("registerClient with null returns false") {
@@ -126,4 +123,3 @@ TEST_CASE("MeasurementClient callback overrides", "[MeasurementClient]") {
     REQUIRE(client.thermal_last_size == 0u);
   }
 }
-

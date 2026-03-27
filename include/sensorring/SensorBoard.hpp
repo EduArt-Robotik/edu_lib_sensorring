@@ -14,10 +14,10 @@
 
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Subscription.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
@@ -102,7 +102,7 @@ private:
   mutable std::recursive_mutex _com_mutex;
   using LockGuard = std::lock_guard<std::recursive_mutex>;
 
-  Subscription _com_subscription;
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

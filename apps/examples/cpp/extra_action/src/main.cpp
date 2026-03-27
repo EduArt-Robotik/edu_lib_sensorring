@@ -106,7 +106,7 @@ int main(int, char*[]) {
 
         // Update the light color via the extra action interface so it runs in the MeasurementManager context.
         manager->enqueueExtraAction([red, green, blue]() {
-          device::WS2812b_Device::setLight(light::LightMode::FixedColor, red, green, blue);
+          device::WS2812b_Device::setLight(device::LightMode::FixedColor, red, green, blue);
         });
 
         if (std::chrono::steady_clock::now() - last_print > 1s) {

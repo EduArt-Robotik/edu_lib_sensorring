@@ -3,7 +3,7 @@
 #include <catch2/catch_all.hpp>
 #include <unordered_set>
 
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/subscription/SubscriberToken.hpp"
 
 using eduart::subscription::SubscriberToken;
 
@@ -47,7 +47,7 @@ TEST_CASE("SubscriberToken equality and inequality", "[SubscriberToken]") {
   }
 
   SECTION("same token copy is equal") {
-    auto t1 = SubscriberToken::getNextToken();
+    auto t1            = SubscriberToken::getNextToken();
     SubscriberToken t2 = t1;
     REQUIRE(t1 == t2);
     REQUIRE_FALSE(t1 != t2);
@@ -110,7 +110,7 @@ TEST_CASE("SubscriberToken in unordered containers", "[SubscriberToken]") {
 
 TEST_CASE("SubscriberToken copy and move", "[SubscriberToken]") {
   SECTION("copy preserves value and validity") {
-    auto orig = SubscriberToken::getNextToken();
+    auto orig            = SubscriberToken::getNextToken();
     SubscriberToken copy = orig;
     REQUIRE(copy.value() == orig.value());
     REQUIRE(copy.isValid() == orig.isValid());
@@ -118,8 +118,8 @@ TEST_CASE("SubscriberToken copy and move", "[SubscriberToken]") {
   }
 
   SECTION("moved token preserves value") {
-    auto orig = SubscriberToken::getNextToken();
-    auto value_before = orig.value();
+    auto orig             = SubscriberToken::getNextToken();
+    auto value_before     = orig.value();
     SubscriberToken moved = std::move(orig);
     REQUIRE(moved.value() == value_before);
     REQUIRE(moved.isValid());

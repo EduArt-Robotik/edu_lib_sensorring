@@ -1,4 +1,4 @@
-#include "sensorring/types/PointCloud.hpp"
+#include "sensorring/measurement/PointCloud.hpp"
 
 #include <algorithm>
 

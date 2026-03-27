@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "sensorring/device/DeviceID.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 
 namespace eduart {
 

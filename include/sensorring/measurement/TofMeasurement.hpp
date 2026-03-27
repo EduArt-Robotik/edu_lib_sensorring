@@ -10,7 +10,7 @@
 #pragma once
 
 #include "sensorring/math/Math.hpp"
-#include "sensorring/types/PointCloud.hpp"
+#include "sensorring/measurement/PointCloud.hpp"
 
 namespace eduart {
 

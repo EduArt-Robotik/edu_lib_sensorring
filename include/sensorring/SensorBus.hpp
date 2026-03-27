@@ -14,7 +14,7 @@
 
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Subscription.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 #include "SensorBoard.hpp"
 
@@ -24,7 +24,7 @@ namespace com {
 class ComInterface;
 }
 
-namespace bus {
+namespace ring {
 
 using namespace std::chrono_literals;
 
@@ -78,9 +78,9 @@ private:
 
   std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
 
-  Subscription _com_subscription;
+  subscription::Subscription _com_subscription;
 };
 
-} // namespace bus
+} // namespace ring
 
 } // namespace eduart

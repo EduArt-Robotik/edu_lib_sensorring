@@ -18,7 +18,7 @@
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Matrix3.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/Subscription.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 // Forward declaration
@@ -171,7 +171,7 @@ protected:
   std::mutex _promise_mutex;
 
   /// RAII subscription to the communication interface.
-  Subscription _com_subscription;
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

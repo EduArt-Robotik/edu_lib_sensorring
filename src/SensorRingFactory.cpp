@@ -49,7 +49,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
 
   const bool strict = (mode == ValidationMode::Strict);
 
-  std::vector<std::unique_ptr<bus::SensorBus> > bus_vec;
+  std::vector<std::unique_ptr<SensorBus> > bus_vec;
   EnumerationMap enumeration_map;
 
   for (auto& iface_cfg : _interfaces) {
@@ -63,7 +63,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
       auto id = iface->getID();
 
       // ── Enumerate ──
-      auto enum_infos = bus::SensorBus::queryConnectedDevices(id);
+      auto enum_infos = SensorBus::queryConnectedDevices(id);
       if (enum_infos.empty()) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "No boards found on interface " + id.name + ".");
         if (iface_cfg.has_expectations) {
@@ -85,8 +85,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
 
         if (ei.version < MIN_FIRMWARE_VERSION) {
           logger::Logger::getInstance()->log(
-              logger::LogVerbosity::Error,
-              "Board " + std::to_string(ei.idx) + " on " + id.name + " has firmware " + ei.version.toString() + " but minimum required is " + MIN_FIRMWARE_VERSION.toString() + ".");
+              logger::LogVerbosity::Error, "Board " + std::to_string(ei.idx) + " on " + id.name + " has firmware " + ei.version.toString() + " but minimum required is " + MIN_FIRMWARE_VERSION.toString() + ".");
           firmware_ok = false;
         }
       }
@@ -285,7 +284,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
 
       if (!board_vec.empty()) {
         enumeration_map[id] = std::move(enriched_enum);
-        bus_vec.push_back(std::make_unique<bus::SensorBus>(id, std::move(board_vec)));
+        bus_vec.push_back(std::make_unique<SensorBus>(id, std::move(board_vec)));
       }
     } catch (const std::exception& e) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while opening interface " + iface_cfg.interface.name + " – skipping.");
@@ -321,7 +320,7 @@ SensorRingFactory::EnumerationMap SensorRingFactory::enumerate() {
         continue;
       }
       auto id         = iface->getID();
-      auto enum_infos = bus::SensorBus::queryConnectedDevices(id);
+      auto enum_infos = SensorBus::queryConnectedDevices(id);
 
       for (auto& ei : enum_infos) {
         ei.state        = device::ConnectionState::Connected;

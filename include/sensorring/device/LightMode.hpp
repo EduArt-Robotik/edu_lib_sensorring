@@ -13,7 +13,7 @@
 
 namespace eduart {
 
-namespace light {
+namespace device {
 
 /**
  * @enum LightMode
@@ -35,6 +35,6 @@ enum class LightMode : std::uint8_t {
   IndividualColor = 0x0E
 };
 
-} // namespace light
+} // namespace device
 
 } // namespace eduart

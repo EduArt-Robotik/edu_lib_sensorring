@@ -1,4 +1,4 @@
-#include "sensorring/types/Image.hpp"
+#include "sensorring/measurement/Image.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -93,8 +93,8 @@ template <typename T, std::size_t RESOLUTION> void GenericGrayscaleImage<T, RESO
 
 template <typename T, std::size_t RESOLUTION> void GenericRGBImage<T, RESOLUTION>::copyTo(T* buffer, int size) {
   static constexpr std::size_t CHANNELS = 3;
-  const std::size_t max_pixels = static_cast<std::size_t>(size) / CHANNELS;
-  const std::size_t count      = std::min(max_pixels, RESOLUTION);
+  const std::size_t max_pixels          = static_cast<std::size_t>(size) / CHANNELS;
+  const std::size_t count               = std::min(max_pixels, RESOLUTION);
   for (std::size_t i = 0; i < count; ++i) {
     buffer[i * CHANNELS + 0] = data[i][0];
     buffer[i * CHANNELS + 1] = data[i][1];

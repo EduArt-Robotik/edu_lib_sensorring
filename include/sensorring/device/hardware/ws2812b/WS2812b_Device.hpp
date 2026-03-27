@@ -15,7 +15,7 @@
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/LightMode.hpp"
+#include "sensorring/device/LightMode.hpp"
 
 namespace eduart {
 
@@ -53,7 +53,7 @@ public:
    * @param[in] blue  Blue channel value.
    * @return true on success.
    */
-  static bool setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  static bool setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   /**
    * @brief Synchronize pending light updates on all WS2812b devices.
    * @return true on success.

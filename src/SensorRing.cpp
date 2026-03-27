@@ -4,16 +4,16 @@ namespace eduart {
 
 namespace ring {
 
-SensorRing::SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec)
+SensorRing::SensorRing(std::vector<std::unique_ptr<SensorBus> > bus_vec)
     : _bus_vec(std::move(bus_vec)) {
 }
 
 SensorRing::~SensorRing() {
 }
 
-std::vector<bus::SensorBus*> SensorRing::getSensorBuses() const {
+std::vector<SensorBus*> SensorRing::getSensorBuses() const {
 
-  std::vector<bus::SensorBus*> ref_vec;
+  std::vector<SensorBus*> ref_vec;
   for (auto& sensor_bus : _bus_vec) {
     ref_vec.push_back(sensor_bus.get());
   }

@@ -20,7 +20,7 @@
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 

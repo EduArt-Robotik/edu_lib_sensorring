@@ -1,6 +1,6 @@
 #include <catch2/catch_all.hpp>
 
-#include "sensorring/types/PointCloud.hpp"
+#include "sensorring/measurement/PointCloud.hpp"
 
 using eduart::measurement::PointCloud;
 using eduart::measurement::PointData;

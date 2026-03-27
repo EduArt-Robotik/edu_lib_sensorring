@@ -19,7 +19,7 @@
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 
 namespace eduart {
 

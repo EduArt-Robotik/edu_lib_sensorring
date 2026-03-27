@@ -12,15 +12,15 @@
 
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/types/Subscription.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/subscription/SubscriberToken.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
 namespace com {
 
-using subscription::Subscription;
 using subscription::SubscriberToken;
+using subscription::Subscription;
 
 class ComInterface {
 

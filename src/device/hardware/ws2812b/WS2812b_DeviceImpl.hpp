@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "sensorring/device/LightMode.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
-#include "sensorring/types/LightMode.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 
 namespace eduart {
@@ -17,7 +17,7 @@ namespace device {
 
 class WS2812b_Device;
 
-/** 
+/**
  * @class WS2812b_DeviceImpl
  * @brief Implementation class for WS2812b_Device hiding private members.
  *
@@ -46,4 +46,3 @@ private:
 } // namespace device
 
 } // namespace eduart
-

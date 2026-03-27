@@ -40,10 +40,10 @@ target_sources(sensorring
   device/hardware/htpa32/HTPA32_DeviceImpl.cpp
   device/hardware/ws2812b/WS2812b_Device.cpp
   device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
-  enumeration/DeviceEnumerator.cpp
-  enumeration/EnumerationInformation.cpp
-  types/Image.cpp
-  types/PointCloud.cpp
+  device/DeviceEnumerator.cpp
+  device/EnumerationInformation.cpp
+  measurement/Image.cpp
+  measurement/PointCloud.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

@@ -78,27 +78,27 @@ void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
 ==========================================================================================
 */
 
-Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   if (!callback) {
-    return Subscription();
+    return subscription::Subscription();
   }
   auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _state_subscriptions.emplace(token, std::move(callback));
-  return Subscription(token, [this, token]() {
+  return subscription::Subscription(token, [this, token]() {
     unsubscribe(token);
   });
 }
 
-Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
+subscription::Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
   if (!callback) {
-    return Subscription();
+    return subscription::Subscription();
   }
   auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
   key_subs.emplace(token, std::move(callback));
-  return Subscription(token, [this, token]() {
+  return subscription::Subscription(token, [this, token]() {
     unsubscribe(token);
   });
 }
@@ -141,7 +141,7 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
 
   // Copy subscriber callbacks under lock, then invoke outside of lock.
   // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
-  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
+  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
   {
     LockGuard lock(_subscriber_mutex);
     auto it = _device_subscriptions.find(device::DeviceType::VL53L8CX);
@@ -184,7 +184,7 @@ int MeasurementManagerImpl::notifyHTPA32() {
   });
 
   // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
+  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
   {
     LockGuard lock(_subscriber_mutex);
     auto it = _device_subscriptions.find(device::DeviceType::HTPA32);
@@ -216,7 +216,7 @@ int MeasurementManagerImpl::notifyHTPA32() {
 
 void MeasurementManagerImpl::notifyWS2812B() {
   // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const device::DeviceGroup&)>> callbacks;
+  std::vector<std::function<void(const device::DeviceGroup&)> > callbacks;
   {
     LockGuard lock(_subscriber_mutex);
     auto it = _device_subscriptions.find(device::DeviceType::WS2812b);
@@ -246,7 +246,7 @@ void MeasurementManagerImpl::notifyWS2812B() {
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
   // Copy subscriber callbacks under lock, then invoke outside of lock.
-  std::vector<std::function<void(const ManagerState)>> callbacks;
+  std::vector<std::function<void(const ManagerState)> > callbacks;
   {
     LockGuard lock(_subscriber_mutex);
     callbacks.reserve(_state_subscriptions.size());
@@ -371,7 +371,7 @@ void MeasurementManagerImpl::StateMachine() {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 
     device::WS2812b_Device::syncLight();
-    device::WS2812b_Device::setLight(light::LightMode::Pulsation, 0, 0, 0);
+    device::WS2812b_Device::setLight(device::LightMode::Pulsation, 0, 0, 0);
 
     // state transition
     _measurement_state = MeasurementState::get_eeprom;
@@ -386,7 +386,7 @@ void MeasurementManagerImpl::StateMachine() {
       _device_groups.at(device::DeviceType::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         if (device->getEnable()) {
           auto fut = device->getEpromAsync(timeout_ms);
-          success = fut.get();
+          success  = fut.get();
         }
       });
     }

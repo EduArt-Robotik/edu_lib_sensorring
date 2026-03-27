@@ -12,15 +12,15 @@ Logger* Logger::getInstance() noexcept {
   return instance;
 }
 
-Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
+subscription::Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
   if (!callback) {
-    return Subscription();
+    return subscription::Subscription();
   }
 
   auto token = subscription::SubscriberToken::getNextToken();
   LockGuard lock(_subscriber_mutex);
   _subscriptions.emplace(token, std::move(callback));
-  return Subscription(token, [this, token]() {
+  return subscription::Subscription(token, [this, token]() {
     unsubscribe(token);
   });
 }
@@ -33,7 +33,7 @@ void Logger::unsubscribe(subscription::SubscriberToken token) {
 void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
   // Copy the subscriber list under lock, then release before invoking callbacks.
   // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
-  std::vector<std::function<void(const LogVerbosity, const std::string&)>> callbacks;
+  std::vector<std::function<void(const LogVerbosity, const std::string&)> > callbacks;
   {
     LockGuard sub_lock(_subscriber_mutex);
     callbacks.reserve(_subscriptions.size());

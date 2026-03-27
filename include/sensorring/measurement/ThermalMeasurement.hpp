@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-#include "sensorring/types/Image.hpp"
+#include "sensorring/measurement/Image.hpp"
 
 namespace eduart {
 

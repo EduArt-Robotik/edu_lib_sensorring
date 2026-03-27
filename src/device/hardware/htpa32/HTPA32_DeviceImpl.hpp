@@ -11,7 +11,7 @@
 #include "sensorring/device/BaseSensor.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
 
 #include "HTPA32_Constants.hpp"
 #include "HTPA32_Eeprom.hpp"

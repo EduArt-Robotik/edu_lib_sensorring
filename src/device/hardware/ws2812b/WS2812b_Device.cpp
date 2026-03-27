@@ -20,7 +20,7 @@ const WS2812b_Params& WS2812b_Device::getParams() const {
   return _impl->getParams();
 }
 
-bool WS2812b_Device::setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
+bool WS2812b_Device::setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
   std::uint8_t mode_cmd       = static_cast<uint8_t>(mode);
   std::vector<uint8_t> tx_buf = { mode_cmd, red, green, blue };
 
