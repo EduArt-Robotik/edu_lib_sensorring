@@ -5,7 +5,7 @@ The Sensor Ring library includes both [C++ examples](https://github.com/EduArt-R
 > ⚠️ **Interface:** All examples register both a **SocketCAN** and an **USBtingo** interface by default. The `SensorRingFactory` auto-discovery will use whichever interface is available on your system. Depending on your setup, you may need to adjust the interface names (e.g. the SocketCAN device name or the USBtingo device index) in the respective example source file. Note that SocketCAN is only available on Linux.
 
 
-## 1. C++ <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp"><img src="https://img.shields.io/badge/C++-00599C?logo=cplusplus&logoColor=white" alt="C++"></a>
+## 1. C++ Examples <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp"><img src="https://img.shields.io/badge/C++-00599C?logo=cplusplus&logoColor=white" alt="C++"></a>
 
 The library is written in C++ and it is recommended to use the C++ interface of the library for performance reasons.
 
@@ -13,11 +13,10 @@ The following examples show how to use the Sensor Ring library in your own C++ p
 
 ### Measurement Rate Examples
 
-The first three examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
+The first two examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
-- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_lambdas.cpp) (**function-based**): Subscribes to device groups and state changes using lambda callbacks directly on the `MeasurementManager`
-- [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_proxy_class.cpp) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member functions as callbacks via `std::bind`
-- [Using Client Interface](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/using_client_interface.cpp) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
+- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/using_lambdas.cpp) (**function-based**): Subscribes to device groups and state changes using lambda callbacks directly on the `MeasurementManager`
+- [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/using_proxy_class.cpp) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member functions as callbacks via `std::bind`
 
 ### Visualization and Action Examples
 
@@ -28,12 +27,12 @@ The first three examples are **functionally identical** — they all use the `Se
 > ⚠️ To use the `depth_map` or `thermal_map` C++ examples on Windows you might first need to enable UTF-8 support for your current terminal session with this command:<br/>
 `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
 
-## 2. Python <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
+## 2. Python Examples <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
 > ℹ️ The library can be built with `-DSENSORRING_BUILD_PYTHON_BINDINGS=ON` option to generate python bindings.
 
 > ⚠️ To use the `sensorring` python package you have to append the location of the package to your `PYTHONPATH` environment variable.
 
-> ⚠️ It is strongly recommended to copy measurements to NumPy arrays before manipulating them in Python. This is shown in the `onRawTofMeasurement()` callback in the `depth_map_matplotlib` example using `point_cloud.copyTo()`.
+> ⚠️ It is strongly recommended to copy measurements to NumPy arrays before manipulating them in Python. This is shown in the `depth_map_matplotlib` example using `point_cloud.copyTo()`.
 
 <div class="tabbed">
 
@@ -58,11 +57,10 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 
 ### Measurement Rate Examples
 
-The first three examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
+The first two examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
 - [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_lambdas.py) (**function-based**): Subscribes to device groups and state changes using Python callbacks directly on the `MeasurementManager`
 - [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_proxy_class.py) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member methods as callbacks
-- [Using Client Interface](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_client_interface.py) (**client interface**): Inherits from the optional `MeasurementClient` and `LoggerClient` interfaces and overrides their virtual callback methods
 
 ### Depth Map Examples
 
@@ -107,7 +105,7 @@ def main():
 
   # Set up the communication interface
   interface = sensorring.ComInterfaceID()
-  interface.type = sensorring.InterfaceType_USBTINGO
+  interface.type = sensorring.InterfaceType_UsbTingo
   interface.name = "0"
 
   try:
@@ -164,6 +162,33 @@ def main():
 
 if __name__ == "__main__":
   main()
+```
+
+## 3. Logger Subscription
+
+All examples subscribe to the `Logger` **before** creating the `SensorRingFactory` or any other library object.
+This is intentional: the factory and the manager emit log messages during construction, enumeration and initialization.
+A logger subscription that is set up **after** these objects are created will miss those early messages.
+
+Because the subscription must exist before any class instance it could be embedded in, a simple **lambda** (C++) or **function** (Python) is the best choice.
+A class-based approach (binding a member function) would require the logger-owning object to be fully constructed first, making it impossible to capture the very first messages.
+
+```cpp
+// C++ — subscribe at the top of the try block, before any other library call
+auto log_sub = logger::Logger::getInstance()->subscribe(
+    [](const logger::LogVerbosity verbosity, const std::string& msg) {
+      if (verbosity > logger::LogVerbosity::Debug)
+        std::cout << "[" << verbosity << "] " << msg << std::endl;
+    });
+```
+
+```python
+# Python — same pattern
+log_sub = sensorring.Logger.getInstance().subscribe(
+    lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+)
 ```
 
 <div class="section_buttons"> 
