@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
+#include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
@@ -53,6 +54,14 @@ int main(int, char*[]) {
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
 
   try {
+    // Subscribe to the logger first so that all messages from initialization onward are captured.
+    // Using a lambda here (rather than binding a class method) ensures the subscription is active
+    // before any other object is constructed.
+    auto log_sub = logger::Logger::getInstance()->subscribe([](const logger::LogVerbosity verbosity, const std::string& msg) {
+      if (verbosity > logger::LogVerbosity::Debug)
+        std::cout << "[" << verbosity << "] " << msg << std::endl;
+    });
+
     // Create SensorRing via factory auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);

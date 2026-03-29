@@ -11,11 +11,8 @@
 
 #include <functional>
 #include <iostream>
-#include <sensorring/logger/Logger.hpp>
-#include <sensorring/logger/LoggerTypes.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/subscription/Subscription.hpp>
-#include <string>
 #include <vector>
 
 #include "Rate.hpp"
@@ -30,8 +27,6 @@ class CustomProxy {
 public:
   /// Constructor
   CustomProxy(manager::MeasurementManager* manager) noexcept {
-    _subscriptions.emplace_back(logger::Logger::getInstance()->subscribe(std::bind(&CustomProxy::onLogOutput, this, std::placeholders::_1, std::placeholders::_2)));
-
     // Subscribe to the manager state changes and measurements
     _subscriptions.emplace_back(manager->subscribeToStateChanges(std::bind(&CustomProxy::onManagerStateChange, this, std::placeholders::_1)));
     _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&CustomProxy::onVL53L8CXCallback, this, std::placeholders::_1)));
@@ -67,17 +62,6 @@ public:
    * @param group The device group of active WS2812b devices
    */
   void onWS2812bCallback(const device::DeviceGroup& group) { (void)group; }
-
-  /**
-   * @brief Callback method for log output
-   * @param verbosity The verbosity level of the log message
-   * @param msg The log message
-   */
-  void onLogOutput(logger::LogVerbosity verbosity, const std::string& msg) {
-    if (verbosity > logger::LogVerbosity::Debug) {
-      std::cout << "[" << verbosity << "] " << msg << std::endl;
-    }
-  }
 
 public:
   Rate vl53l8cx_rate;

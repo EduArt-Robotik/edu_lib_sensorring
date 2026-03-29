@@ -1,7 +1,11 @@
 # Compile examples
 
 add_executable(minimal_using_lambdas
-    cpp/minimal/using_lambdas.cpp
+    cpp/minimal/src/using_lambdas.cpp
+)
+
+target_include_directories(minimal_using_lambdas
+    PRIVATE cpp/minimal/include
 )
 
 target_link_libraries(minimal_using_lambdas
@@ -9,7 +13,11 @@ target_link_libraries(minimal_using_lambdas
 )
 
 add_executable(minimal_using_proxy_class
-    cpp/minimal/using_proxy_class.cpp
+    cpp/minimal/src/using_proxy_class.cpp
+)
+
+target_include_directories(minimal_using_proxy_class
+    PRIVATE cpp/minimal/include
 )
 
 target_link_libraries(minimal_using_proxy_class
