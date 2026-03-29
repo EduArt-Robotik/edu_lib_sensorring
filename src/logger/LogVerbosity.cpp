@@ -1,6 +1,4 @@
-#include "sensorring/logger/LoggerClient.hpp"
-
-#include "sensorring/logger/Logger.hpp"
+#include "sensorring/logger/LogVerbosity.hpp"
 
 namespace eduart {
 
@@ -25,16 +23,6 @@ std::string toString(LogVerbosity verbosity) noexcept {
 
 std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept {
   return os << toString(verbosity);
-}
-
-LoggerClient::LoggerClient() noexcept {
-  // Register the client with the Logger to get the log output
-  _subscription = logger::Logger::getInstance()->subscribe(std::bind(&LoggerClient::onOutputLog, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-LoggerClient::~LoggerClient() noexcept {
-  // Unregister the client from the Logger to stop receiving log output
-  _subscription.cancel();
 }
 
 } // namespace logger

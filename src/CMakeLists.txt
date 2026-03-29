@@ -23,7 +23,7 @@ target_sources(sensorring
   interface/can/CanEndpointMap.cpp
   interface/can/canprotocol.cpp
   logger/Logger.cpp
-  logger/LoggerClient.cpp
+  logger/LogVerbosity.cpp
   device/IDevice.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp

@@ -1,13 +1,16 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
- * @file   LoggerTypes.hpp
+ * @file   LogVerbosity.hpp
  * @author EduArt Robotik GmbH
- * @brief  Logger-related types (verbosity level and related enums).
+ * @brief  Log verbosity levels for the logger.
  * @date   2024-11-25
  */
 
 #pragma once
+
+#include <ostream>
+#include <string>
 
 #include "sensorring/platform/SensorringExport.hpp"
 

@@ -13,7 +13,7 @@
 #include <sstream>
 #include <string>
 
-#include "sensorring/logger/LoggerTypes.hpp"
+#include "sensorring/logger/LogVerbosity.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
 

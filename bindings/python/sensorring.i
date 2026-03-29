@@ -53,8 +53,7 @@ else:
 #define SWIG_FILE_WITH_INIT
 
 #include "sensorring/logger/Logger.hpp"
-#include "sensorring/logger/LoggerTypes.hpp"
-#include "sensorring/logger/LoggerClient.hpp"
+#include "sensorring/logger/LogVerbosity.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/measurement/Image.hpp"
 #include "sensorring/device/LightMode.hpp"
@@ -197,6 +196,9 @@ typedef ::int64_t int64_t;
 
 
 %include "sensorring/math/Math.hpp"
+
+
+%include "sensorring/logger/LogVerbosity.hpp"
 
 
 %include "sensorring/measurement/Image.hpp"
@@ -671,6 +673,3 @@ MeasurementManager.enqueueExtraAction = _MeasurementManager_enqueueExtraAction
 
 %template (TofMeasurementVector) std::vector<eduart::measurement::TofMeasurement>;
 %template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
-
-%feature("director") eduart::logger::LoggerClient;
-%include "sensorring/logger/LoggerClient.hpp"
