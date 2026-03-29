@@ -43,7 +43,7 @@ public:
 
   std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   bool stopCalibration();
-  bool startCalibration(std::size_t window);
+  bool startCalibration(unsigned int window);
 
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
@@ -73,11 +73,11 @@ private:
 
   std::atomic<bool> _read_eeprom{ false };
   std::atomic<bool> _got_eeprom{ false };
-  bool _got_calibration                  = false;
-  bool _calibration_active               = false;
-  double _calibration_average            = 0.0;
-  std::size_t _calibration_count_current = 0;
-  std::size_t _calibration_count_goal    = 0;
+  bool _got_calibration                   = false;
+  bool _calibration_active                = false;
+  double _calibration_average             = 0.0;
+  unsigned int _calibration_count_current = 0;
+  unsigned int _calibration_count_goal    = 0;
   std::string _eeprom_filename;
   std::string _calibration_filename;
   measurement::TemperatureImage _calibration_image;

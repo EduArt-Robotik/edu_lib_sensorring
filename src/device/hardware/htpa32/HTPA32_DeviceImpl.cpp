@@ -74,7 +74,7 @@ bool HTPA32_DeviceImpl::stopCalibration() {
   return true;
 }
 
-bool HTPA32_DeviceImpl::startCalibration(std::size_t window) {
+bool HTPA32_DeviceImpl::startCalibration(unsigned int window) {
   if (_calibration_active) {
     return false;
   }

@@ -40,7 +40,7 @@ bool HTPA32_Device::stopCalibration() {
   return _impl->stopCalibration();
 }
 
-bool HTPA32_Device::startCalibration(std::size_t window) {
+bool HTPA32_Device::startCalibration(unsigned int window) {
   return _impl->startCalibration(window);
 }
 

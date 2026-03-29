@@ -76,7 +76,7 @@ public:
    * @param[in] window Number of frames to average for calibration.
    * @return true on success.
    */
-  bool startCalibration(std::size_t window);
+  bool startCalibration(unsigned int window);
   /**
    * @brief Get the latest thermal measurement and current sensor state.
    * @return Pair of latest thermal measurement and associated sensor state.
