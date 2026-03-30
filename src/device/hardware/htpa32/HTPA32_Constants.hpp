@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <string_view>
 
-#include "platform/Platform.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 
 namespace eduart {
