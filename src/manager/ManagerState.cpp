@@ -1,0 +1,30 @@
+#include "sensorring/manager/ManagerState.hpp"
+
+namespace eduart {
+
+namespace manager {
+
+std::string toString(ManagerState state) noexcept {
+  switch (state) {
+  case ManagerState::Uninitialized:
+    return "Uninitialized";
+  case ManagerState::Initialized:
+    return "Initialized";
+  case ManagerState::Running:
+    return "Running";
+  case ManagerState::Shutdown:
+    return "Shutdown";
+  case ManagerState::Error:
+    return "Error";
+  default:
+    return "Unknown";
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept {
+  return os << toString(state);
+}
+
+} // namespace manager
+
+} // namespace eduart

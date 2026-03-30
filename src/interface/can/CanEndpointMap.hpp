@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <unordered_map>
 
-#include "interface/ComEndpoints.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
 
 #include "canprotocol.hpp"
 
@@ -12,28 +13,32 @@ namespace eduart {
 namespace com {
 
 /**
- * Singleton holding the single shared CAN endpoint <-> CAN ID map to be used by all CAN interface variants.
+ * Singleton holding a bidirectional CAN endpoint <-> CAN ID map used by all CAN interface variants.
+ * The map is built once on first access. Each entry must be unique in both directions;
+ * collisions are detected at build time and silently skipped.
  */
 class CanEndpointMap {
 public:
-  /**
-   * Get a pointer to the instance of the CanEndpointMap singleton.
-   * @return Pointer to the CanEndpointMap instance
-   */
-  static CanEndpointMap* getInstance() noexcept;
+  static constexpr std::size_t MAX_SENSOR_BOARDS = 16;
 
-  void addSensorBoardEndpoint();
-  void addTofSensorEndpoint(std::size_t idx);
-  void addThermalSensorEndpoint(std::size_t idx);
-  void addLightSensorEndpoint();
+  static CanEndpointMap* getInstance() noexcept;
 
   CanProtocol::canid mapEndpointToId(ComEndpoint endpoint) const;
   ComEndpoint mapIdToEndpoint(CanProtocol::canid id) const;
 
 private:
-  CanEndpointMap() = default;
+  CanEndpointMap();
 
-  std::unordered_map<ComEndpoint, CanProtocol::canid> _id_map;
+  void buildMap();
+
+  /**
+   * Insert a bidirectional mapping. Skips the entry (with a warning) when the
+   * CAN ID is already taken by another endpoint.
+   */
+  void insertBidirectional(const std::string& endpoint, CanProtocol::canid id);
+
+  std::unordered_map<ComEndpoint, CanProtocol::canid> _endpoint_to_id;
+  std::unordered_map<CanProtocol::canid, ComEndpoint> _id_to_endpoint;
 };
 
 } // namespace com

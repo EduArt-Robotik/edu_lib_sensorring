@@ -16,14 +16,26 @@ namespace eduart {
 
 namespace com {
 
-ComInterface* ComManager::createInterface(std::string interface_name, InterfaceType type) {
+ComManager* ComManager::getInstance() noexcept {
+  // Intentional leak: the singleton is allocated once and never deleted.
+  // This avoids the static destruction order fiasco, ensuring the ComManager
+  // remains available until process exit.
+  static ComManager* instance = new ComManager;
+  return instance;
+}
+
+ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_unknown) {
 
   // Check if interface already exists
-  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
-    return interface->getInterfaceName() == interface_name;
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&id](const auto& it) {
+    return (it->getID() == id);
   });
   if (it != _interfaces.end())
     return it->get();
+
+  if (!create_if_unknown) {
+    return nullptr;
+  }
 
   // No interface options specified
 #if !(defined(USE_SOCKETCAN) || defined(USE_USBTINGO))
@@ -31,30 +43,30 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 #endif
 
   // Interface does not exist, create a new one
-  switch (type) {
-  case InterfaceType::SOCKETCAN:
+  switch (id.type) {
+  case InterfaceType::SocketCan:
 #ifdef USE_SOCKETCAN
-    _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+    _interfaces.emplace_back(std::make_unique<SocketCANFD>(id.name));
     break;
 #else
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a SocketCAN interface, but the sensorring library is built without -DUSE_SOCKETCAN=ON option.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a SocketCAN interface, but the sensorring library is built without -DSENSORRING_USE_SOCKETCAN=ON option.");
     return nullptr;
 #endif
 
-  case InterfaceType::USBTINGO:
+  case InterfaceType::UsbTingo:
 #ifdef USE_USBTINGO
-    _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+    _interfaces.emplace_back(std::make_unique<USBtingo>(id.name));
     break;
 #else
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a USBtingo interface, but  the sensorring library is built without -DUSE_USBTINGO=ON option.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a USBtingo interface, but  the sensorring library is built without -DSENSORRING_USE_USBTINGO=ON option.");
     return nullptr;
 #endif
 
-  case InterfaceType::UNDEFINED:
+  case InterfaceType::Undefined:
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Got an undefined interface type. Trying to open a the interface by its name.");
     try {
 #ifdef USE_SOCKETCAN
-      _interfaces.emplace_back(std::make_unique<SocketCANFD>(interface_name));
+      _interfaces.emplace_back(std::make_unique<SocketCANFD>(id.name));
       logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened SocketCAN interface by name. Please correct the interface type in the parameters.");
       break;
 #endif
@@ -63,7 +75,7 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
 
     try {
 #ifdef USE_USBTINGO
-      _interfaces.emplace_back(std::make_unique<USBtingo>(interface_name));
+      _interfaces.emplace_back(std::make_unique<USBtingo>(id.name));
       logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Successfully opened USBtingo interface by name. Please correct the interface type in the parameters.");
       break;
 #endif
@@ -82,12 +94,12 @@ ComInterface* ComManager::createInterface(std::string interface_name, InterfaceT
   return _interfaces.back().get();
 }
 
-ComInterface* ComManager::getInterface(std::string interface_name) {
-
-  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&interface_name](const auto& interface) {
-    return interface->getInterfaceName() == interface_name;
-  });
-  return (it != _interfaces.end()) ? it->get() : nullptr;
+std::vector<ComInterface*> ComManager::getInterfaces() {
+  std::vector<ComInterface*> interfaces;
+  for (const auto& interface : _interfaces) {
+    interfaces.push_back(interface.get());
+  }
+  return interfaces;
 }
 
 } // namespace com

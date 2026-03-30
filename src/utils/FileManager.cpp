@@ -1,16 +1,13 @@
 #include "utils/FileManager.hpp"
 
 #include <cstdlib>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 
-#include "sensorring/types/Image.hpp"
-#include "sensors/hardware/heimann_htpa32.hpp"
-
-#include "sensorring/logger/Logger.hpp"
-
+#include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
 #include "platform/Platform.hpp"
+#include "sensorring/logger/Logger.hpp"
+#include "sensorring/measurement/Image.hpp"
 
 namespace eduart {
 
@@ -21,7 +18,7 @@ namespace filemanager {
 //==================================================
 
 template class filemanager::ArrayHandler<double, THERMAL_RESOLUTION>;
-template class filemanager::StructHandler<sensor::htpa32::HTPA32Eeprom>;
+template class filemanager::StructHandler<device::htpa32::HTPA32_Eeprom>;
 
 //==================================================
 // PathHandler
@@ -33,15 +30,19 @@ bool PathHandler::checkDirectory(std::string path) {
 }
 
 bool PathHandler::checkDirectory(std::filesystem::path path) {
-
-  if (!std::filesystem::exists(path)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, std::string("Directory " + path.u8string() + " doesn't exist, creating the directory now."));
-    if (!std::filesystem::create_directories(path)) {
-      if (!std::filesystem::exists(path)) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, std::string("Creating directory " + path.u8string() + " failed!"));
-        return false;
+  if (!path.empty()) {
+    if (!std::filesystem::exists(path)) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, std::string("Directory " + path.u8string() + " doesn't exist, creating the directory now."));
+      if (!std::filesystem::create_directories(path)) {
+        if (!std::filesystem::exists(path)) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, std::string("Creating directory " + path.u8string() + " failed!"));
+          return false;
+        }
       }
     }
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "File Manager: No directory specified, skip operation.");
+    return false;
   }
 
   return true;
@@ -142,11 +143,16 @@ template <typename T, std::size_t l> bool ArrayHandler<T, l>::saveArrayToFile(co
 template <typename T, std::size_t l> bool ArrayHandler<T, l>::saveArrayToFile(const std::string filepath, const std::string filename, const std::array<T, l>& arr) {
   if (arr.empty())
     return false;
-  if (!PathHandler::checkDirectory(filepath))
-    return false;
 
-  std::filesystem::path full_path = PathHandler::resolvePath(filepath) / filename;
-  std::ofstream file(full_path, std::ios::trunc);
+  auto path = PathHandler::resolvePath(filepath);
+  if (!PathHandler::checkDirectory(path)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "File Manager: Directory could not be verified, skip operation.");
+    return false;
+  }
+
+  path /= filename;
+
+  std::ofstream file(path, std::ios::trunc);
 
   if (!file)
     return false;
@@ -168,8 +174,8 @@ template <typename T, std::size_t l> bool ArrayHandler<T, l>::readArrayFromFile(
 
   arr.fill(0);
 
-  std::filesystem::path full_path = PathHandler::resolvePath(filepath) / filename;
-  std::ifstream file(full_path);
+  auto path = PathHandler::resolvePath(filepath) / filename;
+  std::ifstream file(path);
 
   if (!file)
     return false;
@@ -197,11 +203,14 @@ template <typename T> bool StructHandler<T>::saveStructToFile(const std::string 
 }
 
 template <typename T> bool StructHandler<T>::saveStructToFile(const std::string filepath, const std::string filename, const T& str) {
-  if (!PathHandler::checkDirectory(filepath))
+  auto path = PathHandler::resolvePath(filepath);
+  if (!PathHandler::checkDirectory(path)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "File Manager: Directory could not be verified, skip operation.");
     return false;
+  }
 
-  std::filesystem::path full_path = PathHandler::resolvePath(filepath) / filename;
-  std::ofstream file(full_path, std::ios::trunc);
+  path /= filename;
+  std::ofstream file(path, std::ios::trunc);
 
   if (!file)
     return false;
@@ -218,8 +227,8 @@ template <typename T> bool StructHandler<T>::readStructFromFile(const std::strin
 
 template <typename T> bool StructHandler<T>::readStructFromFile(const std::string filepath, const std::string filename, T& str) {
 
-  std::filesystem::path full_path = std::filesystem::path(filepath) / filename;
-  std::ifstream file(full_path);
+  auto path = PathHandler::resolvePath(filepath) / filename;
+  std::ifstream file(path);
 
   if (!file)
     return false;

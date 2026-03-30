@@ -4,26 +4,22 @@
 
 ### 1.1 Measurement Interface
 
-The public interface has **three measurement related components**:
+The public interface has **two measurement related components**:
 
 - The **MeasurementManager**:<br>
-  This class executes the measurements, collects them and distributes them to all registered clients. It is responsible for the timing of the measurement process. The measurements can either be run asynchronously in a separate thread with the `startMeasuring()` and `stopMeasuring()` methods, or in the users thread by repeatedly calling the `measureSome()` method.
-
-- The **MeasurementClient**<br>
-  The MeasurementClient is the observer interface, which gets notified by the Logger when new measurements are available. All MeasurementClient instances that should receive measurements must be registered with the MeasurementManager.
+  This class executes the measurements, collects them and distributes them to all registered subscribers. It is responsible for the timing of the measurement process. The measurements can either be run asynchronously in a separate thread with the `startMeasuring()` and `stopMeasuring()` methods, or in the users thread by repeatedly calling the `measureSome()` method.<br>
+  Clients subscribe to measurements via `subscribeToDeviceGroup()` and to state changes via `subscribeToStateChanges()`. Each call returns a `Subscription` object — the callback stays active for as long as the `Subscription` is alive.
 
 - The **ManagerParams**<br>
   This is the parameter set that configures the system. The ManagerParams are a cascaded structure, that represents the topology of the system as shown in the diagram below..
 
-### 1.1 Logger Interface
+### 1.2 Logger Interface
 
 In addition to the measurement related interface the library provides a **logger interface**:
 
 - The **Logger**<br>
-  The Logger collects all debug, info and error messages that are raised internally and forwards them to the registered LoggerClients.
-
-- The **LoggerClient**<br>
-  The LoggerClient is the observer interface, which gets notified by the Logger when new log messages are available. All LoggerClient instances that should receive log messages must be registered with the Logger.
+  The Logger is a singleton that collects all debug, info and error messages that are raised internally. Clients subscribe to log output via `Logger::getInstance()->subscribe()`, which returns a `Subscription` object.<br>
+  It is recommended to subscribe to the Logger **before** creating other library objects so that messages emitted during initialization are not lost (see the [Examples](05_examples.md#3-logger-subscription) section for details).
 
 ## 2. Topology of the System
 
@@ -37,239 +33,100 @@ The following class diagram illustrates the topology and the reflection of the h
 <img src="../images/class_diagram_simple.webp" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.webp';">
 </div>
 
-## 3. Input Parameters
+## 3. Sensor Ring Factory
 
-Each of the core classes of the library has its own parameter set which is shown in the above class diagram.
-The parameters are designed to mirror the private internal structure of the library.
-This means the `ManagerParams` has one element `RingParams` and the `RingParams` has a vector of `BusParams` which mirrors the 1 to n relationship between `SensorRing` and `SensorBus`.
-Each `SensorBus` has a vector of `BoardParams`, which again represents the real system where multiple boards can be connected on one interface.
+The `SensorRingFactory` is the primary way to create a `SensorRing` instance.
+It handles hardware discovery, board validation and device instantiation in a single `build()` call.
 
-The parameters have to be initialized and configured externally and passed to the `MeasurementManager` as constructor argument upon creation.
-Once a `MeasurementManager` has been instantiated the parameters can no longer be changed.
+### 3.1 Basic Usage
 
-  > ⚠️ Be careful to configure the actual number of connected communication interfaces (where each interface is one SensorBus) and the correct number of sensor boards per interface.
-  If the `ManagerParams` parameter `enforceTopology` is set to `true` the system **will only start if the configuration matches the connected hardware exactly**.
+The minimal workflow is:
 
+1. Create a factory instance
+2. Register communication interfaces with `addInterface()`
+3. Optionally declare expected boards with `expectBoard()`
+4. Call `build()` to enumerate hardware and construct the `SensorRing`
 
-## 4. Minimal Examples for the Supported Languages
-
-The Sensor Ring library includes both [C++ examples](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp) and [Python examples](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python) that show how to use it in custom projects.
-
-
-### 4.1 C++ <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp"><img src="https://img.shields.io/badge/C++-00599C?logo=cplusplus&logoColor=white" alt="C++"></a>
-
-The library is written in C++ and it is recommended to use the C++ interface of the library for performance reasons.
-
-The following examples show how to use the Sensor Ring library in your own C++ project:
-
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp): Displays the current measurement rate
-- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Displays a depth map of the ToF measurement on the command line
-
-> ⚠️ To use the `depth_map` C++ example on Windows you might first need to enable UTF-8 support for your current terminal session with this command: `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
-
-### 4.2 Python <a href="https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python"><img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python"></a>
-> ℹ️ The library can be built with `-DSENSORRING_BUILD_PYTHON_BINDINGS=ON` option to generate python bindings.
-
-> ⚠️ To use the `sensorring` python package you have to append the location of the package to your `PYTHONPATH` environment variable.
-
-<div class="tabbed">
-
-- <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
-    ```sh
-    export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages
-    ```
-    
-  </div>
-
-- <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
-    ```ps
-    $env:PYTHONPATH = "${env:PYTHONPATH};C:\Program Files\EduArt Robotik GmbH\Sensor Ring\bindings\python3"
-    $env:EDU_SENSORRING_DIR = "C:\Program Files\EduArt Robotik GmbH\Sensor Ring\"
-    ```
-    Alternatively you can use the Windows `Edit the System Environment Variables` tool to add the python package location to the environment variable `PYTHONPATH`.
-
-  </div>
-</div>
-
-The following examples show how to use the Sensor Ring library in your own Python project:
-
-- [Minimal Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/minimal/src/main.cpp): Displays the current measurement rate
-- [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Displays a depth map of the ToF measurement on the command line
-- [Depth View Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_view/src/main.cpp): Displays a 3D plot of the ToF measurement on the command line using [matplotlib](https://matplotlib.org/)
-
-<div align=center>
-<table style="border: none;">
-<tr>
-  <td style="text-align:center">
-    <img src="../images/example_cpp1.webp" height=500 onerror="this.onerror=null; this.src='example_cpp1.webp';"><br>
-    The `depth_map` example
-  </td>
-  <td style="text-align:center">
-    <img src="../images/example_py1.webp" height=500 onerror="this.onerror=null; this.src='example_py1.webp';"><br>
-    The `depth_view` example.
-  </td>
-</tr>
-</table>
-</div>
-
-The use of the Python interface is similar to that of the C++ interface with a few exceptions that are explained below.
-
-C++ has the two client interface classes `MeasurementClient` and `LoggerClient`.
-With the generated Python bindings it is not possible to inherit from both base classes in one python class simultaneously.
-Only the first base class is handled correctly, the second one is not recognized correctly and throws an error when trying to registering it.
-For this reason the Python interface has the additional `SensorringClient` class, which combines the callbacks from both `MeasurementClient` and `LoggerClient` in one class.
-
-> ⚠️ Use the `SensorringClient` base class in Python to inherit from both `MeasurementClient` and `LoggerClient`.
-
-> ⚠️ It is strongly recommended to clone measurements to numyp arrays before manipulating them. This is shown in the `onRawTofMeasurement()` callback below.
-
-Below is a minimal example that shows the Python specialities discussed above:
-
-```python
-import numpy as np
-import eduart.sensorring as sensorring
-
-class MeasurementProxy(sensorring.SensorringClient):
-  def __init__(self):
-    # Initialize base class
-    super().__init__()
-    self._points_np = np.zeros((64, 6), dtype=np.float64)
-
-  # Base class callback
-  def onRawTofMeasurement(self, measurement_vec):
-    measurement_vec[0].point_cloud.copyTo(self._points_np)
-  
-  # Base class callback
-  def onOutputLog(self, verbosity, msg):
-    print("[" + sensorring.LogVerbosityToString(verbosity) + "] " + msg)
-
-
-def main():
-  # Create the parameter structure that is used to instantiate the sensorring
-  params = sensorring.ManagerParams()
-  # (Actually configure the parameters here...)
-
-  # Instantiate a Measurement proxy
-  proxy = MeasurementProxy()
-
-  # Register the proxy with the Logger to get the log output
-  sensorring.Logger.getInstance().registerClient(proxy)
-
-  try:
-    # Instantiate a MeasurementManager with the parameters from above
-    manager = sensorring.MeasurementManager(params)
-
-    # Register the proxy with the LogMeasurementManager to get the measurements
-    manager.registerClient(proxy)
-
-    # Start the measurements
-    manager.startMeasuring()
-
-    while (manager.isMeasuring()):
-      # (Actually do something useful here ...)
-      pass
-
-    # Stop the measurements
-    manager.stopMeasuring()
-
-  except Exception as e:
-    print("Caught: ", e)
-
-if __name__ == "__main__":
-    main()
+```cpp
+ring::SensorRingFactory factory;
+factory.addInterface(interface);
+auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 ```
 
-## 5. Wrappers for Other Frameworks
+The returned `SensorRing` is passed to the `MeasurementManager` as before:
 
-In addition the the examples, the Sensor Ring library has provides for [ROS](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [ROS2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) which make the integration of the EduArt Sensor Ring in existing projects easy.
- 
-### 5.1 ROS Wrapper <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1"><img src="https://img.shields.io/badge/ROS1-22314E?logo=ros&logoColor=white" alt="ROS"></a>
+```cpp
+manager::ManagerParams params;
+auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+```
 
-The Ros1 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](hhttps://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html) message and the thermal measurements as [Image](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html) message.
-In addition the pose of each sensor is published as a static transformation.
+### 3.2 Validation Modes
 
-> ℹ️ Using the ROS Wrapper does not require you to install the Sensor Ring Library manually. The ROS build will automatically fetch the library if it is not detected by CMake.
+The `build()` method accepts a `ValidationMode` that controls how expectations are matched against discovered hardware.
 
-<div class="tabbed">
+| Mode | Behaviour |
+|:-----|:----------|
+| **Strict** | Expectations are matched 1:1 by index against discovered boards. Any mismatch in board type, device type or board count returns `nullptr`. |
+| **Relaxed** | For each expectation the factory **searches** all unclaimed boards for the first compatible one. Boards that are not claimed by any expectation remain unconfigured. Mismatches are logged as warnings. |
 
-- <b class="tab-title">**ROS Native**</b><div class="darkmode_inverted_image">
-    ```sh
-    mkdir catkin_ws/src -p
-    cd catkin_ws
-    git clone https://github.com/EduArt-Robotik/edu_sensorring_ros1.git ./src
-    catkin_make -DCATKIN_WHITELIST_PACKAGES="edu_sensorring_ros1"
-    source devel/setup.bash
-    roslaunch edu_sensorring_ros1 usb_sensorring.launch
-    ```
-    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1/blob/master/params/usb_sensorring_params.yaml">native ROS parameter file</a> and have to be adjusted to match the actual sensor configuration.
+In strict mode the order and count of `expectBoard()` calls must match the physical bus exactly.
+In relaxed mode the factory finds compatible boards regardless of their position on the bus.
 
-  </div>
+### 3.3 Configuring Board Expectations
 
-- <b class="tab-title">**ROS in Docker**</b><div class="darkmode_inverted_image">
-    ```sh
-    git clone https://github.com/EduArt-Robotik/edu_sensorring_ros1.git
-    cd edu_sensorring_ros1/docker/
-    docker compose build
-    docker compose up -d
-    ```
-    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2/blob/master/docker/launch_content/sensorring_params.yaml">Docker parameter file</a> and have to be adjusted to match the actual sensor configuration.
+**Auto-discovery** (no expectations): every board found on the bus is used with default configuration.
 
-  </div>
-</div>
+```cpp
+factory.addInterface(interface);
+auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
+```
 
-### 5.2 ROS2 Wrapper <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2"><img src="https://img.shields.io/badge/ROS2-22314E?logo=ros&logoColor=white" alt="ROS2"></a>
+**Board type constraint**: only boards of the specified type are accepted.
 
-The Ros2 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](https://docs.ros2.org/foxy/api/sensor_msgs/msg/PointCloud.html) message and the thermal measurements as [Image](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html) message.
-In addition to the sensor messages the pose of each sensor is published as a static transformation.
+```cpp
+factory.expectBoard({ device::SensorBoardType::Headlight });
+```
 
-> ℹ️ Using the ROS2 Wrapper does not require you to install the Sensor Ring Library manually. The ROS2 build will automatically fetch the library if it is not detected by CMake.
+**Explicit device params**: only the specified device types are instantiated on the matched board.
 
-<div class="tabbed">
+```cpp
+factory.expectBoard({}, { device::HTPA32_Params{} });
+```
 
-- <b class="tab-title">**ROS2 Native**</b><div class="darkmode_inverted_image">
-    ```sh
-    mkdir ros2_ws/src -p
-    cd ros2_ws
-    git clone https://github.com/EduArt-Robotik/edu_sensorring_ros2.git ./src
-    colcon build --packages-select edu_sensorring_ros2 --symlink-install --event-handlers console_direct+
-    source install/setup.bash
-    ros2 launch edu_sensorring_ros2 usb_sensorring.launch.py
-    ```
-    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2/blob/master/params/usb_sensorring_params.yaml">native ROS2 parameter file</a> and have to be adjusted to match the actual sensor configuration.
+**Default device params**: applied to every device of that type when no explicit params are given.
 
-  </div>
+```cpp
+factory.setDefaultDeviceParams(device::VL53L8CX_Params{ .resolution = 4 });
+```
 
-- <b class="tab-title">**ROS2 in Docker**</b><div class="darkmode_inverted_image">
-    ```sh
-    git clone https://github.com/EduArt-Robotik/edu_sensorring_ros2.git
-    cd edu_sensorring_ros2/docker/
-    docker compose build
-    docker compose up -d
-    ```
-    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2/blob/master/docker/launch_content/sensorring_params.yaml">Docker parameter file</a> and have to be adjusted to match the actual sensor configuration.
+### 3.4 Enumeration and Topology
 
-  </div>
-</div>
+The factory can enumerate hardware without building a `SensorRing`:
 
-<div align=center>
-<table style="border: none; table-layout: fixed; width: 100%;">
-<tr>
-  <td style="text-align:center; padding: 20px;">
-    <img src="../images/example_ros1.webp" height=350 onerror="this.onerror=null; this.src='example_ros1.webp';"><br>
-    3D point cloud from the sensor system on a mobile robot visualized with Rviz
-  </td>
-  <td style="text-align:center; padding: 20px;">
-    <img src="../images/example_ros2.webp" height=350 onerror="this.onerror=null; this.src='example_ros2.webp';"><br>
-    3D map of a corridor recorded with the sensor system using <a href="https://octomap.github.io/">Octomap.</a>
-  </td>
-</tr>
-</table>
-</div>
+```cpp
+auto results = factory.enumerate();
+std::cout << factory.printTopology();
+```
+
+The `EnumerationMap` returned by `enumerate()` or `getLatestEnumerationResult()` maps each `ComInterfaceID` to a vector of `EnumerationInformation` structs that report board type, connection state, configuration state and available device types.
+
+## 4. Input Parameters
+
+The `ManagerParams` configure the runtime behaviour of the `MeasurementManager`.
+They are passed as constructor argument and cannot be changed after instantiation.
+
+| Parameter | Description |
+|:----------|:------------|
+| `timeout` | Duration after which the manager shuts down automatically |
+| `enable_brs` | Enable CAN FD bit rate switching |
+| `repair_errors` | Attempt automatic error recovery |
+| `frequency_tof_hz` | Target frequency for ToF measurements |
+| `frequency_thermal_hz` | Target frequency for thermal measurements |
 
 <div class="section_buttons"> 
 
-| Read Previous | |
+| Read Previous | Read Next |
 |:--|--:|
-| [Installation](02_installation.md) | |
+| [Installation](02_installation.md) | [Examples](05_examples.md) |
 
 </div>

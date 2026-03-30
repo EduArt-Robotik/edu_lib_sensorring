@@ -10,26 +10,41 @@ add_library(sensorring::sensorring ALIAS sensorring)
 
 target_sources(sensorring
   PRIVATE
-  MeasurementManager.cpp
-  MeasurementClient.cpp
-  MeasurementManagerImpl.cpp
+  manager/ManagerState.cpp
+  manager/MeasurementManager.cpp
+  manager/MeasurementManagerImpl.cpp
   SensorRing.cpp
   SensorBus.cpp
   SensorBoard.cpp
+  SensorRingFactory.cpp
   interface/ComInterface.cpp
   interface/ComManager.cpp
-  interface/ComObserver.cpp
+  interface/ComEndpoint.cpp
   interface/can/CanEndpointMap.cpp
   interface/can/canprotocol.cpp
   logger/Logger.cpp
-  logger/LoggerClient.cpp
-  sensors/TofSensor.cpp
-  sensors/ThermalSensor.cpp
-  sensors/LedLight.cpp
-  sensors/BaseSensor.cpp
-  types/Image.cpp
-  types/PointCloud.cpp
-  types/EnumerationInformation.cpp
+  logger/LogVerbosity.cpp
+  device/IDevice.cpp
+  device/BaseSensor.cpp
+  device/BaseDevice.cpp
+  device/DeviceState.cpp
+  device/DeviceType.cpp
+  device/DeviceGroup.cpp
+  device/hardware/SensorBoardType.cpp
+  device/hardware/SensorBoardManager.cpp
+  device/hardware/vl53l8cx/VL53L8CX_Device.cpp
+  device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.cpp
+  device/hardware/htpa32/htpa32_eeprom.c
+  device/hardware/htpa32/HTPA32_Eeprom.cpp
+  device/hardware/htpa32/HTPA32_Device.cpp
+  device/hardware/htpa32/HTPA32_DeviceImpl.cpp
+  device/hardware/ws2812b/WS2812b_Device.cpp
+  device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
+  device/DeviceEnumerator.cpp
+  device/SensorBoardCommands.cpp
+  device/EnumerationInformation.cpp
+  measurement/Image.cpp
+  measurement/PointCloud.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

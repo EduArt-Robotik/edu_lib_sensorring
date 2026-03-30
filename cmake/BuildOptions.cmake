@@ -20,3 +20,6 @@ endif()
 if(NOT SENSORRING_USE_SOCKETCAN AND NOT SENSORRING_USE_USBTINGO)
   message(FATAL_ERROR "At least one of the options USE_SOCKETCAN or USE_USBTINGO has to be turned on!")
 endif()
+
+# clangd compile_commands.json support
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

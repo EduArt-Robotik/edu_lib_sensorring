@@ -4,8 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "sensorring/types/InterfaceType.hpp"
-#include "types/SingletonTemplate.hpp"
+#include "sensorring/interface/ComInterfaceID.hpp"
 
 #include "ComInterface.hpp"
 
@@ -13,30 +12,34 @@ namespace eduart {
 
 namespace com {
 
-class ComManager : public Singleton<ComManager> {
+class ComManager {
 public:
   ComManager(const ComManager&)            = delete;
   ComManager& operator=(const ComManager&) = delete;
 
   /**
-   * Create or retrieve a communication interface
-   * @param[in] interface_name Name of the interface to create or retrieve
-   * @param[in] type Type of the interface to create
-   * @return Raw pointer to the ComInterface, or nullptr on failure
-   * @note The returned pointer is valid for the lifetime of the ComManager singleton instance.
+   * @brief Get a reference to the instance of the ComManager singleton
+   * @return Pointer to the ComManager instance
    */
-  ComInterface* createInterface(std::string interface_name, InterfaceType type);
+  static ComManager* getInstance() noexcept;
 
   /**
-   * Retrieve an existing communication interface by name
-   * @param[in] interface_name Name of the interface to retrieve
-   * @return Raw pointer to the ComInterface if found, or nullptr if not found
+   * Create or retrieve a communication interface
+   * @param[in] id ID of the interface to create or retrieve
+   * @param[in] create_if_unknown If true, create the interface if it does not exist
+   * @return Raw pointer to the ComInterface, or nullptr if the interface does not exist and create_if_unknown is false
    * @note The returned pointer is valid for the lifetime of the ComManager singleton instance.
    */
-  ComInterface* getInterface(std::string interface_name);
+  ComInterface* getInterface(com::ComInterfaceID id, bool create_if_unknown = true);
+
+  /**
+   * Get all communication interfaces
+   * @return Vector of all communication interfaces
+   */
+  std::vector<ComInterface*> getInterfaces();
 
 private:
-  friend class Singleton<ComManager>;
+  /// Private constructor. The ComManager is a singleton.
   ComManager() = default;
 
   std::deque<std::unique_ptr<ComInterface> > _interfaces;

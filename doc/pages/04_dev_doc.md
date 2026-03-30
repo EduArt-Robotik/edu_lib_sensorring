@@ -14,9 +14,9 @@ MeasurementManager (Public API)
             └── SensorRing
                     └── SensorBus (one per communication interface)
                             └── SensorBoard (one per physical board)
-                                    ├── TofSensor
-                                    ├── ThermalSensor
-                                    └── LedLight
+                                    ├── VL53L8CX_Device
+                                    ├── HTPA32_Device
+                                    └── WS2812b_Device
 ```
 
 ### Component Responsibilities
@@ -26,46 +26,49 @@ MeasurementManager (Public API)
 - **SensorRing**: Top-level container managing multiple sensor buses
 - **SensorBus**: Manages sensor boards on a single communication interface
 - **SensorBoard**: Represents a physical sensor board containing ToF, thermal, and LED sensors
-- **BaseSensor**: Base class for sensor implementations (TofSensor, ThermalSensor)
+- **BaseSensor**: Base class for sensor implementations (VL53L8CX_Device, HTPA32_Device)
 
 ## Directory Structure
 
 ```
 include/sensorring/          # Public API headers
-    ├── MeasurementManager.hpp
-    ├── MeasurementClient.hpp
+    ├── SensorRingFactory.hpp
     ├── Parameter.hpp
+    ├── device/              # Public device types & params
+    ├── logger/              # Logger & LogVerbosity
+    ├── manager/             # MeasurementManager
+    ├── ring/                # SensorRing & ValidationMode
+    ├── subscription/        # Subscription RAII handle
     └── types/               # Public type definitions
 
 src/                         # Implementation files
-    ├── MeasurementManager.cpp
-    ├── MeasurementManagerImpl.cpp/hpp
-    ├── SensorRing.cpp/hpp
-    ├── SensorBus.cpp/hpp
-    ├── SensorBoard.cpp/hpp
+    ├── SensorRing.cpp
+    ├── SensorBus.cpp
+    ├── SensorBoard.cpp
+    ├── SensorRingFactory.cpp
     ├── interface/          # Communication abstraction
     │   ├── ComInterface.hpp
     │   ├── ComManager.hpp
     │   └── can/            # CAN interface implementations
-    ├── sensors/            # Sensor implementations
+    ├── device/             # Sensor implementations
     │   ├── BaseSensor.hpp
-    │   ├── TofSensor.cpp/hpp
-    │   ├── ThermalSensor.cpp/hpp
-    │   └── hardware/       # Hardware-specific code
-    ├── boardmanager/       # Board configuration management
+    │   ├── hardware/       # Hardware-specific code
+    │   └── ...
+    ├── manager/            # MeasurementManager implementation
     ├── math/               # Math utilities
     └── types/              # Internal type definitions
 ```
 
 ## Design Patterns
 
-### Observer Pattern
+### Publisher / Subscription Pattern
 
-The library extensively uses the observer pattern for decoupled communication:
+The library uses a token-based publish-subscribe pattern for decoupled communication:
 
-- **ComObserver**: Sensors and boards observe communication interfaces for incoming messages
-- **MeasurementClient**: External clients observe the MeasurementManager for measurement data
-- **LoggerClient**: Observers receive log messages from the Logger singleton
+- **Publisher<Args...>**: A template that allows any component to publish typed events. Subscribers receive a `Subscription` RAII handle — the callback is automatically unregistered when the handle is destroyed.
+- **MeasurementManager**: Publishes device-group measurements and state changes via `subscribeToDeviceGroup()` and `subscribeToStateChanges()`.
+- **Logger**: Publishes log messages via `Logger::getInstance()->subscribe()`.
+- **Endpoint-filtered communication**: Internally, sensor boards and devices receive CAN messages through endpoint-filtered subscriptions on the communication interface.
 
 ### PIMPL Idiom
 
@@ -127,7 +130,7 @@ The library uses an abstract communication interface (`ComInterface`) that allow
 Messages flow through the communication layer using the observer pattern:
 
 1. `ComInterface` receives messages from hardware
-2. Registered `ComObserver` instances (sensors, boards) are notified
+1. Registered `Subscription` callbacks (endpoint-filtered) are notified
 3. Observers process messages based on endpoint and payload
 
 <div align="center">
@@ -150,7 +153,7 @@ Communication uses an endpoint-based addressing system:
 3. **Hardware**: Sensor boards execute measurements
 4. **Receive**: Sensors receive data via ComInterface observer callbacks
 5. **Process**: Sensors parse and transform measurement data
-6. **Notify**: MeasurementManager notifies registered MeasurementClients
+6. **Notify**: MeasurementManager publishes to subscribed callbacks
 
 ### Coordinate Transformation
 
@@ -179,7 +182,7 @@ Sensor board configurations are managed by `SensorBoardManager`, which provides:
 ### Parameter Cascading
 
 Parameters follow a cascading structure matching the system topology:
-- `ManagerParams` → `RingParams` → `BusParams` → `SensorBoardParams` → `TofSensorParams` / `ThermalSensorParams`
+- `ManagerParams` → `RingParams` → `BusParams` → `SensorBoardParams` → `VL53L8CX_Params` / `HTPA32_Params`
 
 ### Error Handling
 
@@ -192,9 +195,9 @@ The state machine includes error handling states:
 
 ### For New Developers
 
-1. **Start with the public API**: Understand `MeasurementManager` and `MeasurementClient`
+1. **Start with the public API**: Understand `MeasurementManager`, `SensorRingFactory`, and the subscription mechanism
 2. **Study the state machine**: Review `MeasurementManagerImpl::StateMachine()` to understand the measurement flow
-3. **Explore sensor implementations**: Look at `TofSensor` and `ThermalSensor` to understand data processing
+3. **Explore sensor implementations**: Look at `VL53L8CX_Device` and `HTPA32_Device` to understand data processing
 4. **Review communication layer**: Understand `ComInterface` and its implementations for adding new protocols
 
 ### Common Extension Points

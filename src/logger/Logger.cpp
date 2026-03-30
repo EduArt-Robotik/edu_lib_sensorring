@@ -1,55 +1,41 @@
 #include "sensorring/logger/Logger.hpp"
 
-#include <algorithm>
-
-#include "sensorring/logger/LoggerClient.hpp"
-
 namespace eduart {
 
 namespace logger {
 
 Logger* Logger::getInstance() noexcept {
+  // Intentional leak: the singleton is allocated once and never deleted.
+  // This avoids the static destruction order fiasco, ensuring the Logger
+  // remains available until process exit.
   static Logger* instance = new Logger;
   return instance;
 }
 
-void Logger::registerClient(LoggerClient* client) noexcept {
-  if (client) {
-    LockGuard lock(_client_mutex);
-    auto result = _clients.insert(client);
-
-    // Check if the client was registered
-    if (result.second) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Registered new LoggerClient");
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "LoggerClient is already registered");
-    }
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "LoggerClient to be registered is not valid");
-  }
+subscription::Subscription Logger::subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback) {
+  return _publisher.subscribe(std::move(callback));
 }
 
-void Logger::unregisterClient(LoggerClient* client) noexcept {
-  if (client) {
-    LockGuard lock(_client_mutex);
-    auto result = _clients.erase(client);
-
-    // Check if the client was removed
-    if (result > 0) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Removed measurement client");
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not registered");
-    }
-  } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Measurement client to be removed is not valid");
-  }
+void Logger::unsubscribe(subscription::SubscriberToken token) {
+  _publisher.unsubscribe(token);
 }
 
 void Logger::log(const LogVerbosity verbosity, const std::string& msg) const {
-  LockGuard lock(_client_mutex);
-  for (auto& client : _clients) {
-    if (client)
-      client->onOutputLog(verbosity, msg);
+  auto callbacks = _publisher.copySubscribers();
+
+  for (const auto& cb : callbacks) {
+    try {
+      cb(verbosity, msg);
+    } catch (const std::exception& e) {
+      // Avoid recursive logging by not calling log() here for Exception verbosity.
+      if (verbosity != LogVerbosity::Exception) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Logger subscription callback threw: " + std::string(e.what()));
+      }
+    } catch (...) {
+      if (verbosity != LogVerbosity::Exception) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Logger subscription callback threw unknown exception.");
+      }
+    }
   }
   if (verbosity == LogVerbosity::Exception) {
     throw std::runtime_error(msg);

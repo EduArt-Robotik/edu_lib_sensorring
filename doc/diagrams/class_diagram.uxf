@@ -11,9 +11,9 @@ bg=white
 fg=black
 transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>564</x><y>1452</y><w>696</w><h>192</h></coordinates><panel_attributes>SensorBoard
 --
-- tof : TofSensor
-- thermal : ThermalSensor
-- leds : LedLight
+- tof : VL53L8CX_Device
+- thermal : HTPA32_Device
+- leds : WS2812b_Device
 
 --
 
@@ -21,37 +21,37 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 bg=white
 fg=black
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>ThermalSensor
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>732</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>HTPA32_Device
 --
-- params : ThermalSensorParams
+- params : HTPA32_Params
 - eeprom : HTPA32Eeprom
 
 --
-+ ThermalSensor (ThermalSensorParams params)
-+ ~ThermalSensor ()
++ HTPA32_Device (HTPA32_Params params)
++ ~HTPA32_Device ()
 
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>LedLight
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>312</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>WS2812b_Device
 --
 - params : LedPanelParams
 
 
 --
-+ LedLight( params : LedPanelParams)
-+ ~ LedLight ()
++ WS2812b_Device( params : LedPanelParams)
++ ~ WS2812b_Device ()
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>TofSensor
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>1764</y><w>372</w><h>192</h></coordinates><panel_attributes>VL53L8CX_Device
 --
-- params : TofSensorParams
+- params : VL53L8CX_Params
 
 
 --
-+ TofSensor (params : TofSensorParams)
-+ ~TofSensor ()
++ VL53L8CX_Device (params : VL53L8CX_Params)
++ ~VL53L8CX_Device ()
 
 
 
@@ -67,7 +67,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 + BaseSensor ()
 + ~BaseSensor ()
 
-+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
 
 bg=white
 fg=black
@@ -89,7 +89,7 @@ sensor_board_vec : vector&lt;SensorBoard&gt;
 SensorBus(params : BusParams);
 ~SensorBus();
 
-+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
++ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;)
 
 bg=white
 fg=black
@@ -133,7 +133,7 @@ transparency=0
 + checkConnectionStatus( timeout_ms : unsigned int) : bool
 
 /+ subscribeToEndpoint(target : ComEndpoint) = 0/
-/+ notify(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
+/+ comCallback(source : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
 
 
 bg=white
@@ -183,8 +183,6 @@ getParams() : ManagerParams
 
 enableTofMeasurement(state : bool)
 enableThermalMeasurement(state : bool)
-startThermalCalibration(window : size_t) : bool
-stopThermalCalibration() : bool
 
 setLight(mode : LightMode, red : uint8_t, green : uint8_t, blue : uint8_t) : void
 
@@ -221,8 +219,7 @@ vector&lt;ComInterface&gt;
 + ComManager() = delete
 + getInstance( ) : ComManager*
 
-+ createInterface(name : string, sensor_count : size_t)
-+ getInterface(name : string)
++ getInterface(name : string, create_if_unknown : true)
 
 
 bg=white
@@ -238,7 +235,7 @@ vector&lt;ComObserver*&gt; observers
 
 + startListener()
 + stopListener()
-+ getEndpoints() : vector&lt;ComEndpoints&gt;
++ getEndpoints() : vector&lt;ComEndpoint&gt;
 + registerObserver(observer : ComObserver*) : bool
 
 /+ send(target : ComEndpoint, data : vector&lt;uint8_t&gt;) = 0/
@@ -255,7 +252,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 + ComEndpoint(id : string)
 + getId() : string
 
-_+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoints&gt;
+_+ createEndpoints(sensorCount : size_t)_ : vector&lt;ComEndpoint&gt;
 
 
 bg=white
