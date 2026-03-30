@@ -14,10 +14,10 @@
 
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
@@ -28,10 +28,10 @@ class ComInterface;
 namespace device {
 
 /**
- * @struct SensorBoard
+ * @class SensorBoard
  * @brief One sensor board on a bus: holds configured devices and receives COM callbacks for enumeration and data.
  */
-struct SENSORRING_EXPORT SensorBoard : com::ComObserver, IDevice {
+class SENSORRING_EXPORT SensorBoard : public IDevice {
 public:
   /**
    * @brief Construct the board with parameters, communication interface, index, and owned devices.
@@ -66,32 +66,14 @@ public:
    */
   std::vector<BaseDevice*> getDevices() const;
 
-  /**
-   * @brief Reset all boards on all interfaces (broadcast reset command).
-   * @return true on success.
-   */
-  static bool resetBoards();
-
-  /**
-   * @brief Send bit-rate switching command on the given interface.
-   * @param[in] interface Communication interface ID.
-   * @param[in] enable Whether to enable BRS.
-   */
-  static void cmdSetBrs(com::ComInterfaceID interface, bool enable);
-  /**
-   * @brief Send enumeration command on the given interface so boards respond with CMD_ACTIVE_DEVICE_RESPONSE.
-   * @param[in] interface Communication interface ID to enumerate.
-   */
-  static void cmdEnumerateBoards(com::ComInterfaceID interface);
-
+private:
   /**
    * @brief Handle incoming COM message; used for enumeration and device data.
    * @param[in] source Endpoint that received the message.
    * @param[in] data Raw message payload.
    */
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
+  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
 
-private:
   unsigned int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
@@ -101,6 +83,8 @@ private:
 
   mutable std::recursive_mutex _com_mutex;
   using LockGuard = std::lock_guard<std::recursive_mutex>;
+
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

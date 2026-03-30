@@ -20,9 +20,9 @@ namespace com {
  * @brief Type of the communication interface.
  */
 enum class InterfaceType {
-  UNDEFINED,
-  SOCKETCAN,
-  USBTINGO
+  Undefined,
+  SocketCan,
+  UsbTingo
 };
 
 /**
@@ -31,15 +31,15 @@ enum class InterfaceType {
  */
 struct ComInterfaceID {
   /// Type of the communication interface.
-  InterfaceType type = InterfaceType::UNDEFINED;
+  InterfaceType type = InterfaceType::Undefined;
 
   /// Name of the communication interface.
   std::string name = "";
 
-  /// Equality operator
+  /// Equality operators for ComInterfaceID
   bool operator==(const ComInterfaceID& other) const;
 
-  /// Inequality operator
+  /// Inequality operator for ComInterfaceID
   bool operator!=(const ComInterfaceID& other) const;
 };
 
@@ -57,7 +57,16 @@ inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
 
 namespace std {
 
+/**
+ * @struct std::hash<ComInterfaceID>
+ * @brief Hash specialization for ComInterfaceID to enable use in unordered containers.
+ */
 template <> struct hash<eduart::com::ComInterfaceID> {
+  /**
+   * @brief Compute hash value for a ComInterfaceID.
+   * @param[in] id The interface ID to hash.
+   * @return Combined hash of type and name.
+   */
   std::size_t operator()(const eduart::com::ComInterfaceID& id) const noexcept {
     auto h1 = std::hash<int>{}(static_cast<int>(id.type));
     auto h2 = std::hash<std::string>{}(id.name);

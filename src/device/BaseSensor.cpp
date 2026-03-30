@@ -8,17 +8,19 @@ namespace eduart {
 namespace device {
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
-    : ComObserver()
-    , _idx(idx)
-    , _error(SensorState::SensorInit)
+    : _idx(idx)
+    , _error(DeviceState::Undefined)
     , _interface(interface)
     , _enable_flag(enable) {
-  subscribeToEndpoint(target);
-  _interface->registerObserver(this);
+  _com_subscription = _interface->subscribe(
+      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
+        this->comCallback(source, data);
+      },
+      { target });
 }
 
 BaseSensor::~BaseSensor() {
-  _interface->unregisterObserver(this);
+  // _com_subscription auto-cancels via RAII.
 }
 
 unsigned int BaseSensor::getIdx() const {
@@ -83,18 +85,28 @@ void BaseSensor::setPose(math::Vector3 translation, math::Vector3 rotation) {
 }
 
 void BaseSensor::resetSensorState() {
-  std::lock_guard<std::mutex> lock(_state_mutex);
-  _error = SensorState::SensorOK;
-  _data_available_promise.reset();
-  _measurement_promise.reset();
+  // Locking order: _state_mutex → _promise_mutex.
+  std::lock_guard<std::mutex> state_lock(_state_mutex);
+  _error = DeviceState::Ok;
+
+  {
+    std::lock_guard<std::mutex> promise_lock(_promise_mutex);
+    _data_available_promise.reset();
+    _measurement_promise.reset();
+  }
 
   onResetSensorState();
 }
 
 void BaseSensor::clearDataFlag() {
-  std::lock_guard<std::mutex> lock(_state_mutex);
-  _error = SensorState::SensorOK;
-  _measurement_promise.reset();
+  // Locking order: _state_mutex → _promise_mutex.
+  std::lock_guard<std::mutex> state_lock(_state_mutex);
+  _error = DeviceState::Ok;
+
+  {
+    std::lock_guard<std::mutex> promise_lock(_promise_mutex);
+    _measurement_promise.reset();
+  }
 
   onClearDataFlag();
 }

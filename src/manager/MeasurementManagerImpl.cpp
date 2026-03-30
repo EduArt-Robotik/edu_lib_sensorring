@@ -1,5 +1,6 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
+#include "device/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
@@ -78,39 +79,21 @@ void MeasurementManagerImpl::enqueueExtraAction(std::function<void()> action) {
 ==========================================================================================
 */
 
-Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
-  if (!callback) {
-    return Subscription();
-  }
-  auto token = SubscriberToken::getNextToken();
-  LockGuard lock(_subscriber_mutex);
-  _state_subscriptions.emplace(token, std::move(callback));
-  return Subscription(token, [this, token]() {
-    unsubscribe(token);
-  });
+subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+  return _state_publisher.subscribe(std::move(callback));
 }
 
-Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
-  if (!callback) {
-    return Subscription();
-  }
-  auto token = SubscriberToken::getNextToken();
-  LockGuard lock(_subscriber_mutex);
-  auto& key_subs = _device_subscriptions.try_emplace(key).first->second;
-  key_subs.emplace(token, std::move(callback));
-  return Subscription(token, [this, token]() {
-    unsubscribe(token);
-  });
+subscription::Subscription MeasurementManagerImpl::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
+  return _device_publishers[key].subscribe(std::move(callback));
 }
 
-void MeasurementManagerImpl::unsubscribe(SubscriberToken token) {
+void MeasurementManagerImpl::unsubscribe(subscription::SubscriberToken token) {
   if (!token.isValid()) {
     return;
   }
-  LockGuard lock(_subscriber_mutex);
-  _state_subscriptions.erase(token);
-  for (auto& [key, subscriptions] : _device_subscriptions) {
-    subscriptions.erase(token);
+  _state_publisher.unsubscribe(token);
+  for (auto& [key, publisher] : _device_publishers) {
+    publisher.unsubscribe(token);
   }
 }
 
@@ -133,31 +116,17 @@ int MeasurementManagerImpl::notifyVL53L8CX() {
   _device_groups.at(device::DeviceType::VL53L8CX).invokeForEachDeviceOfType<device::VL53L8CX_Device>([&error_frames](device::VL53L8CX_Device* device) {
     if (!device->getEnable())
       return;
-    auto state = device->getLatestRawMeasurement().second;
-    if (state != device::SensorState::SensorOK) {
+    auto state = device->getLatestMeasurement().second;
+    if (state != device::DeviceState::Ok) {
       error_frames++;
     }
   });
 
-  {
-    LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& tof_group = _device_groups.at(device::DeviceType::VL53L8CX);
-    auto it                              = _device_subscriptions.find(device::DeviceType::VL53L8CX);
-    if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
-        if (sub.second) {
-          try {
-            sub.second(tof_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group VL53L8CX subscription callback threw unknown "
-                                             "exception.");
-          }
-        }
-      }
-    }
+  // Copy subscriber callbacks under lock, then invoke outside of lock.
+  // This avoids deadlocks if a callback tries to subscribe/unsubscribe.
+  auto it = _device_publishers.find(device::DeviceType::VL53L8CX);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::VL53L8CX));
   }
 
   return error_frames;
@@ -170,71 +139,28 @@ int MeasurementManagerImpl::notifyHTPA32() {
     if (!device->getEnable())
       return;
     auto state = device->getLatestMeasurement().second;
-    if (state != device::SensorState::SensorOK) {
+    if (state != device::DeviceState::Ok) {
       error_frames++;
     }
   });
 
-  {
-    LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& thermal_group = _device_groups.at(device::DeviceType::HTPA32);
-    auto it                                  = _device_subscriptions.find(device::DeviceType::HTPA32);
-    if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
-        if (sub.second) {
-          try {
-            sub.second(thermal_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group HTPA32 subscription callback threw unknown "
-                                             "exception.");
-          }
-        }
-      }
-    }
+  auto it = _device_publishers.find(device::DeviceType::HTPA32);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::HTPA32));
   }
 
   return error_frames;
 }
 
 void MeasurementManagerImpl::notifyWS2812B() {
-  {
-    LockGuard lock(_subscriber_mutex);
-    const device::DeviceGroup& ws2812b_group = _device_groups.at(device::DeviceType::WS2812b);
-    auto it                                  = _device_subscriptions.find(device::DeviceType::WS2812b);
-    if (it != _device_subscriptions.end()) {
-      for (auto& sub : it->second) {
-        if (sub.second) {
-          try {
-            sub.second(ws2812b_group);
-          } catch (const std::exception& e) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw: " + std::string(e.what()));
-          } catch (...) {
-            logger::Logger::getInstance()->log(
-                logger::LogVerbosity::Error, "Device group WS2812B subscription callback threw unknown "
-                                             "exception.");
-          }
-        }
-      }
-    }
+  auto it = _device_publishers.find(device::DeviceType::WS2812b);
+  if (it != _device_publishers.end()) {
+    it->second.publish(_device_groups.at(device::DeviceType::WS2812b));
   }
 }
 
 void MeasurementManagerImpl::notifyState(const ManagerState state) {
-  LockGuard lock(_subscriber_mutex);
-  for (auto& sub : _state_subscriptions) {
-    if (sub.second) {
-      try {
-        sub.second(state);
-      } catch (const std::exception& e) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw: " + std::string(e.what()));
-      } catch (...) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "State subscription callback threw unknown exception.");
-      }
-    }
-  }
+  _state_publisher.publish(state);
 }
 
 ManagerState MeasurementManagerImpl::getManagerState() const noexcept {
@@ -328,7 +254,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
-    device::SensorBoard::resetBoards();
+    device::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep 2 seconds -> boards need time to init their vl53l8 sensors
 
     // state transition
@@ -340,7 +266,7 @@ void MeasurementManagerImpl::StateMachine() {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
 
     device::WS2812b_Device::syncLight();
-    device::WS2812b_Device::setLight(light::LightMode::Pulsation, 0, 0, 0);
+    device::WS2812b_Device::setLight(device::LightMode::Pulsation, 0, 0, 0);
 
     // state transition
     _measurement_state = MeasurementState::get_eeprom;
@@ -354,8 +280,8 @@ void MeasurementManagerImpl::StateMachine() {
       const auto timeout_ms = _params.timeout;
       _device_groups.at(device::DeviceType::HTPA32).invokeForEachDeviceOfType<device::HTPA32_Device>([&success, timeout_ms](device::HTPA32_Device* device) {
         if (device->getEnable()) {
-          auto fut = device->getEpromAsync(timeout_ms);
-          success = fut.get();
+          auto fut = device->getEepromAsync(timeout_ms);
+          success  = fut.get();
         }
       });
     }
@@ -374,7 +300,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::pre_loop_init: {
     // enable bit rate switching
-    _sensor_ring->setBrs(_params.enable_brs);
+    _sensor_ring->setBitRateSwitching(_params.enable_brs);
 
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now.");
     _last_tof_measurement_timestamp     = std::chrono::steady_clock::now();

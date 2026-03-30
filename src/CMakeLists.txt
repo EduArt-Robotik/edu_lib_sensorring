@@ -11,7 +11,6 @@ add_library(sensorring::sensorring ALIAS sensorring)
 target_sources(sensorring
   PRIVATE
   manager/ManagerState.cpp
-  manager/MeasurementClient.cpp
   manager/MeasurementManager.cpp
   manager/MeasurementManagerImpl.cpp
   SensorRing.cpp
@@ -20,15 +19,15 @@ target_sources(sensorring
   SensorRingFactory.cpp
   interface/ComInterface.cpp
   interface/ComManager.cpp
-  interface/ComObserver.cpp
   interface/ComEndpoint.cpp
   interface/can/CanEndpointMap.cpp
   interface/can/canprotocol.cpp
   logger/Logger.cpp
-  logger/LoggerClient.cpp
+  logger/LogVerbosity.cpp
   device/IDevice.cpp
   device/BaseSensor.cpp
   device/BaseDevice.cpp
+  device/DeviceState.cpp
   device/DeviceType.cpp
   device/DeviceGroup.cpp
   device/hardware/SensorBoardType.cpp
@@ -41,10 +40,11 @@ target_sources(sensorring
   device/hardware/htpa32/HTPA32_DeviceImpl.cpp
   device/hardware/ws2812b/WS2812b_Device.cpp
   device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
-  enumeration/DeviceEnumerator.cpp
-  enumeration/EnumerationInformation.cpp
-  types/Image.cpp
-  types/PointCloud.cpp
+  device/DeviceEnumerator.cpp
+  device/SensorBoardCommands.cpp
+  device/EnumerationInformation.cpp
+  measurement/Image.cpp
+  measurement/PointCloud.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

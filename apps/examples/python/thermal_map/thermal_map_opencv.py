@@ -18,37 +18,36 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
+CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 # Display scale factor (32x32 is tiny, scale up for visibility)
 SCALE_FACTOR = 16
 
 
-class ThermalViewClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+class ThermalViewClient:
   """Client that copies HTPA32 false-color images to a NumPy buffer for OpenCV display."""
 
   def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
-    sensorring.LoggerClient.__init__(self)
     self._img_np = np.zeros((32, 32, 3), dtype=np.uint8)
     self._got_measurement = False
     self._state = sensorring.ManagerState_Uninitialized
-    self.registerClient(manager)
+    self._subscriptions = []
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self._on_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self._on_htpa32_callback))
 
-  def onStateChange(self, state):
+  def _on_state_change(self, state):
     self._state = state
 
-  def onThermalMeasurement(self, measurement_vec):
-    measurement_vec[0].falsecolor_img.copyTo(self._img_np)
+  def _on_htpa32_callback(self, group):
+    measurement = sensorring.DeviceGroup_getHTPA32Measurement(group, 0)
+    measurement.falsecolor_img.copyTo(self._img_np)
     self._got_measurement = True
-
-  def onOutputLog(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
 
   def wait_for_new_measurement(self):
     """Block until the next measurement arrives and return the NumPy image buffer."""
@@ -76,6 +75,13 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create a SensorRing with one HTPA32 board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)

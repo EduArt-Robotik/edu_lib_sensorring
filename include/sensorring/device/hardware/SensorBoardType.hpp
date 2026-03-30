@@ -1,6 +1,6 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
 /**
- * @file   Parameter.hpp
+ * @file   SensorBoardType.hpp
  * @author EduArt Robotik GmbH
  * @brief  Board type enum for sensor board hardware variants (matches firmware).
  * @date   2026-02-17

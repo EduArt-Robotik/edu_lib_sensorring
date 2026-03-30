@@ -17,7 +17,7 @@
 #include "sensorring/SensorBoardParams.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DeviceType.hpp"
-#include "sensorring/enumeration/EnumerationInformation.hpp"
+#include "sensorring/device/EnumerationInformation.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
@@ -67,6 +67,7 @@ enum class ValidationMode {
  */
 class SENSORRING_EXPORT SensorRingFactory {
 public:
+  /// Currently supported devices for explicit configuration in expectBoard().
   using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
 
   /// Per-interface enumeration results, keyed by interface ID.

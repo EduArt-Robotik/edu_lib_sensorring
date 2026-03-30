@@ -12,8 +12,8 @@ std::vector<device::IDevice*> DeviceGroup::getDevices() const {
   return _devices;
 }
 
-std::size_t DeviceGroup::getDeviceCount() const {
-  return _devices.size();
+unsigned int DeviceGroup::getDeviceCount() const {
+  return static_cast<unsigned int>(_devices.size());
 }
 
 void DeviceGroup::invokeForEachDevice(std::function<void(device::IDevice*)> callback) const {

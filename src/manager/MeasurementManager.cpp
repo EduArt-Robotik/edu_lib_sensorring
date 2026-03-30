@@ -34,15 +34,15 @@ ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
 }
 
-Subscription MeasurementManager::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+subscription::Subscription MeasurementManager::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   return _mm_impl->subscribeToStateChanges(std::move(callback));
 }
 
-Subscription MeasurementManager::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
+subscription::Subscription MeasurementManager::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
   return _mm_impl->subscribeToDeviceGroup(key, std::move(callback));
 }
-  
-void MeasurementManager::unsubscribe(SubscriberToken token) {
+
+void MeasurementManager::unsubscribe(subscription::SubscriberToken token) {
   return _mm_impl->unsubscribe(token);
 }
 

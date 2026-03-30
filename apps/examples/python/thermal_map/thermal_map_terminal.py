@@ -17,11 +17,11 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
+CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 
 def color_string_command(r, g, b):
@@ -47,28 +47,26 @@ def print_false_color_image(img, reset_cursor):
   sys.stdout.flush()
 
 
-class ThermalMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+class ThermalMapClient:
   """Client that prints a false-color thermal image from the first HTPA32 sensor."""
 
-  def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
-    sensorring.LoggerClient.__init__(self)
+  def __init__(self, manager, reset_cursor):
     self._init_flag = False
-    self._reset_cursor = False
-    self.registerClient(manager)
+    self._reset_cursor = reset_cursor
+    self._subscriptions = []
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self._on_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self._on_htpa32_callback))
 
-  def onStateChange(self, state):
+  def _on_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def onThermalMeasurement(self, measurement_vec):
+  def _on_htpa32_callback(self, group):
     self._init_flag = True
-    print_false_color_image(measurement_vec[0].falsecolor_img, self._reset_cursor)
-    self._reset_cursor = True
-
-  def onOutputLog(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
-      self._reset_cursor = False
+    measurement = sensorring.DeviceGroup_getHTPA32Measurement(group, 0)
+    print_false_color_image(measurement.falsecolor_img, self._reset_cursor[0])
+    self._reset_cursor[0] = True
 
   def got_first_measurement(self):
     return self._init_flag
@@ -80,6 +78,8 @@ def main():
   print("Thermal map terminal sensorring example")
   print("======================================")
   print()
+
+  reset_cursor = [False]
 
   params = sensorring.ManagerParams()
   params.frequency_thermal_hz = 5.0
@@ -93,6 +93,14 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg: (
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}"),
+        reset_cursor.__setitem__(0, False)
+      ) if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create a SensorRing with one HTPA32 board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
@@ -109,7 +117,7 @@ def main():
     manager = sensorring.MeasurementManager(params, sensor_ring)
 
     # Instantiate a ThermalMapClient that registers itself with the manager
-    client = ThermalMapClient(manager)
+    client = ThermalMapClient(manager, reset_cursor)
 
     # Start the measurements
     manager.startMeasuring()

@@ -12,8 +12,9 @@
 #include <memory>
 #include <vector>
 
-#include "SensorBus.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+
+#include "SensorBus.hpp"
 
 namespace eduart {
 
@@ -30,7 +31,7 @@ public:
    * @brief Constructor
    * @param[in] bus_vec Vector of sensor buses to manage
    */
-  SensorRing(std::vector<std::unique_ptr<bus::SensorBus> > bus_vec);
+  SensorRing(std::vector<std::unique_ptr<SensorBus> > bus_vec);
 
   /// Destructor
   ~SensorRing();
@@ -39,13 +40,13 @@ public:
    * @brief Get all sensor bus interfaces managed by this ring.
    * @return Vector of const pointers to all sensor buses.
    */
-  std::vector<bus::SensorBus*> getSensorBuses() const;
+  std::vector<SensorBus*> getSensorBuses() const;
 
   /**
    * @brief Enable or disable bit rate switching on CAN bus interfaces.
    * @param[in] brs_enable Enable flag
    */
-  void setBrs(bool brs_enable);
+  void setBitRateSwitching(bool brs_enable);
 
   /**
    * @brief Get all devices connected to the sensor ring.
@@ -55,7 +56,7 @@ public:
 
 private:
   /// Vector of sensor buses managed by this sensor ring.
-  std::vector<std::unique_ptr<bus::SensorBus> > _bus_vec;
+  std::vector<std::unique_ptr<SensorBus> > _bus_vec;
 };
 
 } // namespace ring

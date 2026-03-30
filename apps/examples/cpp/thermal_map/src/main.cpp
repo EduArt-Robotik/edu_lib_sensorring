@@ -20,11 +20,11 @@ using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SocketCan;
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::UsbTingo;
 
 std::string colorStringCommand(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
@@ -56,7 +56,7 @@ int main(int, char*[]) {
   std::cout << "==============================" << std::endl;
   std::cout << std::endl;
 
-  std::atomic<bool> reset_cursor = false;
+  std::atomic<bool> reset_cursor          = false;
   std::atomic<bool> got_first_measurement = false;
 
   manager::ManagerParams params;

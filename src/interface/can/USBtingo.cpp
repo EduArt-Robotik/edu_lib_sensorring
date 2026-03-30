@@ -19,7 +19,7 @@ namespace eduart {
 namespace com {
 
 USBtingo::USBtingo(std::string id)
-    : ComInterface({ InterfaceType::USBTINGO, id }) {
+    : ComInterface({ InterfaceType::UsbTingo, id }) {
   if (!openInterface()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + _id.name);
   }
@@ -115,10 +115,7 @@ bool USBtingo::listener() {
 
             try {
               auto endpoint = CanEndpointMap::getInstance()->mapIdToEndpoint(rx_frame.id);
-              for (auto observer : _observers) {
-                if (observer)
-                  observer->forwardNotification(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
-              }
+              dispatchMessage(endpoint, std::vector<std::uint8_t>(rx_frame.data.begin(), rx_frame.data.begin() + usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc)));
             } catch (const std::exception&) {
               logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _id.name);
             }

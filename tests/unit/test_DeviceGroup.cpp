@@ -15,8 +15,8 @@ using eduart::com::ComInterface;
 using eduart::device::BaseDevice;
 using eduart::device::DeviceGroup;
 using eduart::device::DeviceID;
-using eduart::device::IDevice;
 using eduart::device::DeviceType;
+using eduart::device::IDevice;
 
 // Minimal ComInterface implementation for unit tests (no I/O).
 class MockComInterface : public ComInterface {
@@ -33,7 +33,7 @@ protected:
   bool listener() override { return false; }
 };
 
-// Minimal BaseDevice-derived type for tests (implements BaseSensor and ComObserver pure virtuals).
+// Minimal BaseDevice-derived type for tests (implements BaseSensor pure virtuals).
 class TestDeviceA : public BaseDevice {
 public:
   TestDeviceA(ComInterface* iface, unsigned int idx = 0)
@@ -92,7 +92,9 @@ TEST_CASE("DeviceGroup invokeForEachDevice", "[DeviceGroup]") {
   SECTION("empty group") {
     DeviceGroup group(std::vector<IDevice*>{});
     int count = 0;
-    group.invokeForEachDevice([&count](IDevice*) { ++count; });
+    group.invokeForEachDevice([&count](IDevice*) {
+      ++count;
+    });
     REQUIRE(count == 0);
   }
 
@@ -167,7 +169,9 @@ TEST_CASE("DeviceGroup invokeForEachDeviceOfType", "[DeviceGroup]") {
   SECTION("empty group") {
     DeviceGroup group(std::vector<IDevice*>{});
     int count = 0;
-    group.invokeForEachDeviceOfType<TestDeviceA>([&count](TestDeviceA*) { ++count; });
+    group.invokeForEachDeviceOfType<TestDeviceA>([&count](TestDeviceA*) {
+      ++count;
+    });
     REQUIRE(count == 0);
   }
 
@@ -176,8 +180,12 @@ TEST_CASE("DeviceGroup invokeForEachDeviceOfType", "[DeviceGroup]") {
     DeviceGroup group(raw);
     int count_a = 0;
     int count_b = 0;
-    group.invokeForEachDeviceOfType<TestDeviceA>([&count_a](TestDeviceA*) { ++count_a; });
-    group.invokeForEachDeviceOfType<TestDeviceB>([&count_b](TestDeviceB*) { ++count_b; });
+    group.invokeForEachDeviceOfType<TestDeviceA>([&count_a](TestDeviceA*) {
+      ++count_a;
+    });
+    group.invokeForEachDeviceOfType<TestDeviceB>([&count_b](TestDeviceB*) {
+      ++count_b;
+    });
     REQUIRE(count_a == 1);
     REQUIRE(count_b == 1);
   }
@@ -186,7 +194,9 @@ TEST_CASE("DeviceGroup invokeForEachDeviceOfType", "[DeviceGroup]") {
     std::vector<IDevice*> raw = { &dev_a };
     DeviceGroup group(raw);
     TestDeviceA* received = nullptr;
-    group.invokeForEachDeviceOfType<TestDeviceA>([&received](TestDeviceA* d) { received = d; });
+    group.invokeForEachDeviceOfType<TestDeviceA>([&received](TestDeviceA* d) {
+      received = d;
+    });
     REQUIRE(received == &dev_a);
   }
 }
@@ -204,8 +214,8 @@ TEST_CASE("DeviceGroup createFromDevicesOfType", "[DeviceGroup]") {
 
   SECTION("filters to requested type only") {
     std::vector<IDevice*> raw = { &dev_a, &dev_b, &dev_a1 };
-    auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
-    auto devices = group.getDevices();
+    auto group                = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
+    auto devices              = group.getDevices();
     REQUIRE(devices.size() == 2u);
     REQUIRE(devices[0] == &dev_a);
     REQUIRE(devices[1] == &dev_a1);
@@ -213,16 +223,16 @@ TEST_CASE("DeviceGroup createFromDevicesOfType", "[DeviceGroup]") {
 
   SECTION("createFromDevicesOfType TestDeviceB") {
     std::vector<IDevice*> raw = { &dev_a, &dev_b };
-    auto group = DeviceGroup::createFromDevicesOfType<TestDeviceB>(raw);
-    auto devices = group.getDevices();
+    auto group                = DeviceGroup::createFromDevicesOfType<TestDeviceB>(raw);
+    auto devices              = group.getDevices();
     REQUIRE(devices.size() == 1u);
     REQUIRE(devices[0] == &dev_b);
   }
 
   SECTION("result group getDevicesOfType matches") {
     std::vector<IDevice*> raw = { &dev_a, &dev_b };
-    auto group = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
-    auto of_a = group.getDevicesOfType<TestDeviceA>();
+    auto group                = DeviceGroup::createFromDevicesOfType<TestDeviceA>(raw);
+    auto of_a                 = group.getDevicesOfType<TestDeviceA>();
     REQUIRE(of_a.size() == 1u);
     REQUIRE(of_a[0] == &dev_a);
   }
@@ -240,7 +250,9 @@ TEST_CASE("DeviceGroup edge cases", "[DeviceGroup]") {
   SECTION("single device invokeForEachDeviceOfType") {
     DeviceGroup group(std::vector<IDevice*>{ &dev });
     int calls = 0;
-    group.invokeForEachDeviceOfType<TestDeviceA>([&calls](TestDeviceA*) { ++calls; });
+    group.invokeForEachDeviceOfType<TestDeviceA>([&calls](TestDeviceA*) {
+      ++calls;
+    });
     REQUIRE(calls == 1);
   }
 }
@@ -249,10 +261,11 @@ TEST_CASE("DeviceGroup waitForAll", "[DeviceGroup]") {
   using namespace std::chrono_literals;
 
   SECTION("empty futures vector returns true immediately") {
-    std::vector<std::future<int>> futures;
+    std::vector<std::future<int> > futures;
     const auto timeout = 10ms;
-    const auto ok = DeviceGroup::waitForAll(
-        futures, timeout, [](const int&) { return true; });
+    const auto ok      = DeviceGroup::waitForAll(futures, timeout, [](const int&) {
+      return true;
+    });
     REQUIRE(ok);
   }
 
@@ -266,17 +279,16 @@ TEST_CASE("DeviceGroup waitForAll", "[DeviceGroup]") {
     p1.set_value(1);
     p2.set_value(2);
 
-    std::vector<std::future<int>> futures;
+    std::vector<std::future<int> > futures;
     futures.push_back(std::move(f1));
     futures.push_back(std::move(f2));
 
-    const auto timeout = 100ms;
+    const auto timeout  = 100ms;
     int predicate_calls = 0;
-    const auto ok = DeviceGroup::waitForAll(
-        futures, timeout, [&predicate_calls](const int& value) {
-          ++predicate_calls;
-          return value > 0;
-        });
+    const auto ok       = DeviceGroup::waitForAll(futures, timeout, [&predicate_calls](const int& value) {
+      ++predicate_calls;
+      return value > 0;
+    });
 
     REQUIRE(ok);
     REQUIRE(predicate_calls == 2);
@@ -291,17 +303,16 @@ TEST_CASE("DeviceGroup waitForAll", "[DeviceGroup]") {
     p1.set_value(1);
     p2.set_value(0); // Will cause predicate to fail.
 
-    std::vector<std::future<int>> futures;
+    std::vector<std::future<int> > futures;
     futures.push_back(std::move(f1));
     futures.push_back(std::move(f2));
 
-    const auto timeout = 100ms;
+    const auto timeout  = 100ms;
     int predicate_calls = 0;
-    const auto ok = DeviceGroup::waitForAll(
-        futures, timeout, [&predicate_calls](const int& value) {
-          ++predicate_calls;
-          return value > 0;
-        });
+    const auto ok       = DeviceGroup::waitForAll(futures, timeout, [&predicate_calls](const int& value) {
+      ++predicate_calls;
+      return value > 0;
+    });
 
     REQUIRE_FALSE(ok);
     // Predicate should have been evaluated for all futures.
@@ -312,23 +323,22 @@ TEST_CASE("DeviceGroup waitForAll", "[DeviceGroup]") {
     std::promise<int> ready_promise;
     std::promise<int> never_ready_promise;
 
-    auto ready_future = ready_promise.get_future();
+    auto ready_future       = ready_promise.get_future();
     auto never_ready_future = never_ready_promise.get_future();
 
     // Only fulfill one promise; the other future will time out.
     ready_promise.set_value(42);
 
-    std::vector<std::future<int>> futures;
+    std::vector<std::future<int> > futures;
     futures.push_back(std::move(ready_future));
     futures.push_back(std::move(never_ready_future));
 
-    const auto timeout = 10ms;
+    const auto timeout  = 10ms;
     int predicate_calls = 0;
-    const auto ok = DeviceGroup::waitForAll(
-        futures, timeout, [&predicate_calls](const int&) {
-          ++predicate_calls;
-          return true;
-        });
+    const auto ok       = DeviceGroup::waitForAll(futures, timeout, [&predicate_calls](const int&) {
+      ++predicate_calls;
+      return true;
+    });
 
     REQUIRE_FALSE(ok);
     // Predicate should not be called because waitForAll returns early on timeout.

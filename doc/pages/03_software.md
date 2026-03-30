@@ -4,13 +4,11 @@
 
 ### 1.1 Measurement Interface
 
-The public interface has **three measurement related components**:
+The public interface has **two measurement related components**:
 
 - The **MeasurementManager**:<br>
-  This class executes the measurements, collects them and distributes them to all registered clients. It is responsible for the timing of the measurement process. The measurements can either be run asynchronously in a separate thread with the `startMeasuring()` and `stopMeasuring()` methods, or in the users thread by repeatedly calling the `measureSome()` method.
-
-- The **MeasurementClient**<br>
-  The MeasurementClient is the observer interface, which gets notified by the Logger when new measurements are available. All MeasurementClient instances that should receive measurements must be registered with the MeasurementManager.
+  This class executes the measurements, collects them and distributes them to all registered subscribers. It is responsible for the timing of the measurement process. The measurements can either be run asynchronously in a separate thread with the `startMeasuring()` and `stopMeasuring()` methods, or in the users thread by repeatedly calling the `measureSome()` method.<br>
+  Clients subscribe to measurements via `subscribeToDeviceGroup()` and to state changes via `subscribeToStateChanges()`. Each call returns a `Subscription` object — the callback stays active for as long as the `Subscription` is alive.
 
 - The **ManagerParams**<br>
   This is the parameter set that configures the system. The ManagerParams are a cascaded structure, that represents the topology of the system as shown in the diagram below..
@@ -20,10 +18,8 @@ The public interface has **three measurement related components**:
 In addition to the measurement related interface the library provides a **logger interface**:
 
 - The **Logger**<br>
-  The Logger collects all debug, info and error messages that are raised internally and forwards them to the registered LoggerClients.
-
-- The **LoggerClient**<br>
-  The LoggerClient is the observer interface, which gets notified by the Logger when new log messages are available. All LoggerClient instances that should receive log messages must be registered with the Logger.
+  The Logger is a singleton that collects all debug, info and error messages that are raised internally. Clients subscribe to log output via `Logger::getInstance()->subscribe()`, which returns a `Subscription` object.<br>
+  It is recommended to subscribe to the Logger **before** creating other library objects so that messages emitted during initialization are not lost (see the [Examples](05_examples.md#3-logger-subscription) section for details).
 
 ## 2. Topology of the System
 

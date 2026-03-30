@@ -9,14 +9,17 @@
 
 #pragma once
 
+#include <cstdint>
 #include <future>
 #include <mutex>
 #include <optional>
+#include <vector>
 
+#include "sensorring/device/DeviceState.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
-#include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/math/Matrix3.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 // Forward declaration
@@ -27,23 +30,12 @@ class ComInterface;
 namespace device {
 
 /**
- * @enum SensorState
- * @brief State of a sensor instance.
- */
-enum class SensorState {
-  SensorInit,
-  SensorOK,
-  ReceiveError,
-  ProcessError
-};
-
-/**
  * @class BaseSensor
  * @brief Abstract base class for sensors.
  *
  * Provides state tracking, pose handling and notification hooks for derived sensors.
  */
-class SENSORRING_EXPORT BaseSensor : public com::ComObserver {
+class SENSORRING_EXPORT BaseSensor {
 public:
   /**
    * @brief Construct a base sensor and register it with the communication interface.
@@ -54,7 +46,7 @@ public:
    */
   BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
   /// Destructor
-  ~BaseSensor();
+  virtual ~BaseSensor();
 
   /**
    * @brief Get the index of this sensor instance.
@@ -133,10 +125,17 @@ protected:
    */
   virtual void onClearDataFlag() = 0;
 
+  /**
+   * @brief Handle an incoming communication message for this sensor.
+   * @param[in] source Endpoint that sent the message.
+   * @param[in] data   Message payload.
+   */
+  virtual void comCallback(const com::ComEndpoint source, const std::vector<std::uint8_t>& data) = 0;
+
   /// Index of this sensor instance within its group.
   unsigned int _idx;
   /// Current health state of the sensor.
-  SensorState _error;
+  DeviceState _error;
   /// Communication interface used to talk to the sensor.
   com::ComInterface* _interface;
 
@@ -150,6 +149,7 @@ protected:
   /// Flag indicating whether the sensor is enabled.
   bool _enable_flag;
   /// Mutex protecting sensor state mutations.
+  /// @note Locking order: acquire _state_mutex before _promise_mutex.
   mutable std::mutex _state_mutex;
 
   /// Promise for the current measurement-wait cycle; set by callback, consumed by wait + get().
@@ -157,7 +157,11 @@ protected:
   /// Promise for the current data-available-wait cycle; set by callback when "data available" is received.
   std::optional<std::promise<bool> > _data_available_promise;
   /// Protects promise lifecycles (create in batch thread, set in callback thread).
+  /// @note Locking order: acquire _state_mutex before _promise_mutex.
   std::mutex _promise_mutex;
+
+  /// RAII subscription to the communication interface.
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

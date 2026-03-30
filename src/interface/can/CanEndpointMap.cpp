@@ -11,6 +11,9 @@ namespace eduart {
 namespace com {
 
 CanEndpointMap* CanEndpointMap::getInstance() noexcept {
+  // Intentional leak: the singleton is allocated once and never deleted.
+  // This avoids the static destruction order fiasco, ensuring the map
+  // remains available until process exit.
   static CanEndpointMap* instance = new CanEndpointMap;
   return instance;
 }

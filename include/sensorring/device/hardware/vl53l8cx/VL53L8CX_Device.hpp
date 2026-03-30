@@ -18,8 +18,8 @@
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
+#include "sensorring/measurement/TofMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/TofMeasurement.hpp"
 
 namespace eduart {
 
@@ -28,10 +28,10 @@ namespace device {
 class VL53L8CX_DeviceImpl;
 
 /**
- * @struct VL53L8CX_Device
+ * @class VL53L8CX_Device
  * @brief  Device wrapper for a VL53L8CX Time-of-Flight sensor on the sensorring bus.
  */
-struct SENSORRING_EXPORT VL53L8CX_Device : BaseDevice {
+class SENSORRING_EXPORT VL53L8CX_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new VL53L8CX device instance.
@@ -50,15 +50,15 @@ public:
   const VL53L8CX_Params& getParams() const;
 
   /**
-   * @brief Get the most recent raw measurement and current sensor state.
-   * @return Pair of latest raw Time-of-Flight measurement and associated sensor state.
+   * @brief Get the most recent measurement and current sensor state.
+   * @return Pair of latest Time-of-Flight measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestRawMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
   /**
    * @brief Get the most recent transformed measurement and current sensor state.
    * @return Pair of latest transformed Time-of-Flight measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, SensorState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
@@ -77,6 +77,7 @@ public:
    */
   static std::future<bool> fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
 
+private:
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -84,7 +85,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 

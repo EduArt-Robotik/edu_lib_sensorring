@@ -13,8 +13,8 @@
 #include <vector>
 
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/interface/ComObserver.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 #include "SensorBoard.hpp"
 
@@ -24,7 +24,7 @@ namespace com {
 class ComInterface;
 }
 
-namespace bus {
+namespace ring {
 
 using namespace std::chrono_literals;
 
@@ -32,7 +32,7 @@ using namespace std::chrono_literals;
  * @class SensorBus
  * @brief One communication interface (e.g. CAN) owning multiple SensorBoards and forwarding COM messages.
  */
-class SENSORRING_EXPORT SensorBus : public com::ComObserver {
+class SENSORRING_EXPORT SensorBus {
 public:
   /**
    * @brief Construct the bus with a communication interface and owned sensor boards.
@@ -41,20 +41,17 @@ public:
    */
   SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec);
 
-  /// Destructor
-  ~SensorBus();
-
   /**
    * @brief Enable or disable bit rate switching on the bus interface.
    * @param[in] brs_enable Enable flag.
    */
-  void setBrs(bool brs_enable);
+  void setBitRateSwitching(bool brs_enable);
 
   /**
    * @brief Total number of sensor boards on this bus.
    * @return Number of boards.
    */
-  size_t getSensorCount() const;
+  unsigned int getSensorCount() const;
 
   /**
    * @brief Communication interface used by this bus.
@@ -71,25 +68,19 @@ public:
   /**
    * @brief Enumerate boards on an interface.
    * @param[in] interface Communication interface ID to enumerate.
+   * @param[in] timeout Time to wait for responses before returning.
    * @return Vector of enumeration info. May be empty if none or on error.
    */
-  static std::vector<device::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface);
+  static std::vector<device::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout = 250ms);
 
 private:
-  /**
-   * @brief Handle incoming COM message; used for enumeration counts and forwarding to boards.
-   * @param[in] source Endpoint that received the message.
-   * @param[in] data Raw message payload.
-   */
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-
-  static constexpr std::chrono::milliseconds ENUMERATION_TIMEOUT = 250ms;
-
   com::ComInterface* _interface;
 
   std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
+
+  subscription::Subscription _com_subscription;
 };
 
-} // namespace bus
+} // namespace ring
 
 } // namespace eduart

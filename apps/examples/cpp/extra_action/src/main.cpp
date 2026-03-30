@@ -13,8 +13,10 @@
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
+#include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
+
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 
 using namespace eduart;
@@ -22,11 +24,11 @@ using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SocketCan;
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::UsbTingo;
 
 // Parameters for smooth color cycling of the WS2812b lights.
 
@@ -52,6 +54,14 @@ int main(int, char*[]) {
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
 
   try {
+    // Subscribe to the logger first so that all messages from initialization onward are captured.
+    // Using a lambda here (rather than binding a class method) ensures the subscription is active
+    // before any other object is constructed.
+    auto log_sub = logger::Logger::getInstance()->subscribe([](const logger::LogVerbosity verbosity, const std::string& msg) {
+      if (verbosity > logger::LogVerbosity::Debug)
+        std::cout << "[" << verbosity << "] " << msg << std::endl;
+    });
+
     // Create SensorRing via factory auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
@@ -106,7 +116,7 @@ int main(int, char*[]) {
 
         // Update the light color via the extra action interface so it runs in the MeasurementManager context.
         manager->enqueueExtraAction([red, green, blue]() {
-          device::WS2812b_Device::setLight(light::LightMode::FixedColor, red, green, blue);
+          device::WS2812b_Device::setLight(device::LightMode::FixedColor, red, green, blue);
         });
 
         if (std::chrono::steady_clock::now() - last_print > 1s) {

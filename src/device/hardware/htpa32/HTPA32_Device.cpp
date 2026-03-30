@@ -20,19 +20,19 @@ HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface
 HTPA32_Device::~HTPA32_Device() {
 }
 
-HTPA32_Params HTPA32_Device::getParams() const {
+const HTPA32_Params& HTPA32_Device::getParams() const {
   return _impl->getParams();
 }
 
-std::pair<const measurement::GrayscaleImage&, SensorState> HTPA32_Device::getLatestGrayscaleImage() const {
+std::pair<const measurement::GrayscaleImage&, DeviceState> HTPA32_Device::getLatestGrayscaleImage() const {
   return _impl->getLatestGrayscaleImage();
 }
 
-std::pair<const measurement::FalseColorImage&, SensorState> HTPA32_Device::getLatestFalseColorImage() const {
+std::pair<const measurement::FalseColorImage&, DeviceState> HTPA32_Device::getLatestFalseColorImage() const {
   return _impl->getLatestFalseColorImage();
 }
 
-std::pair<const measurement::ThermalMeasurement&, SensorState> HTPA32_Device::getLatestMeasurement() const {
+std::pair<const measurement::ThermalMeasurement&, DeviceState> HTPA32_Device::getLatestMeasurement() const {
   return _impl->getLatestMeasurement();
 }
 
@@ -40,7 +40,7 @@ bool HTPA32_Device::stopCalibration() {
   return _impl->stopCalibration();
 }
 
-bool HTPA32_Device::startCalibration(std::size_t window) {
+bool HTPA32_Device::startCalibration(unsigned int window) {
   return _impl->startCalibration(window);
 }
 
@@ -56,8 +56,8 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
   _impl->comCallback(source, data);
 }
 
-std::future<bool> HTPA32_Device::getEpromAsync(std::chrono::milliseconds timeout) {
-  return _impl->getEpromAsync(timeout);
+std::future<bool> HTPA32_Device::getEepromAsync(std::chrono::milliseconds timeout) {
+  return _impl->getEepromAsync(timeout);
 }
 
 // std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(std::chrono::milliseconds /*timeout*/) {

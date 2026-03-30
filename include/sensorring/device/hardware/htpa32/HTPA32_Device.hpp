@@ -17,8 +17,8 @@
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/measurement/ThermalMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/ThermalMeasurement.hpp"
 
 namespace eduart {
 
@@ -27,10 +27,10 @@ namespace device {
 class HTPA32_DeviceImpl;
 
 /**
- * @struct HTPA32_Device
+ * @class HTPA32_Device
  * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
  */
-struct SENSORRING_EXPORT HTPA32_Device : BaseDevice {
+class SENSORRING_EXPORT HTPA32_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new HTPA32 device instance.
@@ -39,32 +39,33 @@ public:
    * @param[in] idx      Index of the sensor on the bus.
    */
   HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx);
+
   /// Destructor
   ~HTPA32_Device();
 
   /**
    * @brief Get the sensor parameters used to configure this device.
-   * @return Copy of the HTPA32 parameter struct.
+   * @return Reference to the internal HTPA32 parameter struct.
    */
-  HTPA32_Params getParams() const;
+  const HTPA32_Params& getParams() const;
 
   /**
    * @brief Get the most recent grayscale image and current sensor state.
    * @return Pair of latest grayscale image and associated sensor state.
    */
-  std::pair<const measurement::GrayscaleImage&, SensorState> getLatestGrayscaleImage() const;
+  std::pair<const measurement::GrayscaleImage&, DeviceState> getLatestGrayscaleImage() const;
   /**
    * @brief Get the most recent false-color image and current sensor state.
    * @return Pair of latest false-color image and associated sensor state.
    */
-  std::pair<const measurement::FalseColorImage&, SensorState> getLatestFalseColorImage() const;
+  std::pair<const measurement::FalseColorImage&, DeviceState> getLatestFalseColorImage() const;
 
   /**
    * @brief Request the EEPROM content asynchronously.
    * @param[in] timeout Maximum time to wait for completion.
    * @return Future resolving to true on success.
    */
-  std::future<bool> getEpromAsync(std::chrono::milliseconds timeout);
+  std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   /**
    * @brief Stop any ongoing thermal calibration sequence.
    * @return true on success.
@@ -75,12 +76,12 @@ public:
    * @param[in] window Number of frames to average for calibration.
    * @return true on success.
    */
-  bool startCalibration(std::size_t window);
+  bool startCalibration(unsigned int window);
   /**
    * @brief Get the latest thermal measurement and current sensor state.
    * @return Pair of latest thermal measurement and associated sensor state.
    */
-  std::pair<const measurement::ThermalMeasurement&, SensorState> getLatestMeasurement() const;
+  std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
 
   // std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
@@ -99,6 +100,7 @@ public:
    */
   static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
 
+private:
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -106,7 +108,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 

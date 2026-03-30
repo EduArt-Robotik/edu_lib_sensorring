@@ -7,7 +7,7 @@
 #include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
 #include "platform/Platform.hpp"
 #include "sensorring/logger/Logger.hpp"
-#include "sensorring/types/Image.hpp"
+#include "sensorring/measurement/Image.hpp"
 
 namespace eduart {
 

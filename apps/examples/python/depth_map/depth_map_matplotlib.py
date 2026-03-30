@@ -20,11 +20,11 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SOCKETCAN
+CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_USBTINGO
+USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 # Distance range for axis limits (in meters)
 MIN_DIST = 0.0
@@ -34,28 +34,27 @@ MAX_DIST = 2.0
 SIGMA_MAX = 0.01
 
 
-class DepthMapClient(sensorring.MeasurementClient, sensorring.LoggerClient):
+class DepthMapClient:
   """Client that copies ToF point clouds to a NumPy buffer for visualization."""
 
   def __init__(self, manager):
-    sensorring.MeasurementClient.__init__(self)
-    sensorring.LoggerClient.__init__(self)
     # Buffer for point cloud data: 64 points, 6 columns (x, y, z, raw_distance, sigma, user_idx)
     self._points_np = np.zeros((64, 6), dtype=np.float64)
     self._got_measurement = False
     self._state = sensorring.ManagerState_Uninitialized
-    self.registerClient(manager)
+    self._subscriptions = []
+    self._subscriptions.append(
+      manager.subscribeToStateChanges(self._on_state_change))
+    self._subscriptions.append(
+      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self._on_vl53l8cx_callback))
 
-  def onStateChange(self, state):
+  def _on_state_change(self, state):
     self._state = state
 
-  def onRawTofMeasurement(self, measurement_vec):
-    measurement_vec[0].point_cloud.copyTo(self._points_np)
+  def _on_vl53l8cx_callback(self, group):
+    measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
+    measurement.point_cloud.copyTo(self._points_np)
     self._got_measurement = True
-
-  def onOutputLog(self, verbosity, msg):
-    if verbosity > sensorring.LogVerbosity_Debug:
-      print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
 
   def wait_for_new_measurement(self):
     """Block until the next measurement arrives and return the NumPy point buffer."""
@@ -82,6 +81,13 @@ def main():
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
     # Create a SensorRing with one VL53L8CX board via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)

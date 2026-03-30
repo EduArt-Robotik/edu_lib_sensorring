@@ -23,8 +23,7 @@
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
-#include "sensorring/types/Subscription.hpp"
-#include "sensorring/types/SubscriberToken.hpp"
+#include "sensorring/subscription/Publisher.hpp"
 
 namespace eduart {
 
@@ -75,7 +74,7 @@ public:
    * @param[in] callback Invoked with the updated ManagerState.
    * @return RAII Subscription that auto-cancels on destruction.
    */
-  Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
+  subscription::Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
 
   /**
    * @brief Subscribe to device group updates; callback is invoked when the group is updated.
@@ -83,13 +82,13 @@ public:
    * @param[in] callback Invoked with the updated DeviceGroup.
    * @return RAII Subscription that auto-cancels on destruction.
    */
-  Subscription subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
+  subscription::Subscription subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
 
   /**
    * @brief Cancel a subscription (state or device group).
    * @param[in] token Token returned by subscribeToStateChanges or subscribeToDeviceGroup.
    */
-  void unsubscribe(SubscriberToken token);
+  void unsubscribe(subscription::SubscriberToken token);
 
   /**
    * @brief Return the current health state of the state machine worker.
@@ -188,9 +187,8 @@ private:
 
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
-  mutable Mutex _subscriber_mutex;
-  std::unordered_map<SubscriberToken, std::function<void(const ManagerState state)> > _state_subscriptions;
-  std::unordered_map<device::DeviceType, std::unordered_map<SubscriberToken, std::function<void(const device::DeviceGroup&)> >, DeviceTypeHash> _device_subscriptions;
+  subscription::Publisher<const ManagerState> _state_publisher;
+  std::unordered_map<device::DeviceType, subscription::Publisher<const device::DeviceGroup&>, DeviceTypeHash> _device_publishers;
 };
 
 } // namespace manager

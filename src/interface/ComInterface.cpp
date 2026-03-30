@@ -20,33 +20,49 @@ ComInterfaceID ComInterface::getID() const {
   return _id;
 }
 
-bool ComInterface::registerObserver(ComObserver* observer) {
-  LockGuard guard(_mutex);
-  if (observer) {
-    auto result = _observers.insert(observer);
-
-    if (result.second) {
-      return true;
-    }
+Subscription ComInterface::subscribe(ComCallback callback, std::vector<ComEndpoint> endpoints) {
+  if (!callback) {
+    return Subscription();
   }
-  return false;
+  auto token = SubscriberToken::getNextToken();
+  {
+    std::lock_guard<std::mutex> guard(_subscriber_mutex);
+    _com_subscriptions.emplace(
+        token, SubscriptionEntry{
+                   std::move(callback), { endpoints.begin(), endpoints.end() }
+    });
+  }
+  return Subscription(token, [this, token]() {
+    unsubscribe(token);
+  });
 }
 
-bool ComInterface::unregisterObserver(ComObserver* observer) {
-  LockGuard guard(_mutex);
-  if (observer) {
-    auto result = _observers.erase(observer);
-
-    if (result > 0) {
-      return true;
-    }
-  }
-  return false;
+void ComInterface::unsubscribe(SubscriberToken token) {
+  std::lock_guard<std::mutex> guard(_subscriber_mutex);
+  _com_subscriptions.erase(token);
 }
 
-void ComInterface::clearObservers() {
-  LockGuard guard(_mutex);
-  _observers.clear();
+void ComInterface::dispatchMessage(const ComEndpoint& source, const std::vector<std::uint8_t>& data) {
+  // Copy matching callbacks under lock, then invoke outside of lock.
+  std::vector<ComCallback> callbacks;
+  {
+    std::lock_guard<std::mutex> guard(_subscriber_mutex);
+    callbacks.reserve(_com_subscriptions.size());
+    for (const auto& [token, entry] : _com_subscriptions) {
+      if (entry.callback && (entry.endpoints.empty() || entry.endpoints.count(source))) {
+        callbacks.push_back(entry.callback);
+      }
+    }
+  }
+
+  for (const auto& cb : callbacks) {
+    try {
+      cb(source, data);
+    } catch (const std::exception& e) {
+      // Silently absorb — listener must not crash from subscriber exceptions.
+    } catch (...) {
+    }
+  }
 }
 
 bool ComInterface::startListener() {

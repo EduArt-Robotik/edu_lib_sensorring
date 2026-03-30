@@ -19,11 +19,11 @@ using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SOCKETCAN;
+static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SocketCan;
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::USBTINGO;
+static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::UsbTingo;
 
 // Distance range for color mapping (in meters)
 static constexpr double MIN_DIST = 0.0;
@@ -120,7 +120,7 @@ int main(int, char*[]) {
     auto vl53l8cx_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&got_first_measurement, &reset_cursor](const device::DeviceGroup& devs) {
       got_first_measurement = true;
       auto vl53l8cx         = devs.getDevicesOfType<device::VL53L8CX_Device>().at(0);
-      printDepthMap(vl53l8cx->getLatestRawMeasurement().first.point_cloud, reset_cursor);
+      printDepthMap(vl53l8cx->getLatestMeasurement().first.point_cloud, reset_cursor);
       reset_cursor = true;
     });
 

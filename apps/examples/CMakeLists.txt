@@ -1,7 +1,11 @@
 # Compile examples
 
 add_executable(minimal_using_lambdas
-    cpp/minimal/using_lambdas.cpp
+    cpp/minimal/src/using_lambdas.cpp
+)
+
+target_include_directories(minimal_using_lambdas
+    PRIVATE cpp/minimal/include
 )
 
 target_link_libraries(minimal_using_lambdas
@@ -9,18 +13,14 @@ target_link_libraries(minimal_using_lambdas
 )
 
 add_executable(minimal_using_proxy_class
-    cpp/minimal/using_proxy_class.cpp
+    cpp/minimal/src/using_proxy_class.cpp
+)
+
+target_include_directories(minimal_using_proxy_class
+    PRIVATE cpp/minimal/include
 )
 
 target_link_libraries(minimal_using_proxy_class
-    PRIVATE sensorring::sensorring
-)
-
-add_executable(minimal_using_client_interface
-    cpp/minimal/using_client_interface.cpp
-)
-
-target_link_libraries(minimal_using_client_interface
     PRIVATE sensorring::sensorring
 )
 
@@ -53,7 +53,6 @@ if(SENSORRING_INSTALL)
   install( TARGETS
     minimal_using_lambdas
     minimal_using_proxy_class
-    minimal_using_client_interface
     depth_map
     thermal_map
     extra_action

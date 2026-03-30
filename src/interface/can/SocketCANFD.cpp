@@ -21,7 +21,7 @@ namespace eduart {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface({ InterfaceType::SOCKETCAN, interface_name })
+    : ComInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0) {
 
   try {
@@ -159,10 +159,7 @@ bool SocketCANFD::listener() {
           if (recvbytes) {
             try {
               auto endpoint = CanEndpointMap::getInstance()->mapIdToEndpoint(frame_rd.can_id);
-              for (const auto& observer : _observers) {
-                if (observer)
-                  observer->forwardNotification(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
-              }
+              dispatchMessage(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
             } catch (const std::exception&) {
               logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _id.name);
             }

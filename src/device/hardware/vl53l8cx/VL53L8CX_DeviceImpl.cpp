@@ -26,11 +26,11 @@ const VL53L8CX_Params& VL53L8CX_DeviceImpl::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_DeviceImpl::getLatestRawMeasurement() const {
+std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
   return { _latest_raw_measurement, _parent._error };
 }
 
-std::pair<const measurement::TofMeasurement&, SensorState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
+std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
   return { _latest_transformed_measurement, _parent._error };
 }
 
@@ -59,7 +59,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
         _rx_buffer_complete = true;
       }
     } else {
-      _parent._error = SensorState::ReceiveError;
+      _parent._error = DeviceState::ReceiveError;
     }
   } else if (msg_size == 2) {
     if (_rx_buffer_complete) {

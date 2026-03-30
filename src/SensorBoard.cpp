@@ -1,8 +1,8 @@
 #include "sensorring/SensorBoard.hpp"
 
+#include "device/hardware/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "interface/can/canprotocol.hpp"
-#include "sensorring/device/hardware/SensorBoardManager.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
@@ -17,12 +17,15 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _params(params)
     , _enum_info()
     , _device_vec(std::move(devices)) {
-  subscribeToEndpoint(com::ComEndpoint("broadcast"));
-  _interface->registerObserver(this);
+  _com_subscription = _interface->subscribe(
+      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
+        this->comCallback(source, data);
+      },
+      { com::ComEndpoint("broadcast") });
 }
 
 SensorBoard::~SensorBoard() {
-  _interface->unregisterObserver(this);
+  // _com_subscription auto-cancels via RAII.
 }
 
 bool SensorBoard::isEnumerated() const {
@@ -44,31 +47,6 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
     devices.push_back(device.get());
   }
   return devices;
-}
-
-bool SensorBoard::resetBoards() {
-  bool success                = true;
-  std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
-  for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
-    success &= iface->send(com::ComEndpoint("broadcast"), tx_buf);
-  }
-  return success;
-}
-
-void SensorBoard::cmdSetBrs(com::ComInterfaceID interface, bool enable) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf);
-  }
-}
-
-void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
-  }
 }
 
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {

@@ -12,10 +12,10 @@
 #include <memory>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/LightMode.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/types/LightMode.hpp"
 
 namespace eduart {
 
@@ -24,17 +24,19 @@ namespace device {
 class WS2812b_DeviceImpl;
 
 /**
- * @struct WS2812b_Device
+ * @class WS2812b_Device
  * @brief  Device wrapper for WS2812b LED strips controlled via the sensorring bus.
  */
-struct SENSORRING_EXPORT WS2812b_Device : BaseDevice {
+class SENSORRING_EXPORT WS2812b_Device : public BaseDevice {
 public:
   /**
    * @brief Construct a new WS2812b device instance.
    * @param[in] params    LED strip configuration parameters.
    * @param[in] interface Communication interface used to talk to the device.
+   * @param[in] idx       Index of the device on the bus.
    */
-  WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface);
+  WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx);
+
   /// Destructor
   ~WS2812b_Device();
 
@@ -53,13 +55,14 @@ public:
    * @param[in] blue  Blue channel value.
    * @return true on success.
    */
-  static bool setLight(light::LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  static bool setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
   /**
    * @brief Synchronize pending light updates on all WS2812b devices.
    * @return true on success.
    */
   static bool syncLight();
 
+private:
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -67,7 +70,6 @@ public:
    */
   void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
 
-private:
   void onResetSensorState() override;
   void onClearDataFlag() override;
 
