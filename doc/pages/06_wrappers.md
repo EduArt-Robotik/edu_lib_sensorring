@@ -4,7 +4,7 @@ In addition the the examples, the Sensor Ring library has provides for [ROS](htt
  
 ## 1. ROS Wrapper <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1"><img src="https://img.shields.io/badge/ROS1-22314E?logo=ros&logoColor=white" alt="ROS"></a>
 
-The Ros1 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](hhttps://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html) message and the thermal measurements as [Image](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html) message.
+The Ros1 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html) message and the thermal measurements as [Image](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html) message.
 In addition the pose of each sensor is published as a static transformation.
 
 > ℹ️ Using the ROS Wrapper does not require you to install the Sensor Ring Library manually. The ROS build will automatically fetch the library if it is not detected by CMake.
