@@ -5,8 +5,10 @@
 
 #include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/subscription/Subscription.hpp"
@@ -37,6 +39,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   try {
     eduart::ring::SensorRingFactory factory;
     factory.addInterface(interface);
+    factory.expectBoard({}, { eduart::device::VL53L8CX_Params() });
     auto sensor_ring = factory.build(eduart::ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {
@@ -115,7 +118,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 // These tests require real hardware connected and appropriately configured.
 // They are intended to be enabled explicitly via SENSORRING_BUILD_HARDWARE_TESTS.
 
-TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN", "[ToFHardware]") {
+TEST_CASE("ToF hardware end-to-end measurement via USBtingo or SocketCAN with a single board", "[ToFHardware]") {
   // First try USBtingo with serial "0" (first connected device).
   TestResult usbtingo_result = run_single_interface_test("0", InterfaceType::UsbTingo);
 
