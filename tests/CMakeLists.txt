@@ -33,7 +33,7 @@ catch_discover_tests(sensorring_tests
 
 if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
-      hardware/test_TofHardware.cpp
+      hardware/test_VL53L8Hardware.cpp
     )
 
     target_link_libraries(sensorring_hardware_tests PRIVATE
