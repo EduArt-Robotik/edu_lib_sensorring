@@ -23,6 +23,8 @@ namespace device {
  * @brief Supported device hardware types used for device registration and grouping.
  */
 enum class DeviceType {
+  /// Base board (for reset, firmware revision, etc.).
+  SENSORBOARD,
   /// Time-of-flight sensor (VL53L8CX).
   VL53L8CX,
   /// Thermal sensor (HTPA32).
