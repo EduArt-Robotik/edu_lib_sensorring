@@ -72,7 +72,7 @@ private:
    * @param[in] source Endpoint that received the message.
    * @param[in] data Raw message payload.
    */
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
   unsigned int _idx;
   com::ComInterface* _interface;

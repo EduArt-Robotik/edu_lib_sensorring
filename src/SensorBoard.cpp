@@ -1,11 +1,13 @@
 #include "sensorring/SensorBoard.hpp"
 
+#include <sensorring_transport/Protocol.hpp>
+
 #include "device/hardware/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
-#include "interface/can/canprotocol.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
-#include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
+
+using namespace eduart::transport::protocol;
 
 namespace eduart {
 
@@ -18,10 +20,10 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _enum_info()
     , _device_vec(std::move(devices)) {
   _com_subscription = _interface->subscribe(
-      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
-        this->comCallback(source, data);
-      },
-      { com::ComEndpoint("broadcast") });
+      [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
+        this->comCallback(source, command, data);
+  },
+      { com::ComEndpoint{ com::Direction::Input, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
 }
 
 SensorBoard::~SensorBoard() {
@@ -49,8 +51,8 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
   return devices;
 }
 
-void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  if (data.size() == 12 && data.at(0) == CMD_ACTIVE_DEVICE_RESPONSE && (data.at(1) == _idx)) {
+void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
+  if (command == sensor_board::ACTIVE_DEVICE_RESPONSE && data.size() >= 11 && (data.at(0) == _idx)) {
 
     LockGuard lock(_com_mutex);
 

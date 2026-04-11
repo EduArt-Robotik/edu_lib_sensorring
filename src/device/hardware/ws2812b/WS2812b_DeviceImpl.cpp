@@ -1,7 +1,7 @@
 #include "device/hardware/ws2812b/WS2812b_DeviceImpl.hpp"
 
-#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "interface/ComInterface.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 
 namespace eduart {
 
@@ -20,7 +20,7 @@ const WS2812b_Params& WS2812b_DeviceImpl::getParams() const {
   return _params;
 }
 
-void WS2812b_DeviceImpl::comCallback(const com::ComEndpoint, const std::vector<uint8_t>&) {
+void WS2812b_DeviceImpl::comCallback(const com::ComEndpoint, std::uint8_t, const std::vector<uint8_t>&) {
   // WS2812b currently does not receive data; this is a no-op.
 }
 
@@ -35,4 +35,3 @@ void WS2812b_DeviceImpl::onClearDataFlag() {
 } // namespace device
 
 } // namespace eduart
-

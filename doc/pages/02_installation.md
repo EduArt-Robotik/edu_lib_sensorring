@@ -71,14 +71,18 @@ int main(int, char*[]) {
 
 ### 2.1 Building the library
 
-The library is built with a standard CMake workflow which is almost identical for Windows and Linux. Use the following commands to build the library.
+The library is built with a standard CMake workflow which is almost identical for Windows and Linux.
+
+> ℹ️ This repository uses a **git submodule** for the transport module. Use `--recursive` when cloning. If you already cloned without it, run `git submodule update --init --recursive`. Alternatively, if you don't intend to modify the transport layer CMake will automatically fetch the module via FetchContent if the submodule is missing.
+
+Use the following commands to build the library.
 
 <div class="tabbed">
 
 - <b class="tab-title">**Linux**</b><div class="darkmode_inverted_image">
 
     ```sh
-    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+    git clone --recursive https://github.com/EduArt-Robotik/edu_lib_sensorring
     mkdir -p edu_lib_sensorring/build
     cd edu_lib_sensorring/build
     cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON
@@ -104,7 +108,7 @@ The library is built with a standard CMake workflow which is almost identical fo
 - <b class="tab-title">**Windows**</b><div class="darkmode_inverted_image">
 
     ```powershell
-    git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+    git clone --recursive https://github.com/EduArt-Robotik/edu_lib_sensorring
     mkdir edu_lib_sensorring/build
     cd edu_lib_sensorring/build
     cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON

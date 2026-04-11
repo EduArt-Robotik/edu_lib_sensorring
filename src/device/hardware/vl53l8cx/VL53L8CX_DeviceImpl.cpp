@@ -1,10 +1,13 @@
 #include "device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
 
 #include <algorithm>
+#include <sensorring_transport/Protocol.hpp>
 
 #include "interface/ComInterface.hpp"
-#include "interface/can/canprotocol.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+
+using namespace eduart::transport::protocol;
+using namespace eduart::transport::protocol::vl53l8cx;
 
 namespace eduart {
 
@@ -46,30 +49,31 @@ void VL53L8CX_DeviceImpl::onClearDataFlag() {
   _rx_buffer_complete = false;
 }
 
-void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
-  std::size_t msg_size = data.size();
 
-  if (msg_size == 48) {
-    if ((_rx_buffer_offset + msg_size) <= (int)sizeof(_rx_buffer)) {
-      std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
-      _rx_buffer_offset += msg_size;
+  switch (command) {
+  case MEASUREMENT_RESPONSE:
+    // "Measurement done" notification
+    _parent.setDataAvailableReady(true);
+    break;
 
-      if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
-        _rx_buffer_complete = true;
-      }
-    } else {
-      _parent._error = DeviceState::ReceiveError;
-    }
-  } else if (msg_size == 2) {
-    if (_rx_buffer_complete) {
-      _latest_raw_measurement         = processMeasurement(data[1], _rx_buffer, vl53l8::TOF_RESOLUTION);
+  case MEASUREMENT_TRANSMISSION_RESPONSE: {
+    // Complete measurement data delivered by reassembly layer.
+    // Expected: [frame_id, <192 bytes of point data>]
+    if (data.size() >= sizeof(_rx_buffer) + 1) {
+      uint8_t frame_id = data[0];
+      std::copy_n(data.begin() + 1, sizeof(_rx_buffer), _rx_buffer);
+      _latest_raw_measurement         = processMeasurement(frame_id, _rx_buffer, vl53l8::TOF_RESOLUTION);
       _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _parent._rot_m, _parent._translation);
       _rx_buffer_complete             = false;
       _parent.setMeasurementReady(true);
     }
-  } else if (msg_size == 1) {
-    _parent.setDataAvailableReady(true);
+    break;
+  }
+
+  default:
+    break;
   }
 }
 

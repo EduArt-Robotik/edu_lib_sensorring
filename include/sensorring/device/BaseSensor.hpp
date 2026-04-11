@@ -130,7 +130,7 @@ protected:
    * @param[in] source Endpoint that sent the message.
    * @param[in] data   Message payload.
    */
-  virtual void comCallback(const com::ComEndpoint source, const std::vector<std::uint8_t>& data) = 0;
+  virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
 
   /// Index of this sensor instance within its group.
   unsigned int _idx;

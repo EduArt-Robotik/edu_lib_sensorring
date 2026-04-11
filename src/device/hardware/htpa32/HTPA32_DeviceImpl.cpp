@@ -2,15 +2,18 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sensorring_transport/Protocol.hpp>
 
 #include "interface/ComInterface.hpp"
-#include "interface/can/canprotocol.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
 #include "utils/Iron.hpp"
 
 #include "HTPA32_Eeprom.hpp"
+
+using namespace eduart::transport::protocol;
+using namespace eduart::transport::protocol::htpa32;
 
 namespace eduart {
 
@@ -95,98 +98,87 @@ void HTPA32_DeviceImpl::onClearDataFlag() {
   _has_ready_measurement = false;
 }
 
-void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
+void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
-  std::size_t msg_size = data.size();
 
-  if (_read_eeprom) {
-    if ((_eeprom_buffer.size() + msg_size) < htpa32::HTPA32_Eeprom::SERIALIZED_SIZE + MAX_MSG_LENGTH) {
-      std::size_t len = (int)htpa32::HTPA32_Eeprom::SERIALIZED_SIZE - _eeprom_buffer.size();
-      if (len > msg_size) {
-        len = msg_size;
-      }
-
-      _eeprom_buffer.insert(_eeprom_buffer.end(), data.begin(), data.begin() + len);
-
-      if (_eeprom_buffer.size() >= htpa32::HTPA32_Eeprom::SERIALIZED_SIZE) {
-        auto result = htpa32::HTPA32_Eeprom::deserialize(_eeprom_buffer.data(), _eeprom_buffer.size());
-        if (!result.has_value()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getIdx()));
-        } else {
-          _eeprom = result.value();
-          if (_params.use_eeprom_file) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving EEPROM data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
-            filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
-          }
-          _got_eeprom = true;
+  switch (command) {
+  case EEPROM_TRANSMISSION_RESPONSE: {
+    // Complete eeprom data delivered by reassembly layer.
+    if (_read_eeprom && data.size() >= htpa32::HTPA32_Eeprom::SERIALIZED_SIZE) {
+      auto result = htpa32::HTPA32_Eeprom::deserialize(data.data(), data.size());
+      if (!result.has_value()) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getIdx()));
+      } else {
+        _eeprom = result.value();
+        if (_params.use_eeprom_file) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving EEPROM data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
+          filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
         }
-
-        _read_eeprom = false;
-        _eeprom_condition.notify_all();
+        _got_eeprom = true;
       }
+      _read_eeprom = false;
+      _eeprom_condition.notify_all();
     }
-  } else {
-    if (!_has_ready_measurement) {
-      if (msg_size == 4) {
-        _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
-        _ptat = (uint16_t)(data[2] << 0 | data[3] << 8);
-      } else if (msg_size == MAX_MSG_LENGTH) {
-        if ((_rx_buffer_offset + msg_size) <= (int)sizeof(_rx_buffer)) {
-          std::copy_n(data.begin(), msg_size, (uint8_t*)&_rx_buffer + _rx_buffer_offset);
-          _rx_buffer_offset += msg_size;
+    break;
+  }
 
-          if (_rx_buffer_offset >= sizeof(_rx_buffer)) {
-            std::tie(_latest_measurement, _parent._error) = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
-            if (_parent._error == DeviceState::Ok) {
-              if (_calibration_active && _measurement_init_counter > 5) {
-                if (_calibration_count_current < _calibration_count_goal) {
-                  _calibration_image += _latest_measurement.temp_data_deg_c;
-                  _calibration_count_current++;
-                }
-                if (_calibration_count_current >= _calibration_count_goal) {
-                  _calibration_image /= static_cast<double>(_calibration_count_current);
-                  _calibration_average = _calibration_image.avg();
-                  _calibration_active  = false;
-                  _got_calibration     = true;
+  case MEASUREMENT_TRANSMISSION_RESPONSE: {
+    // Complete thermal measurement data delivered by reassembly layer.
+    // Expected format: [VDD_h, VDD_l, PTAT_h, PTAT_l, <2560 bytes pixel data>]
+    if (!_has_ready_measurement && data.size() >= (4 + sizeof(_rx_buffer))) {
+      _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
+      _ptat = (uint16_t)(data[2] << 0 | data[3] << 8);
+      std::copy_n(data.begin() + 4, sizeof(_rx_buffer), _rx_buffer);
 
-                  logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Calibration finished for sensor " + std::to_string(_parent.getIdx()) + ". Average temperature: " + std::to_string(_calibration_average) + " deg C.");
-                  if (_params.use_calibration_file) {
-                    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving calibration data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
-                    filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
-                  }
-                }
-              } else {
-                _measurement_init_counter++;
-              }
+      std::tie(_latest_measurement, _parent._error) = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+      if (_parent._error == DeviceState::Ok) {
+        if (_calibration_active && _measurement_init_counter > 5) {
+          if (_calibration_count_current < _calibration_count_goal) {
+            _calibration_image += _latest_measurement.temp_data_deg_c;
+            _calibration_count_current++;
+          }
+          if (_calibration_count_current >= _calibration_count_goal) {
+            _calibration_image /= static_cast<double>(_calibration_count_current);
+            _calibration_average = _calibration_image.avg();
+            _calibration_active  = false;
+            _got_calibration     = true;
 
-              if (!_calibration_active && _got_calibration) {
-                _latest_measurement.temp_data_deg_c -= _calibration_image;
-                _latest_measurement.temp_data_deg_c += _calibration_average;
-              }
-
-              if (_params.auto_min_max) {
-                _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
-              } else {
-                _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
-              }
-
-              rotateLeftImage(_latest_measurement.grayscale_img);
-              _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
-              _has_ready_measurement             = true;
-              _parent.setMeasurementReady(true);
-
-            } else {
-              _has_ready_measurement = false;
-              //_parent._error         = SensorState::ProcessError;
-              _parent.setMeasurementReady(false); // ToDo: Add more fine-grained error handling here again on error conditions -> Return SensorState
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Calibration finished for sensor " + std::to_string(_parent.getIdx()) + ". Average temperature: " + std::to_string(_calibration_average) + " deg C.");
+            if (_params.use_calibration_file) {
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving calibration data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
+              filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
             }
           }
         } else {
-          _parent._error = DeviceState::ReceiveError;
-          _parent.setMeasurementReady(false);
+          _measurement_init_counter++;
         }
+
+        if (!_calibration_active && _got_calibration) {
+          _latest_measurement.temp_data_deg_c -= _calibration_image;
+          _latest_measurement.temp_data_deg_c += _calibration_average;
+        }
+
+        if (_params.auto_min_max) {
+          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+        } else {
+          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
+        }
+
+        rotateLeftImage(_latest_measurement.grayscale_img);
+        _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
+        _has_ready_measurement             = true;
+        _parent.setMeasurementReady(true);
+
+      } else {
+        _has_ready_measurement = false;
+        _parent.setMeasurementReady(false);
       }
     }
+    break;
+  }
+
+  default:
+    break;
   }
 }
 
@@ -201,8 +193,8 @@ std::future<bool> HTPA32_DeviceImpl::getEepromAsync(std::chrono::milliseconds ti
     uint16_t sensor_select      = (1u << _parent.getIdx());
     uint8_t sensor_select_high  = (uint8_t)(sensor_select >> 8);
     uint8_t sensor_select_low   = (uint8_t)(sensor_select >> 0);
-    std::vector<uint8_t> tx_buf = { CMD_THERMAL_EEPROM_REQUEST, sensor_select_high, sensor_select_low };
-    _parent._interface->send(com::ComEndpoint("thermal_request"), tx_buf);
+    std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
+    _parent._interface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, EEPROM_TRANSMISSION_REQUEST, tx_buf);
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_parent._state_mutex);

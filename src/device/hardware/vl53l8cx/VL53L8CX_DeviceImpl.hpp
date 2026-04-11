@@ -37,7 +37,7 @@ public:
   std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
   std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
   void onResetSensorState();
   void onClearDataFlag();

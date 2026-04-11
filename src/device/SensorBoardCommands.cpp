@@ -3,17 +3,17 @@
 #include "SensorBoardCommands.hpp"
 
 #include "interface/ComManager.hpp"
-#include "interface/can/canprotocol.hpp"
+#include <sensorring_transport/Protocol.hpp>
+using namespace eduart::transport::protocol;
 
 namespace eduart {
 
 namespace device {
 
 bool resetBoards() {
-  bool success                = true;
-  std::vector<uint8_t> tx_buf = { CMD_HARD_RESET };
+  bool success = true;
   for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
-    success &= iface->send(com::ComEndpoint("broadcast"), tx_buf);
+    success &= iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::RESET, {});
   }
   return success;
 }
@@ -21,16 +21,15 @@ bool resetBoards() {
 void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (iface) {
-    std::vector<uint8_t> tx_buf = { CMD_SET_BRS, 0xFF, 0xFF, enable ? std::uint8_t(0x01) : std::uint8_t(0x00) };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf);
+    // TODO: BRS command removed in v2 protocol — re-add when firmware supports it.
+    (void)enable;
   }
 }
 
 void cmdEnumerateBoards(com::ComInterfaceID interface) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (iface) {
-    std::vector<uint8_t> tx_buf_enumeration = { CMD_ACTIVE_DEVICE_QUERY, CMD_ACTIVE_DEVICE_QUERY };
-    iface->send(com::ComEndpoint("broadcast"), tx_buf_enumeration);
+    iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {});
   }
 }
 

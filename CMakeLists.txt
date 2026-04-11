@@ -58,6 +58,21 @@ include(BuildOptions REQUIRED)
 # Fetch dependencies
 include(CollectDependencies REQUIRED)
 
+# Transport module (submodule or FetchContent fallback)
+set(SENSORRING_TRANSPORT_BUILD_TESTS ${SENSORRING_BUILD_TESTS} CACHE BOOL "Build transport module tests" FORCE)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/edu_sensorring_transport/CMakeLists.txt")
+  add_subdirectory(third_party/edu_sensorring_transport)
+else()
+  message(STATUS "Transport submodule not found, fetching from GitHub...")
+  include(FetchContent)
+  FetchContent_Declare(
+    edu_sensorring_transport
+    GIT_REPOSITORY https://github.com/EduArt-Robotik/edu_sensorring_transport.git
+    GIT_TAG        main
+  )
+  FetchContent_MakeAvailable(edu_sensorring_transport)
+endif()
+
 # Library
 add_subdirectory(src)
 

@@ -33,7 +33,7 @@ public:
 
   const WS2812b_Params& getParams() const;
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
   void onResetSensorState();
   void onClearDataFlag();

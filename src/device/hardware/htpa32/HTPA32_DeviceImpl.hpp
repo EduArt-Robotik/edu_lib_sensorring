@@ -4,7 +4,6 @@
 #include <chrono>
 #include <condition_variable>
 #include <future>
-#include <mutex>
 #include <string>
 #include <vector>
 
@@ -45,7 +44,7 @@ public:
   bool stopCalibration();
   bool startCalibration(unsigned int window);
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
   void onResetSensorState();
   void onClearDataFlag();

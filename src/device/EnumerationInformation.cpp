@@ -88,12 +88,12 @@ bool EnumerationInformation::isUndefined() const noexcept {
 
 EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint8_t>& buffer) {
   EnumerationInformation info;
-  if (buffer.size() >= 12) {
-    info.idx            = static_cast<unsigned int>(buffer[1]);
-    info.type           = static_cast<SensorBoardType>(buffer[2]);
-    info.version        = Version{ buffer[3], buffer[4], buffer[5] };
-    info.hash           = CommitHash::fromBits(buffer[6], buffer[7], buffer[8], buffer[9]);
-    info.device_options = static_cast<std::uint16_t>((static_cast<std::uint16_t>(buffer[10]) << 8) | static_cast<std::uint16_t>(buffer[11]));
+  if (buffer.size() >= 11) {
+    info.idx            = static_cast<unsigned int>(buffer[0]);
+    info.type           = static_cast<SensorBoardType>(buffer[1]);
+    info.version        = Version{ buffer[2], buffer[3], buffer[4] };
+    info.hash           = CommitHash::fromBits(buffer[5], buffer[6], buffer[7], buffer[8]);
+    info.device_options = static_cast<std::uint16_t>((static_cast<std::uint16_t>(buffer[9]) << 8) | static_cast<std::uint16_t>(buffer[10]));
 
     for (int i = 0; i < 16; i++) {
       auto device_type = static_cast<DeviceType>(i);

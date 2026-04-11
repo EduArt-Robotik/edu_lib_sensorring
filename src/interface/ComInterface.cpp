@@ -42,22 +42,31 @@ void ComInterface::unsubscribe(SubscriberToken token) {
   _com_subscriptions.erase(token);
 }
 
-void ComInterface::dispatchMessage(const ComEndpoint& source, const std::vector<std::uint8_t>& data) {
+void ComInterface::dispatchMessage(const ComEndpoint& source, std::uint8_t command, const std::vector<std::uint8_t>& data) {
   // Copy matching callbacks under lock, then invoke outside of lock.
   std::vector<ComCallback> callbacks;
   {
     std::lock_guard<std::mutex> guard(_subscriber_mutex);
     callbacks.reserve(_com_subscriptions.size());
     for (const auto& [token, entry] : _com_subscriptions) {
-      if (entry.callback && (entry.endpoints.empty() || entry.endpoints.count(source))) {
+      if (!entry.callback)
+        continue;
+      if (entry.endpoints.empty()) {
         callbacks.push_back(entry.callback);
+      } else {
+        for (const auto& ep : entry.endpoints) {
+          if (endpointMatches(ep, source)) {
+            callbacks.push_back(entry.callback);
+            break;
+          }
+        }
       }
     }
   }
 
   for (const auto& cb : callbacks) {
     try {
-      cb(source, data);
+      cb(source, command, data);
     } catch (const std::exception& e) {
       // Silently absorb — listener must not crash from subscriber exceptions.
     } catch (...) {
