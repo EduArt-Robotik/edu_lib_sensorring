@@ -1,4 +1,4 @@
-// Unit tests for eduart::device::htpa32::HTPA32_Eeprom serialize/deserialize roundtrip.
+// Unit tests for eduart::sensorring::device::htpa32::HTPA32_Eeprom serialize/deserialize roundtrip.
 
 #include <array>
 #include <algorithm>
@@ -6,7 +6,7 @@
 
 #include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
 
-using eduart::device::htpa32::HTPA32_Eeprom;
+using eduart::sensorring::device::htpa32::HTPA32_Eeprom;
 
 namespace {
 

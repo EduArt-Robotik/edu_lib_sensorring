@@ -11,6 +11,8 @@ using namespace eduart::transport::protocol::vl53l8cx;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
@@ -202,5 +204,7 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(const std::vector<VL
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

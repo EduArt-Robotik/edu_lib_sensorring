@@ -2,8 +2,8 @@
 
 #include "sensorring/measurement/PointCloud.hpp"
 
-using eduart::measurement::PointCloud;
-using eduart::measurement::PointData;
+using eduart::sensorring::measurement::PointCloud;
+using eduart::sensorring::measurement::PointData;
 
 TEST_CASE("PointCloud PointData structure", "[PointCloud]") {
   PointData p;

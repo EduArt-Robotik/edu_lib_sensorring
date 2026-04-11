@@ -11,6 +11,8 @@ using namespace eduart::transport::protocol::vl53l8cx;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 VL53L8CX_DeviceImpl::VL53L8CX_DeviceImpl(VL53L8CX_Device& parent, VL53L8CX_Params params, com::ComInterface* interface, unsigned int idx)
@@ -120,5 +122,7 @@ measurement::TofMeasurement VL53L8CX_DeviceImpl::transformTofMeasurements(const 
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

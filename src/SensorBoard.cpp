@@ -11,6 +11,8 @@ using namespace eduart::transport::protocol;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
@@ -77,5 +79,7 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

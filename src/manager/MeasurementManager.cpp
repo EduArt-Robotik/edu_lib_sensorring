@@ -4,6 +4,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 MeasurementManager::MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
@@ -68,5 +70,7 @@ bool MeasurementManager::isMeasuring() noexcept {
 }
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

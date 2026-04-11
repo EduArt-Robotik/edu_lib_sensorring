@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -50,5 +52,7 @@ SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept;
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -20,6 +20,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -145,5 +147,7 @@ template <typename Response, typename Predicate> bool DeviceGroup::waitForAll(st
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -2,12 +2,12 @@
 
 #include "sensorring/math/Math.hpp"
 
-using eduart::math::eulerDegreesFromRotationMatrix;
-using eduart::math::eulerRadiansFromRotationMatrix;
-using eduart::math::Matrix3;
-using eduart::math::rotMatrixFromEulerDegrees;
-using eduart::math::rotMatrixFromEulerRadians;
-using eduart::math::Vector3;
+using eduart::sensorring::math::eulerDegreesFromRotationMatrix;
+using eduart::sensorring::math::eulerRadiansFromRotationMatrix;
+using eduart::sensorring::math::Matrix3;
+using eduart::sensorring::math::rotMatrixFromEulerDegrees;
+using eduart::sensorring::math::rotMatrixFromEulerRadians;
+using eduart::sensorring::math::Vector3;
 
 TEST_CASE("Euler/rotation matrix round-trip in degrees", "[Math]") {
   Vector3 euler_deg{};

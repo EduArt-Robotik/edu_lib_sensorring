@@ -17,6 +17,8 @@ using namespace eduart::transport::protocol::htpa32;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
@@ -311,5 +313,7 @@ void HTPA32_DeviceImpl::rotateLeftImage(measurement::GrayscaleImage& image) cons
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

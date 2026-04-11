@@ -13,6 +13,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 /**
@@ -39,5 +41,7 @@ struct ManagerParams {
 };
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

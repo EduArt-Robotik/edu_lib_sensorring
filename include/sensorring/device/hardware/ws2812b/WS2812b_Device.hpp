@@ -19,6 +19,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 class WS2812b_DeviceImpl;
@@ -78,5 +80,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

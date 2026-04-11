@@ -11,6 +11,8 @@
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
+  
+namespace sensorring {
 
 namespace device {
 
@@ -45,5 +47,7 @@ struct SENSORRING_EXPORT HTPA32_Params : public DeviceParams {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

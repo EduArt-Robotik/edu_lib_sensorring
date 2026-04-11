@@ -11,6 +11,8 @@ using namespace eduart::transport::protocol::htpa32;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
@@ -202,5 +204,7 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

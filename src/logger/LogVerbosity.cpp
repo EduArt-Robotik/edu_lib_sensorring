@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace logger {
 
 std::string toString(LogVerbosity verbosity) noexcept {
@@ -26,5 +28,7 @@ std::ostream& operator<<(std::ostream& os, LogVerbosity verbosity) noexcept {
 }
 
 } // namespace logger
+
+} // namespace sensorring
 
 } // namespace eduart

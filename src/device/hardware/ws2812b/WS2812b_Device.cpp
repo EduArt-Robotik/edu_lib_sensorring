@@ -10,6 +10,8 @@ using namespace eduart::transport::protocol::ws2812b;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx)
@@ -56,5 +58,7 @@ void WS2812b_Device::onClearDataFlag() {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

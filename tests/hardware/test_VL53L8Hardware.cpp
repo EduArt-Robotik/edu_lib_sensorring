@@ -13,10 +13,10 @@
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
-using eduart::com::InterfaceType;
-using eduart::manager::ManagerParams;
-using eduart::manager::MeasurementManager;
-using eduart::measurement::TofMeasurement;
+using eduart::sensorring::com::InterfaceType;
+using eduart::sensorring::manager::ManagerParams;
+using eduart::sensorring::manager::MeasurementManager;
+using eduart::sensorring::measurement::TofMeasurement;
 
 namespace {
 
@@ -29,7 +29,7 @@ enum class TestResult {
 TestResult run_single_interface_test(const std::string& interface_name, InterfaceType type) {
   ManagerParams params;
 
-  eduart::com::ComInterfaceID interface;
+  eduart::sensorring::com::ComInterfaceID interface;
   interface.type = type;
   interface.name = interface_name;
 
@@ -37,10 +37,10 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   std::size_t count = 0;
 
   try {
-    eduart::ring::SensorRingFactory factory;
+    eduart::sensorring::ring::SensorRingFactory factory;
     factory.addInterface(interface);
-    factory.expectBoard({}, { eduart::device::VL53L8CX_Params() });
-    auto sensor_ring = factory.build(eduart::ring::ValidationMode::Relaxed);
+    factory.expectBoard({}, { eduart::sensorring::device::VL53L8CX_Params() });
+    auto sensor_ring = factory.build(eduart::sensorring::ring::ValidationMode::Relaxed);
 
     if (!sensor_ring) {
       return TestResult::NotAvailable;
@@ -48,12 +48,12 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 
     MeasurementManager manager(params, std::move(sensor_ring));
 
-    auto sub = manager.subscribeToDeviceGroup(eduart::device::DeviceType::VL53L8CX, [&measurements, &count](const eduart::device::DeviceGroup& group) {
-      group.invokeForEachDeviceOfType<eduart::device::VL53L8CX_Device>([&measurements, &count](eduart::device::VL53L8CX_Device* device) {
+    auto sub = manager.subscribeToDeviceGroup(eduart::sensorring::device::DeviceType::VL53L8CX, [&measurements, &count](const eduart::sensorring::device::DeviceGroup& group) {
+      group.invokeForEachDeviceOfType<eduart::sensorring::device::VL53L8CX_Device>([&measurements, &count](eduart::sensorring::device::VL53L8CX_Device* device) {
         if (!device->getEnable())
           return;
         auto [meas, state] = device->getLatestMeasurement();
-        if (state == eduart::device::DeviceState::Ok && !meas.point_cloud.data.empty()) {
+        if (state == eduart::sensorring::device::DeviceState::Ok && !meas.point_cloud.data.empty()) {
           measurements.push_back(meas);
           count++;
         }

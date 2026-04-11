@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 /**
@@ -64,12 +66,14 @@ inline bool endpointMatches(const ComEndpoint& subscription, const ComEndpoint& 
 
 } // namespace com
 
+} // namespace sensorring
+
 } // namespace eduart
 
 namespace std {
 
-template <> struct hash<eduart::com::ComEndpoint> {
-  std::size_t operator()(const eduart::com::ComEndpoint& ep) const {
+template <> struct hash<eduart::sensorring::com::ComEndpoint> {
+  std::size_t operator()(const eduart::sensorring::com::ComEndpoint& ep) const {
     std::uint32_t packed = (static_cast<std::uint32_t>(ep.direction) << 16) | (static_cast<std::uint32_t>(ep.boardAddress) << 8) | static_cast<std::uint32_t>(ep.deviceId);
     return std::hash<std::uint32_t>{}(packed);
   }

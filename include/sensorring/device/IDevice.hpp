@@ -6,6 +6,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -20,5 +22,7 @@ struct SENSORRING_EXPORT IDevice {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

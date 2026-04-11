@@ -23,6 +23,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 class VL53L8CX_DeviceImpl;
@@ -93,5 +95,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -9,6 +9,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace ring {
 
 void SensorRingFactory::addInterface(com::ComInterfaceID interface) {
@@ -402,5 +404,7 @@ device::DeviceType SensorRingFactory::deviceTypeFromVariant(const DeviceParamsVa
 }
 
 } // namespace ring
+
+} // namespace sensorring
 
 } // namespace eduart

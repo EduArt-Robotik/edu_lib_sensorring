@@ -11,6 +11,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace ring {
 
 SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
@@ -56,5 +58,7 @@ std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com
 }
 
 } // namespace ring
+
+} // namespace sensorring
 
 } // namespace eduart

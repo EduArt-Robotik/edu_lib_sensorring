@@ -22,6 +22,8 @@
 #include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
+
+namespace sensorring {
 // Forward declaration
 namespace com {
 class ComInterface;
@@ -165,5 +167,7 @@ protected:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace subscription {
 
 /**
@@ -64,6 +66,8 @@ private:
 
 } // namespace subscription
 
+} // namespace sensorring
+
 } // namespace eduart
 
 #ifndef SWIG
@@ -73,13 +77,13 @@ namespace std {
  * @struct std::hash<SubscriberToken>
  * @brief Hash specialization for SubscriberToken to enable use in unordered containers.
  */
-template <> struct hash<eduart::subscription::SubscriberToken> {
+template <> struct hash<eduart::sensorring::subscription::SubscriberToken> {
   /**
    * @brief Compute hash value for a SubscriberToken.
    * @param[in] token The token to hash.
    * @return Hash of the token's underlying value.
    */
-  std::size_t operator()(const eduart::subscription::SubscriberToken& token) const noexcept { return std::hash<eduart::subscription::SubscriberToken::TokenType>{}(token.value()); }
+  std::size_t operator()(const eduart::sensorring::subscription::SubscriberToken& token) const noexcept { return std::hash<eduart::sensorring::subscription::SubscriberToken::TokenType>{}(token.value()); }
 };
 
 } // namespace std

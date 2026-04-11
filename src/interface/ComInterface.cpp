@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 ComInterface::ComInterface(ComInterfaceID id)
@@ -98,5 +100,7 @@ bool ComInterface::hasError() const {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

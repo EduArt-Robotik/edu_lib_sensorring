@@ -2,11 +2,15 @@
 
 #include "SensorBoardCommands.hpp"
 
-#include "interface/ComManager.hpp"
 #include <sensorring_transport/Protocol.hpp>
+
+#include "interface/ComManager.hpp"
+
 using namespace eduart::transport::protocol;
 
 namespace eduart {
+
+namespace sensorring {
 
 namespace device {
 
@@ -34,5 +38,7 @@ void cmdEnumerateBoards(com::ComInterfaceID interface) {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -18,6 +18,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 class ComInterface;
 }
@@ -49,5 +51,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

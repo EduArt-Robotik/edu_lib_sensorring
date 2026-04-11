@@ -8,6 +8,8 @@ using namespace eduart::transport::protocol;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 DeviceEnumerator::DeviceEnumerator(com::ComInterface* interface)
@@ -44,5 +46,7 @@ void DeviceEnumerator::comCallback(const com::ComEndpoint, std::uint8_t command,
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -7,6 +7,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 namespace vl53l8 {
@@ -40,5 +42,7 @@ static const double lut_tan_y[] = {
 } // namespace vl53l8
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

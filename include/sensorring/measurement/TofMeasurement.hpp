@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 /**
@@ -29,5 +31,7 @@ struct TofMeasurement {
 };
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

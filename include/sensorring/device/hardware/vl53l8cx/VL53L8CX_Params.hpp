@@ -9,6 +9,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -18,5 +20,7 @@ namespace device {
 struct SENSORRING_EXPORT VL53L8CX_Params : public DeviceParams {};
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -26,6 +26,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 struct SensorBoardParams;
@@ -88,7 +90,7 @@ public:
 
   /// Map of device parameters indexed by device type.
   using DeviceParamsVariant = std::variant<VL53L8CX_Params, HTPA32_Params, WS2812b_Params>;
-  
+
   /// Container for device parameters keyed by device type.
   using DeviceParamsMap = std::unordered_map<DeviceType, DeviceParamsVariant>;
 
@@ -148,5 +150,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

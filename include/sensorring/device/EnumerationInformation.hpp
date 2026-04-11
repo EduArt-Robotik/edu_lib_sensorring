@@ -20,6 +20,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 /**
  * @struct Version
  * @brief Semantic version (major, minor, patch) for firmware or board.
@@ -231,5 +233,7 @@ struct SENSORRING_EXPORT EnumerationInformation {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

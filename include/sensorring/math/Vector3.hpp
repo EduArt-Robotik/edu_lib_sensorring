@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 /**
@@ -79,5 +81,7 @@ struct SENSORRING_EXPORT Vector3 {
 };
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

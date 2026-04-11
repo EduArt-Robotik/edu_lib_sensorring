@@ -13,6 +13,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -36,5 +38,7 @@ enum class LightMode : std::uint8_t {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -13,6 +13,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx) {
@@ -65,5 +67,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -17,6 +17,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 using subscription::SubscriberToken;
@@ -143,5 +145,7 @@ private:
 };
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -6,9 +6,9 @@
 using namespace eduart::transport::protocol;
 #include "sensorring/interface/ComEndpoint.hpp"
 
-using eduart::com::ComEndpoint;
-using eduart::com::Direction;
-using eduart::com::endpointMatches;
+using eduart::sensorring::com::ComEndpoint;
+using eduart::sensorring::com::Direction;
+using eduart::sensorring::com::endpointMatches;
 
 TEST_CASE("ComEndpoint equality", "[ComEndpoint]") {
   ComEndpoint a{ Direction::Input, 6, devbyte::VL53L8CX };

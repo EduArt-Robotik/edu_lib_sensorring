@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 std::string toString(ManagerState state) noexcept {
@@ -26,5 +28,7 @@ std::ostream& operator<<(std::ostream& os, ManagerState state) noexcept {
 }
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

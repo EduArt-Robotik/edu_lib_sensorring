@@ -7,10 +7,11 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 namespace htpa32 {
-
 
 // DEVICE ADDRESS
 #define SENSOR_ADDRESS 0x1A
@@ -1822,5 +1823,7 @@ static const unsigned int YADValues[NROFADELEMENTS] = {
 } // namespace htpa32
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

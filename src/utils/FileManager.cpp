@@ -11,6 +11,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace filemanager {
 
 //==================================================
@@ -240,5 +242,7 @@ template <typename T> bool StructHandler<T>::readStructFromFile(const std::strin
 }
 
 } // namespace filemanager
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 DeviceGroup::DeviceGroup(std::vector<device::IDevice*> devices)
@@ -23,5 +25,7 @@ void DeviceGroup::invokeForEachDevice(std::function<void(device::IDevice*)> call
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

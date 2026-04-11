@@ -4,8 +4,8 @@
 
 #include "sensorring/device/DeviceID.hpp"
 
-using eduart::device::DeviceID;
-using eduart::device::DeviceType;
+using eduart::sensorring::device::DeviceID;
+using eduart::sensorring::device::DeviceType;
 
 TEST_CASE("DeviceID construction and defaults", "[DeviceID]") {
   SECTION("default construction") {

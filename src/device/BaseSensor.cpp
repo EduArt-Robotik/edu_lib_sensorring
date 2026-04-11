@@ -5,6 +5,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
@@ -112,5 +114,7 @@ void BaseSensor::clearDataFlag() {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -16,6 +16,8 @@ using namespace eduart::transport::protocol;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 USBtingo::USBtingo(std::string id)
@@ -166,5 +168,7 @@ bool USBtingo::repairInterface() {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

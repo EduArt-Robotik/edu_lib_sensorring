@@ -5,6 +5,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 std::string Version::toString() const {
   std::ostringstream oss;
   oss << major << '.' << minor << '.' << patch;
@@ -160,5 +162,7 @@ std::string EnumerationInformation::toString() const {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

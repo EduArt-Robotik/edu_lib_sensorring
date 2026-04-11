@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 namespace {
@@ -50,5 +52,7 @@ std::string ComEndpoint::toString() const {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

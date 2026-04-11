@@ -22,6 +22,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 class HTPA32_DeviceImpl;
@@ -116,5 +118,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

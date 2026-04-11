@@ -20,6 +20,8 @@ using namespace eduart::transport::protocol;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
@@ -209,5 +211,7 @@ bool SocketCANFD::repairInterface() {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

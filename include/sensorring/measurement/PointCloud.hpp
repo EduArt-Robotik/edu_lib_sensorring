@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 /**
@@ -53,5 +55,7 @@ struct SENSORRING_EXPORT PointCloud {
 };
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

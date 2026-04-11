@@ -5,6 +5,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 WS2812b_DeviceImpl::WS2812b_DeviceImpl(WS2812b_Device& parent, WS2812b_Params params, com::ComInterface* interface)
@@ -33,5 +35,7 @@ void WS2812b_DeviceImpl::onClearDataFlag() {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

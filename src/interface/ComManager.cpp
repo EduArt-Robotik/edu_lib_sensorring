@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 ComManager* ComManager::getInstance() noexcept {
@@ -103,5 +105,7 @@ std::vector<ComInterface*> ComManager::getInterfaces() {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

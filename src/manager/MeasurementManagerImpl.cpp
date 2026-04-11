@@ -15,6 +15,8 @@ using namespace std::chrono_literals;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
@@ -595,5 +597,7 @@ void MeasurementManagerImpl::StateMachine() {
 }
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -1,4 +1,4 @@
-// Unit tests for eduart::device::DeviceGroup (group of BaseDevice pointers, iteration, filtering by type).
+// Unit tests for eduart::sensorring::device::DeviceGroup (group of BaseDevice pointers, iteration, filtering by type).
 
 #include <catch2/catch_all.hpp>
 #include <functional>
@@ -12,20 +12,20 @@ using namespace eduart::transport::protocol;
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 
-using eduart::com::ComEndpoint;
-using eduart::com::ComInterface;
-using eduart::com::Direction;
-using eduart::device::BaseDevice;
-using eduart::device::DeviceGroup;
-using eduart::device::DeviceID;
-using eduart::device::DeviceType;
-using eduart::device::IDevice;
+using eduart::sensorring::com::ComEndpoint;
+using eduart::sensorring::com::ComInterface;
+using eduart::sensorring::com::Direction;
+using eduart::sensorring::device::BaseDevice;
+using eduart::sensorring::device::DeviceGroup;
+using eduart::sensorring::device::DeviceID;
+using eduart::sensorring::device::DeviceType;
+using eduart::sensorring::device::IDevice;
 
 // Minimal ComInterface implementation for unit tests (no I/O).
 class MockComInterface : public ComInterface {
 public:
   MockComInterface()
-      : ComInterface(eduart::com::ComInterfaceID{}) {}
+      : ComInterface(eduart::sensorring::com::ComInterfaceID{}) {}
 
   bool send(ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override { return true; }
   bool openInterface() override { return true; }

@@ -4,6 +4,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 Vector3& Matrix3::operator[](std::size_t idx) {
@@ -74,5 +76,7 @@ Matrix3 Matrix3::operator/(const double& other) const {
 }
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

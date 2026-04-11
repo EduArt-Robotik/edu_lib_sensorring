@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 /**
  * @struct SensorBoardParams
@@ -31,5 +33,7 @@ struct SensorBoardParams {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart
