@@ -1,0 +1,3 @@
+[submodule "external/edu_sensorring_transport"]
+	path = external/edu_sensorring_transport
+	url = git@github.com:EduArt-Robotik/edu_sensorring_transport.git
