@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 struct Rate {
   using Clock     = std::chrono::steady_clock;
   using Duration  = Clock::duration;
@@ -58,5 +60,7 @@ private:
   Duration duration          = Duration::zero();
   TimePoint last_measurement = Clock::time_point::min();
 };
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -16,7 +16,7 @@
 
 #include "CustomProxy.hpp"
 
-using namespace eduart;
+using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")

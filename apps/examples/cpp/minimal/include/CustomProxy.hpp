@@ -19,6 +19,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 /**
  * @class Proxy class that implements the sensorring callbacks to get
  * measurements and the log output of the sensorring library
@@ -70,5 +72,7 @@ public:
 private:
   std::vector<subscription::Subscription> _subscriptions;
 };
+
+} // namespace sensorring
 
 } // namespace eduart
