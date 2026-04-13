@@ -198,6 +198,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/math/Math.hpp"
 
 
+%rename (LogVerbosityToString) eduart::sensorring::logger::toString(LogVerbosity);
 %include "sensorring/logger/LogVerbosity.hpp"
 
 
@@ -241,6 +242,7 @@ typedef ::int64_t int64_t;
 
 %include "sensorring/device/DeviceParams.hpp"
 
+%rename (Orientation_None) eduart::sensorring::device::Orientation::None;
 %include "sensorring/device/Orientation.hpp"
 
 %include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
@@ -299,6 +301,8 @@ typedef ::int64_t int64_t;
 
 %rename (ConnectionStateToString) eduart::sensorring::device::toString(ConnectionState);
 %rename (ConfigurationStateToString) eduart::sensorring::device::toString(ConfigurationState);
+%warnfilter(503) eduart::sensorring::Version;
+%warnfilter(503) eduart::sensorring::CommitHash;
 %template (DeviceTypeVector) std::vector<eduart::sensorring::device::DeviceType>;
 %include "sensorring/device/EnumerationInformation.hpp"
 
@@ -540,7 +544,7 @@ void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mg
 
 
 %rename (LogVerbosityToString) toString(LogVerbosity);
-%include "sensorring/logger/LoggerTypes.hpp"
+%include "sensorring/logger/LogVerbosity.hpp"
 
 
 %catches(std::runtime_error) eduart::sensorring::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
