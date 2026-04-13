@@ -293,8 +293,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::pre_loop_init;
     } else {
       logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check "
-                                       "configuration and restart.");
+          logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
       _measurement_state = MeasurementState::shutdown;
     }
     break;

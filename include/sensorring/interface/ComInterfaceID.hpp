@@ -59,6 +59,7 @@ inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
 
 } // namespace eduart
 
+#ifndef SWIG
 namespace std {
 
 /**
@@ -79,3 +80,4 @@ template <> struct hash<eduart::sensorring::com::ComInterfaceID> {
 };
 
 } // namespace std
+#endif // SWIG

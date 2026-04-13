@@ -87,9 +87,6 @@ private:
    */
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
-  void onResetSensorState() override;
-  void onClearDataFlag() override;
-
   friend class VL53L8CX_DeviceImpl;
   std::unique_ptr<VL53L8CX_DeviceImpl> _impl;
 };

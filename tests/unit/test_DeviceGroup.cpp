@@ -2,12 +2,12 @@
 
 #include <catch2/catch_all.hpp>
 #include <functional>
+#include <sensorring_transport/Protocol.hpp>
 #include <string>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include <sensorring_transport/Protocol.hpp>
-using namespace eduart::transport::protocol;
+using namespace eduart::sensorring::transport::protocol;
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
@@ -40,7 +40,7 @@ protected:
 class TestDeviceA : public BaseDevice {
 public:
   TestDeviceA(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, idx }, iface, ComEndpoint{ Direction::Input, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, false) {}
+      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, idx }, iface, ComEndpoint{ Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}
@@ -51,7 +51,7 @@ public:
 class TestDeviceB : public BaseDevice {
 public:
   TestDeviceB(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::HTPA32, idx }, iface, ComEndpoint{ Direction::Input, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, false) {}
+      : BaseDevice(DeviceID{ DeviceType::HTPA32, idx }, iface, ComEndpoint{ Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}

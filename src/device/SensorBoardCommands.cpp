@@ -6,7 +6,7 @@
 
 #include "interface/ComManager.hpp"
 
-using namespace eduart::transport::protocol;
+using namespace eduart::sensorring::transport::protocol;
 
 namespace eduart {
 
@@ -17,7 +17,7 @@ namespace device {
 bool resetBoards() {
   bool success = true;
   for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
-    success &= iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::RESET, {});
+    success &= iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::RESET, {});
   }
   return success;
 }
@@ -33,7 +33,7 @@ void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable) {
 void cmdEnumerateBoards(com::ComInterfaceID interface) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (iface) {
-    iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {});
+    iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {});
   }
 }
 

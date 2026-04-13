@@ -6,8 +6,8 @@
 #include "device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
 
-using namespace eduart::transport::protocol;
-using namespace eduart::transport::protocol::vl53l8cx;
+using namespace eduart::sensorring::transport::protocol;
+using namespace eduart::sensorring::transport::protocol::vl53l8cx;
 
 namespace eduart {
 
@@ -16,7 +16,7 @@ namespace sensorring {
 namespace device {
 
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, params.enable)
+    : BaseDevice(DeviceID({ DeviceType::VL53L8CX, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, params.enable)
     , _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 
@@ -33,14 +33,6 @@ std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_Device::getL
 
 std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_Device::getLatestTransformedMeasurement() const {
   return _impl->getLatestTransformedMeasurement();
-}
-
-void VL53L8CX_Device::onResetSensorState() {
-  _impl->onResetSensorState();
-}
-
-void VL53L8CX_Device::onClearDataFlag() {
-  _impl->onClearDataFlag();
 }
 
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
@@ -130,7 +122,7 @@ std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(const std::vector<
       uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
       uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
       std::vector<uint8_t> tx_buf{ count, sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::VL53L8CX }, MEASUREMENT_REQUEST, tx_buf);
+      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::VL53L8CX }, MEASUREMENT_REQUEST, tx_buf);
     }
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
@@ -184,7 +176,7 @@ std::future<bool> VL53L8CX_Device::fetchTofMeasurementAsync(const std::vector<VL
       uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
       uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
       std::vector<uint8_t> tx_buf{ sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::VL53L8CX }, MEASUREMENT_TRANSMISSION_REQUEST, tx_buf);
+      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::VL53L8CX }, MEASUREMENT_TRANSMISSION_REQUEST, tx_buf);
     }
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;

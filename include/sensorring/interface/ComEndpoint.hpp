@@ -22,11 +22,12 @@ namespace com {
 
 /**
  * @enum Direction
- * @brief Communication direction on the CAN bus.
+ * @brief Communication direction on the CAN bus, from the board's perspective.
  */
 enum class Direction : std::uint8_t {
-  Input  = 0, ///< Board -> host
-  Output = 1  ///< Host -> board
+  Input     = 0, ///< Host -> Board (board receives)
+  Broadcast = 0, ///< Alias for Input; used with broadcast board address
+  Output    = 1  ///< Board -> Host (board sends)
 };
 
 /**
@@ -34,7 +35,7 @@ enum class Direction : std::uint8_t {
  * @brief Uniquely identifies a communication endpoint as a (Direction, BoardAddress, DeviceId) tuple.
  */
 struct SENSORRING_EXPORT ComEndpoint {
-  Direction direction;       ///< board->host (Input) or host->board (Output)
+  Direction direction;       ///< Host->Board (Input) or Board->Host (Output)
   std::uint8_t boardAddress; ///< 0 = broadcast, 1-126 = individual board (board_index + 1)
   std::uint8_t deviceId;     ///< 0x00 = board, 0x01 = ToF, 0x02 = Thermal, 0x03 = WS2812b
 

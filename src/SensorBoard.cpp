@@ -7,7 +7,7 @@
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
 
-using namespace eduart::transport::protocol;
+using namespace eduart::sensorring::transport::protocol;
 
 namespace eduart {
 
@@ -25,7 +25,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
       [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
         this->comCallback(source, command, data);
   },
-      { com::ComEndpoint{ com::Direction::Input, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
+      { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
 }
 
 SensorBoard::~SensorBoard() {

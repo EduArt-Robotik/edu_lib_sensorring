@@ -12,7 +12,8 @@
 #include <usbtingo/device/DeviceFactory.hpp>
 
 #include "sensorring/logger/Logger.hpp"
-using namespace eduart::transport::protocol;
+
+using namespace eduart::sensorring::transport::protocol;
 
 namespace eduart {
 

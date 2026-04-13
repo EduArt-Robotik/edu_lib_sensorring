@@ -12,8 +12,8 @@
 
 #include "HTPA32_Eeprom.hpp"
 
-using namespace eduart::transport::protocol;
-using namespace eduart::transport::protocol::htpa32;
+using namespace eduart::sensorring::transport::protocol;
+using namespace eduart::sensorring::transport::protocol::htpa32;
 
 namespace eduart {
 
@@ -24,10 +24,8 @@ namespace device {
 HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params, com::ComInterface* interface, unsigned int idx)
     : _parent(parent)
     , _params(params) {
-  _rx_buffer_offset = 0;
   (void)interface;
   (void)idx;
-  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
 
   _vdd  = 0;
   _ptat = 0;
@@ -89,14 +87,8 @@ bool HTPA32_DeviceImpl::startCalibration(unsigned int window) {
   return true;
 }
 
-void HTPA32_DeviceImpl::onResetSensorState() {
-  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
-  _rx_buffer_offset = 0;
-}
 
 void HTPA32_DeviceImpl::onClearDataFlag() {
-  std::fill(std::begin(_rx_buffer), std::end(_rx_buffer), 0);
-  _rx_buffer_offset      = 0;
   _has_ready_measurement = false;
 }
 
@@ -127,12 +119,11 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
     // Complete thermal measurement data delivered by reassembly layer.
     // Expected format: [VDD_h, VDD_l, PTAT_h, PTAT_l, <2560 bytes pixel data>]
-    if (!_has_ready_measurement && data.size() >= (4 + sizeof(_rx_buffer))) {
+    if (!_has_ready_measurement) {
       _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
       _ptat = (uint16_t)(data[2] << 0 | data[3] << 8);
-      std::copy_n(data.begin() + 4, sizeof(_rx_buffer), _rx_buffer);
 
-      std::tie(_latest_measurement, _parent._error) = processMeasurement(0, _rx_buffer, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+      std::tie(_latest_measurement, _parent._error) = processMeasurement(0, data.data() + 4, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
       if (_parent._error == DeviceState::Ok) {
         if (_calibration_active && _measurement_init_counter > 5) {
           if (_calibration_count_current < _calibration_count_goal) {
@@ -196,7 +187,7 @@ std::future<bool> HTPA32_DeviceImpl::getEepromAsync(std::chrono::milliseconds ti
     uint8_t sensor_select_high  = (uint8_t)(sensor_select >> 8);
     uint8_t sensor_select_low   = (uint8_t)(sensor_select >> 0);
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };
-    _parent._interface->send(com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, EEPROM_TRANSMISSION_REQUEST, tx_buf);
+    _parent._interface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, EEPROM_TRANSMISSION_REQUEST, tx_buf);
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     std::unique_lock<std::mutex> lock(_parent._state_mutex);

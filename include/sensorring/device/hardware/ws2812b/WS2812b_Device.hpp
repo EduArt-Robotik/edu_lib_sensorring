@@ -72,9 +72,6 @@ private:
    */
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
-  void onResetSensorState() override;
-  void onClearDataFlag() override;
-
   friend class WS2812b_DeviceImpl;
   std::unique_ptr<WS2812b_DeviceImpl> _impl;
 };

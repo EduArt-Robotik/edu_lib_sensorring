@@ -32,10 +32,15 @@ bool ComEndpoint::operator!=(const ComEndpoint& other) const {
 }
 
 std::string ComEndpoint::toString() const {
-  std::string result = (direction == Direction::Input) ? "Input/" : "Output/";
+  std::string result;
+  if (direction == Direction::Input && boardAddress == BROADCAST) {
+    result = "Broadcast/";
+  } else {
+    result = (direction == Direction::Input) ? "Input/" : "Output/";
+  }
 
   if (boardAddress == BROADCAST) {
-    result += "Broadcast/";
+    result += "All/";
   } else if (boardAddress == ANY_BOARD) {
     result += "ANY/";
   } else {

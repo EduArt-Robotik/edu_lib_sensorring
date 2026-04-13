@@ -47,6 +47,7 @@ public:
    * @param[in] enable Initial enabled state of the sensor.
    */
   BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
+
   /// Destructor
   virtual ~BaseSensor();
 
@@ -118,14 +119,14 @@ protected:
    *
    * Implementations should reset any additional state related to errors or measurements.
    */
-  virtual void onResetSensorState() = 0;
+  virtual void onResetSensorState() {};
 
   /**
    * @brief Sensor-specific hook invoked from clearDataFlag().
    *
    * Implementations should clear any additional flags related to buffered data.
    */
-  virtual void onClearDataFlag() = 0;
+  virtual void onClearDataFlag() {};
 
   /**
    * @brief Handle an incoming communication message for this sensor.
