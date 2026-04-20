@@ -68,7 +68,7 @@ else()
   FetchContent_Declare(
     edu_sensorring_transport
     GIT_REPOSITORY https://github.com/EduArt-Robotik/edu_sensorring_transport.git
-    GIT_TAG        main
+    GIT_TAG        master
   )
   FetchContent_MakeAvailable(edu_sensorring_transport)
 endif()

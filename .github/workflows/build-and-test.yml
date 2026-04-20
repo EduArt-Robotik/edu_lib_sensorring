@@ -54,6 +54,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
       
       - name: Configure CMake
+        shell: bash
         run: |
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
@@ -62,10 +63,12 @@ jobs:
             -DCMAKE_CXX_STANDARD=17
       
       - name: Build
+        shell: bash
         run: |
           cmake --build build --config ${{ matrix.build-type }} -j4
       
       - name: Run tests
+        shell: bash
         working-directory: build
         run: |
           ctest --output-on-failure --build-config ${{ matrix.build-type }}
