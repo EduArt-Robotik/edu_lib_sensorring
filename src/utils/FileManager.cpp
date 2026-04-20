@@ -34,10 +34,10 @@ bool PathHandler::checkDirectory(std::string path) {
 bool PathHandler::checkDirectory(std::filesystem::path path) {
   if (!path.empty()) {
     if (!std::filesystem::exists(path)) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, std::string("Directory " + path.u8string() + " doesn't exist, creating the directory now."));
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Directory " + path.string() + " doesn't exist, creating the directory now.");
       if (!std::filesystem::create_directories(path)) {
         if (!std::filesystem::exists(path)) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, std::string("Creating directory " + path.u8string() + " failed!"));
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Creating directory " + path.string() + " failed!");
           return false;
         }
       }
