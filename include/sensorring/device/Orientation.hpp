@@ -12,6 +12,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -25,5 +27,7 @@ enum class Orientation {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

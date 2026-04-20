@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 /// Thermal image resolution constant (32x32).
 static constexpr unsigned int THERMAL_RESOLUTION = 1024;
 
@@ -116,5 +118,7 @@ template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericRG
 };
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -26,6 +26,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace ring {
 
 /**
@@ -74,7 +76,7 @@ public:
   using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<device::EnumerationInformation> >;
 
   /// Minimum sensor board firmware version required by this library version.
-  static constexpr Version MIN_FIRMWARE_VERSION = { 0, 8, 0 };
+  static constexpr Version MIN_FIRMWARE_VERSION = { 0, 9, 0 };
 
   /**
    * @brief Add a communication interface (bus) to scan during build().
@@ -172,5 +174,7 @@ private:
 };
 
 } // namespace ring
+
+} // namespace sensorring
 
 } // namespace eduart

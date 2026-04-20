@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m) {
@@ -32,5 +34,7 @@ const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad) {
 }
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

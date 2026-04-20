@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 /**
@@ -46,5 +48,7 @@ SENSORRING_EXPORT const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotatio
 SENSORRING_EXPORT const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad);
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

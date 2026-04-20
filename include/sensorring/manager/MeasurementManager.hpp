@@ -23,6 +23,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 // Forward declaration of implementation class
@@ -119,5 +121,7 @@ private:
 };
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

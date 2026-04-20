@@ -9,8 +9,8 @@
 #include <thread>
 #include <vector>
 
-using eduart::subscription::Publisher;
-using eduart::subscription::Subscription;
+using eduart::sensorring::subscription::Publisher;
+using eduart::sensorring::subscription::Subscription;
 
 // ---------------------------------------------------------------------------
 // Basic subscribe / publish
@@ -116,7 +116,7 @@ TEST_CASE("Publisher: publish with no subscribers does nothing", "[Publisher]") 
 
 TEST_CASE("Publisher: unsubscribe with unknown token is a no-op", "[Publisher]") {
   Publisher<> pub;
-  auto bogus = eduart::subscription::SubscriberToken::getNextToken();
+  auto bogus = eduart::sensorring::subscription::SubscriberToken::getNextToken();
   REQUIRE_NOTHROW(pub.unsubscribe(bogus));
 }
 

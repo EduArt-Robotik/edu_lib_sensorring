@@ -4,6 +4,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 void PointCloud::copyTo(double* buffer, int size) {
@@ -25,5 +27,7 @@ void PointCloud::copyTo(double* buffer, int size) {
 }
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

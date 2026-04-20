@@ -19,6 +19,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 class WS2812b_DeviceImpl;
@@ -68,15 +70,14 @@ private:
    * @param[in] source Endpoint that delivered the data.
    * @param[in] data   Raw payload received from the device.
    */
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data) override;
-
-  void onResetSensorState() override;
-  void onClearDataFlag() override;
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
   friend class WS2812b_DeviceImpl;
   std::unique_ptr<WS2812b_DeviceImpl> _impl;
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

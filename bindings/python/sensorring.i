@@ -169,8 +169,8 @@ typedef ::int64_t int64_t;
 
 %import "sensorring/platform/SensorringExport.hpp"
 
-%ignore eduart::math::Vector3::operator[];
-%extend eduart::math::Vector3 {
+%ignore eduart::sensorring::math::Vector3::operator[];
+%extend eduart::sensorring::math::Vector3 {
     double __getitem__(int idx) {
         return $self->operator[](idx);
     }
@@ -182,22 +182,23 @@ typedef ::int64_t int64_t;
 %include "sensorring/math/Vector3.hpp"
 
 
-%ignore eduart::math::Matrix3::operator[];
-%extend eduart::math::Matrix3 {
-    eduart::math::Vector3& __getitem__(int idx) {
+%ignore eduart::sensorring::math::Matrix3::operator[];
+%extend eduart::sensorring::math::Matrix3 {
+    eduart::sensorring::math::Vector3& __getitem__(int idx) {
         return $self->operator[](idx);
     }
-    void __setitem__(int idx, const eduart::math::Vector3 &value) {
+    void __setitem__(int idx, const eduart::sensorring::math::Vector3 &value) {
         $self->operator[](idx) = value;
     }
 }
-%template (MatrixDataArray) std::array<eduart::math::Vector3, 3>;
+%template (MatrixDataArray) std::array<eduart::sensorring::math::Vector3, 3>;
 %include "sensorring/math/Matrix3.hpp"
 
 
 %include "sensorring/math/Math.hpp"
 
 
+%rename (LogVerbosityToString) eduart::sensorring::logger::toString(LogVerbosity);
 %include "sensorring/logger/LogVerbosity.hpp"
 
 
@@ -219,12 +220,12 @@ typedef ::int64_t int64_t;
 %include "sensorring/subscription/Subscription.hpp"
 
 
-%template (PointDataVector) std::vector<eduart::measurement::PointData>;
+%template (PointDataVector) std::vector<eduart::sensorring::measurement::PointData>;
 %include "sensorring/measurement/TofMeasurement.hpp"
 
-%template (TemperatureImageTemplate) eduart::measurement::GenericGrayscaleImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
-%template (GrayscaleImageTemplate) eduart::measurement::GenericGrayscaleImage<double, eduart::THERMAL_RESOLUTION>;
-%template (FalseColorImageTemplate) eduart::measurement::GenericRGBImage<std::uint8_t, eduart::THERMAL_RESOLUTION>;
+%template (TemperatureImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
+%template (GrayscaleImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<double, eduart::sensorring::THERMAL_RESOLUTION>;
+%template (FalseColorImageTemplate) eduart::sensorring::measurement::GenericRGBImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
 %include "sensorring/measurement/ThermalMeasurement.hpp"
 
 
@@ -232,7 +233,7 @@ typedef ::int64_t int64_t;
  * Device type hierarchy
  */
 
-%rename (DeviceTypeToString) eduart::device::toString(DeviceType);
+%rename (DeviceTypeToString) eduart::sensorring::device::toString(DeviceType);
 %include "sensorring/device/DeviceType.hpp"
 
 
@@ -241,6 +242,7 @@ typedef ::int64_t int64_t;
 
 %include "sensorring/device/DeviceParams.hpp"
 
+%rename (Orientation_None) eduart::sensorring::device::Orientation::None;
 %include "sensorring/device/Orientation.hpp"
 
 %include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
@@ -252,7 +254,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 
 
-%rename (SensorBoardTypeToString) eduart::device::toString(SensorBoardType);
+%rename (SensorBoardTypeToString) eduart::sensorring::device::toString(SensorBoardType);
 %include "sensorring/device/hardware/SensorBoardType.hpp"
 
 
@@ -264,13 +266,13 @@ typedef ::int64_t int64_t;
  */
 
 %import "sensorring/device/IDevice.hpp"
-%ignore eduart::device::DeviceGroup::DeviceGroup;
-%ignore eduart::device::DeviceGroup::getDevices;
-%ignore eduart::device::DeviceGroup::invokeForEachDevice;
-%ignore eduart::device::DeviceGroup::getDevicesOfType;
-%ignore eduart::device::DeviceGroup::invokeForEachDeviceOfType;
-%ignore eduart::device::DeviceGroup::createFromDevicesOfType;
-%ignore eduart::device::DeviceGroup::waitForAll;
+%ignore eduart::sensorring::device::DeviceGroup::DeviceGroup;
+%ignore eduart::sensorring::device::DeviceGroup::getDevices;
+%ignore eduart::sensorring::device::DeviceGroup::invokeForEachDevice;
+%ignore eduart::sensorring::device::DeviceGroup::getDevicesOfType;
+%ignore eduart::sensorring::device::DeviceGroup::invokeForEachDeviceOfType;
+%ignore eduart::sensorring::device::DeviceGroup::createFromDevicesOfType;
+%ignore eduart::sensorring::device::DeviceGroup::waitForAll;
 %include "sensorring/device/DeviceGroup.hpp"
 
 
@@ -289,7 +291,7 @@ typedef ::int64_t int64_t;
 %typemap(out) std::chrono::milliseconds {
     $result = PyLong_FromLongLong($1.count());
 }
-%rename(timeout_ms) eduart::manager::ManagerParams::timeout;
+%rename(timeout_ms) eduart::sensorring::manager::ManagerParams::timeout;
 %include "sensorring/manager/ManagerParams.hpp"
 
 
@@ -297,12 +299,14 @@ typedef ::int64_t int64_t;
  * Enumeration information
  */
 
-%rename (ConnectionStateToString) eduart::device::toString(ConnectionState);
-%rename (ConfigurationStateToString) eduart::device::toString(ConfigurationState);
-%template (DeviceTypeVector) std::vector<eduart::device::DeviceType>;
+%rename (ConnectionStateToString) eduart::sensorring::device::toString(ConnectionState);
+%rename (ConfigurationStateToString) eduart::sensorring::device::toString(ConfigurationState);
+%warnfilter(503) eduart::sensorring::Version;
+%warnfilter(503) eduart::sensorring::CommitHash;
+%template (DeviceTypeVector) std::vector<eduart::sensorring::device::DeviceType>;
 %include "sensorring/device/EnumerationInformation.hpp"
 
-%rename (ManagerStateToString) eduart::manager::toString(ManagerState);
+%rename (ManagerStateToString) eduart::sensorring::manager::toString(ManagerState);
 %include "sensorring/manager/ManagerState.hpp"
 
 
@@ -312,38 +316,38 @@ typedef ::int64_t int64_t;
 
 // SWIG cannot handle std::variant or std::unique_ptr natively.
 // We ignore the C++ methods that use them and provide typed alternatives.
-%ignore eduart::ring::SensorRingFactory::DeviceParamsVariant;
-%ignore eduart::ring::SensorRingFactory::EnumerationMap;
-%ignore eduart::ring::SensorRingFactory::build;
-%ignore eduart::ring::SensorRingFactory::enumerate;
-%ignore eduart::ring::SensorRingFactory::getLatestEnumerationResult;
-%ignore eduart::ring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
-%ignore eduart::ring::SensorRingFactory::setDefaultDeviceParams;
-%ignore eduart::ring::SensorRingFactory::buildDefaultParamsMap;
+%ignore eduart::sensorring::ring::SensorRingFactory::DeviceParamsVariant;
+%ignore eduart::sensorring::ring::SensorRingFactory::EnumerationMap;
+%ignore eduart::sensorring::ring::SensorRingFactory::build;
+%ignore eduart::sensorring::ring::SensorRingFactory::enumerate;
+%ignore eduart::sensorring::ring::SensorRingFactory::getLatestEnumerationResult;
+%ignore eduart::sensorring::ring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
+%ignore eduart::sensorring::ring::SensorRingFactory::setDefaultDeviceParams;
+%ignore eduart::sensorring::ring::SensorRingFactory::buildDefaultParamsMap;
 
 %include "sensorring/SensorRingFactory.hpp"
 
 // Typed alternatives for std::variant-based methods
-%extend eduart::ring::SensorRingFactory {
-    void setDefaultVL53L8CXParams(eduart::device::VL53L8CX_Params params) {
+%extend eduart::sensorring::ring::SensorRingFactory {
+    void setDefaultVL53L8CXParams(eduart::sensorring::device::VL53L8CX_Params params) {
         $self->setDefaultDeviceParams(std::move(params));
     }
-    void setDefaultHTPA32Params(eduart::device::HTPA32_Params params) {
+    void setDefaultHTPA32Params(eduart::sensorring::device::HTPA32_Params params) {
         $self->setDefaultDeviceParams(std::move(params));
     }
-    void setDefaultWS2812bParams(eduart::device::WS2812b_Params params) {
+    void setDefaultWS2812bParams(eduart::sensorring::device::WS2812b_Params params) {
         $self->setDefaultDeviceParams(std::move(params));
     }
 
     // expectBoard with explicit device params (replaces the std::variant overload).
     // Called from Python via the expectBoard() wrapper below.
     void _expectBoardWithDevices(
-        eduart::device::SensorBoardParams board_params,
-        eduart::device::VL53L8CX_Params* vl53,
-        eduart::device::HTPA32_Params* htpa,
-        eduart::device::WS2812b_Params* ws)
+        eduart::sensorring::device::SensorBoardParams board_params,
+        eduart::sensorring::device::VL53L8CX_Params* vl53,
+        eduart::sensorring::device::HTPA32_Params* htpa,
+        eduart::sensorring::device::WS2812b_Params* ws)
     {
-        std::vector<eduart::ring::SensorRingFactory::DeviceParamsVariant> device_params;
+        std::vector<eduart::sensorring::ring::SensorRingFactory::DeviceParamsVariant> device_params;
         if (vl53) device_params.push_back(*vl53);
         if (htpa) device_params.push_back(*htpa);
         if (ws)   device_params.push_back(*ws);
@@ -355,21 +359,21 @@ typedef ::int64_t int64_t;
 %inline %{
 namespace eduart { namespace ring {
 
-  eduart::ring::SensorRing* SensorRingFactory_build(eduart::ring::SensorRingFactory* factory, eduart::ring::ValidationMode mode = eduart::ring::ValidationMode::Strict) {
+  eduart::sensorring::ring::SensorRing* SensorRingFactory_build(eduart::sensorring::ring::SensorRingFactory* factory, eduart::sensorring::ring::ValidationMode mode = eduart::sensorring::ring::ValidationMode::Strict) {
     auto ptr = factory->build(mode);
     return ptr.release();
   }
 
-  std::string SensorRingFactory_enumerate_str(eduart::ring::SensorRingFactory* factory) {
+  std::string SensorRingFactory_enumerate_str(eduart::sensorring::ring::SensorRingFactory* factory) {
     factory->enumerate();
     return factory->printTopology();
   }
 
 }}
 %}
-%newobject eduart::ring::SensorRingFactory_build;
+%newobject eduart::sensorring::ring::SensorRingFactory_build;
 
-%exception eduart::ring::SensorRingFactory_build {
+%exception eduart::sensorring::ring::SensorRingFactory_build {
     try {
         $action
     } catch (const std::exception& e) {
@@ -418,25 +422,25 @@ SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 namespace eduart { namespace manager {
 
   /** Factory for Python bindings: takes ownership of sensor_ring. */
-  eduart::manager::MeasurementManager* make_MeasurementManager(eduart::manager::ManagerParams params, eduart::ring::SensorRing* sensor_ring) {
-    return new eduart::manager::MeasurementManager(params, std::unique_ptr<eduart::ring::SensorRing>(sensor_ring));
+  eduart::sensorring::manager::MeasurementManager* make_MeasurementManager(eduart::sensorring::manager::ManagerParams params, eduart::sensorring::ring::SensorRing* sensor_ring) {
+    return new eduart::sensorring::manager::MeasurementManager(params, std::unique_ptr<eduart::sensorring::ring::SensorRing>(sensor_ring));
   }
 
 }}  // namespace eduart::manager
 %}
 
-%newobject eduart::manager::make_MeasurementManager(eduart::manager::ManagerParams, eduart::ring::SensorRing*);
+%newobject eduart::sensorring::manager::make_MeasurementManager(eduart::sensorring::manager::ManagerParams, eduart::sensorring::ring::SensorRing*);
 
 // When passing a SensorRing into the factory, transfer ownership from Python to C++.
-%typemap(in) eduart::ring::SensorRing* sensor_ring (int res = 0, void* argp = nullptr) {
-  res = SWIG_ConvertPtr($input, &argp, $descriptor(eduart::ring::SensorRing*), SWIG_POINTER_DISOWN);
+%typemap(in) eduart::sensorring::ring::SensorRing* sensor_ring (int res = 0, void* argp = nullptr) {
+  res = SWIG_ConvertPtr($input, &argp, $descriptor(eduart::sensorring::ring::SensorRing*), SWIG_POINTER_DISOWN);
   if (!SWIG_IsOK(res)) {
-    SWIG_exception_fail(SWIG_ArgError(res), "in method \"$symname\", argument $argnum of type \"eduart::ring::SensorRing *\" (ownership transferred)");
+    SWIG_exception_fail(SWIG_ArgError(res), "in method \"$symname\", argument $argnum of type \"eduart::sensorring::ring::SensorRing *\" (ownership transferred)");
   }
-  $1 = reinterpret_cast<eduart::ring::SensorRing*>(argp);
+  $1 = reinterpret_cast<eduart::sensorring::ring::SensorRing*>(argp);
 }
 
-%exception eduart::manager::make_MeasurementManager {
+%exception eduart::sensorring::manager::make_MeasurementManager {
     try {
         $action
     } catch (const std::exception& e) {
@@ -452,7 +456,7 @@ namespace eduart { namespace manager {
 // enqueueExtraAction helper: accepts a Python callable and wraps it in std::function<void()>
 %{
 static void Manager_enqueueExtraAction_py(
-    eduart::manager::MeasurementManager* mgr, PyObject* callable) {
+    eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -470,7 +474,7 @@ static void Manager_enqueueExtraAction_py(
   );
 }
 %}
-void Manager_enqueueExtraAction_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
+void Manager_enqueueExtraAction_py(eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable);
 
 // Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
 %pythoncode %{
@@ -484,14 +488,14 @@ MeasurementManager.__init__ = _MeasurementManager_init
 // WS2812b_Device: only expose the static setLight/syncLight helpers, not the full device class.
 %{
 static bool WS2812b_setLight(int mode, int red, int green, int blue) {
-  return eduart::device::WS2812b_Device::setLight(
-    static_cast<eduart::device::LightMode>(mode),
+  return eduart::sensorring::device::WS2812b_Device::setLight(
+    static_cast<eduart::sensorring::device::LightMode>(mode),
     static_cast<std::uint8_t>(red),
     static_cast<std::uint8_t>(green),
     static_cast<std::uint8_t>(blue));
 }
 static bool WS2812b_syncLight() {
-  return eduart::device::WS2812b_Device::syncLight();
+  return eduart::sensorring::device::WS2812b_Device::syncLight();
 }
 %}
 bool WS2812b_setLight(int mode, int red, int green, int blue);
@@ -501,20 +505,20 @@ bool WS2812b_syncLight();
 // DeviceGroup typed query helpers: access device-specific data without exposing
 // the templated getDevicesOfType<T>() or the full device classes.
 %{
-static std::size_t DeviceGroup_getVL53L8CXCount(const eduart::device::DeviceGroup& group) {
-  return group.getDevicesOfType<eduart::device::VL53L8CX_Device>().size();
+static std::size_t DeviceGroup_getVL53L8CXCount(const eduart::sensorring::device::DeviceGroup& group) {
+  return group.getDevicesOfType<eduart::sensorring::device::VL53L8CX_Device>().size();
 }
-static eduart::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::device::DeviceGroup& group, int index) {
-  auto devs = group.getDevicesOfType<eduart::device::VL53L8CX_Device>();
+static eduart::sensorring::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::sensorring::device::DeviceGroup& group, int index) {
+  auto devs = group.getDevicesOfType<eduart::sensorring::device::VL53L8CX_Device>();
   if (index < 0 || index >= static_cast<int>(devs.size()))
     throw std::out_of_range("VL53L8CX device index out of range");
   return devs[index]->getLatestMeasurement().first;
 }
-static std::size_t DeviceGroup_getHTPA32Count(const eduart::device::DeviceGroup& group) {
-  return group.getDevicesOfType<eduart::device::HTPA32_Device>().size();
+static std::size_t DeviceGroup_getHTPA32Count(const eduart::sensorring::device::DeviceGroup& group) {
+  return group.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>().size();
 }
-static eduart::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::device::DeviceGroup& group, int index) {
-  auto devs = group.getDevicesOfType<eduart::device::HTPA32_Device>();
+static eduart::sensorring::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::sensorring::device::DeviceGroup& group, int index) {
+  auto devs = group.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>();
   if (index < 0 || index >= static_cast<int>(devs.size()))
     throw std::out_of_range("HTPA32 device index out of range");
   return devs[index]->getLatestMeasurement().first;
@@ -522,28 +526,28 @@ static eduart::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(
 %}
 %catches(std::out_of_range) DeviceGroup_getVL53L8CXMeasurement;
 %catches(std::out_of_range) DeviceGroup_getHTPA32Measurement;
-std::size_t DeviceGroup_getVL53L8CXCount(const eduart::device::DeviceGroup& group);
-eduart::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::device::DeviceGroup& group, int index);
-std::size_t DeviceGroup_getHTPA32Count(const eduart::device::DeviceGroup& group);
-eduart::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::device::DeviceGroup& group, int index);
+std::size_t DeviceGroup_getVL53L8CXCount(const eduart::sensorring::device::DeviceGroup& group);
+eduart::sensorring::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::sensorring::device::DeviceGroup& group, int index);
+std::size_t DeviceGroup_getHTPA32Count(const eduart::sensorring::device::DeviceGroup& group);
+eduart::sensorring::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::sensorring::device::DeviceGroup& group, int index);
 
 // HTPA32 calibration helper: start calibration on all HTPA32 devices reachable from a MeasurementManager.
 %{
-static void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int window) {
-  auto devs = eduart::device::DeviceGroup(mgr->getSensorRing()->getDevices());
-  for (auto* htpa32 : devs.getDevicesOfType<eduart::device::HTPA32_Device>()) {
+static void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mgr, int window) {
+  auto devs = eduart::sensorring::device::DeviceGroup(mgr->getSensorRing()->getDevices());
+  for (auto* htpa32 : devs.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>()) {
     htpa32->startCalibration(static_cast<std::size_t>(window));
   }
 }
 %}
-void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int window);
+void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mgr, int window);
 
 
 %rename (LogVerbosityToString) toString(LogVerbosity);
-%include "sensorring/logger/LoggerTypes.hpp"
+%include "sensorring/logger/LogVerbosity.hpp"
 
 
-%catches(std::runtime_error) eduart::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
+%catches(std::runtime_error) eduart::sensorring::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
 %ignore Logger::log(const LogVerbosity, const std::stringstream);
 %ignore Logger::subscribe;
 %ignore Logger::unsubscribe;
@@ -561,8 +565,8 @@ void HTPA32_startCalibration(eduart::manager::MeasurementManager* mgr, int windo
 %{
 #include <memory>
 
-static eduart::subscription::Subscription* Logger_subscribe_py(
-    eduart::logger::Logger* logger, PyObject* callable) {
+static eduart::sensorring::subscription::Subscription* Logger_subscribe_py(
+    eduart::sensorring::logger::Logger* logger, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -570,7 +574,7 @@ static eduart::subscription::Subscription* Logger_subscribe_py(
     PyGILState_Release(gstate);
   });
   auto sub = logger->subscribe(
-    [prevent_leak](const eduart::logger::LogVerbosity verbosity, const std::string& msg) {
+    [prevent_leak](const eduart::sensorring::logger::LogVerbosity verbosity, const std::string& msg) {
       PyGILState_STATE gstate = PyGILState_Ensure();
       PyObject* py_verb = PyLong_FromLong(static_cast<int>(verbosity));
       PyObject* py_msg = PyUnicode_FromStringAndSize(msg.c_str(), static_cast<Py_ssize_t>(msg.size()));
@@ -582,11 +586,11 @@ static eduart::subscription::Subscription* Logger_subscribe_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::subscription::Subscription(std::move(sub));
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
 }
 
-static eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(
-    eduart::manager::MeasurementManager* mgr, PyObject* callable) {
+static eduart::sensorring::subscription::Subscription* Manager_subscribeToStateChanges_py(
+    eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -594,7 +598,7 @@ static eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(
     PyGILState_Release(gstate);
   });
   auto sub = mgr->subscribeToStateChanges(
-    [prevent_leak](const eduart::manager::ManagerState state) {
+    [prevent_leak](const eduart::sensorring::manager::ManagerState state) {
       PyGILState_STATE gstate = PyGILState_Ensure();
       PyObject* py_state = PyLong_FromLong(static_cast<int>(state));
       PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_state, nullptr);
@@ -604,12 +608,12 @@ static eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::subscription::Subscription(std::move(sub));
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
 }
 
-static eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
-    eduart::manager::MeasurementManager* mgr,
-    eduart::device::DeviceType key,
+static eduart::sensorring::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
+    eduart::sensorring::manager::MeasurementManager* mgr,
+    eduart::sensorring::device::DeviceType key,
     PyObject* callable) {
   Py_INCREF(callable);
   auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
@@ -618,11 +622,11 @@ static eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
     PyGILState_Release(gstate);
   });
   auto sub = mgr->subscribeToDeviceGroup(key,
-    [prevent_leak](const eduart::device::DeviceGroup& group) {
+    [prevent_leak](const eduart::sensorring::device::DeviceGroup& group) {
       PyGILState_STATE gstate = PyGILState_Ensure();
-      swig_type_info* group_ti = SWIG_TypeQuery("eduart::device::DeviceGroup *");
+      swig_type_info* group_ti = SWIG_TypeQuery("eduart::sensorring::device::DeviceGroup *");
       PyObject* py_group = SWIG_NewPointerObj(
-        const_cast<eduart::device::DeviceGroup*>(&group), group_ti, 0);
+        const_cast<eduart::sensorring::device::DeviceGroup*>(&group), group_ti, 0);
       PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_group, nullptr);
       Py_XDECREF(py_group);
       Py_XDECREF(result);
@@ -630,7 +634,7 @@ static eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
       PyGILState_Release(gstate);
     }
   );
-  return new eduart::subscription::Subscription(std::move(sub));
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
 }
 %}
 
@@ -639,9 +643,9 @@ static eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
 %newobject Manager_subscribeToStateChanges_py;
 %newobject Manager_subscribeToDeviceGroup_py;
 
-eduart::subscription::Subscription* Logger_subscribe_py(eduart::logger::Logger* logger, PyObject* callable);
-eduart::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::manager::MeasurementManager* mgr, PyObject* callable);
-eduart::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::manager::MeasurementManager* mgr, eduart::device::DeviceType key, PyObject* callable);
+eduart::sensorring::subscription::Subscription* Logger_subscribe_py(eduart::sensorring::logger::Logger* logger, PyObject* callable);
+eduart::sensorring::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable);
+eduart::sensorring::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::sensorring::manager::MeasurementManager* mgr, eduart::sensorring::device::DeviceType key, PyObject* callable);
 
 // Attach the subscribe helpers as methods on the Python wrapper classes
 %pythoncode %{
@@ -671,5 +675,5 @@ MeasurementManager.enqueueExtraAction = _MeasurementManager_enqueueExtraAction
  * Client interfaces (director-enabled so Python classes can inherit and override)
  */
 
-%template (TofMeasurementVector) std::vector<eduart::measurement::TofMeasurement>;
-%template (ThermalMeasurementVector) std::vector<eduart::measurement::ThermalMeasurement>;
+%template (TofMeasurementVector) std::vector<eduart::sensorring::measurement::TofMeasurement>;
+%template (ThermalMeasurementVector) std::vector<eduart::sensorring::measurement::ThermalMeasurement>;

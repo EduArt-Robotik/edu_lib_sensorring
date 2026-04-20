@@ -18,6 +18,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 class ComInterface;
 }
@@ -34,7 +36,7 @@ public:
 
   std::vector<device::EnumerationInformation> getResult();
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
 private:
   using Mutex     = std::mutex;
@@ -49,5 +51,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

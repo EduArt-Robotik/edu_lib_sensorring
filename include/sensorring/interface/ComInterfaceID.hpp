@@ -13,6 +13,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 /**
@@ -53,21 +55,24 @@ inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
 
 } // namespace com
 
+} // namespace sensorring
+
 } // namespace eduart
 
+#ifndef SWIG
 namespace std {
 
 /**
  * @struct std::hash<ComInterfaceID>
  * @brief Hash specialization for ComInterfaceID to enable use in unordered containers.
  */
-template <> struct hash<eduart::com::ComInterfaceID> {
+template <> struct hash<eduart::sensorring::com::ComInterfaceID> {
   /**
    * @brief Compute hash value for a ComInterfaceID.
    * @param[in] id The interface ID to hash.
    * @return Combined hash of type and name.
    */
-  std::size_t operator()(const eduart::com::ComInterfaceID& id) const noexcept {
+  std::size_t operator()(const eduart::sensorring::com::ComInterfaceID& id) const noexcept {
     auto h1 = std::hash<int>{}(static_cast<int>(id.type));
     auto h2 = std::hash<std::string>{}(id.name);
     return h1 ^ (h2 << 1);
@@ -75,3 +80,4 @@ template <> struct hash<eduart::com::ComInterfaceID> {
 };
 
 } // namespace std
+#endif // SWIG

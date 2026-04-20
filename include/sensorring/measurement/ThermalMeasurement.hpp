@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 /**
@@ -66,5 +68,7 @@ struct ThermalMeasurement {
 };
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

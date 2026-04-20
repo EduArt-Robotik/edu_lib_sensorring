@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 double& Vector3::x() {
@@ -89,5 +91,7 @@ double Vector3::abs() const {
 }
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

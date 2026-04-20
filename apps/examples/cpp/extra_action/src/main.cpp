@@ -19,7 +19,7 @@
 
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 
-using namespace eduart;
+using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")

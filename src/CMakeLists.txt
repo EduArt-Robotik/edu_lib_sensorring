@@ -20,8 +20,6 @@ target_sources(sensorring
   interface/ComInterface.cpp
   interface/ComManager.cpp
   interface/ComEndpoint.cpp
-  interface/can/CanEndpointMap.cpp
-  interface/can/canprotocol.cpp
   logger/Logger.cpp
   logger/LogVerbosity.cpp
   device/IDevice.cpp
@@ -116,6 +114,12 @@ if(SENSORRING_USE_SOCKETCAN)
 endif()
 
 #########################################################
+# link transport module (always required)
+target_link_libraries(sensorring PUBLIC
+  sensorring_transport::sensorring_transport
+)
+
+#########################################################
 # link usbtingo
 if(SENSORRING_USE_USBTINGO)
   target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
@@ -156,7 +160,7 @@ if(SENSORRING_INSTALL)
 
   #########################################################
   # install library
-  install(TARGETS sensorring
+  install(TARGETS sensorring sensorring_transport
     EXPORT sensorringTargets
     LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
@@ -173,6 +177,11 @@ if(SENSORRING_INSTALL)
   # install headers
   install(DIRECTORY
     ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
+  )
+
+  install(DIRECTORY
+    ${PROJECT_SOURCE_DIR}/third_party/edu_sensorring_transport/include/
     DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
   )
 

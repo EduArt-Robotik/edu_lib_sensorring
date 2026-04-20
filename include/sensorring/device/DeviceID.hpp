@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -61,5 +63,7 @@ inline bool DeviceID::isValid() const {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

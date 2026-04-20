@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /** Numbers match the definition in the sensor board firmware. */
@@ -41,5 +43,7 @@ SENSORRING_EXPORT std::string toString(SensorBoardType type) noexcept;
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const SensorBoardType type) noexcept;
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

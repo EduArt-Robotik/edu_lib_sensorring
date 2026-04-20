@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace subscription {
 
 /**
@@ -98,5 +100,7 @@ private:
 };
 
 } // namespace subscription
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -1,4 +1,4 @@
-// Unit tests for eduart::device::IDevice and capability infrastructure.
+// Unit tests for eduart::sensorring::device::IDevice and capability infrastructure.
 
 #include <algorithm>
 #include <cctype>
@@ -11,10 +11,10 @@
 #include "sensorring/device/CapabilityException.hpp"
 #include "sensorring/device/IDevice.hpp"
 
-using eduart::device::CapabilityNotSupported;
-using eduart::device::ICapability;
-using eduart::device::ICapabilityAsync;
-using eduart::device::IDevice;
+using eduart::sensorring::device::CapabilityNotSupported;
+using eduart::sensorring::device::ICapability;
+using eduart::sensorring::device::ICapabilityAsync;
+using eduart::sensorring::device::IDevice;
 
 // Capability types with struct Request/Response so overloads are distinct (cf. LightDevice, TemperatureSensorDevice).
 struct AddCap {

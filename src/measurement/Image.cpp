@@ -6,6 +6,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 // Explicit template instantiation for the used types
@@ -103,5 +105,7 @@ template <typename T, std::size_t RESOLUTION> void GenericRGBImage<T, RESOLUTION
 }
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

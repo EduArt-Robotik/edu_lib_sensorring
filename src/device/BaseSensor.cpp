@@ -5,6 +5,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable)
@@ -13,8 +15,8 @@ BaseSensor::BaseSensor(com::ComInterface* interface, com::ComEndpoint target, un
     , _interface(interface)
     , _enable_flag(enable) {
   _com_subscription = _interface->subscribe(
-      [this](const com::ComEndpoint& source, const std::vector<uint8_t>& data) {
-        this->comCallback(source, data);
+      [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
+        this->comCallback(source, command, data);
       },
       { target });
 }
@@ -112,5 +114,7 @@ void BaseSensor::clearDataFlag() {
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

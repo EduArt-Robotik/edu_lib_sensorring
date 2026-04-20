@@ -19,6 +19,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace logger {
 
 /**
@@ -73,5 +75,7 @@ private:
 };
 
 } // namespace logger
+
+} // namespace sensorring
 
 } // namespace eduart

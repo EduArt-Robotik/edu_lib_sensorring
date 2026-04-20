@@ -5,6 +5,8 @@
 #include <exception>
 #include <fcntl.h>
 #include <net/if.h>
+#include <sensorring_transport/Protocol.hpp>
+#include <sensorring_transport/can/CanCodec.hpp>
 #include <stdexcept>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -14,15 +16,22 @@
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 
-#include "CanEndpointMap.hpp"
+using namespace eduart::sensorring::transport::protocol;
 
 namespace eduart {
+
+namespace sensorring {
 
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
     : ComInterface({ InterfaceType::SocketCan, interface_name })
-    , _soc(0) {
+    , _soc(0)
+    , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
+    , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
+      ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
+      dispatchMessage(ep, frame.command, frame.data);
+    }) {
 
   try {
     openInterface();
@@ -85,10 +94,17 @@ bool SocketCANFD::openInterface() {
   return true;
 }
 
-bool SocketCANFD::send(ComEndpoint target, const std::vector<uint8_t>& data) {
+bool SocketCANFD::send(ComEndpoint target, std::uint8_t command, const std::vector<uint8_t>& data) {
 
-  canid_t id = CanEndpointMap::getInstance()->mapEndpointToId(target);
-  return send(id, data);
+  auto frames = _assembler.assemble(static_cast<sensorring::transport::Direction>(target.direction), target.boardAddress, target.deviceId, command, data);
+
+  for (const auto& frame : frames) {
+    auto canFrame = sensorring::transport::can::CanCodec::encode(frame);
+    if (!send(static_cast<canid_t>(canFrame.id), canFrame.data)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool SocketCANFD::send(canid_t canid, const std::vector<uint8_t>& tx_buf) {
@@ -156,12 +172,11 @@ bool SocketCANFD::listener() {
       if (select((_soc + 1), &readSet, NULL, NULL, &timeout) >= 0) {
         if (FD_ISSET(_soc, &readSet)) {
           recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
-          if (recvbytes) {
-            try {
-              auto endpoint = CanEndpointMap::getInstance()->mapIdToEndpoint(frame_rd.can_id);
-              dispatchMessage(endpoint, std::vector<std::uint8_t>(frame_rd.data, frame_rd.data + frame_rd.len));
-            } catch (const std::exception&) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Tried to map unknown CAN ID on interface " + _id.name);
+          if (recvbytes && frame_rd.len >= HEADER_SIZE) {
+            std::uint8_t sysId = (frame_rd.can_id >> 8) & 0x07;
+            if (sysId == sensorring::transport::can::CanCodec::SYSID_SENSOR_RING) {
+              auto transportFrame = sensorring::transport::can::CanCodec::decode(frame_rd.can_id, frame_rd.data, frame_rd.len);
+              _reassembler.processFrame(transportFrame);
             }
           }
         }
@@ -196,5 +211,7 @@ bool SocketCANFD::repairInterface() {
 }
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

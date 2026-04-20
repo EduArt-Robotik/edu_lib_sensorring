@@ -9,60 +9,75 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
-#include <unordered_set>
 
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 /**
- * @class ComEndpoint
- * @brief Uniquely identifies a communication endpoint by its string ID.
+ * @enum Direction
+ * @brief Communication direction on the CAN bus, from the board's perspective.
  */
-class SENSORRING_EXPORT ComEndpoint {
-public:
-  /**
-   * @brief Construct from endpoint ID string.
-   * @param[in] id The unique identifier for this endpoint.
-   */
-  ComEndpoint(const std::string& id);
-
-  /// Copy constructor.
-  ComEndpoint(const ComEndpoint& endpoint);
-
-  /**
-   * @brief Get the endpoint ID.
-   * @return The endpoint's unique identifier string.
-   */
-  const std::string getId() const;
-
-  // Equality operator for ComEndpoint
-  bool operator==(const ComEndpoint& other) const;
-
-private:
-  const std::string _id;
+enum class Direction : std::uint8_t {
+  Input     = 0, ///< Host -> Board (board receives)
+  Broadcast = 0, ///< Alias for Input; used with broadcast board address
+  Output    = 1  ///< Board -> Host (board sends)
 };
 
+/**
+ * @struct ComEndpoint
+ * @brief Uniquely identifies a communication endpoint as a (Direction, BoardAddress, DeviceId) tuple.
+ */
+struct SENSORRING_EXPORT ComEndpoint {
+  Direction direction;       ///< Host->Board (Input) or Board->Host (Output)
+  std::uint8_t boardAddress; ///< 0 = broadcast, 1-126 = individual board (board_index + 1)
+  std::uint8_t deviceId;     ///< 0x00 = board, 0x01 = ToF, 0x02 = Thermal, 0x03 = WS2812b
+
+  bool operator==(const ComEndpoint& other) const;
+  bool operator!=(const ComEndpoint& other) const;
+
+  /**
+   * @brief Human-readable representation for logging.
+   * @return e.g. "Input/Board5/VL53L8CX", "Output/Broadcast/Board", "Input/ANY/Board"
+   */
+  std::string toString() const;
+
+  /// Broadcast board address (node ID 0x00 per existing CAN convention).
+  static constexpr std::uint8_t BROADCAST = 0x00;
+
+  /// Subscription wildcard: matches any board address during dispatch.
+  static constexpr std::uint8_t ANY_BOARD = 0xFF;
+};
+
+/**
+ * @brief Check whether a subscription endpoint matches an incoming endpoint.
+ *
+ * Supports the ANY_BOARD wildcard: if subscription.boardAddress == ANY_BOARD,
+ * it matches any incoming board address.
+ */
+inline bool endpointMatches(const ComEndpoint& subscription, const ComEndpoint& incoming) {
+  return subscription.direction == incoming.direction && (subscription.boardAddress == incoming.boardAddress || subscription.boardAddress == ComEndpoint::ANY_BOARD) && subscription.deviceId == incoming.deviceId;
+}
+
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart
 
 namespace std {
 
-/**
- * @struct std::hash<ComEndpoint>
- * @brief Hash specialization for ComEndpoint to enable use in unordered containers.
- */
-template <> struct hash<eduart::com::ComEndpoint> {
-  /**
-   * @brief Compute hash value for a ComEndpoint.
-   * @param[in] ep The endpoint to hash.
-   * @return Hash of the endpoint's ID.
-   */
-  std::size_t operator()(const eduart::com::ComEndpoint& ep) const { return std::hash<std::string>{}(ep.getId()); }
+template <> struct hash<eduart::sensorring::com::ComEndpoint> {
+  std::size_t operator()(const eduart::sensorring::com::ComEndpoint& ep) const {
+    std::uint32_t packed = (static_cast<std::uint32_t>(ep.direction) << 16) | (static_cast<std::uint32_t>(ep.boardAddress) << 8) | static_cast<std::uint32_t>(ep.deviceId);
+    return std::hash<std::uint32_t>{}(packed);
+  }
 };
 
 } // namespace std

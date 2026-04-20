@@ -4,7 +4,6 @@
 #include <chrono>
 #include <condition_variable>
 #include <future>
-#include <mutex>
 #include <string>
 #include <vector>
 
@@ -17,6 +16,8 @@
 #include "HTPA32_Eeprom.hpp"
 
 namespace eduart {
+
+namespace sensorring {
 
 namespace com {
 class ComInterface;
@@ -45,9 +46,8 @@ public:
   bool stopCalibration();
   bool startCalibration(unsigned int window);
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
-  void onResetSensorState();
   void onClearDataFlag();
 
 private:
@@ -68,9 +68,6 @@ private:
   uint16_t _ptat = 0;
   measurement::ThermalMeasurement _latest_measurement;
 
-  uint8_t _rx_buffer[256 * 2 + NUMBER_OF_PIXEL * 2]{};
-  std::size_t _rx_buffer_offset = 0;
-
   std::atomic<bool> _read_eeprom{ false };
   std::atomic<bool> _got_eeprom{ false };
   bool _got_calibration                   = false;
@@ -87,5 +84,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

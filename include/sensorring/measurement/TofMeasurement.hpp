@@ -14,6 +14,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace measurement {
 
 /**
@@ -24,10 +26,15 @@ struct TofMeasurement {
   /// Frame number of the TofMeasurement
   unsigned int frame_id = 0;
 
+  /// Number of valid points in the TofMeasurement
+  unsigned int nr_valid_points = 0;
+
   /// Point cloud of the Time-of-Flight sensor measurement
   PointCloud point_cloud;
 };
 
 } // namespace measurement
+
+} // namespace sensorring
 
 } // namespace eduart

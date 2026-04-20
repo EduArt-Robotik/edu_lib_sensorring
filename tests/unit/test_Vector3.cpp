@@ -2,7 +2,7 @@
 
 #include "sensorring/math/Vector3.hpp"
 
-using eduart::math::Vector3;
+using eduart::sensorring::math::Vector3;
 
 TEST_CASE("Vector3 default construction and accessors", "[Vector3]") {
   Vector3 v{};

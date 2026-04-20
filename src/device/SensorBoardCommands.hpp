@@ -13,6 +13,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -35,5 +37,7 @@ void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable);
 void cmdEnumerateBoards(com::ComInterfaceID interface);
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

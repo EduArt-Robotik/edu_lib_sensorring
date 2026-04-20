@@ -17,6 +17,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 using subscription::SubscriberToken;
@@ -26,7 +28,7 @@ class ComInterface {
 
 public:
   /// Callback type for communication subscriptions.
-  using ComCallback = std::function<void(const ComEndpoint&, const std::vector<std::uint8_t>&)>;
+  using ComCallback = std::function<void(const ComEndpoint&, std::uint8_t command, const std::vector<std::uint8_t>&)>;
 
   /**
    * Constructor
@@ -77,9 +79,10 @@ public:
   /**
    * Send a generic communication message.
    * @param[in] target ComEndpoint to which the message is sent.
-   * @param[in] data Vector holding the message payload.
+   * @param[in] command Command byte.
+   * @param[in] data Payload bytes (without command).
    */
-  virtual bool send(ComEndpoint target, const std::vector<std::uint8_t>& data) = 0;
+  virtual bool send(ComEndpoint target, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
 
   /**
    * Open the communication interface.
@@ -113,13 +116,11 @@ protected:
   /**
    * @brief Dispatch an incoming message to all registered subscribers.
    *
-   * Called from derived listener implementations. Copies the callback list
-   * under lock, then invokes each callback outside the lock.
-   *
-   * @param[in] source Endpoint that the message was received from.
-   * @param[in] data   Raw payload bytes.
+   * @param[in] source  Endpoint that the message was received from.
+   * @param[in] command Command byte.
+   * @param[in] data    Payload bytes.
    */
-  void dispatchMessage(const ComEndpoint& source, const std::vector<std::uint8_t>& data);
+  void dispatchMessage(const ComEndpoint& source, std::uint8_t command, const std::vector<std::uint8_t>& data);
 
   std::atomic<bool> _communication_error;
 
@@ -144,5 +145,7 @@ private:
 };
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

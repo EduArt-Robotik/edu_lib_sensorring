@@ -18,6 +18,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /// Forward declaration of implementation of BaseDevice.
@@ -90,5 +92,7 @@ protected:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

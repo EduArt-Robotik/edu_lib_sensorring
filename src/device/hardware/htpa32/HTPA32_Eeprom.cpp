@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 namespace htpa32 {
@@ -21,5 +23,7 @@ std::optional<HTPA32_Eeprom> HTPA32_Eeprom::deserialize(const uint8_t* buffer, s
 } // namespace htpa32
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

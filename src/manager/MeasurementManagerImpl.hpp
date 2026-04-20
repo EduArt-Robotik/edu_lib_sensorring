@@ -27,6 +27,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 /**
@@ -192,5 +194,7 @@ private:
 };
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

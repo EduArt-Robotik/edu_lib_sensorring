@@ -9,6 +9,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 class ComInterface;
 } // namespace com
@@ -33,10 +35,7 @@ public:
 
   const WS2812b_Params& getParams() const;
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
-
-  void onResetSensorState();
-  void onClearDataFlag();
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
 private:
   WS2812b_Device& _parent;
@@ -44,5 +43,7 @@ private:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

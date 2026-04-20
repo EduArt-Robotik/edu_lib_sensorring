@@ -22,6 +22,8 @@
 #include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
+
+namespace sensorring {
 // Forward declaration
 namespace com {
 class ComInterface;
@@ -45,6 +47,7 @@ public:
    * @param[in] enable Initial enabled state of the sensor.
    */
   BaseSensor(com::ComInterface* interface, com::ComEndpoint target, unsigned int idx, bool enable);
+
   /// Destructor
   virtual ~BaseSensor();
 
@@ -116,21 +119,21 @@ protected:
    *
    * Implementations should reset any additional state related to errors or measurements.
    */
-  virtual void onResetSensorState() = 0;
+  virtual void onResetSensorState() {};
 
   /**
    * @brief Sensor-specific hook invoked from clearDataFlag().
    *
    * Implementations should clear any additional flags related to buffered data.
    */
-  virtual void onClearDataFlag() = 0;
+  virtual void onClearDataFlag() {};
 
   /**
    * @brief Handle an incoming communication message for this sensor.
    * @param[in] source Endpoint that sent the message.
    * @param[in] data   Message payload.
    */
-  virtual void comCallback(const com::ComEndpoint source, const std::vector<std::uint8_t>& data) = 0;
+  virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
 
   /// Index of this sensor instance within its group.
   unsigned int _idx;
@@ -165,5 +168,7 @@ protected:
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -1,57 +1,65 @@
 #include <catch2/catch_all.hpp>
+#include <sensorring_transport/Protocol.hpp>
+#include <unordered_map>
 #include <unordered_set>
-
+using namespace eduart::sensorring::transport::protocol;
 #include "sensorring/interface/ComEndpoint.hpp"
 
-using eduart::com::ComEndpoint;
-
-TEST_CASE("ComEndpoint construction and getId", "[ComEndpoint]") {
-  SECTION("construct with string id") {
-    ComEndpoint ep("sensor_0");
-    REQUIRE(ep.getId() == "sensor_0");
-  }
-
-  SECTION("construct with empty id") {
-    ComEndpoint ep("");
-    REQUIRE(ep.getId().empty());
-  }
-
-  SECTION("construct with longer id") {
-    ComEndpoint ep("can://device0/endpoint/42");
-    REQUIRE(ep.getId() == "can://device0/endpoint/42");
-  }
-}
-
-TEST_CASE("ComEndpoint copy construction", "[ComEndpoint]") {
-  ComEndpoint original("original_id");
-  ComEndpoint copy(original);
-
-  REQUIRE(copy.getId() == original.getId());
-  REQUIRE(copy.getId() == "original_id");
-}
+using eduart::sensorring::com::ComEndpoint;
+using eduart::sensorring::com::Direction;
+using eduart::sensorring::com::endpointMatches;
 
 TEST_CASE("ComEndpoint equality", "[ComEndpoint]") {
-  ComEndpoint a("same_id");
-  ComEndpoint b("same_id");
-  ComEndpoint c("other_id");
+  ComEndpoint a{ Direction::Output, 6, devbyte::VL53L8CX };
+  ComEndpoint b{ Direction::Output, 6, devbyte::VL53L8CX };
+  ComEndpoint c{ Direction::Output, 6, devbyte::HTPA32 };
 
   REQUIRE(a == b);
-  REQUIRE(b == a);
-  REQUIRE_FALSE(a == c);
-  REQUIRE_FALSE(c == a);
-  REQUIRE_FALSE(b == c);
+  REQUIRE(a != c);
 }
 
-TEST_CASE("ComEndpoint in unordered_set", "[ComEndpoint]") {
-  std::unordered_set<ComEndpoint> endpoints;
+TEST_CASE("ComEndpoint hashing", "[ComEndpoint]") {
+  ComEndpoint a{ Direction::Output, 1, devbyte::VL53L8CX };
+  ComEndpoint b{ Direction::Output, 1, devbyte::VL53L8CX };
+  ComEndpoint c{ Direction::Input, 1, devbyte::VL53L8CX };
 
-  endpoints.insert(ComEndpoint("ep1"));
-  endpoints.insert(ComEndpoint("ep2"));
-  endpoints.insert(ComEndpoint("ep1")); // duplicate id
+  REQUIRE(std::hash<ComEndpoint>{}(a) == std::hash<ComEndpoint>{}(b));
+  REQUIRE(std::hash<ComEndpoint>{}(a) != std::hash<ComEndpoint>{}(c));
+}
 
-  REQUIRE(endpoints.size() == 2u);
+TEST_CASE("ComEndpoint in unordered containers", "[ComEndpoint]") {
+  std::unordered_set<ComEndpoint> s;
+  s.insert({ Direction::Output, 1, devbyte::VL53L8CX });
+  s.insert({ Direction::Output, 1, devbyte::VL53L8CX }); // duplicate
+  s.insert({ Direction::Output, 2, devbyte::VL53L8CX });
+  REQUIRE(s.size() == 2);
 
-  REQUIRE(endpoints.find(ComEndpoint("ep1")) != endpoints.end());
-  REQUIRE(endpoints.find(ComEndpoint("ep2")) != endpoints.end());
-  REQUIRE(endpoints.find(ComEndpoint("ep3")) == endpoints.end());
+  std::unordered_map<ComEndpoint, int> m;
+  m[{ Direction::Output, 5, devbyte::BOARD }] = 42;
+  REQUIRE(m[{ Direction::Output, 5, devbyte::BOARD }] == 42);
+}
+
+TEST_CASE("ComEndpoint toString", "[ComEndpoint]") {
+  REQUIRE(ComEndpoint{ Direction::Output, 6, devbyte::VL53L8CX }.toString() == "Output/Board5/VL53L8CX");
+  REQUIRE(ComEndpoint{ Direction::Broadcast, ComEndpoint::BROADCAST, devbyte::BOARD }.toString() == "Broadcast/All/Board");
+  REQUIRE(ComEndpoint{ Direction::Output, ComEndpoint::ANY_BOARD, devbyte::BOARD }.toString() == "Output/ANY/Board");
+  REQUIRE(ComEndpoint{ Direction::Output, 1, devbyte::WS2812B }.toString() == "Output/Board0/WS2812b");
+  REQUIRE(ComEndpoint{ Direction::Input, 1, 0x10 }.toString() == "Input/Board0/Dev16");
+}
+
+TEST_CASE("ComEndpoint endpointMatches", "[ComEndpoint]") {
+  ComEndpoint sub{ Direction::Output, ComEndpoint::ANY_BOARD, devbyte::VL53L8CX };
+  REQUIRE(endpointMatches(sub, { Direction::Output, 5, devbyte::VL53L8CX }));
+  REQUIRE(endpointMatches(sub, { Direction::Output, 100, devbyte::VL53L8CX }));
+  REQUIRE_FALSE(endpointMatches(sub, { Direction::Input, 5, devbyte::VL53L8CX }));
+  REQUIRE_FALSE(endpointMatches(sub, { Direction::Output, 5, devbyte::HTPA32 }));
+
+  ComEndpoint exact{ Direction::Output, 6, devbyte::VL53L8CX };
+  REQUIRE(endpointMatches(exact, { Direction::Output, 6, devbyte::VL53L8CX }));
+  REQUIRE_FALSE(endpointMatches(exact, { Direction::Output, 7, devbyte::VL53L8CX }));
+}
+
+TEST_CASE("ComEndpoint constants", "[ComEndpoint]") {
+  REQUIRE(ComEndpoint::BROADCAST == 0x00);
+  REQUIRE(ComEndpoint::ANY_BOARD == 0xFF);
 }

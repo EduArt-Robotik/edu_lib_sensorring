@@ -1,15 +1,19 @@
 #pragma once
 
 #include <memory>
+#include <sensorring_transport/MessageAssembler.hpp>
+#include <sensorring_transport/MessageReassembler.hpp>
+#include <sensorring_transport/Protocol.hpp>
+#include <sensorring_transport/can/CanCodec.hpp>
 #include <string>
 #include <usbtingo/device/Device.hpp>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
 
-#include "canprotocol.hpp"
-
 namespace eduart {
+
+namespace sensorring {
 
 namespace com {
 
@@ -38,7 +42,7 @@ public:
    * @param[in] data Message payload.
    * @return success==true
    */
-  bool send(ComEndpoint target, const std::vector<uint8_t>& data) override;
+  bool send(ComEndpoint target, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
   /**
    * Open CAN interface.
@@ -62,8 +66,12 @@ private:
   bool listener() override;
 
   std::unique_ptr<usbtingo::device::Device> _dev;
+  sensorring::transport::MessageAssembler _assembler;
+  sensorring::transport::MessageReassembler _reassembler;
 };
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

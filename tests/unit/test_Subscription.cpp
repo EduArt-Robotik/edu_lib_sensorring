@@ -4,8 +4,8 @@
 
 #include "sensorring/subscription/Subscription.hpp"
 
-using eduart::subscription::Subscription;
-using eduart::subscription::SubscriberToken;
+using eduart::sensorring::subscription::Subscription;
+using eduart::sensorring::subscription::SubscriberToken;
 
 TEST_CASE("Subscription default construction", "[Subscription]") {
   Subscription sub;

@@ -20,6 +20,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -54,5 +56,7 @@ using WS2812bMessage = Message<WS2812bPayload>; ///< Complete message for WS2812
 using MessageVariant = std::variant<VL53L8Message, HTPA32Message, WS2812bMessage>; ///< Variant holding any measurement message type.
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

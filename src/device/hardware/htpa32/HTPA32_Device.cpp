@@ -1,19 +1,22 @@
 #include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
 
+#include <sensorring_transport/Protocol.hpp>
 #include <unordered_map>
 
 #include "device/hardware/htpa32/HTPA32_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
-#include "interface/can/canprotocol.hpp"
 
-#include "htpa32_eeprom.h"
+using namespace eduart::sensorring::transport::protocol;
+using namespace eduart::sensorring::transport::protocol::htpa32;
 
 namespace eduart {
+
+namespace sensorring {
 
 namespace device {
 
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint("thermal" + std::to_string(idx) + "_data"), params.enable)
+    : BaseDevice(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, params.enable)
     , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 
@@ -44,16 +47,12 @@ bool HTPA32_Device::startCalibration(unsigned int window) {
   return _impl->startCalibration(window);
 }
 
-void HTPA32_Device::onResetSensorState() {
-  _impl->onResetSensorState();
-}
-
 void HTPA32_Device::onClearDataFlag() {
   _impl->onClearDataFlag();
 }
 
-void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, const std::vector<uint8_t>& data) {
-  _impl->comCallback(source, data);
+void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
+  _impl->comCallback(source, command, data);
 }
 
 std::future<bool> HTPA32_Device::getEepromAsync(std::chrono::milliseconds timeout) {
@@ -132,8 +131,8 @@ std::future<bool> HTPA32_Device::requestThermalMeasurementAsync(const std::vecto
       unsigned int active_sensors = group.active_sensors;
       uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
       uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
-      std::vector<uint8_t> tx_buf{ CMD_THERMAL_SCAN_REQUEST, sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint("thermal_request"), tx_buf);
+      std::vector<uint8_t> tx_buf{ sensor_select_high, sensor_select_low };
+      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, MEASUREMENT_REQUEST, tx_buf);
     }
 
     // Fire-and-forget: success means the request was issued for all enabled devices.
@@ -179,8 +178,8 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<
       unsigned int active_sensors = group.active_sensors;
       uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
       uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
-      std::vector<uint8_t> tx_buf{ CMD_THERMAL_DATA_REQUEST, sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint("thermal_request"), tx_buf);
+      std::vector<uint8_t> tx_buf{ sensor_select_high, sensor_select_low };
+      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, eduart::sensorring::transport::protocol::htpa32::MEASUREMENT_TRANSMISSION_REQUEST, tx_buf);
     }
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
@@ -201,5 +200,7 @@ std::future<bool> HTPA32_Device::fetchThermalMeasurementAsync(const std::vector<
 }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

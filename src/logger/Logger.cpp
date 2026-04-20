@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace logger {
 
 Logger* Logger::getInstance() noexcept {
@@ -47,5 +49,7 @@ void Logger::log(const LogVerbosity verbosity, const std::stringstream& msg) con
 }
 
 } // namespace logger
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -15,6 +15,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 class ComInterface;
 } // namespace com
@@ -37,15 +39,12 @@ public:
   std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
   std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
-  void comCallback(const com::ComEndpoint source, const std::vector<uint8_t>& data);
-
-  void onResetSensorState();
-  void onClearDataFlag();
+  void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
   static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
-  measurement::TofMeasurement processMeasurement(int frame_id, uint8_t* data, int len) const;
+  measurement::TofMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
 
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
@@ -54,12 +53,10 @@ private:
   const VL53L8CX_Params _params;
   measurement::TofMeasurement _latest_raw_measurement;
   measurement::TofMeasurement _latest_transformed_measurement;
-
-  uint8_t _rx_buffer[vl53l8::TOF_RESOLUTION * 3];
-  std::size_t _rx_buffer_offset = 0;
-  bool _rx_buffer_complete      = false;
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

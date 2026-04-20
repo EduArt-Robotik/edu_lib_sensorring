@@ -10,6 +10,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace com {
 
 class ComManager {
@@ -46,5 +48,7 @@ private:
 };
 
 } // namespace com
+
+} // namespace sensorring
 
 } // namespace eduart

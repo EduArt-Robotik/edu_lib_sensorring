@@ -2,8 +2,8 @@
 
 #include "sensorring/math/Matrix3.hpp"
 
-using eduart::math::Matrix3;
-using eduart::math::Vector3;
+using eduart::sensorring::math::Matrix3;
+using eduart::sensorring::math::Vector3;
 
 namespace {
 

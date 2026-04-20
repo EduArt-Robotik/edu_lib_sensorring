@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 BaseDevice::BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable)
@@ -23,5 +25,7 @@ DeviceID BaseDevice::getDeviceID() const {
 // }
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

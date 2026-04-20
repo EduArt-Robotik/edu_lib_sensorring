@@ -1,30 +1,33 @@
-// Unit tests for eduart::device::DeviceGroup (group of BaseDevice pointers, iteration, filtering by type).
+// Unit tests for eduart::sensorring::device::DeviceGroup (group of BaseDevice pointers, iteration, filtering by type).
 
 #include <catch2/catch_all.hpp>
 #include <functional>
+#include <sensorring_transport/Protocol.hpp>
 #include <string>
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+using namespace eduart::sensorring::transport::protocol;
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/DeviceGroup.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 
-using eduart::com::ComEndpoint;
-using eduart::com::ComInterface;
-using eduart::device::BaseDevice;
-using eduart::device::DeviceGroup;
-using eduart::device::DeviceID;
-using eduart::device::DeviceType;
-using eduart::device::IDevice;
+using eduart::sensorring::com::ComEndpoint;
+using eduart::sensorring::com::ComInterface;
+using eduart::sensorring::com::Direction;
+using eduart::sensorring::device::BaseDevice;
+using eduart::sensorring::device::DeviceGroup;
+using eduart::sensorring::device::DeviceID;
+using eduart::sensorring::device::DeviceType;
+using eduart::sensorring::device::IDevice;
 
 // Minimal ComInterface implementation for unit tests (no I/O).
 class MockComInterface : public ComInterface {
 public:
   MockComInterface()
-      : ComInterface(eduart::com::ComInterfaceID{}) {}
+      : ComInterface(eduart::sensorring::com::ComInterfaceID{}) {}
 
-  bool send(ComEndpoint, const std::vector<std::uint8_t>&) override { return true; }
+  bool send(ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override { return true; }
   bool openInterface() override { return true; }
   bool closeInterface() override { return true; }
   bool repairInterface() override { return true; }
@@ -37,22 +40,22 @@ protected:
 class TestDeviceA : public BaseDevice {
 public:
   TestDeviceA(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, idx }, iface, ComEndpoint("test_a"), false) {}
+      : BaseDevice(DeviceID{ DeviceType::VL53L8CX, idx }, iface, ComEndpoint{ Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}
-  void comCallback(ComEndpoint, const std::vector<std::uint8_t>&) override {}
+  void comCallback(ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override {}
 };
 
 // Second derived type for getDevicesOfType / createFromDevicesOfType tests.
 class TestDeviceB : public BaseDevice {
 public:
   TestDeviceB(ComInterface* iface, unsigned int idx = 0)
-      : BaseDevice(DeviceID{ DeviceType::HTPA32, idx }, iface, ComEndpoint("test_b"), false) {}
+      : BaseDevice(DeviceID{ DeviceType::HTPA32, idx }, iface, ComEndpoint{ Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, false) {}
 
   void onResetSensorState() override {}
   void onClearDataFlag() override {}
-  void comCallback(ComEndpoint, const std::vector<std::uint8_t>&) override {}
+  void comCallback(ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override {}
 };
 
 TEST_CASE("DeviceGroup construction and getDevices", "[DeviceGroup]") {

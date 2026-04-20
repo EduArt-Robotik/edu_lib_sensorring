@@ -16,6 +16,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 /**
@@ -23,6 +25,8 @@ namespace device {
  * @brief Supported device hardware types used for device registration and grouping.
  */
 enum class DeviceType {
+  /// Base board (for reset, firmware revision, etc.).
+  SENSORBOARD,
   /// Time-of-flight sensor (VL53L8CX).
   VL53L8CX,
   /// Thermal sensor (HTPA32).
@@ -48,5 +52,7 @@ SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept;
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

@@ -2,7 +2,7 @@
 
 #include "sensorring/measurement/TofMeasurement.hpp"
 
-using eduart::measurement::TofMeasurement;
+using eduart::sensorring::measurement::TofMeasurement;
 
 TEST_CASE("TofMeasurement default initialization", "[TofMeasurement]") {
   TofMeasurement m;

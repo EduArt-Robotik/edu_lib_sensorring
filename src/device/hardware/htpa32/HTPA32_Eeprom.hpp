@@ -5,6 +5,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace device {
 
 namespace htpa32 {
@@ -41,5 +43,7 @@ struct HTPA32_Eeprom {
 } // namespace htpa32
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart

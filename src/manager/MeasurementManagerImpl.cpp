@@ -15,6 +15,8 @@ using namespace std::chrono_literals;
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace manager {
 
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
@@ -291,8 +293,7 @@ void MeasurementManagerImpl::StateMachine() {
       _measurement_state = MeasurementState::pre_loop_init;
     } else {
       logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check "
-                                       "configuration and restart.");
+          logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
       _measurement_state = MeasurementState::shutdown;
     }
     break;
@@ -595,5 +596,7 @@ void MeasurementManagerImpl::StateMachine() {
 }
 
 } // namespace manager
+
+} // namespace sensorring
 
 } // namespace eduart

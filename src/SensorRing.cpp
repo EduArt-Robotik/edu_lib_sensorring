@@ -2,6 +2,8 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace ring {
 
 SensorRing::SensorRing(std::vector<std::unique_ptr<SensorBus> > bus_vec)
@@ -41,5 +43,7 @@ void SensorRing::setBitRateSwitching(bool brs_enable) {
 }
 
 } // namespace ring
+
+} // namespace sensorring
 
 } // namespace eduart

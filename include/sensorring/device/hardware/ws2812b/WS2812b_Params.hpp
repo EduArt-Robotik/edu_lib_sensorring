@@ -9,6 +9,8 @@
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
+  
+namespace sensorring {
 
 namespace device {
 
@@ -22,5 +24,7 @@ struct SENSORRING_EXPORT WS2812b_Params : public DeviceParams {
 };
 
 } // namespace device
+
+} // namespace sensorring
 
 } // namespace eduart
