@@ -1,0 +1,79 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build-type: [Debug, Release]
+        include:
+          - os: ubuntu-latest
+            cmake-preset: debug
+            build-type: Debug
+          - os: ubuntu-latest
+            cmake-preset: release
+            build-type: Release
+          - os: windows-latest
+            cmake-preset: debug
+            build-type: Debug
+          - os: windows-latest
+            cmake-preset: release
+            build-type: Release
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            build-essential \
+            libusb-1.0-0-dev
+      
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake ninja -y
+      
+      - name: Set up MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DSENSORRING_BUILD_TESTS=ON \
+            -DSENSORRING_BUILD_EXAMPLES=ON \
+            -DCMAKE_CXX_STANDARD=17
+      
+      - name: Build
+        run: |
+          cmake --build build --config ${{ matrix.build-type }} -j4
+      
+      - name: Run tests
+        working-directory: build
+        run: |
+          ctest --output-on-failure --build-config ${{ matrix.build-type }}
+      
+      # - name: Upload test results
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-results-${{ matrix.os }}-${{ matrix.build-type }}
+      #     path: build/Testing/
+      #     retention-days: 30
