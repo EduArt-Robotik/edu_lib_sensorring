@@ -12,14 +12,16 @@
       "name": "Debug",
       "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "SENSORRING_BUILD_EXAMPLES": "ON"
       }
     },
     {
       "name": "Release",
       "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "SENSORRING_BUILD_EXAMPLES": "ON"
       }
     }
   ],
