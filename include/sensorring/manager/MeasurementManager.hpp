@@ -47,7 +47,7 @@ public:
   MeasurementManager(ManagerParams params, ring::SensorRingFactory& factory);
 
   /**
-   * @brief Construct the manager from a pre-built SensorRing (power-user constructor).
+   * @brief Construct the manager from a pre-built SensorRing (expert-user constructor).
    * @param[in] params Manager configuration.
    * @param[in] sensor_ring Fully configured SensorRing. Ownership is transferred.
    */

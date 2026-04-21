@@ -24,6 +24,10 @@ The first two examples are **functionally identical** — they all use the `Sens
 - [Thermal Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/thermal_map/src/main.cpp): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
 - [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/extra_action/src/main.cpp): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
 
+### Expert / Expert-User Example
+
+- [Expert Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/expert/src/main.cpp): Demonstrates advanced features: hardware enumeration before building, the expert-user `MeasurementManager(params, unique_ptr<SensorRing>)` constructor, per-board poses, per-device subscriptions, custom spatial subgroups, state monitoring, manual loop control with `measureSome()`, and the light action queue
+
 > ⚠️ To use the `depth_map` or `thermal_map` C++ examples on Windows you might first need to enable UTF-8 support for your current terminal session with this command:<br/>
 `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
 
@@ -77,6 +81,10 @@ The first two examples are **functionally identical** — they all use the `Sens
 ### Action Examples
 
 - [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/extra_action/extra_action.py): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
+
+### Expert / Expert-User Example
+
+- [Expert Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/expert/expert.py): Demonstrates advanced features: hardware enumeration, per-board poses, per-device subscriptions, custom spatial subgroups, state monitoring, and the light action queue
 
 <div align=center>
 <table style="border: none;">
