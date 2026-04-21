@@ -23,11 +23,9 @@ target_sources(sensorring
   logger/Logger.cpp
   logger/LogVerbosity.cpp
   device/IDevice.cpp
-  device/BaseSensor.cpp
   device/BaseDevice.cpp
   device/DeviceState.cpp
   device/DeviceType.cpp
-  device/DeviceGroup.cpp
   device/hardware/SensorBoardType.cpp
   device/hardware/SensorBoardManager.cpp
   device/hardware/vl53l8cx/VL53L8CX_Device.cpp
@@ -43,6 +41,7 @@ target_sources(sensorring
   device/EnumerationInformation.cpp
   measurement/Image.cpp
   measurement/PointCloud.cpp
+  measurement/Helpers.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

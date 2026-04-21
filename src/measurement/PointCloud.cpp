@@ -22,7 +22,7 @@ void PointCloud::copyTo(double* buffer, int size) {
     buffer[i * 6 + 2] = p.point.z();
     buffer[i * 6 + 3] = p.raw_distance;
     buffer[i * 6 + 4] = p.sigma;
-    buffer[i * 6 + 5] = (double)p.user_idx;
+    buffer[i * 6 + 5] = (double)p.sensor_index;
   }
 }
 

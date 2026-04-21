@@ -28,13 +28,12 @@ const VL53L8CX_Params& VL53L8CX_DeviceImpl::getParams() const {
 }
 
 std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_raw_measurement, _parent._error };
+  return { _latest_raw_measurement, _parent._state };
 }
 
 std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
-  return { _latest_transformed_measurement, _parent._error };
+  return { _latest_transformed_measurement, _parent._state };
 }
-
 
 void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
@@ -64,7 +63,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
 measurement::TofMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
   measurement::TofMeasurement result;
   result.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
-  result.frame_id = data[0];
+  result.frame_id        = data[0];
   result.nr_valid_points = data[1];
 
   uint16_t distance_raw = 0;

@@ -26,6 +26,18 @@ const WS2812b_Params& WS2812b_Device::getParams() const {
   return _impl->getParams();
 }
 
+void WS2812b_Device::setColor(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+  enqueueAction([r, g, b]() {
+    setLight(LightMode::FixedColor, r, g, b);
+  });
+}
+
+void WS2812b_Device::setMode(LightMode mode) {
+  enqueueAction([mode]() {
+    setLight(mode, 0, 0, 0);
+  });
+}
+
 bool WS2812b_Device::setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
   std::uint8_t mode_cmd       = static_cast<uint8_t>(mode);
   std::vector<uint8_t> tx_buf = { mode_cmd, red, green, blue };

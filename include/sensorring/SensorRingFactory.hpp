@@ -79,6 +79,13 @@ public:
   static constexpr Version MIN_FIRMWARE_VERSION = { 0, 9, 0 };
 
   /**
+   * @brief Construct the factory with a validation mode.
+   * @param[in] mode Validation mode (default: Relaxed). In Relaxed mode,
+   *            mismatched boards are skipped instead of aborting.
+   */
+  explicit SensorRingFactory(ValidationMode mode = ValidationMode::Relaxed);
+
+  /**
    * @brief Add a communication interface (bus) to scan during build().
    *
    * All subsequent expectBoard() calls apply to this interface until the next
@@ -116,11 +123,10 @@ public:
    * @brief Enumerate hardware on all added interfaces, validate against
    *        expectations, and construct the SensorRing.
    *
-   * @param[in] mode Validation mode (default: Strict). In Relaxed mode,
-   *            mismatched boards are skipped instead of aborting.
+   * Uses the ValidationMode set in the constructor.
    * @return Unique pointer to the SensorRing, or nullptr on failure.
    */
-  std::unique_ptr<SensorRing> build(ValidationMode mode = ValidationMode::Strict);
+  std::unique_ptr<SensorRing> build();
 
   /**
    * @brief Enumerate hardware on all added interfaces without building a SensorRing.
@@ -171,6 +177,7 @@ private:
   std::vector<InterfaceConfig> _interfaces;
   std::unordered_map<device::DeviceType, DeviceParamsVariant> _default_device_params;
   EnumerationMap _enumeration_results;
+  ValidationMode _mode;
 };
 
 } // namespace ring

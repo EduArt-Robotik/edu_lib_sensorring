@@ -3,7 +3,7 @@
 /**
  * @file   main.cpp
  * @author EduArt Robotik GmbH
- * @brief  This example demonstrates how to use enqueueExtraAction() to control WS2812b LEDs with a smooth color cycling animation.
+ * @brief  This example demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the Light interface.
  * @date 2025-11-18
  */
 
@@ -12,7 +12,8 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/hardware/ws2812b/WS2812b_Device.hpp>
+#include <sensorring/device/DepthSensor.hpp>
+#include <sensorring/device/Light.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -68,22 +69,19 @@ int main(int, char*[]) {
     factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
-    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
-      return 1;
-    }
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
-    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
-
-    // Subscribe to ToF device group for rate tracking
+    // Subscribe to depth sensors for rate tracking
     std::atomic<bool> got_first       = false;
     std::atomic<unsigned int> counter = 0;
-    auto tof_sub                      = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&got_first, &counter](const device::DeviceGroup&) {
+    auto tof_sub                      = manager->depthSensors().subscribe([&got_first, &counter](const measurement::DepthMeasurement&) {
       got_first = true;
       counter++;
     });
+
+    // Get a handle to the lights
+    auto lights = manager->lights();
 
     // Start the measurements
     manager->startMeasuring();
@@ -114,10 +112,11 @@ int main(int, char*[]) {
         const auto green = to_channel(phase + OFFSET_G) * BRIGHTNESS;
         const auto blue  = to_channel(phase + OFFSET_B) * BRIGHTNESS;
 
-        // Update the light color via the extra action interface so it runs in the MeasurementManager context.
-        manager->enqueueExtraAction([red, green, blue]() {
-          device::WS2812b_Device::setLight(device::LightMode::FixedColor, red, green, blue);
-        });
+        // Update the light color via the Light interface (applied in next state-machine cycle)
+        for (std::size_t i = 0; i < lights.size(); ++i) {
+          lights[i].setMode(device::LightMode::FixedColor);
+          lights[i].setColor(red, green, blue);
+        }
 
         if (std::chrono::steady_clock::now() - last_print > 1s) {
           std::cout << "Current frame: " << counter.load() << "\r" << std::flush;

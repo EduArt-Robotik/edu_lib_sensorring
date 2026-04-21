@@ -22,7 +22,7 @@ The first two examples are **functionally identical** — they all use the `Sens
 
 - [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
 - [Thermal Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/thermal_map/src/main.cpp): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
-- [Extra Action Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/extra_action/src/main.cpp): Demonstrates how to use `enqueueExtraAction()` to control WS2812b LEDs with a smooth color cycling animation
+- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/extra_action/src/main.cpp): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
 
 > ⚠️ To use the `depth_map` or `thermal_map` C++ examples on Windows you might first need to enable UTF-8 support for your current terminal session with this command:<br/>
 `$OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding`.
@@ -59,24 +59,24 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 
 The first two examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
-- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_lambdas.py) (**function-based**): Subscribes to device groups and state changes using Python callbacks directly on the `MeasurementManager`
+- [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_lambdas.py) (**function-based**): Subscribes to typed device sensors and state changes using Python callbacks directly on the `MeasurementManager`
 - [Using Proxy Class](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_proxy_class.py) (**object-oriented**): Wraps the subscription logic in a custom proxy class that binds its member methods as callbacks
 
 ### Depth Map Examples
 
 - [Depth Map (terminal)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_terminal.py): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
-- [Depth Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_functional.py): Same as above, but uses `subscribeToDeviceGroup()` callbacks matching the C++ example
+- [Depth Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_functional.py): Same as above, but uses per-sensor subscribe callbacks matching the C++ example
 - [Depth Map (matplotlib)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/depth_map/depth_map_matplotlib.py): Displays a live 3D scatter plot of the ToF point cloud alongside a sigma distribution histogram using [matplotlib](https://matplotlib.org/)
 
 ### Thermal Map Examples
 
 - [Thermal Map (terminal)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_terminal.py): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
-- [Thermal Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_functional.py): Same as above, but uses `subscribeToDeviceGroup()` callbacks matching the C++ example
+- [Thermal Map (functional)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_functional.py): Same as above, but uses per-sensor subscribe callbacks matching the C++ example
 - [Thermal Map (OpenCV)](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/thermal_map/thermal_map_opencv.py): Displays a live false-color thermal image in an [OpenCV](https://opencv.org/) window
 
 ### Action Examples
 
-- [Extra Action Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/extra_action/extra_action.py): Demonstrates how to use `enqueueExtraAction()` to control WS2812b LEDs with a smooth color cycling animation
+- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/extra_action/extra_action.py): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
 
 <div align=center>
 <table style="border: none;">
@@ -119,28 +119,21 @@ def main():
     # Create the SensorRing via auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(interface)
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Subscribe to the state changes
     state_sub = manager.subscribeToStateChanges(
       lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
     )
 
-    # Subscribe to the ToF and Thermal device groups
-    tof_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_VL53L8CX,
-      lambda group: None  # Process ToF measurements here
+    # Subscribe to depth and thermal measurements via typed interfaces
+    tof_sub = manager.depthSensors().subscribe(
+      lambda meas: None  # Process depth measurements here
     )
-    thermal_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_HTPA32,
-      lambda group: None  # Process thermal measurements here
+    thermal_sub = manager.thermalSensors().subscribe(
+      lambda meas: None  # Process thermal measurements here
     )
 
     # Start the measurements

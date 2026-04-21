@@ -8,6 +8,10 @@ namespace sensorring {
 
 namespace manager {
 
+MeasurementManager::MeasurementManager(ManagerParams params, ring::SensorRingFactory& factory)
+    : _mm_impl(std::make_unique<MeasurementManagerImpl>(params, factory.build())) {
+}
+
 MeasurementManager::MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
     : _mm_impl(std::make_unique<MeasurementManagerImpl>(params, std::move(sensor_ring))) {
 }
@@ -19,19 +23,6 @@ ManagerParams MeasurementManager::getParams() const noexcept {
   return _mm_impl->getParams();
 }
 
-ring::SensorRing* MeasurementManager::getSensorRing() const noexcept {
-  return _mm_impl->getSensorRing();
-}
-
-void MeasurementManager::enqueueExtraAction(std::function<void()> action) {
-  return _mm_impl->enqueueExtraAction(std::move(action));
-}
-
-/* =======================================================================================
-        Handle observers
-==========================================================================================
-*/
-
 ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
 }
@@ -39,19 +30,6 @@ ManagerState MeasurementManager::getManagerState() const noexcept {
 subscription::Subscription MeasurementManager::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   return _mm_impl->subscribeToStateChanges(std::move(callback));
 }
-
-subscription::Subscription MeasurementManager::subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback) {
-  return _mm_impl->subscribeToDeviceGroup(key, std::move(callback));
-}
-
-void MeasurementManager::unsubscribe(subscription::SubscriberToken token) {
-  return _mm_impl->unsubscribe(token);
-}
-
-/* =======================================================================================
-        Start and stop measurements
-==========================================================================================
-*/
 
 bool MeasurementManager::measureSome() noexcept {
   return _mm_impl->measureSome();
@@ -67,6 +45,18 @@ bool MeasurementManager::stopMeasuring() noexcept {
 
 bool MeasurementManager::isMeasuring() noexcept {
   return _mm_impl->isMeasuring();
+}
+
+device::Group<device::DepthSensor> MeasurementManager::depthSensors() const noexcept {
+  return _mm_impl->depthSensors();
+}
+
+device::Group<device::ThermalSensor> MeasurementManager::thermalSensors() const noexcept {
+  return _mm_impl->thermalSensors();
+}
+
+device::Group<device::Light> MeasurementManager::lights() const noexcept {
+  return _mm_impl->lights();
 }
 
 } // namespace manager

@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp>
+#include <sensorring/device/DepthSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -101,26 +101,19 @@ int main(int, char*[]) {
     factory.expectBoard({}, { device::VL53L8CX_Params{} });
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::VL53L8CX_Params{} });
-    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
-      return 1;
-    }
-
-    // Create the MeasurementManager with the SensorRing
-    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Create the MeasurementManager directly from the factory
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
     // Subscribe to the state changes to get the measurements
     auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
       std::cout << "[State] State changed to: " << state << std::endl;
     });
 
-    // Subscribe to the VL53L8CX device group to get the measurements
-    auto vl53l8cx_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&got_first_measurement, &reset_cursor](const device::DeviceGroup& devs) {
+    // Subscribe to the first depth sensor to get the measurements
+    auto depth_sub = manager->depthSensors().subscribe([&got_first_measurement, &reset_cursor](const measurement::DepthMeasurement& meas) {
       got_first_measurement = true;
-      auto vl53l8cx         = devs.getDevicesOfType<device::VL53L8CX_Device>().at(0);
-      printDepthMap(vl53l8cx->getLatestMeasurement().first.point_cloud, reset_cursor);
+      printDepthMap(meas.point_cloud, reset_cursor);
       reset_cursor = true;
     });
 
@@ -138,7 +131,7 @@ int main(int, char*[]) {
 
       // Cancel subscriptions before stopping (optional — destruction also cancels)
       state_sub.cancel();
-      vl53l8cx_sub.cancel();
+      depth_sub.cancel();
       log_sub.cancel();
 
       // Stop the measurements

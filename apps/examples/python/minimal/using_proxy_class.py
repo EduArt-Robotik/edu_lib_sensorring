@@ -69,11 +69,9 @@ class CustomProxy:
     self._subscriptions.append(
       manager.subscribeToStateChanges(self.on_manager_state_change))
     self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self.on_vl53l8cx_callback))
+      manager.depthSensors().subscribe(self.on_depth_measurement))
     self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self.on_htpa32_callback))
-    self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_WS2812b, self.on_ws2812b_callback))
+      manager.thermalSensors().subscribe(self.on_thermal_measurement))
 
   def cancel_all(self):
     """Cancel all subscriptions."""
@@ -84,14 +82,11 @@ class CustomProxy:
   def on_manager_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def on_vl53l8cx_callback(self, group):
-    self.vl53l8cx_rate.tick(group.getDeviceCount())
+  def on_depth_measurement(self, meas):
+    self.vl53l8cx_rate.tick(1)
 
-  def on_htpa32_callback(self, group):
-    self.htpa32_rate.tick(group.getDeviceCount())
-
-  def on_ws2812b_callback(self, group):
-    pass
+  def on_thermal_measurement(self, meas):
+    self.htpa32_rate.tick(1)
 
 
 def main():
@@ -122,14 +117,9 @@ def main():
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
     factory.addInterface(usbtingo_interface)
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Instantiate a Measurement proxy
     proxy = CustomProxy(manager)

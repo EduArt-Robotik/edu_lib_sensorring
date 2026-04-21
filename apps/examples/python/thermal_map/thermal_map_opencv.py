@@ -39,14 +39,13 @@ class ThermalViewClient:
     self._subscriptions.append(
       manager.subscribeToStateChanges(self._on_state_change))
     self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_HTPA32, self._on_htpa32_callback))
+      manager.thermalSensors().subscribe(self._on_thermal_measurement))
 
   def _on_state_change(self, state):
     self._state = state
 
-  def _on_htpa32_callback(self, group):
-    measurement = sensorring.DeviceGroup_getHTPA32Measurement(group, 0)
-    measurement.falsecolor_img.copyTo(self._img_np)
+  def _on_thermal_measurement(self, meas):
+    meas.falsecolor_img.copyTo(self._img_np)
     self._got_measurement = True
 
   def wait_for_new_measurement(self):
@@ -88,14 +87,9 @@ def main():
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.HTPA32_Params())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.HTPA32_Params())
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Instantiate a ThermalViewClient that registers itself with the manager
     client = ThermalViewClient(manager)
@@ -108,10 +102,9 @@ def main():
       time.sleep(0.1)
 
     if manager.isMeasuring():
-      # Start calibration of thermal sensors via extra action
-      manager.enqueueExtraAction(
-        lambda: sensorring.HTPA32_startCalibration(manager, 20)
-      )
+      # Start calibration directly via the ThermalSensor interface (thread-safe)
+      for sensor in manager.thermalSensors():
+        sensor.startCalibration(20)
 
     window_name = "Thermal View"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)

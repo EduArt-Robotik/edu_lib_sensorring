@@ -3,92 +3,123 @@
 /**
  * @file   BaseDevice.hpp
  * @author EduArt Robotik GmbH
- * @brief  Base device combining IDevice and BaseSensor with device ID and state.
+ * @brief  Base class for all concrete sensor/actuator devices.
  * @date   2025-02-09
  */
 
 #pragma once
 
-#include "sensorring/math/Math.hpp"
+#include <cstdint>
+#include <future>
+#include <mutex>
+#include <optional>
+#include <vector>
 
-#include "BaseSensor.hpp"
-#include "DeviceID.hpp"
-#include "DeviceState.hpp"
-#include "IDevice.hpp"
+#include "sensorring/device/DeviceID.hpp"
+#include "sensorring/device/DeviceState.hpp"
+#include "sensorring/device/IDevice.hpp"
+#include "sensorring/interface/ComEndpoint.hpp"
+#include "sensorring/math/Math.hpp"
+#include "sensorring/math/Matrix3.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace com {
+class ComInterface;
+}
 
-/// Forward declaration of implementation of BaseDevice.
-class SENSORRING_EXPORT DeviceImpl;
+namespace device {
 
 /**
  * @struct DevicePoseOffset
  * @brief Pose offset of a device relative to the center of its sensor board.
  */
 struct DevicePoseOffset {
-
-  /// Translation offset from the board center.
   math::Vector3 board_center_translation_offset;
-
-  /// Rotation offset from the board center.
   math::Vector3 board_center_rotation_offset;
 };
 
 /**
  * @class BaseDevice
- * @brief Base class for concrete devices: implements IDevice and BaseSensor, holds device ID and state.
+ * @brief Single concrete base class for all devices in the SensorRing.
+ *
+ * Combines the polymorphic IDevice interface with communication, state tracking,
+ * pose handling and promise-based measurement synchronisation.
  */
-class SENSORRING_EXPORT BaseDevice : public IDevice, public BaseSensor {
+class SENSORRING_EXPORT BaseDevice : public virtual IDevice {
 public:
   /**
-   * @brief Constructs the device with the given ID, communication interface, endpoint, and enable flag.
-   * @param[in] id Device identifier.
+   * @brief Construct the device with identity, communication link and enable flag.
+   * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
-   * @param[in] target Communication endpoint.
-   * @param[in] enable Whether the device is enabled.
+   * @param[in] target    Communication endpoint this device listens to.
+   * @param[in] enable    Whether the device starts enabled.
    */
   BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
 
-  /**
-   * @brief Returns the device identifier.
-   * @return DeviceID of this device.
-   */
+  virtual ~BaseDevice();
+
+  // -- identity --
+
   DeviceID getDeviceID() const;
+  unsigned int getIdx() const;
 
-  /**
-   * @brief Set the pose offset of this device relative to the board center.
-   * @param[in] offset The pose offset to set.
-   */
+  // -- enable --
+
+  bool getEnable() const;
+  void setEnable(bool enable);
+
+  // -- pose --
+
+  void setPose(math::Vector3 translation, math::Vector3 rotation);
   void setPoseOffset(const DevicePoseOffset& offset) { _pose_offset = offset; }
-
-  /**
-   * @brief Get the pose offset of this device relative to the board center.
-   * @return The current pose offset.
-   */
   DevicePoseOffset getPoseOffset() const { return _pose_offset; }
 
-  // void setEnable(bool enable);
-  // bool getEnable() const;
+  // -- state / measurement synchronisation --
+
+  void resetSensorState();
+  void clearDataFlag();
+  std::future<bool> beginMeasurementWait();
+  std::future<bool> beginDataAvailableWait();
 
 protected:
-  /// Current lifecycle/runtime state.
-  DeviceState _state;
+  void setMeasurementReady(bool success);
+  void setDataAvailableReady(bool success);
 
-  /// Device identifier.
+  virtual void onResetSensorState() {}
+  virtual void onClearDataFlag() {}
+
+  virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
+
+  // -- members --
+
   DeviceID _id;
-
-  /// Whether the device is enabled.
+  unsigned int _idx;
+  DeviceState _state;
   bool _enable;
 
-  /// Pose offset of the device relative to the sensor board center.
+  com::ComInterface* _interface;
+
+  math::Vector3 _translation;
+  math::Vector3 _rotation;
+  math::Matrix3 _rot_m;
+
   DevicePoseOffset _pose_offset{
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 }
   };
+
+  mutable std::mutex _state_mutex;
+
+  std::optional<std::promise<bool> > _measurement_promise;
+  std::optional<std::promise<bool> > _data_available_promise;
+  std::mutex _promise_mutex;
+
+  subscription::Subscription _com_subscription;
 };
 
 } // namespace device

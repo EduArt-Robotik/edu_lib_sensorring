@@ -9,8 +9,10 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 
+#include "sensorring/device/DeviceState.hpp"
 #include "sensorring/measurement/Image.hpp"
 
 namespace eduart {
@@ -42,11 +44,17 @@ class FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>
  * @brief  Structure for holding a measurement from a thermal sensor
  */
 struct ThermalMeasurement {
+  /// Index of the sensor that produced this measurement.
+  unsigned int sensor_index = 0;
+
   /// Frame number of the ThermalMeasurement
   unsigned int frame_id = 0;
 
-  /// User assigned index of the sensor that measured the point
-  unsigned int user_idx = 0;
+  /// Timestamp when the measurement was taken.
+  std::chrono::system_clock::time_point timestamp;
+
+  /// Device health state at the time of publication.
+  device::DeviceState state = device::DeviceState::Undefined;
 
   /// Ambient temperature in °C
   double t_ambient_deg_c = 0;
@@ -58,7 +66,7 @@ struct ThermalMeasurement {
   double max_deg_c = 0;
 
   /// Image structure where each pixel represents the temperature measured at that point in °C
-  TemperatureImage temp_data_deg_c;
+  TemperatureImage temperatures;
 
   /// Grayscale image visualizing the thermal measurement
   GrayscaleImage grayscale_img;

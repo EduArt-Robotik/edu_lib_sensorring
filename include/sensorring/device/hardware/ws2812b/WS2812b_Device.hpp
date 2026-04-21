@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Light.hpp"
 #include "sensorring/device/LightMode.hpp"
 #include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
@@ -29,7 +30,7 @@ class WS2812b_DeviceImpl;
  * @class WS2812b_Device
  * @brief  Device wrapper for WS2812b LED strips controlled via the sensorring bus.
  */
-class SENSORRING_EXPORT WS2812b_Device : public BaseDevice {
+class SENSORRING_EXPORT WS2812b_Device : public BaseDevice, public Light {
 public:
   /**
    * @brief Construct a new WS2812b device instance.
@@ -47,6 +48,18 @@ public:
    * @return Reference to the internal WS2812b parameter struct.
    */
   const WS2812b_Params& getParams() const;
+
+  // --- Light interface overrides ---
+
+  /**
+   * @brief Set the RGB color. Enqueues a CAN command into the device action queue.
+   */
+  void setColor(std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
+
+  /**
+   * @brief Set the light mode. Enqueues a CAN command into the device action queue.
+   */
+  void setMode(LightMode mode) override;
 
   // Simple static helpers to control all WS2812b devices on the bus.
   /**

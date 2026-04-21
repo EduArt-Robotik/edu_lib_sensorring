@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/ThermalSensor.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
@@ -32,7 +33,7 @@ class HTPA32_DeviceImpl;
  * @class HTPA32_Device
  * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
  */
-class SENSORRING_EXPORT HTPA32_Device : public BaseDevice {
+class SENSORRING_EXPORT HTPA32_Device : public BaseDevice, public ThermalSensor {
 public:
   /**
    * @brief Construct a new HTPA32 device instance.
@@ -101,6 +102,11 @@ public:
    * @return Future resolving to true when all fetches succeed.
    */
   static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+
+  /**
+   * @brief Build a ThermalMeasurement from internal state and publish to subscribers.
+   */
+  void publishMeasurement() override;
 
 private:
   /**

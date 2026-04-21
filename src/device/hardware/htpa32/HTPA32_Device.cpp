@@ -55,6 +55,17 @@ void HTPA32_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, 
   _impl->comCallback(source, command, data);
 }
 
+void HTPA32_Device::publishMeasurement() {
+  if (!getEnable())
+    return;
+  auto [measurement, state] = _impl->getLatestMeasurement();
+
+  measurement::ThermalMeasurement m = measurement;
+  m.timestamp                       = std::chrono::system_clock::now();
+  m.state                           = state;
+  _thermal_publisher.publish(m);
+}
+
 std::future<bool> HTPA32_Device::getEepromAsync(std::chrono::milliseconds timeout) {
   return _impl->getEepromAsync(timeout);
 }

@@ -58,15 +58,15 @@ const HTPA32_Params& HTPA32_DeviceImpl::getParams() const {
 }
 
 std::pair<const measurement::GrayscaleImage&, DeviceState> HTPA32_DeviceImpl::getLatestGrayscaleImage() const {
-  return { _latest_measurement.grayscale_img, _parent._error };
+  return { _latest_measurement.grayscale_img, _parent._state };
 }
 
 std::pair<const measurement::FalseColorImage&, DeviceState> HTPA32_DeviceImpl::getLatestFalseColorImage() const {
-  return { _latest_measurement.falsecolor_img, _parent._error };
+  return { _latest_measurement.falsecolor_img, _parent._state };
 }
 
 std::pair<const measurement::ThermalMeasurement&, DeviceState> HTPA32_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_measurement, _parent._error };
+  return { _latest_measurement, _parent._state };
 }
 
 bool HTPA32_DeviceImpl::stopCalibration() {
@@ -86,7 +86,6 @@ bool HTPA32_DeviceImpl::startCalibration(unsigned int window) {
   _calibration_count_current = 0;
   return true;
 }
-
 
 void HTPA32_DeviceImpl::onClearDataFlag() {
   _has_ready_measurement = false;
@@ -123,11 +122,11 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
       _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
       _ptat = (uint16_t)(data[2] << 0 | data[3] << 8);
 
-      std::tie(_latest_measurement, _parent._error) = processMeasurement(0, data.data() + 4, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
-      if (_parent._error == DeviceState::Ok) {
+      std::tie(_latest_measurement, _parent._state) = processMeasurement(0, data.data() + 4, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+      if (_parent._state == DeviceState::Ok) {
         if (_calibration_active && _measurement_init_counter > 5) {
           if (_calibration_count_current < _calibration_count_goal) {
-            _calibration_image += _latest_measurement.temp_data_deg_c;
+            _calibration_image += _latest_measurement.temperatures;
             _calibration_count_current++;
           }
           if (_calibration_count_current >= _calibration_count_goal) {
@@ -147,14 +146,14 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
         }
 
         if (!_calibration_active && _got_calibration) {
-          _latest_measurement.temp_data_deg_c -= _calibration_image;
-          _latest_measurement.temp_data_deg_c += _calibration_average;
+          _latest_measurement.temperatures -= _calibration_image;
+          _latest_measurement.temperatures += _calibration_average;
         }
 
         if (_params.auto_min_max) {
-          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
+          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temperatures, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
         } else {
-          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temp_data_deg_c, _params.t_min_deg_c, _params.t_max_deg_c);
+          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temperatures, _params.t_min_deg_c, _params.t_max_deg_c);
         }
 
         rotateLeftImage(_latest_measurement.grayscale_img);
@@ -205,9 +204,9 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
   std::vector<double> buffer(len);
 
   measurement::ThermalMeasurement result;
-  result.user_idx  = _params.id.index;
-  result.frame_id  = frame_id;
-  result.min_deg_c = 1e6;
+  result.sensor_index = _params.id.index;
+  result.frame_id     = frame_id;
+  result.min_deg_c    = 1e6;
 
   float t_ambient        = _ptat * eeprom.data.ptat_gradient + eeprom.data.ptat_offset;
   result.t_ambient_deg_c = (t_ambient - 2732) / 10.0F;
@@ -246,12 +245,12 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
           = ((((std::int32_t)htpa32::TempTable[table_row + 1][table_col + 1] - (std::int32_t)htpa32::TempTable[table_row + 1][table_col]) * dta) / (std::int32_t)TAEQUIDISTANCE) + (std::int32_t)htpa32::TempTable[table_row + 1][table_col];
       buffer[i] = (std::uint32_t)((vy - vx) * ((std::int32_t)(buffer[i] + TABLEOFFSET) - (std::int32_t)htpa32::YADValues[table_row]) / (std::int32_t)ADEQUIDISTANCE + (std::int32_t)vx);
 
-      result.temp_data_deg_c.data[i] = (buffer[i] - 2732.0F) / 10.0F;
-      if (result.temp_data_deg_c.data[i] < result.min_deg_c) {
-        result.min_deg_c = result.temp_data_deg_c.data[i];
+      result.temperatures.data[i] = (buffer[i] - 2732.0F) / 10.0F;
+      if (result.temperatures.data[i] < result.min_deg_c) {
+        result.min_deg_c = result.temperatures.data[i];
       }
-      if (result.temp_data_deg_c.data[i] > result.max_deg_c) {
-        result.max_deg_c = result.temp_data_deg_c.data[i];
+      if (result.temperatures.data[i] > result.max_deg_c) {
+        result.max_deg_c = result.temperatures.data[i];
       }
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Processing thermal image failed for pixel " + std::to_string(i));
@@ -262,20 +261,20 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
   return { result, DeviceState::Ok };
 }
 
-measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temp_data_deg_c, double t_min_deg_c, double t_max_deg_c) const {
+measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temperatures, double t_min_deg_c, double t_max_deg_c) const {
   measurement::GrayscaleImage result;
 
   double delta_t = (t_max_deg_c - t_min_deg_c);
   if (delta_t != 0) {
     for (unsigned int i = 0; i < 512; i++) {
-      double norm_val = ((temp_data_deg_c.data[i] - t_min_deg_c) / delta_t) * 255;
+      double norm_val = ((temperatures.data[i] - t_min_deg_c) / delta_t) * 255;
       result.data[i]  = static_cast<uint8_t>(std::clamp(std::round(norm_val), 0.0, 255.0));
     }
 
     for (unsigned int i = 512; i < 1024; i += 128) {
       for (unsigned int j = 0; j < 128; j += 32) {
         for (unsigned int k = 0; k < 32; k++) {
-          double norm_val        = (temp_data_deg_c.data[i + (96 - j) + k] - t_min_deg_c) / delta_t * 255;
+          double norm_val        = (temperatures.data[i + (96 - j) + k] - t_min_deg_c) / delta_t * 255;
           result.data[i + j + k] = static_cast<uint8_t>(std::clamp(std::round(norm_val), 0.0, 255.0));
         }
       }

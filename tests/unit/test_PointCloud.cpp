@@ -12,14 +12,14 @@ TEST_CASE("PointCloud PointData structure", "[PointCloud]") {
   p.point.z()    = 3.0;
   p.raw_distance = 4.5;
   p.sigma        = 0.1;
-  p.user_idx     = 7;
+  p.sensor_index     = 7;
 
   REQUIRE(p.point.x() == Catch::Approx(1.0));
   REQUIRE(p.point.y() == Catch::Approx(2.0));
   REQUIRE(p.point.z() == Catch::Approx(3.0));
   REQUIRE(p.raw_distance == Catch::Approx(4.5));
   REQUIRE(p.sigma == Catch::Approx(0.1));
-  REQUIRE(p.user_idx == 7);
+  REQUIRE(p.sensor_index == 7);
 }
 
 TEST_CASE("PointCloud copyTo basic behavior", "[PointCloud]") {
@@ -31,14 +31,14 @@ TEST_CASE("PointCloud copyTo basic behavior", "[PointCloud]") {
   cloud.data[0].point.z()    = 3.0;
   cloud.data[0].raw_distance = 4.0;
   cloud.data[0].sigma        = 0.1;
-  cloud.data[0].user_idx     = 1;
+  cloud.data[0].sensor_index     = 1;
 
   cloud.data[1].point.x()    = -1.0;
   cloud.data[1].point.y()    = -2.0;
   cloud.data[1].point.z()    = -3.0;
   cloud.data[1].raw_distance = 5.0;
   cloud.data[1].sigma        = 0.2;
-  cloud.data[1].user_idx     = 2;
+  cloud.data[1].sensor_index     = 2;
 
   double buffer[12] = { 0.0 };
   cloud.copyTo(buffer, 12);
@@ -78,7 +78,7 @@ TEST_CASE("PointCloud copyTo buffer clipping and empty cloud", "[PointCloud]") {
       cloud.data[i].point.z()    = (i + 1.0) * 100.0;
       cloud.data[i].raw_distance = i + 0.5;
       cloud.data[i].sigma        = 0.01 * (i + 1);
-      cloud.data[i].user_idx     = i;
+      cloud.data[i].sensor_index     = i;
     }
 
     // Buffer can only hold one point (6 doubles)

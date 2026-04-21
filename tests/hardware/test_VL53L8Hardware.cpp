@@ -4,19 +4,17 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
-#include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/device/DeviceParams.hpp"
-#include "sensorring/device/DeviceType.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/DepthSensor.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
 using eduart::sensorring::com::InterfaceType;
 using eduart::sensorring::manager::ManagerParams;
 using eduart::sensorring::manager::MeasurementManager;
-using eduart::sensorring::measurement::TofMeasurement;
+using eduart::sensorring::measurement::DepthMeasurement;
 
 namespace {
 
@@ -33,31 +31,21 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   interface.type = type;
   interface.name = interface_name;
 
-  std::vector<TofMeasurement> measurements;
-  std::size_t count = 0;
+  std::vector<DepthMeasurement> measurements;
+  std::atomic<std::size_t> count{ 0 };
 
   try {
     eduart::sensorring::ring::SensorRingFactory factory;
     factory.addInterface(interface);
     factory.expectBoard({}, { eduart::sensorring::device::VL53L8CX_Params() });
-    auto sensor_ring = factory.build(eduart::sensorring::ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      return TestResult::NotAvailable;
-    }
+    MeasurementManager manager(params, factory);
 
-    MeasurementManager manager(params, std::move(sensor_ring));
-
-    auto sub = manager.subscribeToDeviceGroup(eduart::sensorring::device::DeviceType::VL53L8CX, [&measurements, &count](const eduart::sensorring::device::DeviceGroup& group) {
-      group.invokeForEachDeviceOfType<eduart::sensorring::device::VL53L8CX_Device>([&measurements, &count](eduart::sensorring::device::VL53L8CX_Device* device) {
-        if (!device->getEnable())
-          return;
-        auto [meas, state] = device->getLatestMeasurement();
-        if (state == eduart::sensorring::device::DeviceState::Ok && !meas.point_cloud.data.empty()) {
-          measurements.push_back(meas);
-          count++;
-        }
-      });
+    auto sub = manager.depthSensors().subscribe([&measurements, &count](const DepthMeasurement& meas) {
+      if (!meas.point_cloud.data.empty()) {
+        measurements.push_back(meas);
+        count++;
+      }
     });
 
     if (!manager.startMeasuring()) {
@@ -80,10 +68,11 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
 
     const auto& first = measurements.front();
 
-    const auto& points = first.point_cloud.data;
-    if (points.empty()) {
+    if (first.point_cloud.data.empty()) {
       return TestResult::Failed;
     }
+
+    const auto& points = first.point_cloud.data;
 
     // Heuristic 1: at least half of the points have non-zero distance.
     std::size_t non_zero_count = 0;
@@ -97,7 +86,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
       return TestResult::Failed;
     }
 
-    // Heuristic 2: if we observed at least two frames, frame_id should change.
+    // Heuristic 2: if we observed at least two frames, frame_id should differ.
     if (count >= 2) {
       const auto& second = measurements[1];
       if (second.frame_id == first.frame_id) {

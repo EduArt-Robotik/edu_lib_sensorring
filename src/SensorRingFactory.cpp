@@ -13,6 +13,10 @@ namespace sensorring {
 
 namespace ring {
 
+SensorRingFactory::SensorRingFactory(ValidationMode mode)
+    : _mode(mode) {
+}
+
 void SensorRingFactory::addInterface(com::ComInterfaceID interface) {
   _interfaces.push_back(InterfaceConfig{ interface, {}, false });
 }
@@ -46,7 +50,8 @@ void SensorRingFactory::reset() {
   _default_device_params.clear();
 }
 
-std::unique_ptr<SensorRing> SensorRingFactory::build(ValidationMode mode) {
+std::unique_ptr<SensorRing> SensorRingFactory::build() {
+  const auto mode = _mode;
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::build() – starting.");
 
   const bool strict = (mode == ValidationMode::Strict);

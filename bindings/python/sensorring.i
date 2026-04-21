@@ -82,10 +82,12 @@ else:
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/device/IDevice.hpp"
-#include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
-#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
+#include "sensorring/device/DepthSensor.hpp"
+#include "sensorring/device/ThermalSensor.hpp"
+#include "sensorring/device/Light.hpp"
+#include "sensorring/device/Group.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
+#include "sensorring/measurement/Helpers.hpp"
 %}
 
 
@@ -229,6 +231,32 @@ typedef ::int64_t int64_t;
 %include "sensorring/measurement/ThermalMeasurement.hpp"
 
 
+// Typemap: std::chrono::system_clock::time_point <-> Python float (seconds since epoch)
+%typemap(out) std::chrono::system_clock::time_point {
+  auto epoch = std::chrono::duration_cast<std::chrono::microseconds>($1.time_since_epoch()).count();
+  $result = PyFloat_FromDouble(static_cast<double>(epoch) / 1e6);
+}
+%typemap(in) std::chrono::system_clock::time_point {
+  double secs = PyFloat_AsDouble($input);
+  if (PyErr_Occurred()) SWIG_fail;
+  auto us = static_cast<long long>(secs * 1e6);
+  $1 = std::chrono::system_clock::time_point(std::chrono::microseconds(us));
+}
+
+
+%include "sensorring/measurement/DepthMeasurement.hpp"
+
+
+%template (DepthMeasurementVector) std::vector<eduart::sensorring::measurement::DepthMeasurement>;
+%template (PointCloudVector) std::vector<eduart::sensorring::measurement::PointCloud>;
+
+%rename(combinePointCloudsFromClouds) eduart::sensorring::measurement::combinePointClouds(const std::vector<PointCloud>&);
+%rename(combinePointCloudsFromMeasurements) eduart::sensorring::measurement::combinePointClouds(const std::vector<DepthMeasurement>&);
+%rename(toGrayscaleRange) eduart::sensorring::measurement::toGrayscale(const TemperatureImage&, double, double);
+%rename(toFalseColorRange) eduart::sensorring::measurement::toFalseColor(const TemperatureImage&, double, double);
+%include "sensorring/measurement/Helpers.hpp"
+
+
 /****
  * Device type hierarchy
  */
@@ -262,18 +290,68 @@ typedef ::int64_t int64_t;
 
 
 /****
- * Device group (read-only wrapper for subscription callbacks)
+ * Typed device interfaces (new API)
  */
 
+// IDevice: action queue is internal, not for Python users
+%ignore eduart::sensorring::device::IDevice::enqueueAction;
+%ignore eduart::sensorring::device::IDevice::drainActions;
 %import "sensorring/device/IDevice.hpp"
-%ignore eduart::sensorring::device::DeviceGroup::DeviceGroup;
-%ignore eduart::sensorring::device::DeviceGroup::getDevices;
-%ignore eduart::sensorring::device::DeviceGroup::invokeForEachDevice;
-%ignore eduart::sensorring::device::DeviceGroup::getDevicesOfType;
-%ignore eduart::sensorring::device::DeviceGroup::invokeForEachDeviceOfType;
-%ignore eduart::sensorring::device::DeviceGroup::createFromDevicesOfType;
-%ignore eduart::sensorring::device::DeviceGroup::waitForAll;
-%include "sensorring/device/DeviceGroup.hpp"
+
+// --- DepthSensor ---
+%ignore eduart::sensorring::device::DepthSensor::subscribe;     // Manual GIL wrapper below
+%ignore eduart::sensorring::device::DepthSensor::publishMeasurement;
+%ignore eduart::sensorring::device::DepthSensor::_depth_publisher;
+%include "sensorring/device/DepthSensor.hpp"
+
+// --- ThermalSensor ---
+%ignore eduart::sensorring::device::ThermalSensor::subscribe;
+%ignore eduart::sensorring::device::ThermalSensor::publishMeasurement;
+%ignore eduart::sensorring::device::ThermalSensor::_thermal_publisher;
+%include "sensorring/device/ThermalSensor.hpp"
+
+// --- Light ---
+%include "sensorring/device/Light.hpp"
+
+// --- Group<T> ---
+%ignore eduart::sensorring::device::Group::subscribe;  // Manual GIL wrapper below
+%ignore eduart::sensorring::device::Group::begin;
+%ignore eduart::sensorring::device::Group::end;
+%ignore eduart::sensorring::device::Group::iterator;
+%ignore eduart::sensorring::device::Group::const_iterator;
+%include "sensorring/device/Group.hpp"
+
+%template(DepthSensorGroup) eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>;
+%template(ThermalSensorGroup) eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>;
+%template(LightGroup) eduart::sensorring::device::Group<eduart::sensorring::device::Light>;
+
+%extend eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor> {
+  eduart::sensorring::device::DepthSensor& __getitem__(int i) {
+    if (i < 0) i += static_cast<int>($self->size());
+    if (i < 0 || i >= static_cast<int>($self->size()))
+      throw std::out_of_range("Group index out of range");
+    return (*$self)[static_cast<std::size_t>(i)];
+  }
+  std::size_t __len__() { return $self->size(); }
+}
+%extend eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor> {
+  eduart::sensorring::device::ThermalSensor& __getitem__(int i) {
+    if (i < 0) i += static_cast<int>($self->size());
+    if (i < 0 || i >= static_cast<int>($self->size()))
+      throw std::out_of_range("Group index out of range");
+    return (*$self)[static_cast<std::size_t>(i)];
+  }
+  std::size_t __len__() { return $self->size(); }
+}
+%extend eduart::sensorring::device::Group<eduart::sensorring::device::Light> {
+  eduart::sensorring::device::Light& __getitem__(int i) {
+    if (i < 0) i += static_cast<int>($self->size());
+    if (i < 0 || i >= static_cast<int>($self->size()))
+      throw std::out_of_range("Group index out of range");
+    return (*$self)[static_cast<std::size_t>(i)];
+  }
+  std::size_t __len__() { return $self->size(); }
+}
 
 
 /****
@@ -359,8 +437,8 @@ typedef ::int64_t int64_t;
 %inline %{
 namespace eduart { namespace ring {
 
-  eduart::sensorring::ring::SensorRing* SensorRingFactory_build(eduart::sensorring::ring::SensorRingFactory* factory, eduart::sensorring::ring::ValidationMode mode = eduart::sensorring::ring::ValidationMode::Strict) {
-    auto ptr = factory->build(mode);
+  eduart::sensorring::ring::SensorRing* SensorRingFactory_build(eduart::sensorring::ring::SensorRingFactory* factory) {
+    auto ptr = factory->build();
     return ptr.release();
   }
 
@@ -383,8 +461,8 @@ namespace eduart { namespace ring {
 
 // Attach factory wrappers as methods on the Python SensorRingFactory class
 %pythoncode %{
-def _SensorRingFactory_build(self, mode=ValidationMode_Strict):
-    return SensorRingFactory_build(self, mode)
+def _SensorRingFactory_build(self):
+    return SensorRingFactory_build(self)
 def _SensorRingFactory_enumerate(self):
     return SensorRingFactory_enumerate_str(self)
 
@@ -414,133 +492,17 @@ SensorRingFactory.enumerate = _SensorRingFactory_enumerate
 SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 %}
 
-// --- MeasurementManager: SWIG cannot wrap std::unique_ptr. We ignore the C++ ctor
-// and expose a factory that takes a raw pointer (ownership transferred from Python).
-%ignore MeasurementManager(ManagerParams, std::unique_ptr<ring::SensorRing>);
-
-%inline %{
-namespace eduart { namespace manager {
-
-  /** Factory for Python bindings: takes ownership of sensor_ring. */
-  eduart::sensorring::manager::MeasurementManager* make_MeasurementManager(eduart::sensorring::manager::ManagerParams params, eduart::sensorring::ring::SensorRing* sensor_ring) {
-    return new eduart::sensorring::manager::MeasurementManager(params, std::unique_ptr<eduart::sensorring::ring::SensorRing>(sensor_ring));
-  }
-
-}}  // namespace eduart::manager
-%}
-
-%newobject eduart::sensorring::manager::make_MeasurementManager(eduart::sensorring::manager::ManagerParams, eduart::sensorring::ring::SensorRing*);
-
-// When passing a SensorRing into the factory, transfer ownership from Python to C++.
-%typemap(in) eduart::sensorring::ring::SensorRing* sensor_ring (int res = 0, void* argp = nullptr) {
-  res = SWIG_ConvertPtr($input, &argp, $descriptor(eduart::sensorring::ring::SensorRing*), SWIG_POINTER_DISOWN);
-  if (!SWIG_IsOK(res)) {
-    SWIG_exception_fail(SWIG_ArgError(res), "in method \"$symname\", argument $argnum of type \"eduart::sensorring::ring::SensorRing *\" (ownership transferred)");
-  }
-  $1 = reinterpret_cast<eduart::sensorring::ring::SensorRing*>(argp);
-}
-
-%exception eduart::sensorring::manager::make_MeasurementManager {
-    try {
-        $action
-    } catch (const std::exception& e) {
-        SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-}
+// --- MeasurementManager ---
+// The factory constructor is directly wrappable (takes reference):
+// MeasurementManager(ManagerParams, SensorRingFactory&)
+// The unique_ptr<SensorRing> constructor is for C++ power users only — ignore in SWIG.
+%ignore MeasurementManager::MeasurementManager(ManagerParams, std::unique_ptr<ring::SensorRing>);
+%ignore MeasurementManager::devices;
 %ignore MeasurementManager::subscribeToStateChanges;
-%ignore MeasurementManager::subscribeToDeviceGroup;
-%ignore MeasurementManager::unsubscribe;
-%ignore MeasurementManager::enqueueExtraAction;
 %include "sensorring/manager/MeasurementManager.hpp"
 
-// enqueueExtraAction helper: accepts a Python callable and wraps it in std::function<void()>
-%{
-static void Manager_enqueueExtraAction_py(
-    eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable) {
-  Py_INCREF(callable);
-  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    Py_DECREF(p);
-    PyGILState_Release(gstate);
-  });
-  mgr->enqueueExtraAction(
-    [prevent_leak]() {
-      PyGILState_STATE gstate = PyGILState_Ensure();
-      PyObject* result = PyObject_CallObject(prevent_leak.get(), nullptr);
-      Py_XDECREF(result);
-      if (PyErr_Occurred()) PyErr_Print();
-      PyGILState_Release(gstate);
-    }
-  );
-}
-%}
-void Manager_enqueueExtraAction_py(eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable);
-
-// Make MeasurementManager(params, sensor_ring) use our factory (same API as C++).
-%pythoncode %{
-def _MeasurementManager_init(self, params, sensor_ring):
-    other = make_MeasurementManager(params, sensor_ring)
-    self.this = other.this
-    self.thisown = other.thisown
-MeasurementManager.__init__ = _MeasurementManager_init
-%}
-
-// WS2812b_Device: only expose the static setLight/syncLight helpers, not the full device class.
-%{
-static bool WS2812b_setLight(int mode, int red, int green, int blue) {
-  return eduart::sensorring::device::WS2812b_Device::setLight(
-    static_cast<eduart::sensorring::device::LightMode>(mode),
-    static_cast<std::uint8_t>(red),
-    static_cast<std::uint8_t>(green),
-    static_cast<std::uint8_t>(blue));
-}
-static bool WS2812b_syncLight() {
-  return eduart::sensorring::device::WS2812b_Device::syncLight();
-}
-%}
-bool WS2812b_setLight(int mode, int red, int green, int blue);
-bool WS2812b_syncLight();
-
-
-// DeviceGroup typed query helpers: access device-specific data without exposing
-// the templated getDevicesOfType<T>() or the full device classes.
-%{
-static std::size_t DeviceGroup_getVL53L8CXCount(const eduart::sensorring::device::DeviceGroup& group) {
-  return group.getDevicesOfType<eduart::sensorring::device::VL53L8CX_Device>().size();
-}
-static eduart::sensorring::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::sensorring::device::DeviceGroup& group, int index) {
-  auto devs = group.getDevicesOfType<eduart::sensorring::device::VL53L8CX_Device>();
-  if (index < 0 || index >= static_cast<int>(devs.size()))
-    throw std::out_of_range("VL53L8CX device index out of range");
-  return devs[index]->getLatestMeasurement().first;
-}
-static std::size_t DeviceGroup_getHTPA32Count(const eduart::sensorring::device::DeviceGroup& group) {
-  return group.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>().size();
-}
-static eduart::sensorring::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::sensorring::device::DeviceGroup& group, int index) {
-  auto devs = group.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>();
-  if (index < 0 || index >= static_cast<int>(devs.size()))
-    throw std::out_of_range("HTPA32 device index out of range");
-  return devs[index]->getLatestMeasurement().first;
-}
-%}
-%catches(std::out_of_range) DeviceGroup_getVL53L8CXMeasurement;
-%catches(std::out_of_range) DeviceGroup_getHTPA32Measurement;
-std::size_t DeviceGroup_getVL53L8CXCount(const eduart::sensorring::device::DeviceGroup& group);
-eduart::sensorring::measurement::TofMeasurement DeviceGroup_getVL53L8CXMeasurement(const eduart::sensorring::device::DeviceGroup& group, int index);
-std::size_t DeviceGroup_getHTPA32Count(const eduart::sensorring::device::DeviceGroup& group);
-eduart::sensorring::measurement::ThermalMeasurement DeviceGroup_getHTPA32Measurement(const eduart::sensorring::device::DeviceGroup& group, int index);
-
-// HTPA32 calibration helper: start calibration on all HTPA32 devices reachable from a MeasurementManager.
-%{
-static void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mgr, int window) {
-  auto devs = eduart::sensorring::device::DeviceGroup(mgr->getSensorRing()->getDevices());
-  for (auto* htpa32 : devs.getDevicesOfType<eduart::sensorring::device::HTPA32_Device>()) {
-    htpa32->startCalibration(static_cast<std::size_t>(window));
-  }
-}
-%}
-void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mgr, int window);
+// WS2812b_Device: static setLight/syncLight are no longer needed in the Python API.
+// Use Light.setColor() and Light.setMode() instead.
 
 
 %rename (LogVerbosityToString) toString(LogVerbosity);
@@ -557,9 +519,8 @@ void HTPA32_startCalibration(eduart::sensorring::manager::MeasurementManager* mg
 /****
  * Function-based subscription helpers (Python callable -> std::function)
  *
- * These allow Python code to use manager.subscribeToStateChanges(callback) and
- * manager.subscribeToDeviceGroup(DeviceType, callback) with plain Python
- * callables, mirroring the C++ lambda-based API.
+ * These allow Python code to use manager.subscribeToStateChanges(callback) with
+ * plain Python callables, mirroring the C++ lambda-based API.
  */
 
 %{
@@ -611,41 +572,14 @@ static eduart::sensorring::subscription::Subscription* Manager_subscribeToStateC
   return new eduart::sensorring::subscription::Subscription(std::move(sub));
 }
 
-static eduart::sensorring::subscription::Subscription* Manager_subscribeToDeviceGroup_py(
-    eduart::sensorring::manager::MeasurementManager* mgr,
-    eduart::sensorring::device::DeviceType key,
-    PyObject* callable) {
-  Py_INCREF(callable);
-  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    Py_DECREF(p);
-    PyGILState_Release(gstate);
-  });
-  auto sub = mgr->subscribeToDeviceGroup(key,
-    [prevent_leak](const eduart::sensorring::device::DeviceGroup& group) {
-      PyGILState_STATE gstate = PyGILState_Ensure();
-      swig_type_info* group_ti = SWIG_TypeQuery("eduart::sensorring::device::DeviceGroup *");
-      PyObject* py_group = SWIG_NewPointerObj(
-        const_cast<eduart::sensorring::device::DeviceGroup*>(&group), group_ti, 0);
-      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_group, nullptr);
-      Py_XDECREF(py_group);
-      Py_XDECREF(result);
-      if (PyErr_Occurred()) PyErr_Print();
-      PyGILState_Release(gstate);
-    }
-  );
-  return new eduart::sensorring::subscription::Subscription(std::move(sub));
-}
 %}
 
 // Declare the helpers for SWIG to generate Python wrappers
 %newobject Logger_subscribe_py;
 %newobject Manager_subscribeToStateChanges_py;
-%newobject Manager_subscribeToDeviceGroup_py;
 
 eduart::sensorring::subscription::Subscription* Logger_subscribe_py(eduart::sensorring::logger::Logger* logger, PyObject* callable);
 eduart::sensorring::subscription::Subscription* Manager_subscribeToStateChanges_py(eduart::sensorring::manager::MeasurementManager* mgr, PyObject* callable);
-eduart::sensorring::subscription::Subscription* Manager_subscribeToDeviceGroup_py(eduart::sensorring::manager::MeasurementManager* mgr, eduart::sensorring::device::DeviceType key, PyObject* callable);
 
 // Attach the subscribe helpers as methods on the Python wrapper classes
 %pythoncode %{
@@ -658,16 +592,146 @@ def _MeasurementManager_subscribeToStateChanges(self, callback):
     """Subscribe to state changes: callback(state)."""
     return Manager_subscribeToStateChanges_py(self, callback)
 MeasurementManager.subscribeToStateChanges = _MeasurementManager_subscribeToStateChanges
+%}
 
-def _MeasurementManager_subscribeToDeviceGroup(self, device_type, callback):
-    """Subscribe to a device group: callback(device_group)."""
-    return Manager_subscribeToDeviceGroup_py(self, device_type, callback)
-MeasurementManager.subscribeToDeviceGroup = _MeasurementManager_subscribeToDeviceGroup
 
-def _MeasurementManager_enqueueExtraAction(self, action):
-    """Queue a callable to run once in the next extra-actions slot of the state machine."""
-    Manager_enqueueExtraAction_py(self, action)
-MeasurementManager.enqueueExtraAction = _MeasurementManager_enqueueExtraAction
+/****
+ * Per-device subscribe helpers (new API)
+ *
+ * DepthSensor.subscribe(callback)      -> callback(DepthMeasurement)
+ * ThermalSensor.subscribe(callback)    -> callback(ThermalMeasurement)
+ * DepthSensorGroup.subscribe(callback) -> callback(DepthMeasurement)
+ * ThermalSensorGroup.subscribe(callback) -> callback(ThermalMeasurement)
+ */
+
+%{
+
+static eduart::sensorring::subscription::Subscription* DepthSensor_subscribe_py(
+    eduart::sensorring::device::DepthSensor* sensor, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto sub = sensor->subscribe(
+    [prevent_leak](const eduart::sensorring::measurement::DepthMeasurement& meas) {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::DepthMeasurement *");
+      auto* copy = new eduart::sensorring::measurement::DepthMeasurement(meas);
+      PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_meas, nullptr);
+      Py_XDECREF(py_meas);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
+static eduart::sensorring::subscription::Subscription* ThermalSensor_subscribe_py(
+    eduart::sensorring::device::ThermalSensor* sensor, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto sub = sensor->subscribe(
+    [prevent_leak](const eduart::sensorring::measurement::ThermalMeasurement& meas) {
+      PyGILState_STATE gstate = PyGILState_Ensure();
+      swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::ThermalMeasurement *");
+      auto* copy = new eduart::sensorring::measurement::ThermalMeasurement(meas);
+      PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+      PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_meas, nullptr);
+      Py_XDECREF(py_meas);
+      Py_XDECREF(result);
+      if (PyErr_Occurred()) PyErr_Print();
+      PyGILState_Release(gstate);
+    }
+  );
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
+static eduart::sensorring::subscription::Subscription* DepthSensorGroup_subscribe_py(
+    eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>* group, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto cb = [prevent_leak](const eduart::sensorring::measurement::DepthMeasurement& meas) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::DepthMeasurement *");
+    auto* copy = new eduart::sensorring::measurement::DepthMeasurement(meas);
+    PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+    PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_meas, nullptr);
+    Py_XDECREF(py_meas);
+    Py_XDECREF(result);
+    if (PyErr_Occurred()) PyErr_Print();
+    PyGILState_Release(gstate);
+  };
+  auto sub = group->subscribe(cb);
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
+static eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscribe_py(
+    eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>* group, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto cb = [prevent_leak](const eduart::sensorring::measurement::ThermalMeasurement& meas) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::ThermalMeasurement *");
+    auto* copy = new eduart::sensorring::measurement::ThermalMeasurement(meas);
+    PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+    PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_meas, nullptr);
+    Py_XDECREF(py_meas);
+    Py_XDECREF(result);
+    if (PyErr_Occurred()) PyErr_Print();
+    PyGILState_Release(gstate);
+  };
+  auto sub = group->subscribe(cb);
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
+%}
+
+%newobject DepthSensor_subscribe_py;
+%newobject ThermalSensor_subscribe_py;
+%newobject DepthSensorGroup_subscribe_py;
+%newobject ThermalSensorGroup_subscribe_py;
+
+eduart::sensorring::subscription::Subscription* DepthSensor_subscribe_py(eduart::sensorring::device::DepthSensor* sensor, PyObject* callable);
+eduart::sensorring::subscription::Subscription* ThermalSensor_subscribe_py(eduart::sensorring::device::ThermalSensor* sensor, PyObject* callable);
+eduart::sensorring::subscription::Subscription* DepthSensorGroup_subscribe_py(eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>* group, PyObject* callable);
+eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscribe_py(eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>* group, PyObject* callable);
+
+%pythoncode %{
+def _DepthSensor_subscribe(self, callback):
+    """Subscribe to depth measurements: callback(DepthMeasurement)."""
+    return DepthSensor_subscribe_py(self, callback)
+DepthSensor.subscribe = _DepthSensor_subscribe
+
+def _ThermalSensor_subscribe(self, callback):
+    """Subscribe to thermal measurements: callback(ThermalMeasurement)."""
+    return ThermalSensor_subscribe_py(self, callback)
+ThermalSensor.subscribe = _ThermalSensor_subscribe
+
+def _DepthSensorGroup_subscribe(self, callback):
+    """Subscribe to depth measurements from all sensors in the group."""
+    return DepthSensorGroup_subscribe_py(self, callback)
+DepthSensorGroup.subscribe = _DepthSensorGroup_subscribe
+
+def _ThermalSensorGroup_subscribe(self, callback):
+    """Subscribe to thermal measurements from all sensors in the group."""
+    return ThermalSensorGroup_subscribe_py(self, callback)
+ThermalSensorGroup.subscribe = _ThermalSensorGroup_subscribe
 %}
 
 

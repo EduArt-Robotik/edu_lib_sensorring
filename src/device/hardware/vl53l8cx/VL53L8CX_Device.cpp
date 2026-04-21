@@ -5,6 +5,7 @@
 
 #include "device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 using namespace eduart::sensorring::transport::protocol::vl53l8cx;
@@ -37,6 +38,23 @@ std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_Device::getL
 
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   _impl->comCallback(source, command, data);
+}
+
+void VL53L8CX_Device::publishMeasurement() {
+  if (!getEnable())
+    return;
+  auto [raw, state]          = _impl->getLatestMeasurement();
+  auto [transformed, state2] = _impl->getLatestTransformedMeasurement();
+
+  measurement::DepthMeasurement m;
+  m.sensor_index            = _id.index;
+  m.frame_id                = raw.frame_id;
+  m.nr_valid_points         = raw.nr_valid_points;
+  m.timestamp               = std::chrono::system_clock::now();
+  m.state                   = state;
+  m.point_cloud             = raw.point_cloud;
+  m.transformed_point_cloud = transformed.point_cloud;
+  _depth_publisher.publish(m);
 }
 
 // std::future<bool> VL53L8CX_Device::requestTofMeasurementAsync(std::chrono::milliseconds timeout) {

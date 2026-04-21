@@ -94,30 +94,22 @@ def main():
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Subscribe to the state changes
     state_sub = manager.subscribeToStateChanges(
       lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
     )
 
-    # Subscribe to the VL53L8CX device group to get the measurements
-    def on_vl53l8cx_measurement(group):
+    # Subscribe to depth sensors to get the measurements
+    def on_depth_measurement(meas):
       got_first_measurement[0] = True
-      measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
-      print_depth_map(measurement.point_cloud, reset_cursor[0])
+      print_depth_map(meas.point_cloud, reset_cursor[0])
       reset_cursor[0] = True
 
-    vl53l8cx_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_VL53L8CX, on_vl53l8cx_measurement
-    )
+    depth_sub = manager.depthSensors().subscribe(on_depth_measurement)
 
     # Start the measurements
     manager.startMeasuring()
@@ -131,7 +123,7 @@ def main():
 
       # Cancel subscriptions before stopping (optional - destruction also cancels)
       state_sub.cancel()
-      vl53l8cx_sub.cancel()
+      depth_sub.cancel()
       log_sub.cancel()
 
       # Stop the measurements

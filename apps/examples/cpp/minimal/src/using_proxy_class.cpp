@@ -56,14 +56,8 @@ int main(int, char*[]) {
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.addInterface(usbtingo_interface);
-    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
-      return 1;
-    }
-
-    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
     // Instantiate a Measurement proxy
     auto proxy = std::make_unique<CustomProxy>(manager.get());

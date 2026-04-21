@@ -8,7 +8,7 @@ The public interface has **two measurement related components**:
 
 - The **MeasurementManager**:<br>
   This class executes the measurements, collects them and distributes them to all registered subscribers. It is responsible for the timing of the measurement process. The measurements can either be run asynchronously in a separate thread with the `startMeasuring()` and `stopMeasuring()` methods, or in the users thread by repeatedly calling the `measureSome()` method.<br>
-  Clients subscribe to measurements via `subscribeToDeviceGroup()` and to state changes via `subscribeToStateChanges()`. Each call returns a `Subscription` object — the callback stays active for as long as the `Subscription` is alive.
+  Clients subscribe to measurements via typed device interfaces (`depthSensors()`, `thermalSensors()`, `lights()`) and to state changes via `subscribeToStateChanges()`. Each call returns a `Subscription` object — the callback stays active for as long as the `Subscription` is alive.
 
 - The **ManagerParams**<br>
   This is the parameter set that configures the system. The ManagerParams are a cascaded structure, that represents the topology of the system as shown in the diagram below..

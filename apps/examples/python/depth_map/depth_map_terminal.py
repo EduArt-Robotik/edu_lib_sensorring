@@ -67,15 +67,14 @@ class DepthMapClient:
     self._subscriptions.append(
       manager.subscribeToStateChanges(self._on_state_change))
     self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self._on_vl53l8cx_callback))
+      manager.depthSensors().subscribe(self._on_depth_measurement))
 
   def _on_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def _on_vl53l8cx_callback(self, group):
+  def _on_depth_measurement(self, meas):
     self._init_flag = True
-    measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
-    print_depth_map(measurement.point_cloud, self._reset_cursor[0])
+    print_depth_map(meas.point_cloud, self._reset_cursor[0])
     self._reset_cursor[0] = True
 
   def got_first_measurement(self):
@@ -116,14 +115,9 @@ def main():
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Instantiate a DepthMapClient that registers itself with the manager
     client = DepthMapClient(manager, reset_cursor)

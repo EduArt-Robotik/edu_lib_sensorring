@@ -11,6 +11,8 @@
 
 #include <functional>
 #include <iostream>
+#include <sensorring/device/DepthSensor.hpp>
+#include <sensorring/device/ThermalSensor.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/subscription/Subscription.hpp>
 #include <vector>
@@ -29,11 +31,12 @@ class CustomProxy {
 public:
   /// Constructor
   CustomProxy(manager::MeasurementManager* manager) noexcept {
-    // Subscribe to the manager state changes and measurements
+    // Subscribe to the manager state changes
     _subscriptions.emplace_back(manager->subscribeToStateChanges(std::bind(&CustomProxy::onManagerStateChange, this, std::placeholders::_1)));
-    _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, std::bind(&CustomProxy::onVL53L8CXCallback, this, std::placeholders::_1)));
-    _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, std::bind(&CustomProxy::onHTPA32Callback, this, std::placeholders::_1)));
-    _subscriptions.emplace_back(manager->subscribeToDeviceGroup(device::DeviceType::WS2812b, std::bind(&CustomProxy::onWS2812bCallback, this, std::placeholders::_1)));
+
+    // Subscribe to depth and thermal sensors via the new typed API
+    _subscriptions.emplace_back(manager->depthSensors().subscribe(std::bind(&CustomProxy::onDepthMeasurement, this, std::placeholders::_1)));
+    _subscriptions.emplace_back(manager->thermalSensors().subscribe(std::bind(&CustomProxy::onThermalMeasurement, this, std::placeholders::_1)));
   }
 
   /// Destructor
@@ -48,22 +51,22 @@ public:
   void onManagerStateChange(const manager::ManagerState state) { std::cout << "[State] State changed to: " << state << std::endl; }
 
   /**
-   * @brief Callback method for VL53L8CX measurements
-   * @param group The device group of active VL53L8CX devices
+   * @brief Callback method for depth measurements
+   * @param meas The latest depth measurement
    */
-  void onVL53L8CXCallback(const device::DeviceGroup& group) { vl53l8cx_rate.tick(group.getDeviceCount()); }
+  void onDepthMeasurement(const measurement::DepthMeasurement& meas) {
+    (void)meas;
+    vl53l8cx_rate.tick(1);
+  }
 
   /**
-   * @brief Callback method for HTPA32 measurements
-   * @param group The device group of active HTPA32 devices
+   * @brief Callback method for thermal measurements
+   * @param meas The latest thermal measurement
    */
-  void onHTPA32Callback(const device::DeviceGroup& group) { htpa32_rate.tick(group.getDeviceCount()); }
-
-  /**
-   * @brief Callback method for WS2812b measurements
-   * @param group The device group of active WS2812b devices
-   */
-  void onWS2812bCallback(const device::DeviceGroup& group) { (void)group; }
+  void onThermalMeasurement(const measurement::ThermalMeasurement& meas) {
+    (void)meas;
+    htpa32_rate.tick(1);
+  }
 
 public:
   Rate vl53l8cx_rate;

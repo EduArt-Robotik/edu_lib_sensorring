@@ -9,7 +9,6 @@ add_executable(sensorring_tests
     unit/test_TofMeasurement.cpp
     unit/test_ComEndpoint.cpp
     unit/test_DeviceID.cpp
-    unit/test_DeviceGroup.cpp
     unit/test_SubscriberToken.cpp
     unit/test_Subscription.cpp
     unit/test_Publisher.cpp
