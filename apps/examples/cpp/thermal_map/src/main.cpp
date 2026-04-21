@@ -97,7 +97,7 @@ int main(int, char*[]) {
     // Subscribe to the first thermal sensor to get the measurements
     auto thermal_sub = manager->thermalSensors().subscribe([&got_first_measurement, &reset_cursor](const measurement::ThermalMeasurement& meas) {
       got_first_measurement = true;
-      printFalseColorImage(meas.falsecolor_img, reset_cursor);
+      printFalseColorImage(meas.temperatures.toFalseColor(), reset_cursor);
       reset_cursor = true;
     });
 

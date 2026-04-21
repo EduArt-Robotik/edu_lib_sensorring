@@ -52,16 +52,6 @@ public:
    */
   const HTPA32_Params& getParams() const;
 
-  /**
-   * @brief Get the most recent grayscale image and current sensor state.
-   * @return Pair of latest grayscale image and associated sensor state.
-   */
-  std::pair<const measurement::GrayscaleImage&, DeviceState> getLatestGrayscaleImage() const;
-  /**
-   * @brief Get the most recent false-color image and current sensor state.
-   * @return Pair of latest false-color image and associated sensor state.
-   */
-  std::pair<const measurement::FalseColorImage&, DeviceState> getLatestFalseColorImage() const;
 
   /**
    * @brief Request the EEPROM content asynchronously.

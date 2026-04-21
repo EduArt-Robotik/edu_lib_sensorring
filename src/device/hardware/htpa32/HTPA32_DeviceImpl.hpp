@@ -38,8 +38,6 @@ public:
 
   const HTPA32_Params& getParams() const;
 
-  std::pair<const measurement::GrayscaleImage&, DeviceState> getLatestGrayscaleImage() const;
-  std::pair<const measurement::FalseColorImage&, DeviceState> getLatestFalseColorImage() const;
   std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
 
   std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);

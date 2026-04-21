@@ -101,11 +101,6 @@ struct ThermalMeasurement {
   /// Image structure where each pixel represents the temperature measured at that point in °C
   TemperatureImage temperatures;
 
-  /// Grayscale image visualizing the thermal measurement
-  GrayscaleImage grayscale_img;
-
-  /// False color image visualizing the thermal measurement
-  FalseColorImage falsecolor_img;
 };
 
 } // namespace measurement

@@ -57,14 +57,6 @@ const HTPA32_Params& HTPA32_DeviceImpl::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::GrayscaleImage&, DeviceState> HTPA32_DeviceImpl::getLatestGrayscaleImage() const {
-  return { _latest_measurement.grayscale_img, _parent._state };
-}
-
-std::pair<const measurement::FalseColorImage&, DeviceState> HTPA32_DeviceImpl::getLatestFalseColorImage() const {
-  return { _latest_measurement.falsecolor_img, _parent._state };
-}
-
 std::pair<const measurement::ThermalMeasurement&, DeviceState> HTPA32_DeviceImpl::getLatestMeasurement() const {
   return { _latest_measurement, _parent._state };
 }
@@ -150,15 +142,7 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
           _latest_measurement.temperatures += _calibration_average;
         }
 
-        if (_params.auto_min_max) {
-          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temperatures, _latest_measurement.min_deg_c, _latest_measurement.max_deg_c);
-        } else {
-          _latest_measurement.grayscale_img = convertToGrayscaleImage(_latest_measurement.temperatures, _params.t_min_deg_c, _params.t_max_deg_c);
-        }
-
-        rotateLeftImage(_latest_measurement.grayscale_img);
-        _latest_measurement.falsecolor_img = convertToFalseColorImage(_latest_measurement.grayscale_img);
-        _has_ready_measurement             = true;
+        _has_ready_measurement = true;
         _parent.setMeasurementReady(true);
 
       } else {

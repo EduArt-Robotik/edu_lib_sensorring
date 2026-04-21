@@ -6,7 +6,7 @@ add_executable(sensorring_tests
     unit/test_Matrix3.cpp
     unit/test_Math.cpp
     unit/test_PointCloud.cpp
-    unit/test_TofMeasurement.cpp
+    unit/test_DepthMeasurement.cpp
     unit/test_ComEndpoint.cpp
     unit/test_DeviceID.cpp
     unit/test_SubscriberToken.cpp
