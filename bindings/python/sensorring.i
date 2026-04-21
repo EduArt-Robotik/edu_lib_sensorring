@@ -87,7 +87,6 @@ else:
 #include "sensorring/device/Light.hpp"
 #include "sensorring/device/Group.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
-#include "sensorring/measurement/Helpers.hpp"
 %}
 
 
@@ -214,6 +213,7 @@ typedef ::int64_t int64_t;
 
 
 %include "sensorring/measurement/PointCloud.hpp"
+%template (PointCloudVector) std::vector<eduart::sensorring::measurement::PointCloud>;
 
 
 %include "sensorring/subscription/SubscriberToken.hpp"
@@ -245,16 +245,9 @@ typedef ::int64_t int64_t;
 
 
 %include "sensorring/measurement/DepthMeasurement.hpp"
-
-
 %template (DepthMeasurementVector) std::vector<eduart::sensorring::measurement::DepthMeasurement>;
-%template (PointCloudVector) std::vector<eduart::sensorring::measurement::PointCloud>;
 
-%rename(combinePointCloudsFromClouds) eduart::sensorring::measurement::combinePointClouds(const std::vector<PointCloud>&);
-%rename(combinePointCloudsFromMeasurements) eduart::sensorring::measurement::combinePointClouds(const std::vector<DepthMeasurement>&);
-%rename(toGrayscaleRange) eduart::sensorring::measurement::toGrayscale(const TemperatureImage&, double, double);
-%rename(toFalseColorRange) eduart::sensorring::measurement::toFalseColor(const TemperatureImage&, double, double);
-%include "sensorring/measurement/Helpers.hpp"
+
 
 
 /****

@@ -26,6 +26,19 @@ void PointCloud::copyTo(double* buffer, int size) {
   }
 }
 
+PointCloud PointCloud::combine(const std::vector<PointCloud>& clouds) {
+  PointCloud result;
+  std::size_t total = 0;
+  for (const auto& c : clouds) {
+    total += c.data.size();
+  }
+  result.data.reserve(total);
+  for (const auto& c : clouds) {
+    result.data.insert(result.data.end(), c.data.begin(), c.data.end());
+  }
+  return result;
+}
+
 } // namespace measurement
 
 } // namespace sensorring

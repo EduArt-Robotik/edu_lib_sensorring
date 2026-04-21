@@ -41,7 +41,8 @@ target_sources(sensorring
   device/EnumerationInformation.cpp
   measurement/Image.cpp
   measurement/PointCloud.cpp
-  measurement/Helpers.cpp
+  measurement/DepthMeasurement.cpp
+  measurement/ThermalMeasurement.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

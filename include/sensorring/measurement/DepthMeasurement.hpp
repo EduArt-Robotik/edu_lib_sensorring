@@ -9,6 +9,7 @@
 #pragma once
 
 #include <chrono>
+#include <vector>
 
 #include "sensorring/device/DeviceState.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
@@ -48,6 +49,13 @@ struct SENSORRING_EXPORT DepthMeasurement {
 
   /// Point cloud transformed into the ring's coordinate frame (using configured pose).
   PointCloud transformed_point_cloud;
+
+  /**
+   * @brief Combine the transformed point clouds from multiple depth measurements.
+   * @param[in] measurements Vector of depth measurements to merge.
+   * @return Single PointCloud containing all transformed points.
+   */
+  static PointCloud combinePointClouds(const std::vector<DepthMeasurement>& measurements);
 };
 
 } // namespace measurement
