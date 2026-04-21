@@ -5,7 +5,6 @@
 
 #include "device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
-#include "sensorring/measurement/DepthMeasurement.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 using namespace eduart::sensorring::transport::protocol::vl53l8cx;
@@ -28,11 +27,11 @@ const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _impl->getParams();
 }
 
-std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_Device::getLatestMeasurement() const {
+std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_Device::getLatestMeasurement() const {
   return _impl->getLatestMeasurement();
 }
 
-std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_Device::getLatestTransformedMeasurement() const {
+std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_Device::getLatestTransformedMeasurement() const {
   return _impl->getLatestTransformedMeasurement();
 }
 

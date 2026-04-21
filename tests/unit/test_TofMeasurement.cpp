@@ -1,18 +1,18 @@
 #include <catch2/catch_all.hpp>
 
-#include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 
-using eduart::sensorring::measurement::TofMeasurement;
+using eduart::sensorring::measurement::DepthMeasurement;
 
-TEST_CASE("TofMeasurement default initialization", "[TofMeasurement]") {
-  TofMeasurement m;
+TEST_CASE("DepthMeasurement default initialization", "[DepthMeasurement]") {
+  DepthMeasurement m;
 
   REQUIRE(m.frame_id == 0u);
   REQUIRE(m.point_cloud.data.empty());
 }
 
-TEST_CASE("TofMeasurement structure integrity", "[TofMeasurement]") {
-  TofMeasurement m;
+TEST_CASE("DepthMeasurement structure integrity", "[DepthMeasurement]") {
+  DepthMeasurement m;
   m.frame_id = 42u;
 
   m.point_cloud.data.resize(1);

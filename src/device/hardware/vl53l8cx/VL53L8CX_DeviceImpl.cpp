@@ -27,11 +27,11 @@ const VL53L8CX_Params& VL53L8CX_DeviceImpl::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
+std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
   return { _latest_raw_measurement, _parent._state };
 }
 
-std::pair<const measurement::TofMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
+std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
   return { _latest_transformed_measurement, _parent._state };
 }
 
@@ -49,7 +49,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
     // Expected: [frame_id, nr of valid points, <192 bytes of point data>]
     if (data.size() >= (vl53l8::TOF_RESOLUTION * 3 + 2)) {
       _latest_raw_measurement         = processMeasurement(data);
-      _latest_transformed_measurement = transformTofMeasurements(_latest_raw_measurement, _parent._rot_m, _parent._translation);
+      _latest_transformed_measurement = transformMeasurement(_latest_raw_measurement, _parent._rot_m, _parent._translation);
       _parent.setMeasurementReady(true);
     }
     break;
@@ -60,8 +60,8 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
   }
 }
 
-measurement::TofMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
-  measurement::TofMeasurement result;
+measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
+  measurement::DepthMeasurement result;
   result.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
   result.frame_id        = data[0];
   result.nr_valid_points = data[1];
@@ -93,7 +93,7 @@ measurement::TofMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::v
   return result;
 }
 
-measurement::TofMeasurement VL53L8CX_DeviceImpl::transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
+measurement::DepthMeasurement VL53L8CX_DeviceImpl::transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
   auto transformed_measurement = measurement;
 
   for (unsigned int i = 0; i < transformed_measurement.point_cloud.data.size(); i++) {

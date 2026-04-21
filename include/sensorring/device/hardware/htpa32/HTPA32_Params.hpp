@@ -7,11 +7,10 @@
 #include <string>
 
 #include "sensorring/device/DeviceParams.hpp"
-#include "sensorring/device/Orientation.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
-  
+
 namespace sensorring {
 
 namespace device {

@@ -15,8 +15,8 @@
 #include <vector>
 
 #include "sensorring/device/DeviceID.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
-#include "sensorring/measurement/TofMeasurement.hpp"
 
 namespace eduart {
 
@@ -45,7 +45,7 @@ template <typename PayloadT> struct Message {
   PayloadT payload;
 };
 
-using VL53L8Payload  = measurement::TofMeasurement;     ///< Payload type for VL53L8CX ToF sensor measurements.
+using VL53L8Payload  = measurement::DepthMeasurement;   ///< Payload type for VL53L8CX ToF sensor measurements.
 using HTPA32Payload  = measurement::ThermalMeasurement; ///< Payload type for HTPA32 thermal camera measurements.
 using WS2812bPayload = std::vector<uint8_t>;            ///< Payload type for WS2812b LED control messages.
 

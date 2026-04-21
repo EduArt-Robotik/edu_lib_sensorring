@@ -16,6 +16,17 @@ namespace eduart {
 namespace sensorring {
 
 namespace device {
+
+/**
+ * @enum Orientation
+ * @brief Possible orientations of a sensor board. Used to rotate/mirror light animations and thermal images.
+ */
+enum class Orientation {
+  Left,
+  Right,
+  None
+};
+
 /**
  * @struct DeviceParams
  * @brief Base parameter structure of a device. A device is one sensor or actuator on a sensor board.

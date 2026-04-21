@@ -55,7 +55,14 @@ struct SENSORRING_EXPORT DepthMeasurement {
    * @param[in] measurements Vector of depth measurements to merge.
    * @return Single PointCloud containing all transformed points.
    */
-  static PointCloud combinePointClouds(const std::vector<DepthMeasurement>& measurements);
+  static inline PointCloud combinePointClouds(const std::vector<DepthMeasurement>& measurements) {
+    std::vector<PointCloud> clouds;
+    clouds.reserve(measurements.size());
+    for (const auto& m : measurements) {
+      clouds.push_back(m.transformed_point_cloud);
+    }
+    return PointCloud::combine(clouds);
+  }
 };
 
 } // namespace measurement

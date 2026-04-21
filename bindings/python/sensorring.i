@@ -58,7 +58,6 @@ else:
 #include "sensorring/measurement/Image.hpp"
 #include "sensorring/device/LightMode.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
-#include "sensorring/measurement/TofMeasurement.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
 #include "sensorring/subscription/SubscriberToken.hpp"
 #include "sensorring/subscription/Subscription.hpp"
@@ -69,7 +68,6 @@ else:
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/DeviceID.hpp"
 #include "sensorring/device/DeviceParams.hpp"
-#include "sensorring/device/Orientation.hpp"
 #include "sensorring/device/hardware/SensorBoardType.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
@@ -223,7 +221,6 @@ typedef ::int64_t int64_t;
 
 
 %template (PointDataVector) std::vector<eduart::sensorring::measurement::PointData>;
-%include "sensorring/measurement/TofMeasurement.hpp"
 
 %template (TemperatureImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
 %template (GrayscaleImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<double, eduart::sensorring::THERMAL_RESOLUTION>;
@@ -261,10 +258,8 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/DeviceID.hpp"
 
 
-%include "sensorring/device/DeviceParams.hpp"
-
 %rename (Orientation_None) eduart::sensorring::device::Orientation::None;
-%include "sensorring/device/Orientation.hpp"
+%include "sensorring/device/DeviceParams.hpp"
 
 %include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 
@@ -732,5 +727,4 @@ ThermalSensorGroup.subscribe = _ThermalSensorGroup_subscribe
  * Client interfaces (director-enabled so Python classes can inherit and override)
  */
 
-%template (TofMeasurementVector) std::vector<eduart::sensorring::measurement::TofMeasurement>;
 %template (ThermalMeasurementVector) std::vector<eduart::sensorring::measurement::ThermalMeasurement>;

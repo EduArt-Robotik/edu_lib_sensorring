@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/Light.hpp"
 #include "sensorring/device/LightMode.hpp"
@@ -23,8 +21,6 @@ namespace eduart {
 namespace sensorring {
 
 namespace device {
-
-class WS2812b_DeviceImpl;
 
 /**
  * @class WS2812b_Device
@@ -40,14 +36,13 @@ public:
    */
   WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx);
 
-  /// Destructor
-  ~WS2812b_Device();
+  ~WS2812b_Device() = default;
 
   /**
    * @brief Get the parameters used to configure this device.
    * @return Reference to the internal WS2812b parameter struct.
    */
-  const WS2812b_Params& getParams() const;
+  const WS2812b_Params& getParams() const { return _params; }
 
   // --- Light interface overrides ---
 
@@ -85,8 +80,7 @@ private:
    */
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
-  friend class WS2812b_DeviceImpl;
-  std::unique_ptr<WS2812b_DeviceImpl> _impl;
+  const WS2812b_Params _params;
 };
 
 } // namespace device

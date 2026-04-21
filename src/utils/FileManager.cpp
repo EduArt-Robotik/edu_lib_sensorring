@@ -5,9 +5,27 @@
 #include <iostream>
 
 #include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
-#include "platform/Platform.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/measurement/Image.hpp"
+
+namespace {
+
+inline std::string getEnvVar(const char* name) {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996) // allow getenv on MSVC
+#endif
+
+  const char* val = std::getenv(name);
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
+  return val ? std::string(val) : std::string();
+}
+
+} // anonymous namespace
 
 namespace eduart {
 

@@ -19,7 +19,7 @@
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -54,14 +54,14 @@ public:
 
   /**
    * @brief Get the most recent measurement and current sensor state.
-   * @return Pair of latest Time-of-Flight measurement and associated sensor state.
+   * @return Pair of latest depth measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
   /**
    * @brief Get the most recent transformed measurement and current sensor state.
-   * @return Pair of latest transformed Time-of-Flight measurement and associated sensor state.
+   * @return Pair of latest transformed depth measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
