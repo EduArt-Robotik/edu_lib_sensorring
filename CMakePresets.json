@@ -6,24 +6,25 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"}
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "SENSORRING_BUILD_EXAMPLES": "ON",
+        "SENSORRING_BUILD_TESTS": "ON",
+        "SENSORRING_BUILD_UTILS": "ON"
+      }
     },
     {
       "name": "Debug",
       "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "SENSORRING_BUILD_EXAMPLES": "ON",
-        "SENSORRING_BUILD_TESTS": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "Release",
       "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "SENSORRING_BUILD_EXAMPLES": "ON",
-        "SENSORRING_BUILD_TESTS": "ON"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],
