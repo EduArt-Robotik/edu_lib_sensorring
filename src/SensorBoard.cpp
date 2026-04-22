@@ -20,6 +20,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _interface(com::ComManager::getInstance()->getInterface(interface))
     , _params(params)
     , _enum_info()
+    , _bootloader_ack(false)
     , _device_vec(std::move(devices)) {
   _com_subscription = _interface->subscribe(
       [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
@@ -53,10 +54,29 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
   return devices;
 }
 
+bool SensorBoard::enterBootloader() const {
+  {
+    UniqueLock lock_ack(_bootloader_ack_mutex);
+    _bootloader_ack = false;
+  }
+
+  {
+    RecursiveLock lock(_com_mutex);
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<uint8_t>(_idx + 1), devbyte::BOARD }, sensor_board::ENTER_BOOTLOADER, {});
+  }
+
+  UniqueLock lock_ack(_bootloader_ack_mutex);
+  const bool signaled = _bootloader_ack_condition.wait_for(lock_ack, std::chrono::milliseconds(10), [this]() {
+    return _bootloader_ack;
+  });
+
+  return signaled;
+}
+
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   if (command == sensor_board::ACTIVE_DEVICE_RESPONSE && data.size() >= 11 && (data.at(0) == _idx)) {
 
-    LockGuard lock(_com_mutex);
+    RecursiveLock lock(_com_mutex);
 
     if (_enum_info.isUndefined()) {
       _enum_info       = EnumerationInformation::fromBuffer(data);
@@ -75,6 +95,12 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
         device->setPose(translation, rotation);
       }
     }
+  } else if (command == sensor_board::ENTER_BOOTLOADER_ACK) {
+    {
+      UniqueLock lock_ack(_bootloader_ack_mutex);
+      _bootloader_ack = true;
+    }
+    _bootloader_ack_condition.notify_all();
   }
 }
 

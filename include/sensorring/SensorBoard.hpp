@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <condition_variable>
 #include <memory>
 #include <mutex>
 
@@ -68,7 +69,19 @@ public:
    */
   std::vector<BaseDevice*> getDevices() const;
 
+  /**
+   * @brief Enter bootloader mode on the board.
+   * @return True if entering bootloader is successful, false otherwise.
+   */
+  bool enterBootloader() const;
+
 private:
+  using Mutex     = std::mutex;
+  using UniqueLock = std::unique_lock<Mutex>;
+
+  using RecursiveMutex     = std::recursive_mutex;
+  using RecursiveLock = std::lock_guard<RecursiveMutex>;
+
   /**
    * @brief Handle incoming COM message; used for enumeration and device data.
    * @param[in] source Endpoint that received the message.
@@ -81,10 +94,13 @@ private:
   const SensorBoardParams _params;
   EnumerationInformation _enum_info;
 
-  std::vector<std::unique_ptr<device::BaseDevice> > _device_vec;
+  mutable RecursiveMutex _com_mutex;
 
-  mutable std::recursive_mutex _com_mutex;
-  using LockGuard = std::lock_guard<std::recursive_mutex>;
+  mutable Mutex _bootloader_ack_mutex;
+  mutable bool _bootloader_ack;
+  mutable std::condition_variable _bootloader_ack_condition;
+
+  std::vector<std::unique_ptr<device::BaseDevice> > _device_vec;
 
   subscription::Subscription _com_subscription;
 };
