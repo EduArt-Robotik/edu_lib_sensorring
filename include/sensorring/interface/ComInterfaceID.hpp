@@ -9,7 +9,10 @@
 
 #pragma once
 
+#include <ostream>
 #include <string>
+
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -26,6 +29,20 @@ enum class InterfaceType {
   SocketCan,
   UsbTingo
 };
+
+/**
+ * @brief Format interface type as string.
+ * @return Interface type string.
+ */
+SENSORRING_EXPORT std::string toString(InterfaceType type) noexcept;
+
+/**
+ * @brief Stream interface type as string.
+ * @param[in] os Output stream.
+ * @param[in] type Interface type to print.
+ * @return Reference to os.
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const InterfaceType type) noexcept;
 
 /**
  * @struct InterfaceParams
