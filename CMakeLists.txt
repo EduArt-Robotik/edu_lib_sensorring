@@ -87,6 +87,11 @@ if(SENSORRING_BUILD_EXAMPLES)
   add_subdirectory(apps/examples)
 endif()
 
+# Utilities
+if(SENSORRING_BUILD_UTILS)
+  add_subdirectory(apps/utils)
+endif()
+
 # Documentation
 if(SENSORRING_BUILD_DOCUMENTATION AND CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(doc)
