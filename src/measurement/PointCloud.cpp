@@ -22,8 +22,21 @@ void PointCloud::copyTo(double* buffer, int size) {
     buffer[i * 6 + 2] = p.point.z();
     buffer[i * 6 + 3] = p.raw_distance;
     buffer[i * 6 + 4] = p.sigma;
-    buffer[i * 6 + 5] = (double)p.user_idx;
+    buffer[i * 6 + 5] = (double)p.sensor_index;
   }
+}
+
+PointCloud PointCloud::combine(const std::vector<PointCloud>& clouds) {
+  PointCloud result;
+  std::size_t total = 0;
+  for (const auto& c : clouds) {
+    total += c.data.size();
+  }
+  result.data.reserve(total);
+  for (const auto& c : clouds) {
+    result.data.insert(result.data.end(), c.data.begin(), c.data.end());
+  }
+  return result;
 }
 
 } // namespace measurement

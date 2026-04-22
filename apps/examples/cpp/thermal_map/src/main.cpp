@@ -10,7 +10,7 @@
 #include <chrono>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/hardware/htpa32/HTPA32_Device.hpp>
+#include <sensorring/device/ThermalSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -85,26 +85,19 @@ int main(int, char*[]) {
     factory.expectBoard({}, { device::HTPA32_Params{} });
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({}, { device::HTPA32_Params{} });
-    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
-      return 1;
-    }
-
-    // Create the MeasurementManager with the SensorRing
-    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Create the MeasurementManager directly from the factory
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
     // Subscribe to the state changes to get the measurements
     auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
       std::cout << "[State] State changed to: " << state << std::endl;
     });
 
-    // Subscribe to the Thermal device group to get the measurements
-    auto htpa32_sub = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, [&got_first_measurement, &reset_cursor](const device::DeviceGroup& devs) {
+    // Subscribe to the first thermal sensor to get the measurements
+    auto thermal_sub = manager->thermalSensors().subscribe([&got_first_measurement, &reset_cursor](const measurement::ThermalMeasurement& meas) {
       got_first_measurement = true;
-      auto htpa32           = devs.getDevicesOfType<device::HTPA32_Device>().at(0);
-      printFalseColorImage(htpa32->getLatestFalseColorImage().first, reset_cursor);
+      printFalseColorImage(meas.temperatures.toFalseColor(), reset_cursor);
       reset_cursor = true;
     });
 
@@ -116,12 +109,11 @@ int main(int, char*[]) {
 
     if (manager->isMeasuring()) {
 
-      manager->enqueueExtraAction([&manager]() {
-        auto devs   = device::DeviceGroup(manager->getSensorRing()->getDevices());
-        auto htpa32 = devs.getDevicesOfType<device::HTPA32_Device>().at(0);
-        std::cout << "Starting calibration of thermal sensors." << std::endl;
-        htpa32->startCalibration(20);
-      });
+      // Start calibration directly via the ThermalSensor interface (thread-safe)
+      std::cout << "Starting calibration of thermal sensors." << std::endl;
+      for (auto& sensor : manager->thermalSensors()) {
+        sensor.startCalibration(20);
+      }
 
       while (manager->isMeasuring()) {
         std::this_thread::sleep_for(1s);
@@ -129,7 +121,7 @@ int main(int, char*[]) {
 
       // Cancel subscriptions before stopping (optional — destruction also cancels)
       state_sub.cancel();
-      htpa32_sub.cancel();
+      thermal_sub.cancel();
       log_sub.cancel();
 
       // Stop the measurements

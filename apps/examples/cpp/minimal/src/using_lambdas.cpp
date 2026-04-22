@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/device/DepthSensor.hpp>
+#include <sensorring/device/ThermalSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -59,29 +61,23 @@ int main(int, char*[]) {
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.addInterface(usbtingo_interface);
-    auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
 
-    if (!sensor_ring) {
-      std::cout << "Failed to create SensorRing. Exiting." << std::endl;
-      return 1;
-    }
-
-    // Create the MeasurementManager with the SensorRing
-    auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(sensor_ring));
+    // Create the MeasurementManager directly from the factory
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
     // Subscribe to the state changes to get the measurements
     auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
       std::cout << "[State] State changed to: " << state << std::endl;
     });
 
-    // Subscribe to the ToF device group to get the measurements
-    auto vl53l8cx_sub = manager->subscribeToDeviceGroup(device::DeviceType::VL53L8CX, [&vl53l8cx_rate](const device::DeviceGroup& group) {
-      vl53l8cx_rate->tick(group.getDeviceCount());
+    // Subscribe to all depth sensors for measurement rate tracking
+    auto depth_sub = manager->depthSensors().subscribe([&vl53l8cx_rate](const measurement::DepthMeasurement&) {
+      vl53l8cx_rate->tick(1);
     });
 
-    // Subscribe to the Thermal device group to get the measurements
-    auto htpa32_sub = manager->subscribeToDeviceGroup(device::DeviceType::HTPA32, [&htpa32_rate](const device::DeviceGroup& group) {
-      htpa32_rate->tick(group.getDeviceCount());
+    // Subscribe to all thermal sensors for measurement rate tracking
+    auto thermal_sub = manager->thermalSensors().subscribe([&htpa32_rate](const measurement::ThermalMeasurement&) {
+      htpa32_rate->tick(1);
     });
 
     // Start the measurements
@@ -100,8 +96,8 @@ int main(int, char*[]) {
 
       // Cancel subscriptions before stopping (optional — destruction also cancels)
       state_sub.cancel();
-      vl53l8cx_sub.cancel();
-      htpa32_sub.cancel();
+      depth_sub.cancel();
+      thermal_sub.cancel();
       log_sub.cancel();
 
       // Stop the measurements

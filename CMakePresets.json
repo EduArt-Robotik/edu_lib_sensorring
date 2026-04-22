@@ -13,7 +13,8 @@
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "SENSORRING_BUILD_EXAMPLES": "ON"
+        "SENSORRING_BUILD_EXAMPLES": "ON",
+        "SENSORRING_BUILD_TESTS": "ON"
       }
     },
     {
@@ -21,7 +22,8 @@
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "SENSORRING_BUILD_EXAMPLES": "ON"
+        "SENSORRING_BUILD_EXAMPLES": "ON",
+        "SENSORRING_BUILD_TESTS": "ON"
       }
     }
   ],

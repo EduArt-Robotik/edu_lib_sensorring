@@ -22,27 +22,23 @@ target_sources(sensorring
   interface/ComEndpoint.cpp
   logger/Logger.cpp
   logger/LogVerbosity.cpp
-  device/IDevice.cpp
-  device/BaseSensor.cpp
   device/BaseDevice.cpp
   device/DeviceState.cpp
   device/DeviceType.cpp
-  device/DeviceGroup.cpp
   device/hardware/SensorBoardType.cpp
   device/hardware/SensorBoardManager.cpp
   device/hardware/vl53l8cx/VL53L8CX_Device.cpp
   device/hardware/vl53l8cx/VL53L8CX_DeviceImpl.cpp
   device/hardware/htpa32/htpa32_eeprom.c
-  device/hardware/htpa32/HTPA32_Eeprom.cpp
   device/hardware/htpa32/HTPA32_Device.cpp
   device/hardware/htpa32/HTPA32_DeviceImpl.cpp
   device/hardware/ws2812b/WS2812b_Device.cpp
-  device/hardware/ws2812b/WS2812b_DeviceImpl.cpp
   device/DeviceEnumerator.cpp
   device/SensorBoardCommands.cpp
   device/EnumerationInformation.cpp
   measurement/Image.cpp
   measurement/PointCloud.cpp
+  measurement/ThermalMeasurement.cpp
   utils/FileManager.cpp
   math/Math.cpp
   math/Vector3.cpp

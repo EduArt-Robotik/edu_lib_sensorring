@@ -13,12 +13,14 @@
 #include <memory>
 
 #include "sensorring/SensorRing.hpp"
-#include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/device/DepthSensor.hpp"
+#include "sensorring/device/Group.hpp"
+#include "sensorring/device/Light.hpp"
+#include "sensorring/device/ThermalSensor.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
-#include "sensorring/subscription/SubscriberToken.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
@@ -38,9 +40,16 @@ class SENSORRING_EXPORT MeasurementManagerImpl;
 class SENSORRING_EXPORT MeasurementManager {
 public:
   /**
-   * @brief Construct the manager with parameters and owned SensorRing.
+   * @brief Construct the manager from a configured factory. Builds the SensorRing internally.
    * @param[in] params Manager configuration.
-   * @param[in] sensor_ring SensorRing instance to manage (ownership transferred).
+   * @param[in] factory Configured SensorRingFactory (interfaces and expectations already set).
+   */
+  MeasurementManager(ManagerParams params, ring::SensorRingFactory& factory);
+
+  /**
+   * @brief Construct the manager from a pre-built SensorRing (expert-user constructor).
+   * @param[in] params Manager configuration.
+   * @param[in] sensor_ring Fully configured SensorRing. Ownership is transferred.
    */
   MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
 
@@ -79,20 +88,6 @@ public:
   subscription::Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
 
   /**
-   * @brief Subscribe to device group updates; callback is invoked when the group is updated.
-   * @param[in] key Device group to subscribe to.
-   * @param[in] callback Invoked with the updated DeviceGroup.
-   * @return RAII Subscription that auto-cancels on destruction.
-   */
-  subscription::Subscription subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
-
-  /**
-   * @brief Cancel a subscription.
-   * @param[in] token Token returned by subscribeToDeviceGroup or subscribeToStateChanges.
-   */
-  void unsubscribe(subscription::SubscriberToken token);
-
-  /**
    * @brief Return the current health state of the state machine worker.
    * @return Current manager state.
    */
@@ -105,16 +100,20 @@ public:
   ManagerParams getParams() const noexcept;
 
   /**
-   * @brief Return the SensorRing managed by this manager.
-   * @return Pointer to the managed SensorRing (never null while manager is alive).
+   * @brief Return a typed group of all devices matching the given interface.
+   * @tparam T Device interface type (DepthSensor, ThermalSensor, Light).
+   * @return Group<T> wrapping matching device pointers.
    */
-  ring::SensorRing* getSensorRing() const noexcept;
+  template <typename T> device::Group<T> devices() const noexcept;
 
-  /**
-   * @brief Queue a callable to run once in the next extra-actions slot of the state machine.
-   * @param[in] action Callable executed once from the measurement thread; should be non-blocking and exception-safe.
-   */
-  void enqueueExtraAction(std::function<void()> action);
+  /// Convenience: return all depth sensors.
+  device::Group<device::DepthSensor> depthSensors() const noexcept;
+
+  /// Convenience: return all thermal sensors.
+  device::Group<device::ThermalSensor> thermalSensors() const noexcept;
+
+  /// Convenience: return all lights.
+  device::Group<device::Light> lights() const noexcept;
 
 private:
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;

@@ -14,13 +14,17 @@
 #include <functional>
 #include <future>
 #include <memory>
-#include <queue>
 #include <thread>
 #include <unordered_map>
 
 #include "sensorring/SensorRing.hpp"
-#include "sensorring/device/DeviceGroup.hpp"
-#include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/DepthSensor.hpp"
+#include "sensorring/device/Group.hpp"
+#include "sensorring/device/Light.hpp"
+#include "sensorring/device/ThermalSensor.hpp"
+#include "sensorring/device/hardware/htpa32/HTPA32_Device.hpp"
+#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Device.hpp"
+#include "sensorring/device/hardware/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -37,96 +41,31 @@ namespace manager {
  */
 class MeasurementManagerImpl {
 public:
-  /**
-   * @brief Construct the implementation with parameters and owned SensorRing.
-   * @param[in] params Manager configuration.
-   * @param[in] sensor_ring SensorRing instance to manage (ownership transferred).
-   */
   MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
-
-  /// Destructor
   ~MeasurementManagerImpl() noexcept;
 
-  /**
-   * @brief Run one processing cycle of the state machine worker.
-   * @return true on success.
-   */
   bool measureSome() noexcept;
-
-  /**
-   * @brief Start the state machine worker loop in a dedicated thread.
-   * @return true on success.
-   */
   bool startMeasuring() noexcept;
-
-  /**
-   * @brief Stop the state machine worker loop and join the thread.
-   * @return true on success.
-   */
   bool stopMeasuring() noexcept;
-
-  /**
-   * @brief Report whether the measurement worker thread is running.
-   * @return true if the measurement thread is running.
-   */
   bool isMeasuring() noexcept;
 
-  /**
-   * @brief Subscribe to state changes; callback is invoked when the state changes.
-   * @param[in] callback Invoked with the updated ManagerState.
-   * @return RAII Subscription that auto-cancels on destruction.
-   */
   subscription::Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
 
-  /**
-   * @brief Subscribe to device group updates; callback is invoked when the group is updated.
-   * @param[in] key Device group to subscribe to.
-   * @param[in] callback Invoked with the updated DeviceGroup.
-   * @return RAII Subscription that auto-cancels on destruction.
-   */
-  subscription::Subscription subscribeToDeviceGroup(device::DeviceType key, std::function<void(const device::DeviceGroup&)> callback);
-
-  /**
-   * @brief Cancel a subscription (state or device group).
-   * @param[in] token Token returned by subscribeToStateChanges or subscribeToDeviceGroup.
-   */
-  void unsubscribe(subscription::SubscriberToken token);
-
-  /**
-   * @brief Return the current health state of the state machine worker.
-   * @return Current manager state.
-   */
   ManagerState getManagerState() const noexcept;
-
-  /**
-   * @brief Return the parameters used to initialize the manager.
-   * @return Initial parameter struct.
-   */
   ManagerParams getParams() const noexcept;
 
-  /**
-   * @brief Return the SensorRing managed by this implementation.
-   * @return Pointer to the managed SensorRing (never null while implementation is alive).
-   */
-  ring::SensorRing* getSensorRing() const noexcept;
-
-  /**
-   * @brief Queue a callable to run once in the next extra-actions slot; executed from measurement thread; exceptions are caught and logged.
-   * @param[in] action Callable executed once; should be non-blocking and exception-safe.
-   */
-  void enqueueExtraAction(std::function<void()> action);
+  device::Group<device::DepthSensor> depthSensors() const noexcept;
+  device::Group<device::ThermalSensor> thermalSensors() const noexcept;
+  device::Group<device::Light> lights() const noexcept;
 
 private:
-  using Mutex     = std::mutex;
-  using LockGuard = std::lock_guard<Mutex>;
-
   enum class MeasurementState {
     init,
     reset_sensors,
     sync_lights,
     get_eeprom,
     pre_loop_init,
-    extra_actions,
+    device_actions,
     request_tof_measurement,
     fetch_tof_data,
     request_thermal_measurement,
@@ -143,10 +82,6 @@ private:
     ThermalRequest
   };
 
-  struct DeviceTypeHash {
-    std::size_t operator()(device::DeviceType key) const noexcept { return static_cast<std::size_t>(key); }
-  };
-
   struct MeasurementFutureKeyHash {
     std::size_t operator()(MeasurementFutureKey key) const noexcept { return static_cast<std::size_t>(key); }
   };
@@ -156,9 +91,8 @@ private:
 
   bool waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept;
 
-  int notifyVL53L8CX();
-  int notifyHTPA32();
-  void notifyWS2812B();
+  void publishDepthMeasurements();
+  void publishThermalMeasurements();
   void notifyState(const ManagerState state);
 
   const ManagerParams _params;
@@ -176,21 +110,22 @@ private:
   bool _is_thermal_throttled;
   bool _thermal_measurement_flag;
 
-  Mutex _extra_actions_mutex;
-  std::queue<std::function<void()> > _extra_actions;
-
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::unordered_map<device::DeviceType, device::DeviceGroup, DeviceTypeHash> _device_groups;
-  bool _tof_enabled;
-  bool _thermal_enabled;
-
   std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
 
   subscription::Publisher<const ManagerState> _state_publisher;
-  std::unordered_map<device::DeviceType, subscription::Publisher<const device::DeviceGroup&>, DeviceTypeHash> _device_publishers;
+
+  // Typed device vectors — abstract interfaces for public API
+  std::vector<device::DepthSensor*> _depth_sensors;
+  std::vector<device::ThermalSensor*> _thermal_sensors;
+  std::vector<device::Light*> _lights;
+
+  // Concrete device vectors — for internal CAN bus operations
+  std::vector<device::VL53L8CX_Device*> _vl53l8cx_devices;
+  std::vector<device::HTPA32_Device*> _htpa32_devices;
 };
 
 } // namespace manager

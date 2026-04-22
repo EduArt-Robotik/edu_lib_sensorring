@@ -2,7 +2,6 @@
 
 #include <sensorring_transport/Protocol.hpp>
 
-#include "device/hardware/ws2812b/WS2812b_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
@@ -16,14 +15,19 @@ namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::WS2812b, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::WS2812B }, params.enable)
-    , _impl(std::make_unique<WS2812b_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface))) {
+    , _params(std::move(params)) {
 }
 
-WS2812b_Device::~WS2812b_Device() {
+void WS2812b_Device::setColor(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+  enqueueAction([r, g, b]() {
+    setLight(LightMode::FixedColor, r, g, b);
+  });
 }
 
-const WS2812b_Params& WS2812b_Device::getParams() const {
-  return _impl->getParams();
+void WS2812b_Device::setMode(LightMode mode) {
+  enqueueAction([mode]() {
+    setLight(mode, 0, 0, 0);
+  });
 }
 
 bool WS2812b_Device::setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
@@ -45,8 +49,8 @@ bool WS2812b_Device::syncLight() {
   return true;
 }
 
-void WS2812b_Device::comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
-  _impl->comCallback(source, command, data);
+void WS2812b_Device::comCallback(const com::ComEndpoint, std::uint8_t, const std::vector<uint8_t>&) {
+  // WS2812b currently does not receive data; this is a no-op.
 }
 
 } // namespace device

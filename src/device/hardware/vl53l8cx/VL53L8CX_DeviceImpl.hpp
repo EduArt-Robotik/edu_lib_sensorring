@@ -5,11 +5,11 @@
 #include <mutex>
 #include <vector>
 
-#include "sensorring/device/BaseSensor.hpp"
+#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 
 #include "VL53L8CX_Constants.hpp"
 
@@ -36,23 +36,23 @@ public:
 
   const VL53L8CX_Params& getParams() const;
 
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
-  static measurement::TofMeasurement transformTofMeasurements(const measurement::TofMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
+  static measurement::DepthMeasurement transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
-  measurement::TofMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
+  measurement::DepthMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
 
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
   VL53L8CX_Device& _parent;
 
   const VL53L8CX_Params _params;
-  measurement::TofMeasurement _latest_raw_measurement;
-  measurement::TofMeasurement _latest_transformed_measurement;
+  measurement::DepthMeasurement _latest_raw_measurement;
+  measurement::DepthMeasurement _latest_transformed_measurement;
 };
 
 } // namespace device

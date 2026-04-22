@@ -30,14 +30,20 @@ struct HTPA32_Eeprom {
    *  @param[in]  Buffer size for safety
    *  @return     Number of bytes written. Returns 0 if the buffer is too small.
    **/
-  std::size_t serialize(uint8_t* buffer, std::size_t buffer_size);
+  inline std::size_t serialize(uint8_t* buffer, std::size_t buffer_size) { return htpa32_serialize(&data, buffer, buffer_size); }
 
   /**
    *  Deserialize the eeprom struct from buffer.
    *  @param[in]  Buffer size for safety
    *  @return     Returns the deserialized HTPA32_Eeprom struct. Returns std::nullopt if the buffer is too small or deserialization fails.
    **/
-  static std::optional<HTPA32_Eeprom> deserialize(const uint8_t* buffer, std::size_t buffer_size);
+  static inline std::optional<HTPA32_Eeprom> deserialize(const uint8_t* buffer, std::size_t buffer_size) {
+    HTPA32_Eeprom eeprom;
+    if (htpa32_deserialize(&eeprom.data, buffer, buffer_size) == 0) {
+      return eeprom;
+    }
+    return std::nullopt;
+  }
 };
 
 } // namespace htpa32

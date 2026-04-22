@@ -5,7 +5,7 @@
 """
  @file   extra_action.py
  @author EduArt Robotik GmbH
- @brief  This example demonstrates how to use enqueueExtraAction() to control WS2812b LEDs
+ @brief  This example demonstrates how to control WS2812b LEDs
          with a smooth color cycling animation.
  @date 2025-11-18
 """
@@ -66,22 +66,19 @@ def main():
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params(), sensorring.WS2812b_Params())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params(), sensorring.WS2812b_Params())
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
-
-    # Subscribe to ToF device group for rate tracking
+    # Subscribe to depth sensors for rate tracking
     got_first = [False]
     counter = [0]
-    tof_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_VL53L8CX,
-      lambda group: (got_first.__setitem__(0, True), counter.__setitem__(0, counter[0] + 1))
+    depth_sub = manager.depthSensors().subscribe(
+      lambda meas: (got_first.__setitem__(0, True), counter.__setitem__(0, counter[0] + 1))
     )
+
+    # Get a handle to the lights
+    lights = manager.lights()
 
     # Start the measurements
     manager.startMeasuring()
@@ -102,10 +99,10 @@ def main():
         green = int(to_channel(phase + OFFSET_G) * BRIGHTNESS)
         blue = int(to_channel(phase + OFFSET_B) * BRIGHTNESS)
 
-        # Update the light color via the extra action interface so it runs in the MeasurementManager context.
-        manager.enqueueExtraAction(
-          lambda r=red, g=green, b=blue: sensorring.WS2812b_setLight(sensorring.LightMode_FixedColor, r, g, b)
-        )
+        # Update the light color via the Light interface (applied in next state-machine cycle)
+        for i in range(len(lights)):
+          lights[i].setMode(sensorring.LightMode_FixedColor)
+          lights[i].setColor(red, green, blue)
 
         now = time.time()
         if now - last_print > 1.0:
@@ -113,7 +110,7 @@ def main():
           last_print = now
         time.sleep(0.05)
 
-      tof_sub.cancel()
+      depth_sub.cancel()
 
       # Stop the measurements
       manager.stopMeasuring()

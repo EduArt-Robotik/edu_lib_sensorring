@@ -15,10 +15,11 @@
 #include <vector>
 
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/DepthSensor.hpp"
 #include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/measurement/TofMeasurement.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -33,7 +34,7 @@ class VL53L8CX_DeviceImpl;
  * @class VL53L8CX_Device
  * @brief  Device wrapper for a VL53L8CX Time-of-Flight sensor on the sensorring bus.
  */
-class SENSORRING_EXPORT VL53L8CX_Device : public BaseDevice {
+class SENSORRING_EXPORT VL53L8CX_Device : public BaseDevice, public DepthSensor {
 public:
   /**
    * @brief Construct a new VL53L8CX device instance.
@@ -53,14 +54,14 @@ public:
 
   /**
    * @brief Get the most recent measurement and current sensor state.
-   * @return Pair of latest Time-of-Flight measurement and associated sensor state.
+   * @return Pair of latest depth measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
   /**
    * @brief Get the most recent transformed measurement and current sensor state.
-   * @return Pair of latest transformed Time-of-Flight measurement and associated sensor state.
+   * @return Pair of latest transformed depth measurement and associated sensor state.
    */
-  std::pair<const measurement::TofMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
+  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
   // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
@@ -78,6 +79,11 @@ public:
    * @return Future resolving to true when all fetches succeed.
    */
   static std::future<bool> fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
+
+  /**
+   * @brief Build a DepthMeasurement from internal state and publish to subscribers.
+   */
+  void publishMeasurement() override;
 
 private:
   /**

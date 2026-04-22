@@ -34,8 +34,8 @@ struct SENSORRING_EXPORT PointData {
   /// Standard deviation associated with the points location
   double sigma = 0.0;
 
-  /// User assigned index of the sensor that measured the point
-  unsigned int user_idx = 0;
+  /// Index of the sensor that measured the point
+  unsigned int sensor_index = 0;
 };
 
 /**
@@ -52,6 +52,13 @@ struct SENSORRING_EXPORT PointCloud {
    * @param[in] size Actual size of the buffer passed to the method. If the buffer is smaller than the point cloud only a subset of points is copied.
    */
   void copyTo(double* buffer, int size);
+
+  /**
+   * @brief Combine multiple point clouds into a single cloud.
+   * @param[in] clouds Vector of point clouds to merge.
+   * @return Single PointCloud containing all points.
+   */
+  static PointCloud combine(const std::vector<PointCloud>& clouds);
 };
 
 } // namespace measurement

@@ -48,6 +48,14 @@ target_link_libraries(extra_action
     PRIVATE sensorring::sensorring
 )
 
+add_executable(expert
+    cpp/expert/src/main.cpp
+)
+
+target_link_libraries(expert
+    PRIVATE sensorring::sensorring
+)
+
 if(SENSORRING_INSTALL)
   # Install compiled examples
   install( TARGETS
@@ -56,6 +64,7 @@ if(SENSORRING_INSTALL)
     depth_map
     thermal_map
     extra_action
+    expert
     RUNTIME DESTINATION ${SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR} COMPONENT Examples
   )
 

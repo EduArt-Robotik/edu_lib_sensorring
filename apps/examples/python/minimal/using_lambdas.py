@@ -87,30 +87,23 @@ def main():
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
     factory.addInterface(usbtingo_interface)
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Subscribe to the state changes
     state_sub = manager.subscribeToStateChanges(
       lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
     )
 
-    # Subscribe to the ToF device group to get the measurements
-    vl53l8cx_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_VL53L8CX,
-      lambda group: vl53l8cx_rate.tick(group.getDeviceCount())
+    # Subscribe to all depth sensors for measurement rate tracking
+    depth_sub = manager.depthSensors().subscribe(
+      lambda meas: vl53l8cx_rate.tick(1)
     )
 
-    # Subscribe to the Thermal device group to get the measurements
-    htpa32_sub = manager.subscribeToDeviceGroup(
-      sensorring.DeviceType_HTPA32,
-      lambda group: htpa32_rate.tick(group.getDeviceCount())
+    # Subscribe to all thermal sensors for measurement rate tracking
+    thermal_sub = manager.thermalSensors().subscribe(
+      lambda meas: htpa32_rate.tick(1)
     )
 
     # Start the measurements
@@ -130,8 +123,8 @@ def main():
 
       # Cancel subscriptions before stopping (optional - destruction also cancels)
       state_sub.cancel()
-      vl53l8cx_sub.cancel()
-      htpa32_sub.cancel()
+      depth_sub.cancel()
+      thermal_sub.cancel()
       log_sub.cancel()
 
       # Stop the measurements

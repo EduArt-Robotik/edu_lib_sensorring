@@ -9,9 +9,12 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 
+#include "sensorring/device/DeviceState.hpp"
 #include "sensorring/measurement/Image.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -26,27 +29,65 @@ namespace measurement {
 class GrayscaleImage : public GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
- * @class  TemperatureImage
- * @brief  Pseudo image structure for the converted temperatures of a thermal image
- */
-class TemperatureImage : public GenericGrayscaleImage<double, THERMAL_RESOLUTION> {};
-
-/**
  * @class  FalseColorImage
  * @brief  False color image with 3 channels (red, green, blue) and 8 bit color depth
  */
 class FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
+ * @class  TemperatureImage
+ * @brief  Pseudo image structure for the converted temperatures of a thermal image.
+ *
+ * Each pixel stores a temperature value in °C. Provides methods to convert to
+ * visualization images (grayscale or false-color iron palette).
+ */
+class SENSORRING_EXPORT TemperatureImage : public GenericGrayscaleImage<double, THERMAL_RESOLUTION> {
+public:
+  /**
+   * @brief Convert to grayscale with explicit temperature range.
+   * @param[in] t_min Temperature mapped to pixel value 0.
+   * @param[in] t_max Temperature mapped to pixel value 255.
+   * @return GrayscaleImage with pixels in [0, 255].
+   */
+  GrayscaleImage toGrayscale(double t_min, double t_max) const;
+
+  /**
+   * @brief Convert to grayscale using the automatic min/max of this image.
+   * @return GrayscaleImage with pixels in [0, 255].
+   */
+  GrayscaleImage toGrayscale() const;
+
+  /**
+   * @brief Convert to a false-color image (iron palette) with explicit range.
+   * @param[in] t_min Temperature mapped to the cold end of the palette.
+   * @param[in] t_max Temperature mapped to the hot end of the palette.
+   * @return FalseColorImage (RGB, iron palette).
+   */
+  FalseColorImage toFalseColor(double t_min, double t_max) const;
+
+  /**
+   * @brief Convert to a false-color image (iron palette) using automatic min/max.
+   * @return FalseColorImage (RGB, iron palette).
+   */
+  FalseColorImage toFalseColor() const;
+};
+
+/**
  * @class  ThermalMeasurement
  * @brief  Structure for holding a measurement from a thermal sensor
  */
 struct ThermalMeasurement {
+  /// Index of the sensor that produced this measurement.
+  unsigned int sensor_index = 0;
+
   /// Frame number of the ThermalMeasurement
   unsigned int frame_id = 0;
 
-  /// User assigned index of the sensor that measured the point
-  unsigned int user_idx = 0;
+  /// Timestamp when the measurement was taken.
+  std::chrono::system_clock::time_point timestamp;
+
+  /// Device health state at the time of publication.
+  device::DeviceState state = device::DeviceState::Undefined;
 
   /// Ambient temperature in °C
   double t_ambient_deg_c = 0;
@@ -58,13 +99,8 @@ struct ThermalMeasurement {
   double max_deg_c = 0;
 
   /// Image structure where each pixel represents the temperature measured at that point in °C
-  TemperatureImage temp_data_deg_c;
+  TemperatureImage temperatures;
 
-  /// Grayscale image visualizing the thermal measurement
-  GrayscaleImage grayscale_img;
-
-  /// False color image visualizing the thermal measurement
-  FalseColorImage falsecolor_img;
 };
 
 } // namespace measurement

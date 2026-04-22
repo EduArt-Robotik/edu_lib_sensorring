@@ -38,7 +38,7 @@ class DepthMapClient:
   """Client that copies ToF point clouds to a NumPy buffer for visualization."""
 
   def __init__(self, manager):
-    # Buffer for point cloud data: 64 points, 6 columns (x, y, z, raw_distance, sigma, user_idx)
+    # Buffer for point cloud data: 64 points, 6 columns (x, y, z, raw_distance, sigma, sensor_index)
     self._points_np = np.zeros((64, 6), dtype=np.float64)
     self._got_measurement = False
     self._state = sensorring.ManagerState_Uninitialized
@@ -46,14 +46,13 @@ class DepthMapClient:
     self._subscriptions.append(
       manager.subscribeToStateChanges(self._on_state_change))
     self._subscriptions.append(
-      manager.subscribeToDeviceGroup(sensorring.DeviceType_VL53L8CX, self._on_vl53l8cx_callback))
+      manager.depthSensors().subscribe(self._on_depth_measurement))
 
   def _on_state_change(self, state):
     self._state = state
 
-  def _on_vl53l8cx_callback(self, group):
-    measurement = sensorring.DeviceGroup_getVL53L8CXMeasurement(group, 0)
-    measurement.point_cloud.copyTo(self._points_np)
+  def _on_depth_measurement(self, meas):
+    meas.point_cloud.copyTo(self._points_np)
     self._got_measurement = True
 
   def wait_for_new_measurement(self):
@@ -94,14 +93,9 @@ def main():
     factory.expectBoard(sensorring.SensorBoardParams())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    sensor_ring = factory.build(sensorring.ValidationMode_Relaxed)
 
-    if sensor_ring is None:
-      print("Failed to create SensorRing. Exiting.")
-      return
-
-    # Create the MeasurementManager with the SensorRing
-    manager = sensorring.MeasurementManager(params, sensor_ring)
+    # Create the MeasurementManager directly from the factory
+    manager = sensorring.MeasurementManager(params, factory)
 
     # Instantiate a DepthMapClient that registers itself with the manager
     client = DepthMapClient(manager)

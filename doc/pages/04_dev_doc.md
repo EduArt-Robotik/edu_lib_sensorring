@@ -26,7 +26,7 @@ MeasurementManager (Public API)
 - **SensorRing**: Top-level container managing multiple sensor buses
 - **SensorBus**: Manages sensor boards on a single communication interface
 - **SensorBoard**: Represents a physical sensor board containing ToF, thermal, and LED sensors
-- **BaseSensor**: Base class for sensor implementations (VL53L8CX_Device, HTPA32_Device)
+- **BaseDevice**: Base class for all concrete device implementations (VL53L8CX_Device, HTPA32_Device, WS2812b_Device)
 
 ## Directory Structure
 
@@ -51,7 +51,6 @@ src/                         # Implementation files
     │   ├── ComManager.hpp
     │   └── can/            # CAN interface implementations
     ├── device/             # Sensor implementations
-    │   ├── BaseSensor.hpp
     │   ├── hardware/       # Hardware-specific code
     │   └── ...
     ├── manager/            # MeasurementManager implementation
@@ -66,7 +65,7 @@ src/                         # Implementation files
 The library uses a token-based publish-subscribe pattern for decoupled communication:
 
 - **Publisher<Args...>**: A template that allows any component to publish typed events. Subscribers receive a `Subscription` RAII handle — the callback is automatically unregistered when the handle is destroyed.
-- **MeasurementManager**: Publishes device-group measurements and state changes via `subscribeToDeviceGroup()` and `subscribeToStateChanges()`.
+- **MeasurementManager**: Publishes per-device measurements via typed accessors (`depthSensors()`, `thermalSensors()`, `lights()`) and state changes via `subscribeToStateChanges()`.
 - **Logger**: Publishes log messages via `Logger::getInstance()->subscribe()`.
 - **Endpoint-filtered communication**: Internally, sensor boards and devices receive CAN messages through endpoint-filtered subscriptions on the communication interface.
 
@@ -203,7 +202,7 @@ The state machine includes error handling states:
 ### Common Extension Points
 
 - **New Communication Interface**: Implement `ComInterface` and register with `ComManager`
-- **New Sensor Type**: Extend `BaseSensor` and add to `SensorBoard`
+- **New Sensor Type**: Extend `BaseDevice` and the appropriate interface (`DepthSensor`, `ThermalSensor`, or `Light`) and add to `SensorBoard`
 - **New Board Type**: Add configuration to `SensorBoardManager`
 - **Custom Processing**: Implement `MeasurementClient` to process measurements
 
