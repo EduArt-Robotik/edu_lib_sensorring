@@ -30,13 +30,14 @@ public:
 
   bool flashAllBoardsSequential(const com::ComInterfaceID& interface, const std::string& hex_file_path, LogCallback log_callback = {}) const;
 
+  std::optional<std::uint8_t> detectBootloaderNode(const com::ComInterfaceID& interface) const;
+
 private:
   UpdateConfig _config;
 
   bool flashSingleBoardImpl(const com::ComInterfaceID& interface, std::uint8_t node_id, const std::string& hex_file_path, const std::string& display_node_label, LogCallback log_callback) const;
   std::size_t countAppBoards(const com::ComInterfaceID& interface) const;
   bool enterBootloaderOnBoardIndex(const com::ComInterfaceID& interface, std::size_t board_index, LogCallback log_callback) const;
-  std::optional<std::uint8_t> detectBootloaderNode(const com::ComInterfaceID& interface) const;
 };
 
 } // namespace firmware_update

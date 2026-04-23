@@ -1,17 +1,61 @@
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
-#include <sensorring/firmware_update/FirmwareUpdater.hpp>
+#include <optional>
 #include <string>
-#include <vector>
+#include <thread>
+
+#include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/firmware_update/FirmwareUpdater.hpp>
 
 using namespace eduart::sensorring;
 
 namespace {
 
+enum class Mode {
+  EnterBootloader,
+  FlashDetectedBootloader,
+  EnterBootloaderAndFlash,
+  AutoAll,
+};
+
 void printUsage(const char* executable) {
-  std::cerr << "Usage: " << executable << " <socketcan|usbtingo> <interface-name> <firmware.hex>\n"
-            << "Example:\n"
-            << "  " << executable << " socketcan can0 ./firmware.hex\n";
+  std::cerr << "Usage: " << executable
+            << " -m <enter|flash|enter-flash|auto-all> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
+            << "Modes:\n"
+            << "  enter        : switch one app board to bootloader mode (requires -n)\n"
+            << "  flash        : detect one board already in bootloader mode and flash it (requires -f)\n"
+            << "  enter-flash  : switch one app board to bootloader mode and flash it directly (requires -n and -f)\n"
+            << "  auto-all     : automatically update all boards on one interface (requires -f)\n"
+            << "Examples:\n"
+            << "  " << executable << " -m enter -t socketcan -i can0 -n 0\n"
+            << "  " << executable << " -m flash -t socketcan -i can0 -f ./firmware.hex\n"
+            << "  " << executable << " -m enter-flash -t socketcan -i can0 -n 1 -f ./firmware.hex\n"
+            << "  " << executable << " -m auto-all -t socketcan -i can0 -f ./firmware.hex\n";
+}
+
+bool parseMode(const std::string& input, Mode& mode) {
+  if (input == "enter") {
+    mode = Mode::EnterBootloader;
+    return true;
+  }
+
+  if (input == "flash") {
+    mode = Mode::FlashDetectedBootloader;
+    return true;
+  }
+
+  if (input == "enter-flash") {
+    mode = Mode::EnterBootloaderAndFlash;
+    return true;
+  }
+
+  if (input == "auto-all") {
+    mode = Mode::AutoAll;
+    return true;
+  }
+
+  return false;
 }
 
 bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
@@ -28,54 +72,211 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
   return false;
 }
 
+bool enterBootloaderOnBoard(const com::ComInterfaceID& interface, unsigned int board_index) {
+  ring::SensorRingFactory factory(ring::ValidationMode::Relaxed);
+  factory.addInterface(interface);
+
+  const auto enumeration = factory.enumerate();
+  std::size_t board_count = 0U;
+  for (const auto& [iface, boards] : enumeration) {
+    (void)iface;
+    board_count += boards.size();
+  }
+
+  if (board_index >= board_count) {
+    std::cerr << "Requested board index " << board_index << " is out of range for current board set.\n";
+    return false;
+  }
+
+  std::cout << "Discovered " << board_count << " board(s) on " << interface.type << " " << interface.name << ".\n";
+  if (board_count == 0U) {
+    return false;
+  }
+
+  auto ring = factory.build();
+  if (!ring) {
+    std::cerr << "Failed to build SensorRing from discovered boards on " << interface.type << " " << interface.name << ".\n";
+    return false;
+  }
+
+  const auto buses = ring->getSensorBuses();
+  if (buses.empty()) {
+    std::cerr << "No sensor bus available after build on " << interface.type << " " << interface.name << ".\n";
+    return false;
+  }
+
+  const auto boards = buses.front()->getSensorBoards();
+  if (boards.empty()) {
+    std::cerr << "No sensor board available after build on " << interface.type << " " << interface.name << ".\n";
+    return false;
+  }
+
+  const bool ok = boards.at(board_index)->enterBootloader();
+  if (!ok) {
+    std::cerr << "Failed to enter bootloader mode on board " << board_index << " on " << interface.type << " " << interface.name << ".\n";
+    return false;
+  }
+
+  std::cout << "Board " << board_index << " switched to bootloader mode on " << interface.type << " " << interface.name << ".\n";
+  return true;
+}
+
+std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const firmware_update::FirmwareUpdater& updater,
+                                                             const com::ComInterfaceID& interface,
+                                                             unsigned int retries,
+                                                             std::chrono::milliseconds retry_delay) {
+  for (unsigned int attempt = 0; attempt < retries; ++attempt) {
+    const auto node_id = updater.detectBootloaderNode(interface);
+    if (node_id.has_value()) {
+      return node_id;
+    }
+    std::this_thread::sleep_for(retry_delay);
+  }
+
+  return std::nullopt;
+}
+
 } // namespace
 
 int main(int argc, char* argv[]) {
-  if (!(argc == 1 || argc == 4)) {
-    printUsage(argv[0]);
-    return EXIT_FAILURE;
-  }
-
   try {
-    std::vector<com::ComInterfaceID> interfaces_to_try;
-    std::string hex_file_path;
+    std::string mode_str;
+    std::string interface_type_str;
+    std::string interface_name;
+    std::string firmware_path;
+    std::optional<unsigned int> board_index;
 
-    if (argc == 1) {
-      interfaces_to_try.push_back(com::ComInterfaceID{ com::InterfaceType::UsbTingo, "0" });
-      interfaces_to_try.push_back(com::ComInterfaceID{ com::InterfaceType::SocketCan, "can0" });
-      std::cerr << "No firmware file argument provided.\n";
-      printUsage(argv[0]);
-      return EXIT_FAILURE;
-    } else {
-      com::ComInterfaceID interface;
-      if (!parseInterfaceType(argv[1], interface.type)) {
-        std::cerr << "Unsupported interface type: " << argv[1] << '\n';
+    for (int i = 1; i < argc; i += 2) {
+      if (i + 1 >= argc) {
+        std::cerr << "Missing value for argument: " << argv[i] << '\n';
         printUsage(argv[0]);
         return EXIT_FAILURE;
       }
-      interface.name = argv[2];
-      hex_file_path  = argv[3];
-      interfaces_to_try.push_back(interface);
+
+      const std::string arg = argv[i];
+      const std::string value = argv[i + 1];
+
+      if (arg == "-m") {
+        mode_str = value;
+      } else if (arg == "-t") {
+        interface_type_str = value;
+      } else if (arg == "-i") {
+        interface_name = value;
+      } else if (arg == "-n") {
+        try {
+          board_index = static_cast<unsigned int>(std::stoul(value));
+        } catch (const std::exception&) {
+          std::cerr << "Invalid board index: " << value << '\n';
+          printUsage(argv[0]);
+          return EXIT_FAILURE;
+        }
+      } else if (arg == "-f") {
+        firmware_path = value;
+      } else {
+        std::cerr << "Unknown argument: " << arg << '\n';
+        printUsage(argv[0]);
+        return EXIT_FAILURE;
+      }
     }
 
-    std::cout << "Discovered " << interfaces_to_try.size() << " candidate interface(s).\n";
-    std::cout << "Firmware file: " << hex_file_path << '\n';
+    Mode mode = Mode::EnterBootloader;
+    if (!parseMode(mode_str, mode)) {
+      std::cerr << "Unsupported mode: " << mode_str << '\n';
+      printUsage(argv[0]);
+      return EXIT_FAILURE;
+    }
 
+    if (interface_type_str.empty() || interface_name.empty()) {
+      std::cerr << "Missing required interface arguments (-t and -i).\n";
+      printUsage(argv[0]);
+      return EXIT_FAILURE;
+    }
+
+    com::ComInterfaceID interface;
+    if (!parseInterfaceType(interface_type_str, interface.type)) {
+      std::cerr << "Unsupported interface type: " << interface_type_str << '\n';
+      printUsage(argv[0]);
+      return EXIT_FAILURE;
+    }
+    interface.name = interface_name;
+
+    constexpr unsigned int bootloader_detect_retries = 10U;
+    const auto bootloader_detect_retry_delay = std::chrono::milliseconds(200);
     firmware_update::FirmwareUpdater updater;
-    auto log_callback = [](const std::string& msg) {
+    const auto log_callback = [](const std::string& msg) {
       std::cout << msg << '\n';
     };
 
-    for (std::size_t i = 0; i < interfaces_to_try.size(); ++i) {
-      const auto& interface = interfaces_to_try[i];
-      std::cout << "[" << (i + 1) << "/" << interfaces_to_try.size() << "] Trying interface " << interface.type << " " << interface.name << "...\n";
-      if (updater.flashAllBoardsSequential(interface, hex_file_path, log_callback)) {
-        return EXIT_SUCCESS;
+    if (mode == Mode::EnterBootloader) {
+      if (!board_index.has_value()) {
+        std::cerr << "Mode 'enter' requires -n <board-index>.\n";
+        printUsage(argv[0]);
+        return EXIT_FAILURE;
       }
-      std::cout << "Interface " << interface.type << " " << interface.name << " failed.\n";
+      return enterBootloaderOnBoard(interface, *board_index) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-    std::cerr << "Firmware update failed on all candidate interfaces.\n";
+    if (mode == Mode::FlashDetectedBootloader) {
+      if (firmware_path.empty()) {
+        std::cerr << "Mode 'flash' requires -f <firmware.hex>.\n";
+        printUsage(argv[0]);
+        return EXIT_FAILURE;
+      }
+
+      if (interface.type != com::InterfaceType::SocketCan) {
+        std::cerr << "Mode 'flash' currently supports only socketcan interfaces.\n";
+        return EXIT_FAILURE;
+      }
+
+      const auto node_id = detectBootloaderNodeWithRetries(updater, interface, bootloader_detect_retries, bootloader_detect_retry_delay);
+      if (!node_id.has_value()) {
+        std::cerr << "No board detected in bootloader mode on " << interface.type << " " << interface.name << ".\n";
+        return EXIT_FAILURE;
+      }
+
+      std::cout << "Detected bootloader node " << static_cast<unsigned int>(*node_id) << ". Flashing...\n";
+      return updater.flashSingleBoard(interface, *node_id, firmware_path, log_callback) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    if (mode == Mode::EnterBootloaderAndFlash) {
+      if (!board_index.has_value() || firmware_path.empty()) {
+        std::cerr << "Mode 'enter-flash' requires both -n <board-index> and -f <firmware.hex>.\n";
+        printUsage(argv[0]);
+        return EXIT_FAILURE;
+      }
+
+      if (interface.type != com::InterfaceType::SocketCan) {
+        std::cerr << "Mode 'enter-flash' currently supports only socketcan interfaces.\n";
+        return EXIT_FAILURE;
+      }
+
+      if (!enterBootloaderOnBoard(interface, *board_index)) {
+        return EXIT_FAILURE;
+      }
+
+      const auto node_id = detectBootloaderNodeWithRetries(updater, interface, bootloader_detect_retries, bootloader_detect_retry_delay);
+      if (!node_id.has_value()) {
+        std::cerr << "Board entered bootloader mode, but no bootloader node could be detected.\n";
+        return EXIT_FAILURE;
+      }
+
+      std::cout << "Detected bootloader node " << static_cast<unsigned int>(*node_id) << ". Flashing...\n";
+      return updater.flashSingleBoard(interface, *node_id, firmware_path, log_callback) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    if (mode == Mode::AutoAll) {
+      if (firmware_path.empty()) {
+        std::cerr << "Mode 'auto-all' requires -f <firmware.hex>.\n";
+        printUsage(argv[0]);
+        return EXIT_FAILURE;
+      }
+
+      std::cout << "Running automatic sequential flash on interface " << interface.type << " " << interface.name << ".\n";
+      std::cout << "Firmware file: " << firmware_path << '\n';
+      return updater.flashAllBoardsSequential(interface, firmware_path, log_callback) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    std::cerr << "Unsupported mode.\n";
     return EXIT_FAILURE;
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << '\n';

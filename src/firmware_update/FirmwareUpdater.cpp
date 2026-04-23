@@ -544,7 +544,7 @@ bool FirmwareUpdater::flashAllBoardsSequential(const com::ComInterfaceID& interf
       if (node_id.has_value()) {
         return node_id;
       }
-      logMessage(log_callback, "Detecting boards in bootloader mode... attempt " + std::to_string(attempt + 1U) + "/" + std::to_string(_config.bootloader_detect_retries));
+      logMessage(log_callback, "Detecting boards already in bootloader mode... attempt " + std::to_string(attempt + 1U) + "/" + std::to_string(_config.bootloader_detect_retries));
       std::this_thread::sleep_for(_config.bootloader_detect_retry_delay);
     }
     return std::nullopt;
