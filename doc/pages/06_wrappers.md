@@ -87,8 +87,8 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
 <div class="section_buttons"> 
 
-| Read Previous | |
+| Read Previous | Read Next |
 |:--|--:|
-| [Examples](05_examples.md) | |
+| [Examples](05_examples.md) | [Bootloader and Firmware Update](firmware_update.md) |
 
 </div>
