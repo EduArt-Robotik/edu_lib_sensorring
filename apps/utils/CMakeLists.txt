@@ -1,1 +1,3 @@
+add_subdirectory(activate_bootloader)
+
 add_subdirectory(firmware_updater)

@@ -3,5 +3,7 @@ add_executable(firmware_updater
 )
 
 target_link_libraries(firmware_updater
-    PRIVATE sensorring::sensorring
+    PRIVATE
+      sensorring::sensorring
+      sensorring::firmware_update
 )

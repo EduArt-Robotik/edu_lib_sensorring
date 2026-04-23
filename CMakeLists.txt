@@ -76,6 +76,10 @@ endif()
 # Library
 add_subdirectory(src)
 
+if(SENSORRING_BUILD_FIRMWARE_UPDATE)
+  add_subdirectory(src/firmware_update)
+endif()
+
 # Tests
 if(SENSORRING_BUILD_TESTS)
   enable_testing()
