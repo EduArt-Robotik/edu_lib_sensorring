@@ -34,6 +34,8 @@ public:
 
   /// Send one franklyboot request as a SINGLE transport frame on broadcast.
   void sendRequest(const franklyboot::msg::Msg& msg);
+  /// Send multiple franklyboot requests packed into one transport frame.
+  void sendRequests(const std::vector<franklyboot::msg::Msg>& msgs);
 
   /**
    * @brief Fire-and-forget variant of @ref sendRequest.

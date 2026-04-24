@@ -31,6 +31,7 @@ private:
 
   std::string nodeLabel() const;
   franklyboot::msg::Msg transact(const franklyboot::msg::Msg& request);
+  void transactBatch(const std::vector<franklyboot::msg::Msg>& requests, bool expect_echo);
   std::uint32_t readWord(franklyboot::msg::RequestType request_type);
   void writeWord(franklyboot::msg::RequestType request_type, std::uint8_t packet_id, std::uint32_t word, bool expect_echo);
   void exec(franklyboot::msg::RequestType request_type, std::uint32_t argument, bool expect_echo);
