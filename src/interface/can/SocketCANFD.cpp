@@ -25,7 +25,7 @@ namespace sensorring {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : CanInterface({ InterfaceType::SocketCan, interface_name })
+    : ComInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
@@ -175,12 +175,6 @@ bool SocketCANFD::listener() {
         if (FD_ISSET(_soc, &readSet)) {
           recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
           if (recvbytes && frame_rd.len >= HEADER_SIZE) {
-            RawCanFrame raw_frame;
-            raw_frame.can_id = frame_rd.can_id;
-            raw_frame.fd     = (recvbytes == CANFD_MTU);
-            raw_frame.data.assign(frame_rd.data, frame_rd.data + frame_rd.len);
-            dispatchCanFrame(raw_frame);
-
             std::uint8_t sysId = (frame_rd.can_id >> 8) & 0x07;
             if (sysId == sensorring::transport::can::CanCodec::SYSID_SENSOR_RING) {
               auto transportFrame = sensorring::transport::can::CanCodec::decode(frame_rd.can_id, frame_rd.data, frame_rd.len);

@@ -107,7 +107,7 @@ Msg BootloaderDevice::transact(const Msg& request) {
     throw std::runtime_error("No response from bootloader node " + std::to_string(_node_id));
   }
 
-  const auto& response = rx->msg;
+  const auto& response = *rx;
   if (response.request != request.request || response.packet_id != request.packet_id) {
     throw std::runtime_error("Bootloader response mismatch on node " + std::to_string(_node_id));
   }

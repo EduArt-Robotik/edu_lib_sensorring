@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "CanInterface.hpp"
+#include "interface/ComInterface.hpp"
 
 namespace eduart {
 
@@ -24,7 +24,7 @@ namespace com {
  * @author Stefan May, Hannes Duske
  * @date 13.05.2018 (modified 09.08.2024)
  */
-class SocketCANFD : public CanInterface {
+class SocketCANFD : public ComInterface {
 public:
   /**
    * Constructor
@@ -58,7 +58,7 @@ public:
    * @param[in] tx_buf Message payload.
    * @return success==true
    */
-  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) override;
+  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd);
 
   /**
    * Close device file link.

@@ -9,7 +9,7 @@
 #include <usbtingo/device/Device.hpp>
 #include <vector>
 
-#include "CanInterface.hpp"
+#include "interface/ComInterface.hpp"
 
 namespace eduart {
 
@@ -23,7 +23,7 @@ namespace com {
  * @author Hannes Duske
  * @date 29.01.2025
  */
-class USBtingo : public CanInterface {
+class USBtingo : public ComInterface {
 public:
   /**
    * Constructor
@@ -48,7 +48,7 @@ public:
    * Send raw CAN/CAN-FD frame.
    * @note USBtingo transmits CAN-FD only; the fd flag is accepted and ignored.
    */
-  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) override;
+  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd);
 
   /**
    * Open CAN interface.

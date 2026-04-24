@@ -21,7 +21,6 @@ target_sources(sensorring
   interface/ComInterface.cpp
   interface/ComManager.cpp
   interface/ComEndpoint.cpp
-  interface/can/CanInterface.cpp
   logger/Logger.cpp
   logger/LogVerbosity.cpp
   device/BaseDevice.cpp

@@ -11,7 +11,6 @@
 #include "firmware_update/internal/BootloaderProtocol.hpp"
 #include "firmware_update/internal/BootloaderActivator.hpp"
 #include "interface/ComManager.hpp"
-#include "interface/can/CanInterface.hpp"
 #include "sensorring/SensorRingFactory.hpp"
 
 namespace eduart {
@@ -32,11 +31,6 @@ void logMessage(const LogCallback& log_callback, const std::string& msg) {
 
 bool isResultOk(ResultType result) {
   return result == ResultType::RES_NONE || result == ResultType::RES_OK;
-}
-
-com::CanInterface* getCanInterface(const com::ComInterfaceID& interface) {
-  auto* interface_impl = com::ComManager::getInstance()->getInterface(interface);
-  return dynamic_cast<com::CanInterface*>(interface_impl);
 }
 
 std::vector<device::EnumerationInformation> enumerateBoardsOnInterface(const com::ComInterfaceID& interface) {
@@ -75,14 +69,13 @@ bool FirmwareUpdater::enterSingleBoardBootloader(const com::ComInterfaceID& inte
 
 bool FirmwareUpdater::flashSingleBoardImpl(const com::ComInterfaceID& interface, std::uint8_t node_id, const std::string& hex_file_path, const std::string& display_node_label, LogCallback log_callback) const {
   try {
-    auto* can_interface = getCanInterface(interface);
-    if (!can_interface) {
-      logMessage(log_callback, "Requested interface does not provide CAN frame access.");
+    auto* interface_impl = com::ComManager::getInstance()->getInterface(interface);
+    if (!interface_impl) {
+      logMessage(log_callback, "Failed to open interface for firmware flash.");
       return false;
     }
 
-    internal::BootloaderProtocol protocol(*can_interface, _config.can_timeout);
-    protocol.setSpecificNodeMode(node_id);
+    internal::BootloaderProtocol protocol(*interface_impl, _config.can_timeout);
 
     internal::BootloaderDevice device(protocol, node_id, display_node_label);
     device.init();
@@ -213,31 +206,33 @@ bool FirmwareUpdater::enterBootloaderOnBoard(const com::ComInterfaceID& interfac
 
 std::optional<std::uint8_t> FirmwareUpdater::detectBootloaderNode(const com::ComInterfaceID& interface) const {
   try {
-    auto* can_interface = getCanInterface(interface);
-    if (!can_interface) {
+    auto* interface_impl = com::ComManager::getInstance()->getInterface(interface);
+    if (!interface_impl) {
       return std::nullopt;
     }
 
-    internal::BootloaderProtocol protocol(*can_interface, _config.can_timeout);
-    protocol.setBroadcastMode();
+    internal::BootloaderProtocol protocol(*interface_impl, _config.can_timeout);
 
     Msg ping(RequestType::REQ_PING, ResultType::RES_NONE, 0U);
     ping.data = { 0U, 0U, 0U, 0U };
     protocol.sendRequest(ping);
 
-    std::optional<std::uint8_t> detected_node;
+    // The bootloader responds on broadcast, so we cannot recover a physical
+    // node id from the wire. Hardware guarantees that at most one board is in
+    // bootloader mode at a time, so any successful ping reply means "the one
+    // bootloader board is alive". We return a synthetic id (0) to keep the
+    // existing optional<bool>-style callers happy without pretending to know
+    // which board it actually is.
     while (true) {
       const auto rx = protocol.receive();
       if (!rx.has_value()) {
-        break;
+        return std::nullopt;
       }
 
-      if (rx->msg.request == RequestType::REQ_PING && isResultOk(rx->msg.result)) {
-        detected_node = internal::BootloaderProtocol::nodeFromCanId(rx->can_id);
-        break;
+      if (rx->request == RequestType::REQ_PING && isResultOk(rx->result)) {
+        return std::uint8_t{ 0U };
       }
     }
-    return detected_node;
   } catch (...) {
     return std::nullopt;
   }

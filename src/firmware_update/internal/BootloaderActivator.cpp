@@ -28,7 +28,7 @@ bool BootloaderActivator::enterBootloader(std::uint8_t board_address) {
     _ack_received          = false;
   }
 
-  if (!_interface.send(com::ComEndpoint{ com::Direction::Input, board_address, devbyte::BOARD }, sensor_board::ENTER_BOOTLOADER, {})) {
+  if (!_interface.send(com::ComEndpoint{ com::Direction::Input, board_address, devbyte::BOARD }, sensor_board::BOOTLOADER_START, {})) {
     return false;
   }
 
@@ -40,7 +40,7 @@ bool BootloaderActivator::enterBootloader(std::uint8_t board_address) {
 
 void BootloaderActivator::onMessage(const com::ComEndpoint& source, std::uint8_t command, const std::vector<std::uint8_t>& data) {
   (void)data;
-  if (command != sensor_board::ENTER_BOOTLOADER_ACK) {
+  if (command != sensor_board::BOOTLOADER_START_ACK) {
     return;
   }
 
