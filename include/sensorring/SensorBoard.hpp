@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <condition_variable>
 #include <memory>
 #include <mutex>
 
@@ -69,12 +68,6 @@ public:
    */
   std::vector<BaseDevice*> getDevices() const;
 
-  /**
-   * @brief Enter bootloader mode on the board.
-   * @return True if entering bootloader is successful, false otherwise.
-   */
-  bool enterBootloader() const;
-
 private:
   using Mutex     = std::mutex;
   using UniqueLock = std::unique_lock<Mutex>;
@@ -95,10 +88,6 @@ private:
   EnumerationInformation _enum_info;
 
   mutable RecursiveMutex _com_mutex;
-
-  mutable Mutex _bootloader_ack_mutex;
-  mutable bool _bootloader_ack;
-  mutable std::condition_variable _bootloader_ack_condition;
 
   std::vector<std::unique_ptr<device::BaseDevice> > _device_vec;
 

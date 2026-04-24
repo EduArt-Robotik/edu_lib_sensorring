@@ -72,7 +72,7 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
   return false;
 }
 
-bool enterBootloaderOnBoard(const com::ComInterfaceID& interface, unsigned int board_index) {
+bool enterBootloaderOnBoard(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int board_index) {
   ring::SensorRingFactory factory(ring::ValidationMode::Relaxed);
   factory.addInterface(interface);
 
@@ -93,25 +93,7 @@ bool enterBootloaderOnBoard(const com::ComInterfaceID& interface, unsigned int b
     return false;
   }
 
-  auto ring = factory.build();
-  if (!ring) {
-    std::cerr << "Failed to build SensorRing from discovered boards on " << interface.type << " " << interface.name << ".\n";
-    return false;
-  }
-
-  const auto buses = ring->getSensorBuses();
-  if (buses.empty()) {
-    std::cerr << "No sensor bus available after build on " << interface.type << " " << interface.name << ".\n";
-    return false;
-  }
-
-  const auto boards = buses.front()->getSensorBoards();
-  if (boards.empty()) {
-    std::cerr << "No sensor board available after build on " << interface.type << " " << interface.name << ".\n";
-    return false;
-  }
-
-  const bool ok = boards.at(board_index)->enterBootloader();
+  const bool ok = updater.enterSingleBoardBootloader(interface, board_index);
   if (!ok) {
     std::cerr << "Failed to enter bootloader mode on board " << board_index << " on " << interface.type << " " << interface.name << ".\n";
     return false;
@@ -213,7 +195,7 @@ int main(int argc, char* argv[]) {
         printUsage(argv[0]);
         return EXIT_FAILURE;
       }
-      return enterBootloaderOnBoard(interface, *board_index) ? EXIT_SUCCESS : EXIT_FAILURE;
+      return enterBootloaderOnBoard(updater, interface, *board_index) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     if (mode == Mode::FlashDetectedBootloader) {
@@ -250,7 +232,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      if (!enterBootloaderOnBoard(interface, *board_index)) {
+      if (!enterBootloaderOnBoard(updater, interface, *board_index)) {
         return EXIT_FAILURE;
       }
 

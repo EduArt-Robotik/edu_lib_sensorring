@@ -25,7 +25,7 @@ namespace sensorring {
 namespace com {
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface({ InterfaceType::SocketCan, interface_name })
+    : CanInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
@@ -100,55 +100,57 @@ bool SocketCANFD::send(ComEndpoint target, std::uint8_t command, const std::vect
 
   for (const auto& frame : frames) {
     auto canFrame = sensorring::transport::can::CanCodec::encode(frame);
-    if (!send(static_cast<canid_t>(canFrame.id), canFrame.data)) {
+    if (!sendCanFrame(canFrame.id, canFrame.data, true)) {
       return false;
     }
   }
   return true;
 }
 
-bool SocketCANFD::send(canid_t canid, const std::vector<uint8_t>& tx_buf) {
+bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) {
+  static double _timeCom = 0.0;
+  timeval clock;
+  double now = 0.0;
+  do {
+    ::gettimeofday(&clock, 0);
+    now = static_cast<double>(clock.tv_sec) + static_cast<double>(clock.tv_usec) * 1.0e-6;
+  } while ((now - _timeCom) < 0.002);
+  _timeCom = now;
 
-  if (tx_buf.size() <= CANFD_MAX_DLEN) {
-    auto frame    = std::make_unique<canfd_frame>();
-    frame->can_id = canid;
-    frame->len    = tx_buf.size();
-
-    std::copy_n(tx_buf.begin(), tx_buf.size(), frame->data);
-    return send(frame.get());
+  int retval = 0;
+  {
+    LockGuard guard(_mutex);
+    if (fd) {
+      if (data.size() > CANFD_MAX_DLEN) {
+        return false;
+      }
+      canfd_frame frame{};
+      frame.can_id = static_cast<canid_t>(can_id);
+      frame.len    = static_cast<__u8>(data.size());
+      std::copy_n(data.begin(), data.size(), frame.data);
+      retval = write(_soc, &frame, sizeof(canfd_frame));
+      if (retval != sizeof(canfd_frame)) {
+        _communication_error = true;
+        throw std::runtime_error("CAN FD transmission error, returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
+      }
+    } else {
+      if (data.size() > CAN_MAX_DLEN) {
+        return false;
+      }
+      can_frame frame{};
+      frame.can_id  = static_cast<canid_t>(can_id);
+      frame.can_dlc = static_cast<__u8>(data.size());
+      std::copy_n(data.begin(), data.size(), frame.data);
+      retval = write(_soc, &frame, sizeof(can_frame));
+      if (retval != sizeof(can_frame)) {
+        _communication_error = true;
+        throw std::runtime_error("CAN transmission error, returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(can_frame)));
+      }
+    }
   }
 
-  return false;
-}
-
-bool SocketCANFD::send(const canfd_frame* frame) {
-  if (frame) {
-    static double _timeCom = 0.0;
-    timeval clock;
-    double now = 0.0;
-    do {
-      ::gettimeofday(&clock, 0);
-      now = static_cast<double>(clock.tv_sec) + static_cast<double>(clock.tv_usec) * 1.0e-6;
-    } while ((now - _timeCom) < 0.002);
-    _timeCom = now;
-
-    int retval;
-
-    {
-      LockGuard guard(_mutex);
-      retval = write(_soc, frame, sizeof(canfd_frame));
-    }
-
-    if (retval != sizeof(canfd_frame)) {
-      _communication_error = true;
-      throw std::runtime_error("CAN transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
-      return false;
-    }
-
-    _communication_error = false;
-    return true;
-  }
-  return false;
+  _communication_error = false;
+  return true;
 }
 
 bool SocketCANFD::listener() {
@@ -173,6 +175,12 @@ bool SocketCANFD::listener() {
         if (FD_ISSET(_soc, &readSet)) {
           recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
           if (recvbytes && frame_rd.len >= HEADER_SIZE) {
+            RawCanFrame raw_frame;
+            raw_frame.can_id = frame_rd.can_id;
+            raw_frame.fd     = (recvbytes == CANFD_MTU);
+            raw_frame.data.assign(frame_rd.data, frame_rd.data + frame_rd.len);
+            dispatchCanFrame(raw_frame);
+
             std::uint8_t sysId = (frame_rd.can_id >> 8) & 0x07;
             if (sysId == sensorring::transport::can::CanCodec::SYSID_SENSOR_RING) {
               auto transportFrame = sensorring::transport::can::CanCodec::decode(frame_rd.can_id, frame_rd.data, frame_rd.len);

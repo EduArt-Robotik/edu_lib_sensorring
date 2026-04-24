@@ -1,5 +1,10 @@
 add_library(sensorring_firmware_update STATIC
   FirmwareUpdater.cpp
+  internal/BootloaderActivator.cpp
+  internal/BootloaderDevice.cpp
+  internal/BootloaderProtocol.cpp
+  internal/Crc32.cpp
+  internal/HexFile.cpp
   ${PROJECT_SOURCE_DIR}/external/frankly_bootloader/src/francor/franklyboot/msg.cpp
 )
 

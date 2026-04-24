@@ -49,6 +49,9 @@ include(ConfigurePlatform REQUIRED)
 # Configure Paths
 include(ConfigurePaths REQUIRED)
 
+# clangd compile database symlink
+include(ExportCompileCommands REQUIRED)
+
 # Build settings
 include(BuildSettings REQUIRED)
 

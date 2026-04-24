@@ -22,7 +22,7 @@ namespace sensorring {
 namespace com {
 
 USBtingo::USBtingo(std::string id)
-    : ComInterface({ InterfaceType::UsbTingo, id })
+    : CanInterface({ InterfaceType::UsbTingo, id })
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
       ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
@@ -88,11 +88,21 @@ bool USBtingo::send(ComEndpoint target, std::uint8_t command, const std::vector<
 
   for (const auto& frame : frames) {
     auto canFrame = sensorring::transport::can::CanCodec::encode(frame);
-    usbtingo::bus::Message msg(canFrame.id, canFrame.data);
-    if (!_dev->send_can(msg.to_CanTxFrame(true))) {
+    if (!sendCanFrame(canFrame.id, canFrame.data, true)) {
       _communication_error = true;
       throw std::runtime_error("Unable to send message on interface " + _id.name);
     }
+  }
+  _communication_error = false;
+  return true;
+}
+
+bool USBtingo::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) {
+  (void)fd;
+  usbtingo::bus::Message msg(can_id, data);
+  if (!_dev->send_can(msg.to_CanTxFrame(true))) {
+    _communication_error = true;
+    throw std::runtime_error("Unable to send message on interface " + _id.name);
   }
   _communication_error = false;
   return true;
@@ -128,6 +138,12 @@ bool USBtingo::listener() {
             std::size_t frameLen = usbtingo::can::Dlc::dlc_to_bytes(rx_frame.dlc);
             if (frameLen < HEADER_SIZE)
               continue;
+
+            RawCanFrame raw_frame;
+            raw_frame.can_id = rx_frame.id;
+            raw_frame.fd     = true;
+            raw_frame.data.assign(rx_frame.data.begin(), rx_frame.data.begin() + frameLen);
+            dispatchCanFrame(raw_frame);
 
             std::uint8_t sysId = (rx_frame.id >> 8) & 0x07;
             if (sysId != sensorring::transport::can::CanCodec::SYSID_SENSOR_RING)
