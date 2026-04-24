@@ -1,3 +1,6 @@
 [submodule "external/edu_sensorring_transport"]
 	path = external/edu_sensorring_transport
 	url = git@github.com:EduArt-Robotik/edu_sensorring_transport.git
+[submodule "external/frankly_bootloader"]
+	path = external/frankly_bootloader
+	url = git@github.com:EduArt-Robotik/frankly_bootloader.git

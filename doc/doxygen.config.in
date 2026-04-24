@@ -1000,6 +1000,7 @@ INPUT                  = pages/01_hardware.md \
                          pages/03_software.md \
                          pages/05_examples.md \
                          pages/06_wrappers.md \
+                         pages/07_firmware_update.md \
                          ../include/sensorring \
                          ../README.md
 

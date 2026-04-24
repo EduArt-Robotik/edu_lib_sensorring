@@ -8,6 +8,8 @@ option( SENSORRING_USE_USBTINGO "Compile with support for the USBtingo USB adapt
 option( SENSORRING_INSTALL "Enable the installation of the library." on)
 option( SENSORRING_BUILD_SHARED_LIBS "Build as shared library. If set to OFF a static library is built." OFF)
 option( SENSORRING_BUILD_EXAMPLES "Build the example programs" OFF)
+option( SENSORRING_BUILD_UTILS "Build utility command line programs" OFF)
+option( SENSORRING_BUILD_FIRMWARE_UPDATE "Build firmware update module" ON)
 option( SENSORRING_BUILD_DOCUMENTATION "Build the documentation" OFF)
 option( SENSORRING_BUILD_PYTHON_BINDINGS "Build python bindings" OFF)
 option( SENSORRING_BUILD_TESTS "Build unit tests" OFF)

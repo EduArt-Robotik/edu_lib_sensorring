@@ -58,14 +58,7 @@ public:
    * @param[in] tx_buf Message payload.
    * @return success==true
    */
-  bool send(canid_t canid, const std::vector<uint8_t>& tx_buf);
-
-  /**
-   * Send CAN frame.
-   * @param[in] frame CAN frame.
-   * @return success==true
-   */
-  bool send(const canfd_frame* frame);
+  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd);
 
   /**
    * Close device file link.

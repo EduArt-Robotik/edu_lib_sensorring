@@ -56,7 +56,7 @@ std::vector<BaseDevice*> SensorBoard::getDevices() const {
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   if (command == sensor_board::ACTIVE_DEVICE_RESPONSE && data.size() >= 11 && (data.at(0) == _idx)) {
 
-    LockGuard lock(_com_mutex);
+    RecursiveLock lock(_com_mutex);
 
     if (_enum_info.isUndefined()) {
       _enum_info       = EnumerationInformation::fromBuffer(data);

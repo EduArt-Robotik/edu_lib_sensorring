@@ -45,6 +45,12 @@ public:
   bool send(ComEndpoint target, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
   /**
+   * Send raw CAN/CAN-FD frame.
+   * @note USBtingo transmits CAN-FD only; the fd flag is accepted and ignored.
+   */
+  bool sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd);
+
+  /**
    * Open CAN interface.
    * @return success==true
    */

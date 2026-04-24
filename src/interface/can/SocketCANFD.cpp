@@ -5,8 +5,10 @@
 #include <exception>
 #include <fcntl.h>
 #include <net/if.h>
+#include <poll.h>
 #include <sensorring_transport/Protocol.hpp>
 #include <sensorring_transport/can/CanCodec.hpp>
+#include <sensorring_transport/can/CanFdDlc.hpp>
 #include <stdexcept>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -23,6 +25,12 @@ namespace eduart {
 namespace sensorring {
 
 namespace com {
+
+namespace {
+// Bound how long one send operation may wait under TX queue pressure.
+constexpr int TX_BACKPRESSURE_POLL_TIMEOUT_MS = 50;
+constexpr int TX_BACKPRESSURE_MAX_RETRIES = 20;
+} // namespace
 
 SocketCANFD::SocketCANFD(std::string interface_name)
     : ComInterface({ InterfaceType::SocketCan, interface_name })
@@ -100,55 +108,79 @@ bool SocketCANFD::send(ComEndpoint target, std::uint8_t command, const std::vect
 
   for (const auto& frame : frames) {
     auto canFrame = sensorring::transport::can::CanCodec::encode(frame);
-    if (!send(static_cast<canid_t>(canFrame.id), canFrame.data)) {
+    if (!sendCanFrame(canFrame.id, canFrame.data, true)) {
       return false;
     }
   }
   return true;
 }
 
-bool SocketCANFD::send(canid_t canid, const std::vector<uint8_t>& tx_buf) {
+bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) {
+  // Non-blocking SocketCAN can return EAGAIN/ENOBUFS when kernel/device TX
+  // queues are full. In that case, wait for POLLOUT and retry a bounded number
+  // of times instead of throttling every frame with a fixed delay.
+  auto writeWithBackpressure = [this](const void* frame, std::size_t frame_size) -> bool {
+    for (int attempt = 0; attempt < TX_BACKPRESSURE_MAX_RETRIES; ++attempt) {
+      const int retval = write(_soc, frame, frame_size);
+      if (retval == static_cast<int>(frame_size)) {
+        return true;
+      }
 
-  if (tx_buf.size() <= CANFD_MAX_DLEN) {
-    auto frame    = std::make_unique<canfd_frame>();
-    frame->can_id = canid;
-    frame->len    = tx_buf.size();
+      if (retval < 0 && (errno == EAGAIN || errno == ENOBUFS)) {
+        pollfd pfd{};
+        pfd.fd = _soc;
+        pfd.events = POLLOUT;
 
-    std::copy_n(tx_buf.begin(), tx_buf.size(), frame->data);
-    return send(frame.get());
+        // Wait until the socket becomes writable again.
+        const int poll_result = poll(&pfd, 1, TX_BACKPRESSURE_POLL_TIMEOUT_MS);
+        if (poll_result > 0 && (pfd.revents & POLLOUT) != 0) {
+          continue;
+        }
+        if (poll_result == 0 || (poll_result > 0 && (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) != 0)) {
+          continue;
+        }
+      }
+      break;
+    }
+    return false;
+  };
+
+  {
+    LockGuard guard(_mutex);
+    if (fd) {
+      if (data.size() > CANFD_MAX_DLEN) {
+        return false;
+      }
+      // Round the payload length up to the next canonical CAN FD frame size
+      const std::uint8_t dlc_code = sensorring::transport::can::bytesToDlcCode(data.size());
+      const std::size_t padded_len = sensorring::transport::can::dlcCodeToBytes(dlc_code);
+
+      canfd_frame frame{};
+      frame.can_id = static_cast<canid_t>(can_id);
+      frame.len    = static_cast<__u8>(padded_len);
+      std::copy_n(data.begin(), data.size(), frame.data);
+      // bytes data.size()..padded_len-1 stay zeroed from canfd_frame{}.
+      if (!writeWithBackpressure(&frame, sizeof(canfd_frame))) {
+        _communication_error = true;
+        throw std::runtime_error("CAN FD transmission error: write failed after retrying backpressure conditions");
+      }
+    } else {
+      if (data.size() > CAN_MAX_DLEN) {
+        return false;
+      }
+      can_frame frame{};
+      frame.can_id  = static_cast<canid_t>(can_id);
+      frame.can_dlc = static_cast<__u8>(data.size());
+      std::copy_n(data.begin(), data.size(), frame.data);
+      if (!writeWithBackpressure(&frame, sizeof(can_frame))) {
+        _communication_error = true;
+        throw std::runtime_error("CAN transmission error: write failed after retrying backpressure conditions");
+      }
+    }
   }
 
-  return false;
-}
-
-bool SocketCANFD::send(const canfd_frame* frame) {
-  if (frame) {
-    static double _timeCom = 0.0;
-    timeval clock;
-    double now = 0.0;
-    do {
-      ::gettimeofday(&clock, 0);
-      now = static_cast<double>(clock.tv_sec) + static_cast<double>(clock.tv_usec) * 1.0e-6;
-    } while ((now - _timeCom) < 0.002);
-    _timeCom = now;
-
-    int retval;
-
-    {
-      LockGuard guard(_mutex);
-      retval = write(_soc, frame, sizeof(canfd_frame));
-    }
-
-    if (retval != sizeof(canfd_frame)) {
-      _communication_error = true;
-      throw std::runtime_error("CAN transmission error for command " + std::to_string((int)(frame->data[0])) + ", returned " + std::to_string(retval) + " submitted bytes instead of " + std::to_string(sizeof(canfd_frame)));
-      return false;
-    }
-
-    _communication_error = false;
-    return true;
-  }
-  return false;
+  _communication_error = false;
+  return true;
 }
 
 bool SocketCANFD::listener() {
