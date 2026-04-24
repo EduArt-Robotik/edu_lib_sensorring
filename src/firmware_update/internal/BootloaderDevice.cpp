@@ -89,7 +89,11 @@ void BootloaderDevice::flashHex(const std::string& hex_path, const LogCallback& 
   }
 
   exec(RequestType::REQ_FLASH_WRITE_APP_CRC, app_crc, true);
-  exec(RequestType::REQ_START_APP, 0U, true);
+  
+  // Fire and forget request to start the application
+  //exec(RequestType::REQ_START_APP, 0U, true);
+  _protocol.sendRequestNoWait(Msg(RequestType::REQ_START_APP, ResultType::RES_NONE, 0U));
+
   logMessage(log_callback, "Flashed " + nodeLabel() + " successfully.");
 }
 

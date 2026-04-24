@@ -37,6 +37,16 @@ void BootloaderProtocol::sendRequest(const franklyboot::msg::Msg& msg) {
   }
 }
 
+void BootloaderProtocol::sendRequestNoWait(const franklyboot::msg::Msg& msg) {
+  // Drop any stale response that might still be in the queue so a subsequent
+  // receive() cannot mistake a previous reply for the (never-arriving) echo.
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _rx_queue.clear();
+  }
+  sendRequest(msg);
+}
+
 std::optional<franklyboot::msg::Msg> BootloaderProtocol::receive() {
   std::unique_lock<std::mutex> lock(_mutex);
   const bool received = _cv.wait_for(lock, _timeout, [this]() {

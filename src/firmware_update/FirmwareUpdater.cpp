@@ -153,12 +153,28 @@ bool FirmwareUpdater::flashAllBoardsSequential(const com::ComInterfaceID& interf
     ++flashed_nodes;
     std::this_thread::sleep_for(_config.settle_delay_after_flash);
 
-    const std::size_t app_count_after_boundary = countAppBoards(interface);
+    std::size_t app_count_after_boundary = countAppBoards(interface);
+    for (unsigned int attempt = 0U; app_count_after_boundary <= app_count_now && attempt < _config.bootloader_detect_retries; ++attempt) {
+      logMessage(log_callback,
+                 "Waiting for boundary node to boot application and advance chain... attempt " +
+                     std::to_string(attempt + 1U) + "/" + std::to_string(_config.bootloader_detect_retries));
+      std::this_thread::sleep_for(_config.bootloader_detect_retry_delay);
+      app_count_after_boundary = countAppBoards(interface);
+    }
+
     if (app_count_after_boundary <= app_count_now) {
-      logMessage(log_callback, "Boundary node flashed, but app board count did not advance (" + std::to_string(app_count_now) + " -> " + std::to_string(app_count_after_boundary) + ").");
+      logMessage(log_callback,
+                 "Boundary node flashed, but app board count did not advance (" + std::to_string(app_count_now) + " -> " +
+                     std::to_string(app_count_after_boundary) +
+                     "). The flashed image likely stayed in bootloader mode, so downstream boards remain power-isolated.");
       return false;
     }
 
+    // The boundary node we just flashed has now transitioned from
+    // bootloader-only to an enumerable app board. Treat it as already
+    // processed, otherwise the next loop iteration re-targets board index 0
+    // again and can push an already-flashed board back into bootloader mode.
+    flashed_app_boards = app_count_after_boundary;
     last_known_app_count = app_count_after_boundary;
     logMessage(log_callback, "Sequential update advanced to " + std::to_string(last_known_app_count) + " app board(s).");
   }
@@ -194,9 +210,11 @@ bool FirmwareUpdater::enterBootloaderOnBoard(const com::ComInterfaceID& interfac
   }
 
   const std::uint8_t board_address = static_cast<std::uint8_t>(boards[board_index].idx + 1U);
-  internal::BootloaderActivator activator(*interface_impl, _config.can_timeout);
+  internal::BootloaderActivator activator(*interface_impl, _config.bootloader_start_ack_timeout);
   if (!activator.enterBootloader(board_address)) {
-    logMessage(log_callback, "Failed to switch board " + std::to_string(board_index) + " to bootloader mode.");
+    logMessage(log_callback,
+               "Failed to switch board " + std::to_string(board_index) + " (address " + std::to_string(board_address) +
+                   ") to bootloader mode within " + std::to_string(_config.bootloader_start_ack_timeout.count()) + " ms.");
     return false;
   }
 

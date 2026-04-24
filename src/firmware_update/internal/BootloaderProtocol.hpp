@@ -35,6 +35,16 @@ public:
   /// Send one franklyboot request as a SINGLE transport frame on broadcast.
   void sendRequest(const franklyboot::msg::Msg& msg);
 
+  /**
+   * @brief Fire-and-forget variant of @ref sendRequest.
+   *
+   * Use for terminal requests (REQ_START_APP, REQ_RESET_DEVICE) where the
+   * bootloader cannot reliably echo a response: the device jumps into the
+   * application (or system-resets) before its TX FIFO has drained, so the
+   * caller must not expect a matching BOOTLOADER_RESPONSE.
+   */
+  void sendRequestNoWait(const franklyboot::msg::Msg& msg);
+
   /// Block until a matching BOOTLOADER_RESPONSE arrives or the timeout expires.
   std::optional<franklyboot::msg::Msg> receive();
 

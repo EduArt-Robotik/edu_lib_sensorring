@@ -15,6 +15,7 @@ namespace firmware_update {
 
 struct UpdateConfig {
   std::chrono::milliseconds can_timeout{ 500 };
+  std::chrono::milliseconds bootloader_start_ack_timeout{ 1200 };
   std::chrono::milliseconds settle_delay_after_flash{ 500 };
   std::chrono::milliseconds bootloader_detect_retry_delay{ 200 };
   unsigned int bootloader_detect_retries{ 5 };
