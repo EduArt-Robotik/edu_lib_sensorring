@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 6,
   "configurePresets": [
     {
       "name": "default",
@@ -36,6 +36,70 @@
     {
       "name": "Release",
       "configurePreset": "Release"
+    },
+    {
+      "name": "DebugClean",
+      "inherits": "Debug",
+      "cleanFirst": true
+    },
+    {
+      "name": "ReleaseClean",
+      "inherits": "Release",
+      "cleanFirst": true
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
+        }
+      ]
+    },
+    {
+      "name": "Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release"
+        },
+        {
+          "type": "build",
+          "name": "Release"
+        }
+      ]
+    },
+    {
+      "name": "DebugClean",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "DebugClean"
+        }
+      ]
+    },
+    {
+      "name": "ReleaseClean",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release"
+        },
+        {
+          "type": "build",
+          "name": "ReleaseClean"
+        }
+      ]
     }
   ]
 }
