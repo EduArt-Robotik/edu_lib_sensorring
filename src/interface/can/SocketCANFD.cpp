@@ -7,6 +7,7 @@
 #include <net/if.h>
 #include <sensorring_transport/Protocol.hpp>
 #include <sensorring_transport/can/CanCodec.hpp>
+#include <sensorring_transport/can/CanFdDlc.hpp>
 #include <stdexcept>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -124,10 +125,15 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
       if (data.size() > CANFD_MAX_DLEN) {
         return false;
       }
+      // Round the payload length up to the next canonical CAN FD frame size
+      const std::uint8_t dlc_code = sensorring::transport::can::bytesToDlcCode(data.size());
+      const std::size_t padded_len = sensorring::transport::can::dlcCodeToBytes(dlc_code);
+
       canfd_frame frame{};
       frame.can_id = static_cast<canid_t>(can_id);
-      frame.len    = static_cast<__u8>(data.size());
+      frame.len    = static_cast<__u8>(padded_len);
       std::copy_n(data.begin(), data.size(), frame.data);
+      // bytes data.size()..padded_len-1 stay zeroed from canfd_frame{}.
       retval = write(_soc, &frame, sizeof(canfd_frame));
       if (retval != sizeof(canfd_frame)) {
         _communication_error = true;
