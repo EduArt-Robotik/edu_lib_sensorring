@@ -8,9 +8,17 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "SENSORRING_USE_SOCKETCAN": "ON",
+        "SENSORRING_USE_USBTINGO": "ON",
+        "SENSORRING_INSTALL": "ON",
+        "SENSORRING_BUILD_SHARED_LIBS": "OFF",
         "SENSORRING_BUILD_EXAMPLES": "ON",
+        "SENSORRING_BUILD_UTILS": "ON",
+        "SENSORRING_BUILD_FIRMWARE_UPDATE": "ON",
+        "SENSORRING_BUILD_DOCUMENTATION": "OFF",
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "OFF",
         "SENSORRING_BUILD_TESTS": "ON",
-        "SENSORRING_BUILD_UTILS": "ON"
+        "SENSORRING_BUILD_HARDWARE_TESTS": "OFF"
       }
     },
     {
