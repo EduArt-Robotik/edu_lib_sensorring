@@ -76,18 +76,6 @@ subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::
   return _state_publisher.subscribe(std::move(callback));
 }
 
-bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept {
-  auto it = _measurement_futures.find(key);
-  if (it == _measurement_futures.end()) {
-    return true;
-  }
-  auto& fut = it->second;
-  if (fut.wait_for(timeout) != std::future_status::ready) {
-    return false;
-  }
-  return fut.get();
-}
-
 void MeasurementManagerImpl::publishDepthMeasurements() {
   for (auto* sensor : _depth_sensors) {
     sensor->publishMeasurement();
@@ -260,7 +248,7 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::request_tof_measurement: {
     if (tof_enabled) {
-      _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+      _tof_request_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
     }
     _last_tof_measurement_timestamp = std::chrono::steady_clock::now();
     _measurement_state              = MeasurementState::request_thermal_measurement;
@@ -270,9 +258,9 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::request_thermal_measurement: {
     if (thermal_enabled && !_thermal_measurement_flag) {
       if (!_is_thermal_throttled || ((std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp) > _thermal_measurement_period)) {
-        _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(_htpa32_devices, _params.timeout);
-        _last_thermal_measurement_timestamp                        = std::chrono::steady_clock::now();
-        _thermal_measurement_flag                                  = true;
+        device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
+        _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
+        _thermal_measurement_flag           = true;
       }
     }
     _measurement_state = MeasurementState::wait_for_data;
@@ -280,9 +268,12 @@ void MeasurementManagerImpl::StateMachine() {
   }
 
   case MeasurementState::wait_for_data: {
-    if (_is_tof_throttled || _first_measurement) {
-      if (tof_enabled)
-        success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
+    if (tof_enabled && _tof_request_future.valid()) {
+      if (_tof_request_future.wait_for(_params.timeout) != std::future_status::ready) {
+        success = false;
+      } else {
+        success = _tof_request_future.get();
+      }
     }
 
     if (success) {
@@ -302,11 +293,14 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::fetch_tof_data: {
     if (tof_enabled) {
-      auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-      if (fut.wait_for(_params.timeout) == std::future_status::ready) {
-        success = fut.get();
-      } else {
-        success = false;
+      for (auto* dev : _vl53l8cx_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          success = false;
+          break;
+        }
       }
 
       if (success) {
@@ -325,8 +319,15 @@ void MeasurementManagerImpl::StateMachine() {
 
   case MeasurementState::fetch_thermal_data: {
     if (thermal_enabled && _thermal_measurement_flag) {
-      auto fut = device::HTPA32_Device::fetchThermalMeasurementAsync(_htpa32_devices, _params.timeout);
-      success  = fut.wait_for(_params.timeout) == std::future_status::ready && fut.get();
+      for (auto* dev : _htpa32_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          success = false;
+          break;
+        }
+      }
 
       if (success) {
         publishThermalMeasurements();
@@ -346,16 +347,8 @@ void MeasurementManagerImpl::StateMachine() {
   case MeasurementState::throttle_measurement: {
     if (tof_enabled && _is_tof_throttled) {
       std::this_thread::sleep_until(_last_tof_measurement_timestamp + _tof_measurement_period);
-    } else {
-      success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
     }
-
-    if (success) {
-      _measurement_state = MeasurementState::device_actions;
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while taking tof measurements.");
-      _measurement_state = MeasurementState::error_handler_measurement;
-    }
+    _measurement_state = MeasurementState::device_actions;
     break;
   }
 
@@ -380,9 +373,13 @@ void MeasurementManagerImpl::StateMachine() {
         do {
           attempts++;
           if (!_vl53l8cx_devices.empty()) {
-            _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+            _tof_request_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+            if (_tof_request_future.wait_for(_params.timeout) != std::future_status::ready) {
+              success = false;
+            } else {
+              success = _tof_request_future.get();
+            }
           }
-          success = waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
         } while (!success && _is_running && (attempts < 10));
       }
     }

@@ -67,29 +67,18 @@ private:
     pre_loop_init,
     device_actions,
     request_tof_measurement,
-    fetch_tof_data,
     request_thermal_measurement,
-    fetch_thermal_data,
     wait_for_data,
+    fetch_tof_data,
+    fetch_thermal_data,
     throttle_measurement,
     error_handler_measurement,
     error_handler_communication,
     shutdown
   };
 
-  enum class MeasurementFutureKey {
-    ToFRequest,
-    ThermalRequest
-  };
-
-  struct MeasurementFutureKeyHash {
-    std::size_t operator()(MeasurementFutureKey key) const noexcept { return static_cast<std::size_t>(key); }
-  };
-
   void StateMachine();
   void StateMachineWorker() noexcept;
-
-  bool waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept;
 
   void publishDepthMeasurements();
   void publishThermalMeasurements();
@@ -114,7 +103,7 @@ private:
   std::thread _worker_thread;
   std::exception_ptr worker_exception;
 
-  std::unordered_map<MeasurementFutureKey, std::future<bool>, MeasurementFutureKeyHash> _measurement_futures;
+  std::future<bool> _tof_request_future;
 
   subscription::Publisher<const ManagerState> _state_publisher;
 

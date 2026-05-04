@@ -52,46 +52,58 @@ public:
    */
   const HTPA32_Params& getParams() const;
 
-
   /**
    * @brief Request the EEPROM content asynchronously.
    * @param[in] timeout Maximum time to wait for completion.
    * @return Future resolving to true on success.
    */
   std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
+
   /**
    * @brief Stop any ongoing thermal calibration sequence.
    * @return true on success.
    */
   bool stopCalibration();
+
   /**
    * @brief Start a thermal calibration over a sliding window of frames.
    * @param[in] window Number of frames to average for calibration.
    * @return true on success.
    */
   bool startCalibration(unsigned int window);
+
   /**
    * @brief Get the latest thermal measurement and current sensor state.
    * @return Pair of latest thermal measurement and associated sensor state.
    */
   std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
 
-  // std::future<bool> requestThermalMeasurementAsync(std::chrono::milliseconds timeout);
-  // std::future<bool> fetchThermalMeasurementAsync(std::chrono::milliseconds timeout);
   /**
    * @brief Request thermal measurements asynchronously on a set of devices.
+   *
+   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
    * @param[in] devices Vector of devices to trigger.
-   * @param[in] timeout Maximum time to wait for completion.
-   * @return Future resolving to true when all requests succeed.
+   * @param[in] timeout Maximum time to wait (fire-and-forget; timeout is unused).
+   * @return Future resolving to true when the request has been sent.
    */
-  static std::future<bool> requestThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+  static std::future<bool> requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
   /**
-   * @brief Fetch thermal measurements asynchronously from a set of devices.
-   * @param[in] devices Vector of devices to read from.
-   * @param[in] timeout Maximum time to wait for completion.
-   * @return Future resolving to true when all fetches succeed.
+   * @brief Request a thermal measurement asynchronously from this single device.
+   *
+   * Sends a direct MEASUREMENT_REQUEST to this board. Fire-and-forget.
+   * @param[in] timeout Maximum time to wait (unused; returns immediately).
+   * @return Future resolving to true when the request has been sent.
    */
-  static std::future<bool> fetchThermalMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
+  std::future<bool> requestMeasurementAsync(std::chrono::milliseconds timeout);
+  /**
+   * @brief Fetch the thermal measurement asynchronously from this device.
+   *
+   * Sends a direct MEASUREMENT_TRANSMISSION_REQUEST to this single device and waits
+   * for the response. Must be called sequentially, one device at a time.
+   * @param[in] timeout Maximum time to wait for data transmission.
+   * @return Future resolving to true when the measurement data has been received.
+   */
+  std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
 
   /**
    * @brief Build a ThermalMeasurement from internal state and publish to subscribers.

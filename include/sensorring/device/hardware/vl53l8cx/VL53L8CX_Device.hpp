@@ -63,22 +63,24 @@ public:
    */
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
-  // std::future<bool> requestTofMeasurementAsync(std::chrono::milliseconds timeout);
-  // std::future<bool> fetchTofMeasurementAsync(std::chrono::milliseconds timeout);
   /**
    * @brief Request Time-of-Flight measurements asynchronously on a set of devices.
+   *
+   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
    * @param[in] devices Vector of devices to trigger.
-   * @param[in] timeout Maximum time to wait for completion.
+   * @param[in] timeout Maximum time to wait for all devices to acknowledge readiness.
    * @return Future resolving to true when all requests succeed.
    */
-  static std::future<bool> requestTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
+  static std::future<bool> requestMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
   /**
-   * @brief Fetch Time-of-Flight measurements asynchronously from a set of devices.
-   * @param[in] devices Vector of devices to read from.
-   * @param[in] timeout Maximum time to wait for completion.
-   * @return Future resolving to true when all fetches succeed.
+   * @brief Fetch the Time-of-Flight measurement asynchronously from this device.
+   *
+   * Sends a direct MEASUREMENT_TRANSMISSION_REQUEST to this single device and waits
+   * for the response. Must be called sequentially, one device at a time.
+   * @param[in] timeout Maximum time to wait for data transmission.
+   * @return Future resolving to true when the measurement data has been received.
    */
-  static std::future<bool> fetchTofMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout);
+  std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
 
   /**
    * @brief Build a DepthMeasurement from internal state and publish to subscribers.
