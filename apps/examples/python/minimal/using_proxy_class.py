@@ -64,6 +64,8 @@ class CustomProxy:
     self.vl53l8cx_rate = Rate()
     self.htpa32_rate = Rate()
     self._subscriptions = []
+    self._depth_sensor_count = manager.depthSensors().size()
+    self._thermal_sensor_count = manager.thermalSensors().size()
 
     # Subscribe member methods using bound methods as callbacks
     self._subscriptions.append(
@@ -83,10 +85,12 @@ class CustomProxy:
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
   def on_depth_measurement(self, meas):
-    self.vl53l8cx_rate.tick(1)
+    if meas.sensor_index == 0:
+      self.vl53l8cx_rate.tick(self._depth_sensor_count)
 
   def on_thermal_measurement(self, meas):
-    self.htpa32_rate.tick(1)
+    if meas.sensor_index == 0:
+      self.htpa32_rate.tick(self._thermal_sensor_count)
 
 
 def main():

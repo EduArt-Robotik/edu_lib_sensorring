@@ -91,20 +91,27 @@ def main():
     # Create the MeasurementManager directly from the factory
     manager = sensorring.MeasurementManager(params, factory)
 
+    depth_sensor_count = manager.depthSensors().size()
+    thermal_sensor_count = manager.thermalSensors().size()
+
     # Subscribe to the state changes
     state_sub = manager.subscribeToStateChanges(
       lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
     )
 
+    def on_depth_measurement(meas):
+      if meas.sensor_index == 0:
+        vl53l8cx_rate.tick(depth_sensor_count)
+
+    def on_thermal_measurement(meas):
+      if meas.sensor_index == 0:
+        htpa32_rate.tick(thermal_sensor_count)
+
     # Subscribe to all depth sensors for measurement rate tracking
-    depth_sub = manager.depthSensors().subscribe(
-      lambda meas: vl53l8cx_rate.tick(1)
-    )
+    depth_sub = manager.depthSensors().subscribe(on_depth_measurement)
 
     # Subscribe to all thermal sensors for measurement rate tracking
-    thermal_sub = manager.thermalSensors().subscribe(
-      lambda meas: htpa32_rate.tick(1)
-    )
+    thermal_sub = manager.thermalSensors().subscribe(on_thermal_measurement)
 
     # Start the measurements
     manager.startMeasuring()

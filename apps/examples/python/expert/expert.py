@@ -154,14 +154,15 @@ def main():
       print(f"Front depth subgroup: {front_depth.size()} sensors")
 
     # =========================================================================
-    # 8. Group subscription for thermal (all sensors at once)
+    # 8. Group subscription for thermal (per-sensor callbacks)
     # =========================================================================
     thermal_frame_count = [0]
     lock = threading.Lock()
 
     def thermal_callback(meas):
-      with lock:
-        thermal_frame_count[0] += 1
+      if meas.sensor_index == 0:
+        with lock:
+          thermal_frame_count[0] += 1
       # meas.temperatures holds the 32x32 temperature array in deg C.
       # meas.min_deg_c / meas.max_deg_c give the frame extremes.
 

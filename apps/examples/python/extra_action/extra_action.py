@@ -73,9 +73,12 @@ def main():
     # Subscribe to depth sensors for rate tracking
     got_first = [False]
     counter = [0]
-    depth_sub = manager.depthSensors().subscribe(
-      lambda meas: (got_first.__setitem__(0, True), counter.__setitem__(0, counter[0] + 1))
-    )
+    def on_depth_measurement(meas):
+      if meas.sensor_index == 0:
+        got_first[0] = True
+        counter[0] += 1
+
+    depth_sub = manager.depthSensors().subscribe(on_depth_measurement)
 
     # Get a handle to the lights
     lights = manager.lights()

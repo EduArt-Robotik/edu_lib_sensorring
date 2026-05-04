@@ -65,19 +65,26 @@ int main(int, char*[]) {
     // Create the MeasurementManager directly from the factory
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
+    const auto depth_sensor_count   = static_cast<unsigned int>(manager->depthSensors().size());
+    const auto thermal_sensor_count = static_cast<unsigned int>(manager->thermalSensors().size());
+
     // Subscribe to the state changes to get the measurements
     auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
       std::cout << "[State] State changed to: " << state << std::endl;
     });
 
     // Subscribe to all depth sensors for measurement rate tracking
-    auto depth_sub = manager->depthSensors().subscribe([&vl53l8cx_rate](const measurement::DepthMeasurement&) {
-      vl53l8cx_rate->tick(1);
+    auto depth_sub = manager->depthSensors().subscribe([&vl53l8cx_rate, depth_sensor_count](const measurement::DepthMeasurement& meas) {
+      if (meas.sensor_index == 0) {
+        vl53l8cx_rate->tick(depth_sensor_count);
+      }
     });
 
     // Subscribe to all thermal sensors for measurement rate tracking
-    auto thermal_sub = manager->thermalSensors().subscribe([&htpa32_rate](const measurement::ThermalMeasurement&) {
-      htpa32_rate->tick(1);
+    auto thermal_sub = manager->thermalSensors().subscribe([&htpa32_rate, thermal_sensor_count](const measurement::ThermalMeasurement& meas) {
+      if (meas.sensor_index == 0) {
+        htpa32_rate->tick(thermal_sensor_count);
+      }
     });
 
     // Start the measurements
