@@ -3,7 +3,7 @@
 /**
  * @file   MeasurementManagerImpl.hpp
  * @author EduArt Robotik GmbH
- * @brief  Implementation of MeasurementManager; holds state machine and private members.
+ * @brief  Implementation of MeasurementManager; holds tick-based scheduler and private members.
  * @date   2025-02-15
  */
 
@@ -15,7 +15,7 @@
 #include <future>
 #include <memory>
 #include <thread>
-#include <unordered_map>
+#include <vector>
 
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/device/DepthSensor.hpp"
@@ -29,6 +29,8 @@
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/subscription/Publisher.hpp"
 
+#include "SchedulerTypes.hpp"
+
 namespace eduart {
 
 namespace sensorring {
@@ -37,7 +39,15 @@ namespace manager {
 
 /**
  * @class MeasurementManagerImpl
- * @brief Implementation of MeasurementManager.
+ * @brief Implementation of MeasurementManager with tick-based scheduler.
+ *
+ * The scheduler runs at a fixed base rate. Each sensor group has an integer
+ * divisor determining how often it fires. Within each tick:
+ *   1. Wait for pending data from previous requests (self-regulating).
+ *   2. Fetch data from groups that have pending results.
+ *   3. Request new measurements for groups due this tick.
+ *   4. Execute device actions (actuators).
+ *   5. Sleep until next tick boundary.
  */
 class MeasurementManagerImpl {
 public:
@@ -59,51 +69,51 @@ public:
   device::Group<device::Light> lights() const noexcept;
 
 private:
-  enum class MeasurementState {
+  enum class Phase {
     init,
     reset_sensors,
     sync_lights,
     get_eeprom,
     pre_loop_init,
-    device_actions,
-    request_tof_measurement,
-    request_thermal_measurement,
-    wait_for_data,
-    fetch_tof_data,
-    fetch_thermal_data,
-    throttle_measurement,
+    tick,
     error_handler_measurement,
     error_handler_communication,
     shutdown
   };
 
-  void StateMachine();
-  void StateMachineWorker() noexcept;
+  void runPhase();
+  void runWorker() noexcept;
+
+  // Tick sub-steps
+  bool waitForPendingData();
+  bool fetchPendingData();
+  void requestMeasurements();
+  void executeDeviceActions();
 
   void publishDepthMeasurements();
   void publishThermalMeasurements();
   void notifyState(const ManagerState state);
 
+  void buildSchedule();
+  bool isGroupDue(const SensorGroupSchedule& group) const;
+
   const ManagerParams _params;
   std::atomic<ManagerState> _manager_state;
-  std::atomic<MeasurementState> _measurement_state;
+  Phase _phase;
   std::unique_ptr<ring::SensorRing> _sensor_ring;
 
-  bool _first_measurement;
-  std::chrono::duration<double> _tof_measurement_period;
-  std::chrono::duration<double> _thermal_measurement_period;
-  std::chrono::time_point<std::chrono::steady_clock> _last_tof_measurement_timestamp;
-  std::chrono::time_point<std::chrono::steady_clock> _last_thermal_measurement_timestamp;
+  // Scheduler state
+  double _base_rate_hz;
+  std::chrono::duration<double> _tick_period;
+  std::chrono::time_point<std::chrono::steady_clock> _next_tick_time;
+  unsigned long _tick_count;
+  std::vector<SensorGroupSchedule> _schedule;
 
-  bool _is_tof_throttled;
-  bool _is_thermal_throttled;
-  bool _thermal_measurement_flag;
+  // Pending future for VL53L8CX data-available signal (non-blocking request).
+  std::future<bool> _tof_data_available_future;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
-  std::exception_ptr worker_exception;
-
-  std::future<bool> _tof_request_future;
 
   subscription::Publisher<const ManagerState> _state_publisher;
 

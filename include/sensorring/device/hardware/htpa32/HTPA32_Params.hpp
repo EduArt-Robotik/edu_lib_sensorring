@@ -20,6 +20,8 @@ namespace device {
  * @brief Parameter structure of the thermal sensor of a sensor board.
  */
 struct SENSORRING_EXPORT HTPA32_Params : public DeviceParams {
+  HTPA32_Params() { max_rate_hz = 5.0; }
+
   /// Minimal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
   double t_min_deg_c = 20;
 

@@ -37,6 +37,10 @@ struct DeviceParams {
 
   /// Whether the device is enabled at creation.
   bool enable = true;
+
+  /// Maximum measurement rate this device can sustain (Hz, tenths precision).
+  /// Used by the scheduler to compute per-group divisors.
+  double max_rate_hz = 15.0;
 };
 
 } // namespace device

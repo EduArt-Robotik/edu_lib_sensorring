@@ -17,7 +17,9 @@ namespace device {
  * @struct VL53L8CX_Params
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
-struct SENSORRING_EXPORT VL53L8CX_Params : public DeviceParams {};
+struct SENSORRING_EXPORT VL53L8CX_Params : public DeviceParams {
+  VL53L8CX_Params() { max_rate_hz = 15.0; }
+};
 
 } // namespace device
 

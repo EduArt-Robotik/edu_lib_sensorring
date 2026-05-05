@@ -105,10 +105,7 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::millisecon
       return false;
     }
 
-    _interface->send(
-        com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::HTPA32 },
-        MEASUREMENT_REQUEST,
-        {});
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
 
     return true;
   });

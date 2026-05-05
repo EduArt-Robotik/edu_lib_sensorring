@@ -24,19 +24,22 @@ namespace manager {
  * measurement state machine. One measurement manager manages exactly one sensor ring.
  */
 struct ManagerParams {
-  /// Timeout for the measurements before the error handler is called.
+  /// Timeout for individual sensor operations before the error handler is called.
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
 
-  /// Enable bit rate switching on the can bus interface.
-  bool enable_brs = false; // ToDo: remove
+  /// Enable bit rate switching on the CAN bus interface.
+  bool enable_brs = false;
 
-  /// If set to true error handling is enabled to try to repair communication and timing errors. When set to false the MeasurementManager instantly shuts down when an error is detected.
+  /// If set to true error handling is enabled to try to repair communication and timing errors.
+  /// When set to false the MeasurementManager instantly shuts down when an error is detected.
   bool repair_errors = true;
 
-  /// Target frequency for the time of flight measurement. If set to 0.0 the measurements are executed as fast as possible.
+  /// Target frequency cap for depth sensors (Hz, tenths precision).
+  /// 0.0 = run each group at its hardware max rate.
   double frequency_tof_hz = 0.0;
 
-  /// Target frequency for the thermal measurement. If set to 0.0 the measurements are executed as fast as possible.
+  /// Target frequency cap for thermal sensors (Hz, tenths precision).
+  /// 0.0 = run each group at its hardware max rate.
   double frequency_thermal_hz = 6.0;
 };
 
