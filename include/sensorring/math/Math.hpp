@@ -19,6 +19,19 @@ namespace sensorring {
 
 namespace math {
 
+/// PI constant
+static constexpr double PI = 3.141592653589793238462643383279502884;
+
+/**
+ * @brief Convert degrees to radians.
+ */
+SENSORRING_EXPORT double degreesToRadians(double degrees);
+
+/**
+ * @brief Convert radians to degrees.
+ */
+SENSORRING_EXPORT double radiansToDegrees(double radians);
+
 /**
  * @brief Calculate euler angles of a rotation from a rotation matrix (RPY-convention).
  * @param[in] rot_m Rotation matrix to be converted to euler angles

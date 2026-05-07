@@ -9,6 +9,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 #include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
@@ -34,6 +35,10 @@ public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::DepthMeasurement;
 
+  /// Constructor
+  DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+
+  /// Destructor
   virtual ~DepthSensor() = default;
 
   /**
@@ -51,6 +56,33 @@ public:
   virtual void publishMeasurement() = 0;
 
 protected:
+  /**
+   * @brief Create lookup tables for x and y angles based on FOV and resolution.
+   * @param fov_x Horizontal field of view in degrees.
+   * @param fov_y Vertical field of view in degrees.
+   * @param res_x Horizontal resolution (number of columns).
+   * @param res_y Vertical resolution (number of rows).
+   * @param lut_x Output vector for horizontal angle lookup table.
+   * @param lut_y Output vector for vertical angle lookup table.
+   */
+  virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y);
+
+  /**
+   * @brief Transform a raw depth measurement into a point cloud.
+   * @param lut_x Horizontal angle lookup table.
+   * @param lut_y Vertical angle lookup table.
+   * @param meas Raw depth measurement vector.
+   * @param pcl Output point cloud.
+   */
+  void transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<double>& meas, measurement::PointCloud& pcl);
+
+  double _fov_x_deg;
+  double _fov_y_deg;
+  unsigned int _resolution_x;
+  unsigned int _resolution_y;
+  std::vector<double> _lut_x;
+  std::vector<double> _lut_y;
+
   subscription::Publisher<const measurement::DepthMeasurement&> _depth_publisher;
 };
 

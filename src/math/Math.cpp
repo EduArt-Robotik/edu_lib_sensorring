@@ -6,12 +6,16 @@ namespace sensorring {
 
 namespace math {
 
-// Can't use std::numbers::pi because of C++17 requirement for ROS1 compatibility
-static inline constexpr double pi = 3.141592653589793238462643383279502884;
+double degreesToRadians(double degrees) {
+  return degrees * PI / 180.0;
+}
 
+double radiansToDegrees(double radians) {
+  return radians * 180.0 / PI;
+}
 
 const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m) {
-  return eulerRadiansFromRotationMatrix(rot_m) * 180.0F / pi;
+  return eulerRadiansFromRotationMatrix(rot_m) * 180.0F / PI;
 }
 
 const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m) {
@@ -23,7 +27,7 @@ const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m) {
 }
 
 const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotation_deg) {
-  return rotMatrixFromEulerRadians(rotation_deg * pi / 180.0F);
+  return rotMatrixFromEulerRadians(rotation_deg * PI / 180.0F);
 }
 
 const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad) {
