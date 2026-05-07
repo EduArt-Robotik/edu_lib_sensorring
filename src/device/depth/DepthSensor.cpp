@@ -36,20 +36,20 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
   }
 }
 
-void DepthSensor::transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<double>& meas, measurement::PointCloud& pcl) {
+void DepthSensor::transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<RawPointInput>& raw_points, measurement::PointCloud& pcl, unsigned int sensor_index) {
 
   unsigned int i = 0;
   for (const auto lut_val_x : lut_x) {
     for (const auto lut_val_y : lut_y) {
 
-      double distance = meas[i];
-      if (distance > 0) {
-        double x = distance * lut_val_x;
-        double y = distance * lut_val_y;
-        double z = distance;
-        pcl.data.push_back(measurement::PointData{ math::Vector3{ { x, y, z } }, distance, 0.0, 0 });
+      const auto& raw = raw_points[i];
+      if (raw.distance > 0) {
+        double x = raw.distance * lut_val_x;
+        double y = raw.distance * lut_val_y;
+        double z = raw.distance;
+        pcl.data.push_back(measurement::PointData{ math::Vector3{ { x, y, z } }, raw.distance, raw.sigma, sensor_index });
       } else {
-        pcl.data.push_back(measurement::PointData{ math::Vector3{ { 0.0, 0.0, 0.0 } }, -1.0, -1.0, 0 });
+        pcl.data.push_back(measurement::PointData{ math::Vector3{ { 0.0, 0.0, 0.0 } }, -1.0, -1.0, sensor_index });
       }
 
       i++;

@@ -11,8 +11,6 @@
 #include "sensorring/math/Math.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 
-#include "VL53L8CX_Constants.hpp"
-
 namespace eduart {
 
 namespace sensorring {
@@ -46,6 +44,9 @@ public:
 private:
   measurement::DepthMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
 
+  static constexpr unsigned int RESOLUTION             = 64;
+  static constexpr unsigned int RESOLUTION_X           = 8;
+  static constexpr unsigned int RESOLUTION_Y           = 8;
   static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
 
   VL53L8CX_Device& _parent;

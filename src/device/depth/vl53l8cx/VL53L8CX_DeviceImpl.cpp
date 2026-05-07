@@ -47,7 +47,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
     // Complete measurement data delivered by reassembly layer.
     // Expected: [frame_id, nr of valid points, <192 bytes of point data>]
-    if (data.size() >= (vl53l8::TOF_RESOLUTION * 3 + 2)) {
+    if (data.size() >= (RESOLUTION * 3 + 2)) {
       _latest_raw_measurement         = processMeasurement(data);
       _latest_transformed_measurement = transformMeasurement(_latest_raw_measurement, _parent._rot_m, _parent._translation);
       _parent.setMeasurementReady(true);
@@ -62,33 +62,25 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
 
 measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
   measurement::DepthMeasurement result;
-  result.point_cloud.data.reserve(vl53l8::TOF_RESOLUTION);
   result.frame_id        = data[0];
   result.nr_valid_points = data[1];
 
-  uint16_t distance_raw = 0;
-  uint16_t sigma_raw    = 0;
+  std::vector<RawPointInput> raw_points;
+  raw_points.reserve(RESOLUTION);
 
-  for (int i = 0; i < vl53l8::TOF_RESOLUTION; i++) {
-    distance_raw = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 10) & 0x3FFF; // 14 bit
-    sigma_raw    = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 0) & 0x03FF;  // 10 bit
+  for (unsigned int i = 0; i < RESOLUTION; i++) {
+    uint16_t distance_raw = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 10) & 0x3FFF; // 14 bit
+    uint16_t sigma_raw    = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 0) & 0x03FF;  // 10 bit
 
-    math::Vector3 point   = { 0, 0, 0 };
-    double point_distance = -1;
-    double point_sigma    = -1;
-
+    RawPointInput raw;
     if (distance_raw != 0) {
-      point_distance = (double)distance_raw / 4.0F / 1000.0F; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
-      point_sigma    = (double)sigma_raw / 128.0 / 1000.0F;   // Factor 128 for fixed point conversion, Factor 1000 from mm to m
-
-      point.x() = point_distance * vl53l8::lut_tan_x[i];
-      point.y() = point_distance * vl53l8::lut_tan_y[i];
-      point.z() = point_distance;
+      raw.distance = static_cast<double>(distance_raw) / 4.0 / 1000.0; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
+      raw.sigma    = static_cast<double>(sigma_raw) / 128.0 / 1000.0;  // Factor 128 for fixed point conversion, Factor 1000 from mm to m
     }
-
-    result.point_cloud.data.push_back(measurement::PointData({ point, point_distance, point_sigma, _params.id.index }));
+    raw_points.push_back(raw);
   }
 
+  _parent.transformMeasurementToPointCloud(_parent._lut_x, _parent._lut_y, raw_points, result.point_cloud, _params.id.index);
   result.point_cloud.data.shrink_to_fit();
   return result;
 }

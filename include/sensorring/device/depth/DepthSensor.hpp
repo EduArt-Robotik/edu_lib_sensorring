@@ -23,6 +23,20 @@ namespace sensorring {
 namespace device {
 
 /**
+ * @struct RawPointInput
+ * @brief  Raw per-point data provided by a depth sensor before 3D transformation.
+ *
+ * Each sensor populates the fields it supports; unset fields keep their defaults.
+ * Used internally by DepthSensor subclasses.
+ */
+struct RawPointInput {
+  /// Distance in meters. <= 0 means invalid.
+  double distance = 0.0; 
+  /// Standard deviation in meters. 0 = not available.
+  double sigma    = 0.0;
+};
+
+/**
  * @class DepthSensor
  * @brief Public interface for any depth-sensing device.
  *
@@ -68,13 +82,14 @@ protected:
   virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y);
 
   /**
-   * @brief Transform a raw depth measurement into a point cloud.
+   * @brief Transform raw depth sensor data into a 3D point cloud.
    * @param lut_x Horizontal angle lookup table.
    * @param lut_y Vertical angle lookup table.
-   * @param meas Raw depth measurement vector.
+   * @param raw_points Per-point raw sensor data (distance, sigma, etc.).
    * @param pcl Output point cloud.
+   * @param sensor_index Index of the sensor producing this measurement.
    */
-  void transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<double>& meas, measurement::PointCloud& pcl);
+  void transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<RawPointInput>& raw_points, measurement::PointCloud& pcl, unsigned int sensor_index = 0);
 
   double _fov_x_deg;
   double _fov_y_deg;

@@ -5,6 +5,7 @@
 #include "sensorring/measurement/PointCloud.hpp"
 
 using eduart::sensorring::device::DepthSensor;
+using eduart::sensorring::device::RawPointInput;
 using eduart::sensorring::measurement::PointCloud;
 
 static constexpr double expected_lut_x_8[] = { 0.3624, 0.2589, 0.1553, 0.0518, -0.0518, -0.1553, -0.2589, -0.3624 };
@@ -21,7 +22,7 @@ public:
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }
 
-  void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<double>& meas, PointCloud& pcl) { transformMeasurementToPointCloud(lut_x, lut_y, meas, pcl); }
+  void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<RawPointInput>& raw_points, PointCloud& pcl) { transformMeasurementToPointCloud(lut_x, lut_y, raw_points, pcl); }
 };
 
 TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
@@ -48,10 +49,10 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
   SECTION("DepthSensor raw measurement to point cloud transformation") {
     std::vector<double> lut_x{ -1.0, 1.0 };
     std::vector<double> lut_y{ -2.0, 2.0 };
-    std::vector<double> meas{ 1.0, 2.0, -1.0, 3.0 };
+    std::vector<RawPointInput> raw_points{ {1.0}, {2.0}, {-1.0}, {3.0} };
 
     PointCloud pcl;
-    m.toPointCloud(lut_x, lut_y, meas, pcl);
+    m.toPointCloud(lut_x, lut_y, raw_points, pcl);
 
     REQUIRE(pcl.data.size() == 4u);
 
