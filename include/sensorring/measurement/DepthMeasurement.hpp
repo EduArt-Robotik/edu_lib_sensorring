@@ -11,7 +11,7 @@
 #include <chrono>
 #include <vector>
 
-#include "sensorring/device/DeviceState.hpp"
+#include "sensorring/device/types/DeviceState.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 

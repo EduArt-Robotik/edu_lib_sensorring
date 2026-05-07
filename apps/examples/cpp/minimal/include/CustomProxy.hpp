@@ -11,8 +11,8 @@
 
 #include <functional>
 #include <iostream>
-#include <sensorring/device/DepthSensor.hpp>
-#include <sensorring/device/ThermalSensor.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/device/thermal/ThermalSensor.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/subscription/Subscription.hpp>
 #include <vector>

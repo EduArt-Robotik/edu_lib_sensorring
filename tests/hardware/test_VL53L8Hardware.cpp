@@ -4,8 +4,8 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
-#include "sensorring/device/DepthSensor.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/device/depth/DepthSensor.hpp"
+#include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"

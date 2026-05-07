@@ -33,6 +33,8 @@ enum class DeviceType {
   HTPA32,
   /// LED strip (WS2812b).
   WS2812b,
+  /// Time-of-flight sensor (TMF8829).
+  TMF8829,
   /// Undefined device type.
   UNDEFINED
 };

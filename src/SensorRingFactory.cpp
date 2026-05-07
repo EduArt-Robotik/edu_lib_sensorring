@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "device/hardware/SensorBoardManager.hpp"
+#include "board/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"
 

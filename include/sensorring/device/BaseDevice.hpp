@@ -15,9 +15,9 @@
 #include <optional>
 #include <vector>
 
-#include "sensorring/device/DeviceID.hpp"
-#include "sensorring/device/DeviceState.hpp"
-#include "sensorring/device/IDevice.hpp"
+#include "sensorring/device/types/DeviceID.hpp"
+#include "sensorring/device/types/DeviceState.hpp"
+// #include "sensorring/device/IDevice.hpp" // removed, merged into BaseDevice
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Matrix3.hpp"
@@ -50,7 +50,7 @@ struct DevicePoseOffset {
  * Combines the polymorphic IDevice interface with communication, state tracking,
  * pose handling and promise-based measurement synchronisation.
  */
-class SENSORRING_EXPORT BaseDevice : public virtual IDevice {
+class SENSORRING_EXPORT BaseDevice {
 public:
   /**
    * @brief Construct the device with identity, communication link and enable flag.
@@ -62,6 +62,19 @@ public:
   BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
 
   virtual ~BaseDevice();
+
+  /**
+   * @brief Enqueue a self-contained action to be executed by the state machine.
+   * @param[in] action Callable executed once during the next device_actions slot.
+   *                   Should be non-blocking and exception-safe.
+   */
+  void enqueueAction(std::function<void()> action);
+
+  /**
+   * @brief Atomically drain and return all pending actions.
+   * @return Vector of actions to execute. Empty if no actions were pending.
+   */
+  std::vector<std::function<void()> > drainActions();
 
   // -- identity --
 
@@ -81,15 +94,18 @@ public:
 
   // -- state / measurement synchronisation --
 
-  void resetSensorState();
-  void clearDataFlag();
   std::future<bool> beginMeasurementWait();
-  std::future<bool> beginDataAvailableWait();
-
-protected:
   void setMeasurementReady(bool success);
+
+  std::future<bool> beginDataAvailableWait();
   void setDataAvailableReady(bool success);
 
+  void resetSensorState();
+  void clearDataFlag();
+
+protected:
+  std::mutex _action_mutex;
+  std::vector<std::function<void()> > _pending_actions;
   virtual void onResetSensorState() {}
   virtual void onClearDataFlag() {}
 
@@ -115,9 +131,9 @@ protected:
 
   mutable std::mutex _state_mutex;
 
-  std::optional<std::promise<bool> > _measurement_promise;
-  std::optional<std::promise<bool> > _data_available_promise;
   std::mutex _promise_mutex;
+  std::optional<std::promise<bool> > _data_available_promise;
+  std::optional<std::promise<bool> > _measurement_promise;
 
   subscription::Subscription _com_subscription;
 };

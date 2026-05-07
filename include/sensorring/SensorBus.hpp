@@ -13,11 +13,10 @@
 #include <memory>
 #include <vector>
 
+#include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
-
-#include "SensorBoard.hpp"
 
 namespace eduart {
 

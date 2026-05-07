@@ -14,6 +14,8 @@ std::string toString(DeviceType type) noexcept {
     return "HTPA32";
   case DeviceType::WS2812b:
     return "WS2812b";
+  case DeviceType::TMF8829:
+    return "TMF8829";
   case DeviceType::UNDEFINED:
     return "Undefined";
   default:

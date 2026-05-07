@@ -1,11 +1,10 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
-#include "device/SensorBoardCommands.hpp"
+#include "board/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
-#include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
+#include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/IDevice.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 using namespace std::chrono_literals;
@@ -333,9 +332,8 @@ void MeasurementManagerImpl::runPhase() {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Trying to restart measurements.");
 
       // Reset sensor state.
-      for (device::IDevice* d : _sensor_ring->getDevices()) {
-        if (auto bd = dynamic_cast<device::BaseDevice*>(d))
-          bd->resetSensorState();
+      for (auto* dev : _sensor_ring->getDevices()) {
+        dev->resetSensorState();
       }
 
       // Clear all pending flags and attempt a single request cycle.

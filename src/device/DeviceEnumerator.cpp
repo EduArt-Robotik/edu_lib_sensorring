@@ -4,7 +4,7 @@
 
 using namespace eduart::sensorring::transport::protocol;
 
-#include "SensorBoardCommands.hpp"
+#include "board/SensorBoardCommands.hpp"
 
 namespace eduart {
 

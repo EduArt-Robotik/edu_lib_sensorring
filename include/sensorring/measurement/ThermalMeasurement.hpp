@@ -12,7 +12,7 @@
 #include <chrono>
 #include <cstdint>
 
-#include "sensorring/device/DeviceState.hpp"
+#include "sensorring/device/types/DeviceState.hpp"
 #include "sensorring/measurement/Image.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -100,7 +100,6 @@ struct ThermalMeasurement {
 
   /// Image structure where each pixel represents the temperature measured at that point in °C
   TemperatureImage temperatures;
-
 };
 
 } // namespace measurement

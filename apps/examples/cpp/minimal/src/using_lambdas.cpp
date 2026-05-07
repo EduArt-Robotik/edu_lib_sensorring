@@ -10,8 +10,8 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/DepthSensor.hpp>
-#include <sensorring/device/ThermalSensor.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/device/thermal/ThermalSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>

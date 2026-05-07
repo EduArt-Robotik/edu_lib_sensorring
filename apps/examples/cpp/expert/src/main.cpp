@@ -23,18 +23,17 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/DepthSensor.hpp>
-#include <sensorring/device/Group.hpp>
-#include <sensorring/device/Light.hpp>
-#include <sensorring/device/ThermalSensor.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp>
+#include <sensorring/device/light/Light.hpp>
+#include <sensorring/device/light/ws2812b/WS2812b_Params.hpp>
+#include <sensorring/device/thermal/ThermalSensor.hpp>
+#include <sensorring/device/thermal/htpa32/HTPA32_Params.hpp>
+#include <sensorring/device/types/Group.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 #include <vector>
-
-#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 
 using namespace eduart::sensorring;
 using namespace std::chrono_literals;

@@ -6,7 +6,7 @@
 #include <thread>
 
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/firmware_update/FirmwareUpdater.hpp>
+#include <sensorring/firmware/FirmwareUpdater.hpp>
 
 using namespace eduart::sensorring;
 

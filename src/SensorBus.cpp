@@ -3,8 +3,8 @@
 #include <chrono>
 #include <thread>
 
+#include "board/SensorBoardCommands.hpp"
 #include "device/DeviceEnumerator.hpp"
-#include "device/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"
