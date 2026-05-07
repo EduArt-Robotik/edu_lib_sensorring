@@ -21,6 +21,7 @@
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -70,7 +71,7 @@ enum class ValidationMode {
 class SENSORRING_EXPORT SensorRingFactory {
 public:
   /// Currently supported devices for explicit configuration in expectBoard().
-  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
+  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
 
   /// Per-interface enumeration results, keyed by interface ID.
   using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<board::EnumerationInformation> >;

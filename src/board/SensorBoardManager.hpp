@@ -18,6 +18,7 @@
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardType.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
@@ -94,7 +95,7 @@ public:
   }
 
   /// Map of device parameters indexed by device type.
-  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
+  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
 
   /// Container for device parameters keyed by device type.
   using DeviceParamsMap = std::unordered_map<DeviceType, DeviceParamsVariant>;
@@ -145,6 +146,7 @@ private:
      { "Minipanel",
         {
             { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::TMF8829, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Undefined,
      { "Unknown",
