@@ -7,13 +7,13 @@ add_executable(sensorring_tests
     unit/test_Math.cpp
     unit/test_PointCloud.cpp
     unit/test_DepthMeasurement.cpp
+    unit/test_ThermalMeasurement.cpp
     unit/test_ComEndpoint.cpp
     unit/test_DeviceID.cpp
     unit/test_SubscriberToken.cpp
     unit/test_Subscription.cpp
     unit/test_Publisher.cpp
     unit/test_HTPA32_Eeprom.cpp
-    unit/test_MeasurementHelpers.cpp
 )
 
 target_include_directories(sensorring_tests PRIVATE

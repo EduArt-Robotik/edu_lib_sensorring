@@ -144,3 +144,33 @@ TEST_CASE("PointCloud transform applies rotation and translation", "[PointCloud]
   REQUIRE(roundtrip.data[1].point.y() == Catch::Approx(cloud.data[1].point.y()).margin(1e-6));
   REQUIRE(roundtrip.data[1].point.z() == Catch::Approx(cloud.data[1].point.z()).margin(1e-6));
 }
+
+TEST_CASE("PointCloud::combine merges multiple clouds", "[PointCloud]") {
+  PointCloud a, b;
+  a.data.push_back({ { 1.0, 0.0, 0.0 }, 1.0, 0.01, 0 });
+  a.data.push_back({ { 2.0, 0.0, 0.0 }, 2.0, 0.02, 0 });
+  b.data.push_back({ { 3.0, 0.0, 0.0 }, 3.0, 0.03, 1 });
+
+  auto combined = PointCloud::combine({ a, b });
+
+  REQUIRE(combined.data.size() == 3);
+  REQUIRE(combined.data[0].point.x() == Catch::Approx(1.0));
+  REQUIRE(combined.data[1].point.x() == Catch::Approx(2.0));
+  REQUIRE(combined.data[2].point.x() == Catch::Approx(3.0));
+}
+
+TEST_CASE("PointCloud::combine with empty vector", "[PointCloud]") {
+  auto combined = PointCloud::combine({});
+  REQUIRE(combined.data.empty());
+}
+
+TEST_CASE("PointCloud::combine with one cloud", "[PointCloud]") {
+  PointCloud a;
+  a.data.push_back({ { 5.0, 6.0, 7.0 }, 5.0, 0.1, 0 });
+
+  auto combined = PointCloud::combine({ a });
+
+  REQUIRE(combined.data.size() == 1);
+  REQUIRE(combined.data[0].point.x() == Catch::Approx(5.0));
+}
+
