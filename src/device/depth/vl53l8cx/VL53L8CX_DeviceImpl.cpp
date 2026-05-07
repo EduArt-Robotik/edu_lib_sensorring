@@ -95,11 +95,7 @@ measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std:
 
 measurement::DepthMeasurement VL53L8CX_DeviceImpl::transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
   auto transformed_measurement = measurement;
-
-  for (unsigned int i = 0; i < transformed_measurement.point_cloud.data.size(); i++) {
-    transformed_measurement.point_cloud.data[i].point = (rotation * measurement.point_cloud.data[i].point) + translation;
-  }
-
+  transformed_measurement.point_cloud = measurement::PointCloud::transform(measurement.point_cloud, rotation, translation);
   return transformed_measurement;
 }
 

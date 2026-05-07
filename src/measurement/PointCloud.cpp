@@ -39,6 +39,14 @@ PointCloud PointCloud::combine(const std::vector<PointCloud>& clouds) {
   return result;
 }
 
+PointCloud PointCloud::transform(const PointCloud& cloud, const math::Matrix3 rotation, const math::Vector3 translation) {
+  PointCloud result = cloud;
+  for (size_t i = 0; i < result.data.size(); ++i) {
+    result.data[i].point = (rotation * cloud.data[i].point) + translation;
+  }
+  return result;
+}
+
 } // namespace measurement
 
 } // namespace sensorring
