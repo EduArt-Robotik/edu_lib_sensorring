@@ -1,11 +1,12 @@
 include(CTest)
 include(Catch)
 
-add_executable(sensorring_tests
+add_executable(sensorring_unit_tests
     unit/test_Vector3.cpp
     unit/test_Matrix3.cpp
     unit/test_Math.cpp
     unit/test_PointCloud.cpp
+    unit/test_DepthSensor.cpp
     unit/test_DepthMeasurement.cpp
     unit/test_ThermalMeasurement.cpp
     unit/test_ComEndpoint.cpp
@@ -16,17 +17,17 @@ add_executable(sensorring_tests
     unit/test_HTPA32_Eeprom.cpp
 )
 
-target_include_directories(sensorring_tests PRIVATE
+target_include_directories(sensorring_unit_tests PRIVATE
     ${PROJECT_SOURCE_DIR}/src
 )
 
-target_link_libraries(sensorring_tests PRIVATE
+target_link_libraries(sensorring_unit_tests PRIVATE
   sensorring::sensorring
   Catch2::Catch2WithMain
   Threads::Threads
 )
 
-catch_discover_tests(sensorring_tests
+catch_discover_tests(sensorring_unit_tests
   PROPERTIES LABELS "unit"
 )
 
