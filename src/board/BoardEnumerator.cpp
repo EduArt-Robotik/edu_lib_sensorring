@@ -1,4 +1,4 @@
-#include "DeviceEnumerator.hpp"
+#include "board/BoardEnumerator.hpp"
 
 #include <sensorring_transport/Protocol.hpp>
 
@@ -10,9 +10,9 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
 
-DeviceEnumerator::DeviceEnumerator(com::ComInterface* interface)
+BoardEnumerator::BoardEnumerator(com::ComInterface* interface)
     : _interface(interface)
     , _enumeration_vec() {
   _com_subscription = _interface->subscribe(
@@ -22,30 +22,30 @@ DeviceEnumerator::DeviceEnumerator(com::ComInterface* interface)
       { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
 }
 
-DeviceEnumerator::~DeviceEnumerator() {
+BoardEnumerator::~BoardEnumerator() {
   // _com_subscription auto-cancels via RAII.
 }
 
-void DeviceEnumerator::startEnumeration() {
-  device::cmdEnumerateBoards(_interface->getID());
+void BoardEnumerator::startEnumeration() {
+  cmdEnumerateBoards(_interface->getID());
 }
 
-std::vector<device::EnumerationInformation> DeviceEnumerator::getResult() {
+std::vector<EnumerationInformation> BoardEnumerator::getResult() {
   LockGuard lock(_enumeration_mutex);
   return _enumeration_vec;
 }
 
-void DeviceEnumerator::comCallback(const com::ComEndpoint, std::uint8_t command, const std::vector<uint8_t>& data) {
+void BoardEnumerator::comCallback(const com::ComEndpoint, std::uint8_t command, const std::vector<uint8_t>& data) {
   LockGuard lock(_enumeration_mutex);
 
   if (command == sensor_board::ACTIVE_DEVICE_RESPONSE) {
-    auto info  = device::EnumerationInformation::fromBuffer(data);
-    info.state = device::ConnectionState::Connected;
+    auto info  = EnumerationInformation::fromBuffer(data);
+    info.state = ConnectionState::Connected;
     _enumeration_vec.push_back(std::move(info));
   }
 }
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

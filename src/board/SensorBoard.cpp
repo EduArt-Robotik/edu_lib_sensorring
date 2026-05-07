@@ -13,7 +13,7 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
 
 SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
     : _idx(idx)
@@ -78,7 +78,7 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
   }
 }
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

@@ -12,7 +12,7 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
 
 bool resetBoards() {
   bool success = true;
@@ -37,7 +37,7 @@ void cmdEnumerateBoards(com::ComInterfaceID interface) {
   }
 }
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

@@ -12,9 +12,9 @@
 #include <memory>
 #include <mutex>
 
+#include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/types/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
@@ -27,7 +27,7 @@ namespace com {
 class ComInterface;
 }
 
-namespace device {
+namespace board {
 
 /**
  * @class SensorBoard
@@ -42,7 +42,7 @@ public:
    * @param[in] idx Board index on the bus.
    * @param[in] devices Owned devices (sensors/actuators) on this board.
    */
-  SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices);
+  SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<device::BaseDevice> > devices);
   /// Destructor
   ~SensorBoard();
 
@@ -55,7 +55,7 @@ public:
    * @brief Return the enumeration info received from the hardware.
    * @return Const reference to enumeration information.
    */
-  const EnumerationInformation& getEnumInfo() const;
+  const board::EnumerationInformation& getEnumInfo() const;
   /**
    * @brief Board type from configuration (undefined if not set). Used for topology enforcement.
    * @return Board type.
@@ -66,7 +66,7 @@ public:
    * @brief Return non-owning pointers to all devices on this board.
    * @return Vector of BaseDevice pointers.
    */
-  std::vector<BaseDevice*> getDevices() const;
+  std::vector<device::BaseDevice*> getDevices() const;
 
 private:
   using Mutex      = std::mutex;
@@ -85,7 +85,7 @@ private:
   unsigned int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
-  EnumerationInformation _enum_info;
+  board::EnumerationInformation _enum_info;
 
   mutable RecursiveMutex _com_mutex;
 
@@ -94,7 +94,7 @@ private:
   subscription::Subscription _com_subscription;
 };
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

@@ -1,9 +1,9 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
- * @file   DeviceEnumerator.hpp
+ * @file   BoardEnumerator.hpp
  * @author EduArt Robotik GmbH
- * @brief  Enumerator for devices on a sensor board.
+ * @brief  Enumerator for boards on a sensor bus.
  * @date   2026-02-24
  */
 
@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
-#include "sensorring/device/types/EnumerationInformation.hpp"
+#include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
 namespace eduart {
@@ -24,17 +24,17 @@ namespace com {
 class ComInterface;
 }
 
-namespace device {
+namespace board {
 
-class DeviceEnumerator {
+class BoardEnumerator {
 public:
-  DeviceEnumerator(com::ComInterface* interface);
+  BoardEnumerator(com::ComInterface* interface);
 
-  ~DeviceEnumerator();
+  ~BoardEnumerator();
 
   void startEnumeration();
 
-  std::vector<device::EnumerationInformation> getResult();
+  std::vector<EnumerationInformation> getResult();
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
@@ -45,12 +45,12 @@ private:
   mutable Mutex _enumeration_mutex;
 
   com::ComInterface* _interface;
-  std::vector<device::EnumerationInformation> _enumeration_vec;
+  std::vector<EnumerationInformation> _enumeration_vec;
 
   subscription::Subscription _com_subscription;
 };
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

@@ -15,12 +15,12 @@
 #include <variant>
 #include <vector>
 
+#include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardType.hpp"
 #include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/types/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -28,7 +28,12 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
+
+using device::BaseDevice;
+using device::DeviceID;
+using device::DevicePoseOffset;
+using device::DeviceType;
 
 struct SensorBoardParams;
 class SensorBoard;
@@ -89,7 +94,7 @@ public:
   }
 
   /// Map of device parameters indexed by device type.
-  using DeviceParamsVariant = std::variant<VL53L8CX_Params, HTPA32_Params, WS2812b_Params>;
+  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
 
   /// Container for device parameters keyed by device type.
   using DeviceParamsMap = std::unordered_map<DeviceType, DeviceParamsVariant>;
@@ -149,7 +154,7 @@ private:
   };
 };
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

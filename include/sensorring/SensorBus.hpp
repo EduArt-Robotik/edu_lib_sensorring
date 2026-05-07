@@ -41,7 +41,7 @@ public:
    * @param[in] interface Communication interface ID for this bus.
    * @param[in] board_vec Owned sensor boards.
    */
-  SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec);
+  SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<board::SensorBoard> > board_vec);
 
   /**
    * @brief Enable or disable bit rate switching on the bus interface.
@@ -65,7 +65,7 @@ public:
    * @brief Non-owning pointers to all sensor boards on this bus.
    * @return Vector of SensorBoard pointers.
    */
-  std::vector<device::SensorBoard*> getSensorBoards() const;
+  std::vector<board::SensorBoard*> getSensorBoards() const;
 
   /**
    * @brief Enumerate boards on an interface.
@@ -73,12 +73,12 @@ public:
    * @param[in] timeout Time to wait for responses before returning.
    * @return Vector of enumeration info. May be empty if none or on error.
    */
-  static std::vector<device::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout = 250ms);
+  static std::vector<board::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout = 250ms);
 
 private:
   com::ComInterface* _interface;
 
-  std::vector<std::unique_ptr<device::SensorBoard> > _board_vec;
+  std::vector<std::unique_ptr<board::SensorBoard> > _board_vec;
 
   subscription::Subscription _com_subscription;
 };

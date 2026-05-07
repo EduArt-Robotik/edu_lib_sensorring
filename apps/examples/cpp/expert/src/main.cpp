@@ -87,20 +87,20 @@ int main(int, char*[]) {
     htpa_params.auto_min_max = true;
     device::WS2812b_Params ws_params;
 
-    device::SensorBoardParams board_0;
+    board::SensorBoardParams board_0;
     board_0.rotation    = { 0, 0, 45 };
     board_0.translation = { 0.1, 0.05, 0 };
     factory.expectBoard(board_0, { vl53_params, htpa_params, ws_params });
 
     // Board 1: Front-right, rotated -45° around Z.
-    device::SensorBoardParams board_1;
+    board::SensorBoardParams board_1;
     board_1.rotation    = { 0, 0, -45 };
     board_1.translation = { 0.1, -0.05, 0 };
     factory.expectBoard(board_1, { vl53_params, htpa_params, ws_params });
 
     // Second interface (if available).
     factory.addInterface(usbtingo_interface);
-    device::SensorBoardParams board_2;
+    board::SensorBoardParams board_2;
     board_2.rotation    = { 0, 0, 0 };
     board_2.translation = { -0.1, 0, 0 };
     factory.expectBoard(board_2, { vl53_params, htpa_params, ws_params });

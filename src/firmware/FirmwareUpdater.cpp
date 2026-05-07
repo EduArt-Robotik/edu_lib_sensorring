@@ -33,7 +33,7 @@ bool isResultOk(ResultType result) {
   return result == ResultType::RES_NONE || result == ResultType::RES_OK;
 }
 
-std::vector<device::EnumerationInformation> enumerateBoardsOnInterface(const com::ComInterfaceID& interface) {
+std::vector<board::EnumerationInformation> enumerateBoardsOnInterface(const com::ComInterfaceID& interface) {
   ring::SensorRingFactory factory(ring::ValidationMode::Relaxed);
   factory.addInterface(interface);
   const auto enumeration = factory.enumerate();

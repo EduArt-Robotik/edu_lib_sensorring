@@ -103,7 +103,7 @@ struct SENSORRING_EXPORT CommitHash {
   bool operator==(const CommitHash& other) const noexcept;
 };
 
-namespace device {
+namespace board {
 
 /**
  * @enum ConnectionState
@@ -176,7 +176,7 @@ struct SENSORRING_EXPORT EnumerationInformation {
   std::uint16_t device_options = 0;
 
   /// Devices on the board.
-  std::vector<DeviceType> devices;
+  std::vector<device::DeviceType> devices;
 
   /// Configuration/connection state after enumeration.
   ConnectionState state = ConnectionState::Undefined;
@@ -185,7 +185,7 @@ struct SENSORRING_EXPORT EnumerationInformation {
   ConfigurationState config_state = ConfigurationState::Undefined;
 
   /// Device types that were instantiated by the factory (subset of devices).
-  std::vector<DeviceType> configured_devices;
+  std::vector<device::DeviceType> configured_devices;
 
   /**
    * @brief Return true if this instance has not been filled from a valid enumeration response.
@@ -205,7 +205,7 @@ struct SENSORRING_EXPORT EnumerationInformation {
    * @param[in] type Device type to check.
    * @return true if the corresponding bit is set in device_options.
    */
-  bool hasDevice(DeviceType type) const noexcept;
+  bool hasDevice(device::DeviceType type) const noexcept;
 
   /**
    * @brief Compare enumeration index to an integer.
@@ -235,7 +235,7 @@ struct SENSORRING_EXPORT EnumerationInformation {
   std::string toString() const;
 };
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

@@ -15,12 +15,12 @@
 #include <vector>
 
 #include "sensorring/SensorRing.hpp"
+#include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/types/EnumerationInformation.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -73,7 +73,7 @@ public:
   using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params>;
 
   /// Per-interface enumeration results, keyed by interface ID.
-  using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<device::EnumerationInformation> >;
+  using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<board::EnumerationInformation> >;
 
   /// Minimum sensor board firmware version required by this library version.
   static constexpr Version MIN_FIRMWARE_VERSION = { 0, 9, 0 };
@@ -100,7 +100,7 @@ public:
    * not Undefined it is validated against the hardware-reported type. All devices
    * reported by the hardware are instantiated; setDefaultDeviceParams() applies.
    */
-  void expectBoard(device::SensorBoardParams params);
+  void expectBoard(board::SensorBoardParams params);
 
   /**
    * @brief Declare an expected board together with explicit per-device params.
@@ -109,7 +109,7 @@ public:
    * hardware must have at least those devices or build() fails. If
    * params.board_type is not Undefined it is additionally validated.
    */
-  void expectBoard(device::SensorBoardParams params, std::vector<DeviceParamsVariant> device_params);
+  void expectBoard(board::SensorBoardParams params, std::vector<DeviceParamsVariant> device_params);
 
   /**
    * @brief Set default params applied to every device of the given type that has
@@ -158,7 +158,7 @@ public:
 
 private:
   struct BoardExpectation {
-    device::SensorBoardParams params;
+    board::SensorBoardParams params;
     std::vector<DeviceParamsVariant> device_params;
     bool has_explicit_devices = false;
   };

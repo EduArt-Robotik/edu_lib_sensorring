@@ -15,7 +15,7 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
 
 /**
  * @brief Reset all boards on all interfaces (broadcast reset command).
@@ -36,7 +36,7 @@ void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable);
  */
 void cmdEnumerateBoards(com::ComInterfaceID interface);
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

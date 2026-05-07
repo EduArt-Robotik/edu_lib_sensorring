@@ -4,7 +4,7 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
 
 std::string toString(SensorBoardType type) noexcept {
   switch (type) {
@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& os, const SensorBoardType type) noexcept 
   return os << toString(type);
 }
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

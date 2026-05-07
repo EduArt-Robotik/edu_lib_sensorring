@@ -53,14 +53,15 @@ set(SENSORRING_BOARD_SOURCES
   board/SensorBoardType.cpp
   board/SensorBoardCommands.cpp
   board/SensorBoardManager.cpp
+  board/BoardEnumerator.cpp
+  board/EnumerationInformation.cpp
 )
 
 set(SENSORRING_DEVICE_SOURCES
   device/BaseDevice.cpp
   device/DeviceType.cpp
-  device/DeviceEnumerator.cpp
   device/types/DeviceState.cpp
-  device/types/EnumerationInformation.cpp
+  device/depth/DepthSensor.cpp
   device/depth/vl53l8cx/VL53L8CX_Device.cpp
   device/depth/vl53l8cx/VL53L8CX_DeviceImpl.cpp
   device/depth/tmf8829/TMF8829_Device.cpp

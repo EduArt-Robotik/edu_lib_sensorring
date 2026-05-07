@@ -16,7 +16,8 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace device {
+namespace board {
+
 /**
  * @struct SensorBoardParams
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
@@ -32,7 +33,7 @@ struct SensorBoardParams {
   math::Vector3 translation = { 0, 0, 0 };
 };
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

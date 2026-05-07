@@ -1,4 +1,4 @@
-#include "sensorring/device/types/EnumerationInformation.hpp"
+#include "sensorring/board/EnumerationInformation.hpp"
 
 #include <iomanip>
 #include <sstream>
@@ -47,7 +47,7 @@ bool CommitHash::operator==(const CommitHash& other) const noexcept {
   return hash == other.hash;
 }
 
-namespace device {
+namespace board {
 
 std::string toString(ConnectionState state) {
   switch (state) {
@@ -98,7 +98,7 @@ EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint
     info.device_options = static_cast<std::uint16_t>((static_cast<std::uint16_t>(buffer[9]) << 8) | static_cast<std::uint16_t>(buffer[10]));
 
     for (int i = 0; i < 16; i++) {
-      auto device_type = static_cast<DeviceType>(i);
+      auto device_type = static_cast<device::DeviceType>(i);
       if (info.hasDevice(device_type)) {
         info.devices.push_back(device_type);
       }
@@ -107,8 +107,8 @@ EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint
   return info;
 }
 
-bool EnumerationInformation::hasDevice(DeviceType type) const noexcept {
-  if (type == DeviceType::UNDEFINED) {
+bool EnumerationInformation::hasDevice(device::DeviceType type) const noexcept {
+  if (type == device::DeviceType::UNDEFINED) {
     return false;
   }
   const auto bit = static_cast<std::uint16_t>(1u) << static_cast<std::uint8_t>(type);
@@ -161,7 +161,7 @@ std::string EnumerationInformation::toString() const {
   return ss.str();
 }
 
-} // namespace device
+} // namespace board
 
 } // namespace sensorring
 

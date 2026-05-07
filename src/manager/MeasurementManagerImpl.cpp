@@ -235,7 +235,7 @@ void MeasurementManagerImpl::runPhase() {
 
   case Phase::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
-    device::resetBoards();
+    board::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2));
     _phase = Phase::sync_lights;
     break;
