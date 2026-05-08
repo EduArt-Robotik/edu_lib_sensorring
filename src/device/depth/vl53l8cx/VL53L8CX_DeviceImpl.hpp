@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <future>
 #include <mutex>
 #include <vector>
 
@@ -38,15 +37,10 @@ public:
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
-  static measurement::DepthMeasurement transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
-
 private:
   measurement::DepthMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
 
-  static constexpr unsigned int RESOLUTION             = 64;
-  static constexpr unsigned int RESOLUTION_X           = 8;
-  static constexpr unsigned int RESOLUTION_Y           = 8;
-  static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
+  static constexpr unsigned int RESOLUTION = 64;
 
   VL53L8CX_Device& _parent;
 

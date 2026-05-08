@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <future>
 #include <mutex>
 #include <vector>
 
@@ -37,17 +36,11 @@ public:
   const TMF8829_Params& getParams() const;
 
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
-  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
-  static measurement::DepthMeasurement transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
-
 private:
-  static constexpr unsigned int RESOLUTION             = 64;
-  static constexpr unsigned int RESOLUTION_X           = 8;
-  static constexpr unsigned int RESOLUTION_Y           = 8;
-  static constexpr unsigned int MAX_SENSOR_SELECT_SIZE = 16;
+  static constexpr unsigned int RESOLUTION = 64;
 
   TMF8829_Device& _parent;
 

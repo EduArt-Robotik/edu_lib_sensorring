@@ -1,6 +1,5 @@
 #include "device/depth/vl53l8cx/VL53L8CX_DeviceImpl.hpp"
 
-#include <algorithm>
 #include <sensorring_transport/Protocol.hpp>
 
 #include "interface/ComInterface.hpp"
