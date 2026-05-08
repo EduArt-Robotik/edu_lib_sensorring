@@ -36,6 +36,12 @@ struct SENSORRING_EXPORT DepthMeasurement {
   /// Number of valid points in this measurement.
   unsigned int nr_valid_points = 0;
 
+  /// Resolution of the depth sensor in x direction. Part of the DepthMeasurement as the PointCloud itself may be unstructured.
+  unsigned int resolution_x = 0;
+
+  /// Resolution of the depth sensor in y direction. Part of the DepthMeasurement as the PointCloud itself may be unstructured.
+  unsigned int resolution_y = 0;
+
   /// Point cloud in the sensor's local coordinate frame.
   PointCloud point_cloud;
 
