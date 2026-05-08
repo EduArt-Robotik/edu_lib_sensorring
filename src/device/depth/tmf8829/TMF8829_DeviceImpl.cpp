@@ -63,27 +63,25 @@ measurement::DepthMeasurement TMF8829_DeviceImpl::processMeasurement(const std::
   measurement::DepthMeasurement result;
   result.frame_id        = data[0];
   result.nr_valid_points = data[1];
-
-  std::vector<RawPointInput> raw_points;
-  raw_points.reserve(RESOLUTION);
+  result.point_cloud.data.resize(RESOLUTION);
 
   for (unsigned int i = 0; i < RESOLUTION; i++) {
     uint16_t distance_raw = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 10) & 0x3FFF; // 14 bit
+    uint16_t sigma_raw    = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 0) & 0x03FF;  // 10 bit
 
-    RawPointInput raw;
     if (distance_raw != 0) {
-      raw.distance = static_cast<double>(distance_raw) / 4.0 / 1000.0; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
+      result.point_cloud.data[i].raw_distance = static_cast<double>(distance_raw) / 4.0 / 1000.0; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
+      result.point_cloud.data[i].sigma        = static_cast<double>(sigma_raw) / 128.0 / 1000.0;  // Factor 128 for fixed point conversion, Factor 1000 from mm to m
     }
-    raw_points.push_back(raw);
   }
 
-  _parent.transformMeasurementToPointCloud(_parent._lut_x, _parent._lut_y, raw_points, result.point_cloud, _params.id.index);
+  _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, result.point_cloud);
   result.point_cloud.data.shrink_to_fit();
   return result;
 }
 
 measurement::DepthMeasurement TMF8829_DeviceImpl::transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
-  auto transformed_measurement = measurement;
+  auto transformed_measurement        = measurement;
   transformed_measurement.point_cloud = measurement::PointCloud::transform(measurement.point_cloud, rotation, translation);
   return transformed_measurement;
 }

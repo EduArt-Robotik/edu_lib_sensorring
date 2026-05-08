@@ -26,30 +26,32 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
   auto fov_y_rad = math::degreesToRadians(fov_y_deg);
 
   for (unsigned int i = 0; i < res_x; ++i) {
-    double angle_x = (((static_cast<double>(i) + 1) / res_x) - 0.5) * fov_x_rad;
+    double angle_x = (0.5 - ((static_cast<double>(i) + 0.5) / res_x)) * fov_x_rad;
     lut_x[i]       = std::tan(angle_x);
   }
 
   for (unsigned int j = 0; j < res_y; ++j) {
-    double angle_y = (((static_cast<double>(j) + 1) / res_y) - 0.5) * fov_y_rad;
+    double angle_y = (0.5 - ((static_cast<double>(j) + 0.5) / res_y)) * fov_y_rad;
     lut_y[j]       = std::tan(angle_y);
   }
 }
 
-void DepthSensor::transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<RawPointInput>& raw_points, measurement::PointCloud& pcl, unsigned int sensor_index) {
+void DepthSensor::processRawMeasurement(const std::vector<double>& lut_x, const std::vector<double>& lut_y, measurement::PointCloud& pcl) {
 
   unsigned int i = 0;
   for (const auto lut_val_x : lut_x) {
     for (const auto lut_val_y : lut_y) {
 
-      const auto& raw = raw_points[i];
-      if (raw.distance > 0) {
-        double x = raw.distance * lut_val_x;
-        double y = raw.distance * lut_val_y;
-        double z = raw.distance;
-        pcl.data.push_back(measurement::PointData{ math::Vector3{ { x, y, z } }, raw.distance, raw.sigma, sensor_index });
+      const auto& raw_distance = pcl.data[i].raw_distance;
+      if (raw_distance > 0) {
+        double x = raw_distance * lut_val_x;
+        double y = raw_distance * lut_val_y;
+        double z = raw_distance;
+        pcl.data[i].point = math::Vector3{ { x, y, z } };
       } else {
-        pcl.data.push_back(measurement::PointData{ math::Vector3{ { 0.0, 0.0, 0.0 } }, -1.0, -1.0, sensor_index });
+        pcl.data[i].point = math::Vector3{ { 0.0, 0.0, 0.0 } };
+        pcl.data[i].raw_distance = -1.0;
+        pcl.data[i].sigma = -1.0;
       }
 
       i++;

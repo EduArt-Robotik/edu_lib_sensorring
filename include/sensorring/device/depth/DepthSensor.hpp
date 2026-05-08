@@ -23,20 +23,6 @@ namespace sensorring {
 namespace device {
 
 /**
- * @struct RawPointInput
- * @brief  Raw per-point data provided by a depth sensor before 3D transformation.
- *
- * Each sensor populates the fields it supports; unset fields keep their defaults.
- * Used internally by DepthSensor subclasses.
- */
-struct RawPointInput {
-  /// Distance in meters. <= 0 means invalid.
-  double distance = 0.0; 
-  /// Standard deviation in meters. 0 = not available.
-  double sigma    = 0.0;
-};
-
-/**
  * @class DepthSensor
  * @brief Public interface for any depth-sensing device.
  *
@@ -72,24 +58,22 @@ public:
 protected:
   /**
    * @brief Create lookup tables for x and y angles based on FOV and resolution.
-   * @param fov_x Horizontal field of view in degrees.
-   * @param fov_y Vertical field of view in degrees.
-   * @param res_x Horizontal resolution (number of columns).
-   * @param res_y Vertical resolution (number of rows).
-   * @param lut_x Output vector for horizontal angle lookup table.
-   * @param lut_y Output vector for vertical angle lookup table.
+   * @param[in] fov_x Horizontal field of view in degrees.
+   * @param[in] fov_y Vertical field of view in degrees.
+   * @param[in] res_x Horizontal resolution (number of columns).
+   * @param[in] res_y Vertical resolution (number of rows).
+   * @param[out] lut_x Output vector for horizontal angle lookup table.
+   * @param[out] lut_y Output vector for vertical angle lookup table.
    */
   virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y);
 
   /**
-   * @brief Transform raw depth sensor data into a 3D point cloud.
-   * @param lut_x Horizontal angle lookup table.
-   * @param lut_y Vertical angle lookup table.
-   * @param raw_points Per-point raw sensor data (distance, sigma, etc.).
-   * @param pcl Output point cloud.
-   * @param sensor_index Index of the sensor producing this measurement.
+   * @brief Calculate the x,y,z coordinates from the raw distance measurements.
+   * @param[in] lut_x Horizontal angle lookup table.
+   * @param[in] lut_y Vertical angle lookup table.
+   * @param[in,out] pcl Point cloud to operate on. Distance must be populated, x,y,z will be calculated and filled in.
    */
-  void transformMeasurementToPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, const std::vector<RawPointInput>& raw_points, measurement::PointCloud& pcl, unsigned int sensor_index = 0);
+  void processRawMeasurement(const std::vector<double>& lut_x, const std::vector<double>& lut_y, measurement::PointCloud& pcl);
 
   double _fov_x_deg;
   double _fov_y_deg;
