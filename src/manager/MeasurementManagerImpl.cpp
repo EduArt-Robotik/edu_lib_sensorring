@@ -47,6 +47,8 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
       _lights.push_back(lt);
     if (auto* vl = dynamic_cast<device::VL53L8CX_Device*>(dev))
       _vl53l8cx_devices.push_back(vl);
+    if (auto* tmf = dynamic_cast<device::TMF8829_Device*>(dev))
+      _tmf8829_devices.push_back(tmf);
     if (auto* ht = dynamic_cast<device::HTPA32_Device*>(dev))
       _htpa32_devices.push_back(ht);
   }
@@ -83,8 +85,18 @@ void MeasurementManagerImpl::buildSchedule() {
         group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
       }
     }
-    if (group.max_rate_hz == std::numeric_limits<double>::max()) {
-      group.max_rate_hz = 15.0; // Fallback default.
+    _schedule.push_back(group);
+  }
+
+  if (!_tmf8829_devices.empty()) {
+    SensorGroupSchedule group;
+    group.type = device::DeviceType::TMF8829;
+    // Group max rate is limited by the slowest sensor in the group.
+    group.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _tmf8829_devices) {
+      if (dev->getEnable()) {
+        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      }
     }
     _schedule.push_back(group);
   }
@@ -97,9 +109,6 @@ void MeasurementManagerImpl::buildSchedule() {
       if (dev->getEnable()) {
         group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
       }
-    }
-    if (group.max_rate_hz == std::numeric_limits<double>::max()) {
-      group.max_rate_hz = 6.0; // Fallback default.
     }
     _schedule.push_back(group);
   }
@@ -496,6 +505,20 @@ bool MeasurementManagerImpl::fetchPendingData() {
           return false;
         }
       }
+      //ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+      publishDepthMeasurements();
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      for (auto* dev : _tmf8829_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          return false;
+        }
+      }
+      //ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
       publishDepthMeasurements();
     }
 
@@ -528,6 +551,15 @@ void MeasurementManagerImpl::requestMeasurements() {
         // Launch request — the async thread sends the broadcast and waits for
         // data-available. The future is consumed in the next tick's waitForPendingData().
         _tof_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+        group.has_pending_request  = true;
+      }
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      if (!_tmf8829_devices.empty()) {
+        // Launch request — the async thread sends the broadcast and waits for
+        // data-available. The future is consumed in the next tick's waitForPendingData().
+        _tof_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
         group.has_pending_request  = true;
       }
     }

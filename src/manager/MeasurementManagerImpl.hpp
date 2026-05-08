@@ -45,8 +45,8 @@ namespace manager {
  * The scheduler runs at a fixed base rate. Each sensor group has an integer
  * divisor determining how often it fires. Within each tick:
  *   1. Wait for pending data from previous requests (self-regulating).
- *   2. Fetch data from groups that have pending results.
- *   3. Request new measurements for groups due this tick.
+ *   2. Request new measurements for groups due this tick.
+ *   3. Fetch data from groups that have pending results.
  *   4. Execute device actions (actuators).
  *   5. Sleep until next tick boundary.
  */
@@ -125,6 +125,7 @@ private:
 
   // Concrete device vectors — for internal CAN bus operations
   std::vector<device::VL53L8CX_Device*> _vl53l8cx_devices;
+  std::vector<device::TMF8829_Device*> _tmf8829_devices;
   std::vector<device::HTPA32_Device*> _htpa32_devices;
 };
 
