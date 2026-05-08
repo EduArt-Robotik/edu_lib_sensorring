@@ -4,6 +4,7 @@
 
 #include "interface/ComInterface.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 using namespace eduart::sensorring::transport::protocol::tmf8829;
@@ -40,12 +41,10 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
     break;
 
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
-    // Complete measurement data delivered by reassembly layer.
-    // Expected: [frame_id, nr of valid points, <192 bytes of point data>]
-    if (data.size() >= (RESOLUTION * 3 + 2)) {
-      _latest_raw_measurement         = processMeasurement(data);
-      _latest_transformed_measurement = transformMeasurement(_latest_raw_measurement, _parent._rot_m, _parent._translation);
-      _parent.setMeasurementReady(true);
+    try {
+      _latest_measurement = TMF8829_Measurement::fromBuffer(data);
+    } catch (std::exception& e) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception while processing TMF8829 measurement data: " + std::string(e.what()));
     }
     break;
   }
@@ -53,33 +52,6 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
   default:
     break;
   }
-}
-
-measurement::DepthMeasurement TMF8829_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
-  measurement::DepthMeasurement result;
-  result.frame_id        = data[0];
-  result.nr_valid_points = data[1];
-  result.point_cloud.data.resize(RESOLUTION);
-
-  for (unsigned int i = 0; i < RESOLUTION; i++) {
-    uint16_t distance_raw = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 10) & 0x3FFF; // 14 bit
-    uint16_t sigma_raw    = (*((uint32_t*)(data.data() + i * 3 + 2)) >> 0) & 0x03FF;  // 10 bit
-
-    if (distance_raw != 0) {
-      result.point_cloud.data[i].raw_distance = static_cast<double>(distance_raw) / 4.0 / 1000.0; // Factor 4 for fixed point conversion, Factor 1000 from mm to m
-      result.point_cloud.data[i].sigma        = static_cast<double>(sigma_raw) / 128.0 / 1000.0;  // Factor 128 for fixed point conversion, Factor 1000 from mm to m
-    }
-  }
-
-  _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, result.point_cloud);
-  result.point_cloud.data.shrink_to_fit();
-  return result;
-}
-
-measurement::DepthMeasurement TMF8829_DeviceImpl::transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
-  auto transformed_measurement        = measurement;
-  transformed_measurement.point_cloud = measurement::PointCloud::transform(measurement.point_cloud, rotation, translation);
-  return transformed_measurement;
 }
 
 } // namespace device

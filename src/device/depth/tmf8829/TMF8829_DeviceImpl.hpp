@@ -11,6 +11,8 @@
 #include "sensorring/math/Math.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 
+#include "TMF8829_Measurement.hpp"
+
 namespace eduart {
 
 namespace sensorring {
@@ -42,8 +44,6 @@ public:
   static measurement::DepthMeasurement transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation);
 
 private:
-  measurement::DepthMeasurement processMeasurement(const std::vector<uint8_t>& data) const;
-
   static constexpr unsigned int RESOLUTION             = 64;
   static constexpr unsigned int RESOLUTION_X           = 8;
   static constexpr unsigned int RESOLUTION_Y           = 8;
