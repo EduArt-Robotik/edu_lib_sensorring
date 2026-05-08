@@ -42,7 +42,12 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
 
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
     try {
-      _latest_measurement = TMF8829_Measurement::fromBuffer(data);
+      _latest_measurement                  = TMF8829_Measurement::fromBuffer(data);
+      _latest_measurement.header.device_id = _parent.getDeviceID();
+
+      if (_latest_measurement.header.state == device::DeviceState::Ok) {
+        _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, _latest_measurement.point_cloud);
+      }
       _parent.setMeasurementReady(true);
       return;
     } catch (std::exception& e) {

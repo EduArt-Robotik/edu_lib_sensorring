@@ -38,17 +38,8 @@ void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source,
 void TMF8829_Device::publishMeasurement() {
   if (!getEnable())
     return;
-  auto [raw, state] = _impl->getLatestMeasurement();
-
-  // ToDo: Should be populated when measurement is received, not here
-  measurement::DepthMeasurement m;
-  m.header.device_id = _id;
-  m.header.frame_id  = raw.header.frame_id;
-  m.header.timestamp = std::chrono::system_clock::now();
-  m.header.state     = state;
-  m.nr_valid_points  = raw.nr_valid_points;
-  m.point_cloud      = raw.point_cloud;
-  _depth_publisher.publish(m);
+  auto [meas, state] = _impl->getLatestMeasurement();
+  _depth_publisher.publish(meas);
 }
 
 std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout) {

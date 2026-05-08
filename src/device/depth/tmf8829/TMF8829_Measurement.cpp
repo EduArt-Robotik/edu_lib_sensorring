@@ -17,6 +17,7 @@ namespace sensorring {
 namespace device {
 
 TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8_t>& buffer) {
+  static constexpr double MM_TO_M = 0.001;
 
   // Check buffer size
   if (buffer.size() < (tmf8829::RESULT_FRAME_PRE_HEADER_SIZE + tmf8829::RESULT_FRAME_HEADER_SIZE + tmf8829::RESULT_FRAME_FOOTER_SIZE)) {
@@ -35,7 +36,6 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   }
 
   TMF8829_Measurement measurement;
-  measurement.header.frame_id = buffer[0];
 
   // tmf8829 header
   measurement.tmf8829_header.frame_type          = (buffer[header_offset + 0] >> 4) & 0x0F; // Upper 4 bits
@@ -51,7 +51,10 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
 
   measurement.point_cloud.data.resize(num_points);
   for (std::size_t i = 0; i < num_points; i++) {
-    measurement.point_cloud.data[i].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, data_offset + i * 3)) * tmf8829::DISTANCE_FIXED_POINT_FACTOR;
+    measurement.point_cloud.data[i].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, data_offset + i * 3));
+    measurement.point_cloud.data[i].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
+    measurement.point_cloud.data[i].raw_distance *= MM_TO_M;
+    measurement.nr_valid_points++;
   }
 
   // tmf8829 footer
@@ -62,6 +65,13 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   measurement.tmf8829_footer.vcsel_max_power_reached    = (buffer[footer_offset + 8] >> 4) & 0x01; // Bit 4
   measurement.tmf8829_footer.vcsel_burst_limit_exceeded = (buffer[footer_offset + 8] >> 5) & 0x01; // Bit 5
   measurement.tmf8829_footer.frame_aborted              = (buffer[footer_offset + 8] >> 6) & 0x03; // Bit 6-7;
+
+  // Common DepthMeasurement fields
+  measurement.header.frame_id = buffer[0];
+  measurement.header.timestamp = std::chrono::system_clock::now();
+  measurement.header.state = measurement.tmf8829_footer.frame_valid ? device::DeviceState::Ok : device::DeviceState::Error;
+  measurement.resolution_x = tmf8829::LOOKUP_TABLE_RESOLUTION_X[measurement.tmf8829_header.focal_plane_mode];
+  measurement.resolution_y = tmf8829::LOOKUP_TABLE_RESOLUTION_Y[measurement.tmf8829_header.focal_plane_mode];
 
   return measurement;
 }
