@@ -26,13 +26,13 @@ namespace measurement {
  * @class  GrayscaleImage
  * @brief  Grayscale image with 1 channel and 8 bit color depth
  */
-class GrayscaleImage : public GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT GrayscaleImage : public GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  FalseColorImage
  * @brief  False color image with 3 channels (red, green, blue) and 8 bit color depth
  */
-class FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  TemperatureImage
@@ -76,7 +76,7 @@ public:
  * @class  ThermalMeasurement
  * @brief  Structure for holding a measurement from a thermal sensor
  */
-struct ThermalMeasurement {
+struct SENSORRING_EXPORT ThermalMeasurement {
 
   /// Measurement header
   Header header;

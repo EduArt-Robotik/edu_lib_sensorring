@@ -10,6 +10,7 @@
 #pragma once
 
 #include "sensorring/device/types/DeviceID.hpp"
+#include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
@@ -31,7 +32,7 @@ enum class Orientation {
  * @struct DeviceParams
  * @brief Base parameter structure of a device. A device is one sensor or actuator on a sensor board.
  */
-struct DeviceParams {
+struct SENSORRING_EXPORT DeviceParams {
   /// Device identifier (type, name, index).
   DeviceID id;
 
