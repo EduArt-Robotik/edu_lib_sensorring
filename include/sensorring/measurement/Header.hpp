@@ -4,9 +4,12 @@
  * @file   Header.hpp
  * @author EduArt Robotik GmbH
  * @brief  Universal header for all measurements.
+ * @date   2026-05-08
  */
 
 #pragma once
+
+#include <chrono>
 
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/device/types/DeviceState.hpp"
@@ -19,6 +22,13 @@ namespace sensorring {
 
 namespace measurement {
 
+/**
+ * @struct Header
+ * @brief Universal header attached to every sensor measurement.
+ *
+ * Carries identity, sequencing, timing, device health, and the sensor pose
+ * at the time the measurement was produced.
+ */
 struct SENSORRING_EXPORT Header {
 
   /// ID of the sensor that produced this measurement.
@@ -36,7 +46,7 @@ struct SENSORRING_EXPORT Header {
   /// Sensor pose translation
   math::Vector3 position = { 0.0, 0.0, 0.0 };
 
-  // Sensor pose orientation
+  /// Sensor pose orientation (roll, pitch, yaw) in degrees.
   math::Vector3 orientation = { 0.0, 0.0, 0.0 };
 };
 

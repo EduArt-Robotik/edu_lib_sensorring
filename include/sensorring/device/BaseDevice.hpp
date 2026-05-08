@@ -39,8 +39,8 @@ namespace device {
  * @brief Pose offset of a device relative to the center of its sensor board.
  */
 struct DevicePoseOffset {
-  math::Vector3 board_center_translation_offset;
-  math::Vector3 board_center_rotation_offset;
+  math::Vector3 board_center_translation_offset; ///< Translation (x, y, z in metres) from the board centre to the device.
+  math::Vector3 board_center_rotation_offset;    ///< Rotation offset (roll, pitch, yaw in degrees) from the board centre to the device.
 };
 
 /**
@@ -78,29 +78,71 @@ public:
 
   // -- identity --
 
+  /// @brief Return the full device identifier (type + index).
   DeviceID getDeviceID() const;
+
+  /// @brief Return the zero-based index of this device on its bus.
   unsigned int getIdx() const;
 
   // -- enable --
 
+  /// @brief Return whether this device is currently enabled.
   bool getEnable() const;
+
+  /**
+   * @brief Enable or disable this device.
+   * @param[in] enable @c true to enable, @c false to disable.
+   */
   void setEnable(bool enable);
 
   // -- pose --
 
+  /**
+   * @brief Set the absolute pose of this device in the ring coordinate frame.
+   * @param[in] translation Position (x, y, z) in metres.
+   * @param[in] rotation    Orientation (roll, pitch, yaw) in degrees.
+   */
   void setPose(math::Vector3 translation, math::Vector3 rotation);
+
+  /**
+   * @brief Store a pose offset relative to the board centre.
+   * @param[in] offset Offset to apply on top of the board centre pose.
+   */
   void setPoseOffset(const DevicePoseOffset& offset) { _pose_offset = offset; }
+
+  /// @brief Return the stored pose offset relative to the board centre.
   DevicePoseOffset getPoseOffset() const { return _pose_offset; }
 
   // -- state / measurement synchronisation --
 
+  /**
+   * @brief Begin an asynchronous wait for the next measurement trigger.
+   * @return Future that resolves to @c true when the measurement trigger fires, or @c false on shutdown.
+   */
   std::future<bool> beginMeasurementWait();
+
+  /**
+   * @brief Satisfy the pending measurement-wait future.
+   * @param[in] success @c true if the measurement succeeded, @c false on error.
+   */
   void setMeasurementReady(bool success);
 
+  /**
+   * @brief Begin an asynchronous wait for new data to become available.
+   * @return Future that resolves to @c true when data is available, or @c false on shutdown.
+   */
   std::future<bool> beginDataAvailableWait();
+
+  /**
+   * @brief Satisfy the pending data-available-wait future.
+   * @param[in] success @c true if data is ready, @c false on error.
+   */
   void setDataAvailableReady(bool success);
 
+  /// @brief Reset the device to its initialised state, clearing all error flags.
   void resetSensorState();
+
+  /// @brief Clear the data-available flag so the device can accept the next measurement cycle.
   void clearDataFlag();
 
 protected:

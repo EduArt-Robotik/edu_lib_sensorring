@@ -1,6 +1,11 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
-//
-// Parameter structure for the TMF8829 Time-of-Flight sensor.
+
+/**
+ * @file   TMF8829_Params.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Parameter structure for the TMF8829 Time-of-Flight sensor.
+ * @date   2026-05-08
+ */
 
 #pragma once
 
@@ -18,6 +23,7 @@ namespace device {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
+  /// @brief Default constructor; sets the maximum measurement rate to 15 Hz.
   TMF8829_Params() { max_rate_hz = 15.0; }
 };
 

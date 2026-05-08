@@ -19,13 +19,18 @@ namespace sensorring {
 
 namespace board {
 
-/** Numbers match the definition in the sensor board firmware. */
+/**
+ * @enum SensorBoardType
+ * @brief Hardware variant of a sensor board.
+ *
+ * The numeric values match the board-type field reported by the sensor board firmware during enumeration.
+ */
 enum class SensorBoardType {
-  Sidepanel = 0x00,
-  Headlight = 0x01,
-  Taillight = 0x02,
-  Minipanel = 0x03,
-  Undefined = 0xff
+  Sidepanel = 0x00, ///< Sidepanel board.
+  Headlight = 0x01, ///< Headlight board.
+  Taillight = 0x02, ///< Taillight board.
+  Minipanel = 0x03, ///< Minipanel board.
+  Undefined = 0xff  ///< Board type could not be determined.
 };
 
 /**

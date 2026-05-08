@@ -48,11 +48,15 @@ public:
 
   /**
    * @brief Set the RGB color. Enqueues a CAN command into the device action queue.
+   * @param[in] r Red channel (0–255).
+   * @param[in] g Green channel (0–255).
+   * @param[in] b Blue channel (0–255).
    */
   void setColor(std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 
   /**
    * @brief Set the light mode. Enqueues a CAN command into the device action queue.
+   * @param[in] mode Light mode to apply.
    */
   void setMode(LightMode mode) override;
 

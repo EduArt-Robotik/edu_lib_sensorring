@@ -4,6 +4,7 @@
  * @file   Light.hpp
  * @author EduArt Robotik GmbH
  * @brief  Abstract interface for light/LED actuator devices.
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -29,6 +30,7 @@ namespace device {
  */
 class SENSORRING_EXPORT Light {
 public:
+  /// @brief Virtual destructor.
   virtual ~Light() = default;
 
   /**

@@ -22,9 +22,9 @@ namespace device {
  * @brief Possible orientations of a sensor board. Used to rotate/mirror light animations and thermal images.
  */
 enum class Orientation {
-  Left,
-  Right,
-  None
+  Left,  ///< Board is mounted on the left side; animations are mirrored horizontally.
+  Right, ///< Board is mounted on the right side; animations are used as-is.
+  None   ///< No specific orientation; default behaviour applies.
 };
 
 /**

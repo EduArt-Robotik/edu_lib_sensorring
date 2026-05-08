@@ -4,6 +4,7 @@
  * @file   DepthMeasurement.hpp
  * @author EduArt Robotik GmbH
  * @brief  Pure data structure for depth sensor measurements.
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -45,7 +46,10 @@ struct SENSORRING_EXPORT DepthMeasurement {
   /// Point cloud in the sensor's local coordinate frame.
   PointCloud point_cloud;
 
-  /// Point cloud transformed to the ring's global coordinate frame with the pose from the header.
+  /**
+   * @brief Transform the point cloud from the sensor's local frame to the ring's global frame.
+   * @return A new PointCloud with all points expressed in the global coordinate frame.
+   */
   inline PointCloud transformToGlobalFrame() { return PointCloud::transform(point_cloud, header.position, header.orientation); };
 };
 

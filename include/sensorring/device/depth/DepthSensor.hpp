@@ -4,6 +4,7 @@
  * @file   DepthSensor.hpp
  * @author EduArt Robotik GmbH
  * @brief  Abstract interface for depth-sensing devices (ToF, structured light, etc.).
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -35,10 +36,16 @@ public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::DepthMeasurement;
 
-  /// Constructor
+  /**
+   * @brief Construct a DepthSensor with its field-of-view and pixel resolution.
+   * @param[in] fov_x_deg Horizontal field of view in degrees.
+   * @param[in] fov_y_deg Vertical field of view in degrees.
+   * @param[in] res_x     Horizontal resolution in pixels (columns).
+   * @param[in] res_y     Vertical resolution in pixels (rows).
+   */
   DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
 
-  /// Destructor
+  /// @brief Virtual destructor.
   virtual ~DepthSensor() = default;
 
   /**

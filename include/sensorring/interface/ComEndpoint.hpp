@@ -39,7 +39,10 @@ struct SENSORRING_EXPORT ComEndpoint {
   std::uint8_t boardAddress; ///< 0 = broadcast, 1-126 = individual board (board_index + 1)
   std::uint8_t deviceId;     ///< 0x00 = board, 0x01 = ToF, 0x02 = Thermal, 0x03 = WS2812b
 
+  /// @brief Equality comparison for ComEndpoint (compares direction, board address, and device ID).
   bool operator==(const ComEndpoint& other) const;
+  
+  /// @brief Inequality comparison for ComEndpoint.
   bool operator!=(const ComEndpoint& other) const;
 
   /**

@@ -1,6 +1,11 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
-//
-// Parameter structure for the HTPA32 thermal sensor.
+
+/**
+ * @file   HTPA32_Params.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Parameter structure for the HTPA32 thermal sensor.
+ * @date   2026-05-08
+ */
 
 #pragma once
 
@@ -20,6 +25,7 @@ namespace device {
  * @brief Parameter structure of the thermal sensor of a sensor board.
  */
 struct SENSORRING_EXPORT HTPA32_Params : public DeviceParams {
+  /// @brief Default constructor; sets the maximum measurement rate to 5 Hz.
   HTPA32_Params() { max_rate_hz = 5.0; }
 
   /// Minimal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.

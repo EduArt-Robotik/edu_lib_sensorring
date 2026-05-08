@@ -4,6 +4,7 @@
  * @file   Group.hpp
  * @author EduArt Robotik GmbH
  * @brief  Typed container for a group of devices with subscribe() and iteration.
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -52,6 +53,10 @@ public:
     bool operator==(const iterator& other) const { return _it == other._it; }
   };
 
+  /**
+   * @class const_iterator
+   * @brief Const dereferencing iterator so range-for over a const Group<T> yields const T&.
+   */
   class const_iterator {
     typename std::vector<T*>::const_iterator _it;
 
@@ -82,9 +87,13 @@ public:
   /// Whether the group is empty.
   bool empty() const { return _devices.empty(); }
 
+  /// Begin iterator (mutable).
   iterator begin() { return iterator(_devices.begin()); }
+  /// Past-the-end iterator (mutable).
   iterator end() { return iterator(_devices.end()); }
+  /// Begin iterator (const).
   const_iterator begin() const { return const_iterator(_devices.begin()); }
+  /// Past-the-end iterator (const).
   const_iterator end() const { return const_iterator(_devices.end()); }
 
   /**

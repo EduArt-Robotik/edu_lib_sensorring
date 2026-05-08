@@ -4,6 +4,7 @@
  * @file   ThermalSensor.hpp
  * @author EduArt Robotik GmbH
  * @brief  Abstract interface for thermal-sensing devices.
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -34,6 +35,7 @@ public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::ThermalMeasurement;
 
+  /// @brief Virtual destructor.
   virtual ~ThermalSensor() = default;
 
   /**
@@ -64,7 +66,7 @@ public:
   virtual bool stopCalibration() = 0;
 
 protected:
-  subscription::Publisher<const measurement::ThermalMeasurement&> _thermal_publisher;
+  subscription::Publisher<const measurement::ThermalMeasurement&> _thermal_publisher; ///< Publisher that delivers thermal measurements to subscribers.
 };
 
 } // namespace device

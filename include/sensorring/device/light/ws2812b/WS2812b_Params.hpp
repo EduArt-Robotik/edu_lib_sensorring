@@ -1,6 +1,11 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
-//
-// Parameter structure for the WS2812b LED strip.
+
+/**
+ * @file   WS2812b_Params.hpp
+ * @author EduArt Robotik GmbH
+ * @brief  Parameter structure for the WS2812b LED strip.
+ * @date   2026-05-08
+ */
 
 #pragma once
 

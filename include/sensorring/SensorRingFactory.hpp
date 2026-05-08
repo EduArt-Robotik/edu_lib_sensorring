@@ -91,6 +91,7 @@ public:
    *
    * All subsequent expectBoard() calls apply to this interface until the next
    * addInterface() call.
+   * @param[in] interface Identifier of the communication interface to add.
    */
   void addInterface(com::ComInterfaceID interface);
 
@@ -100,6 +101,7 @@ public:
    * Matched by index order against enumeration results. If params.board_type is
    * not Undefined it is validated against the hardware-reported type. All devices
    * reported by the hardware are instantiated; setDefaultDeviceParams() applies.
+   * @param[in] params Board-level parameters (type, name, enable flag, etc.).
    */
   void expectBoard(board::SensorBoardParams params);
 
@@ -109,6 +111,8 @@ public:
    * Only the device types present in @p device_params are instantiated; the
    * hardware must have at least those devices or build() fails. If
    * params.board_type is not Undefined it is additionally validated.
+   * @param[in] params        Board-level parameters.
+   * @param[in] device_params Per-device parameter overrides for this board.
    */
   void expectBoard(board::SensorBoardParams params, std::vector<DeviceParamsVariant> device_params);
 
@@ -117,6 +121,7 @@ public:
    *        no explicit params from expectBoard().
    *
    * May be called multiple times for different device types.
+   * @param[in] params Device parameter variant containing the defaults to apply.
    */
   void setDefaultDeviceParams(DeviceParamsVariant params);
 

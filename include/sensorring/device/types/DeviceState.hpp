@@ -28,14 +28,14 @@ namespace device {
  * and runtime health (Ok, ReceiveError, ProcessError, Error).
  */
 enum class DeviceState {
-  Undefined,
-  Initialized,
-  Idle,
-  Ok,
-  ReceiveError,
-  ProcessError,
-  Error,
-  Shutdown
+  Undefined,    ///< Initial state; device not yet configured.
+  Initialized,  ///< Device has been configured but not yet started.
+  Idle,         ///< Device is running but not actively measuring.
+  Ok,           ///< Device is measuring and data is valid.
+  ReceiveError, ///< A CAN receive error was detected.
+  ProcessError, ///< An error occurred while processing received data.
+  Error,        ///< General unrecoverable device error.
+  Shutdown      ///< Device has been shut down and should not be used.
 };
 
 /**
