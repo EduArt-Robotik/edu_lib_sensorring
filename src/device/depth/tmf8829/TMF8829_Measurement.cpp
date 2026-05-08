@@ -16,23 +16,26 @@ namespace device {
 
 TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8_t>& buffer) {
 
-  if (buffer.size() < (tmf8829::RESULT_FRAME_HEADER_SIZE + tmf8829::RESULT_FRAME_FOOTER_SIZE)) {
+  // Check buffer size
+  if (buffer.size() < (tmf8829::RESULT_FRAME_PRE_HEADER_SIZE + tmf8829::RESULT_FRAME_HEADER_SIZE + tmf8829::RESULT_FRAME_FOOTER_SIZE)) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Buffer too small to contain valid TMF8829 measurement");
   }
 
-  TMF8829_Measurement measurement;
-
+  // Buffer offsets for different sections of the frame
   const std::size_t header_offset = 1 + tmf8829::RESULT_FRAME_PRE_HEADER_SIZE;         // Skip frame_id and pre-header
   const std::size_t data_offset   = header_offset + tmf8829::RESULT_FRAME_HEADER_SIZE; // Skip frame_id and pre-header and header
   const std::size_t footer_offset = buffer.size() - tmf8829::RESULT_FRAME_FOOTER_SIZE; // Footer is at the end of the buffer
 
+  // Check EOF marker in the footer to validate the frame
   auto eof_marker = ByteOperations::readUint16(buffer, buffer.size() - 2); // Last 2 bytes of the buffer
   if (eof_marker != tmf8829::RESULT_FRAME_EOF_MARKER) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Buffer does not contain valid TMF8829 measurement: EOF marker mismatch");
   }
 
+  TMF8829_Measurement measurement;
   measurement.header.frame_id = buffer[0];
 
+  // tmf8829 header
   measurement.tmf8829_header.frame_type          = (buffer[header_offset + 0] >> 4) & 0x0F; // Upper 4 bits
   measurement.tmf8829_header.focal_plane_mode    = (buffer[header_offset + 0] >> 0) & 0x0F; // Lower 4 bits
   measurement.tmf8829_header.result_frame_format = buffer[header_offset + 1];
@@ -40,14 +43,16 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   measurement.tmf8829_header.frame_number        = ByteOperations::readUint32(buffer, header_offset + 4);
   measurement.tmf8829_header.temperature         = (static_cast<double>(buffer[header_offset + 8] + buffer[header_offset + 9] + buffer[header_offset + 10])) / 3.0; // Average of the three independent temperature sensors
 
+  // tmf8829 point data
   std::size_t point_buffer_size = measurement.tmf8829_header.payload - tmf8829::RESULT_FRAME_HEADER_SIZE - tmf8829::RESULT_FRAME_FOOTER_SIZE + tmf8829::RESULT_FRAME_PAYLOAD_OFFSET;
-  std::size_t num_points        = point_buffer_size / 3; // Each point is 3 bytes (uint16_t distance + uint8_t snr)
+  std::size_t num_points        = point_buffer_size / 3u; // Each point is 3 bytes (uint16_t distance + uint8_t snr) // ToDo: Evaluate the header layout byte for point size
 
   measurement.point_cloud.data.resize(num_points);
   for (std::size_t i = 0; i < num_points; i++) {
     measurement.point_cloud.data[i].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, data_offset + i * 3)) * tmf8829::DISTANCE_FIXED_POINT_FACTOR;
   }
 
+  // tmf8829 footer
   measurement.tmf8829_footer.timestamp_t0               = ByteOperations::readUint32(buffer, footer_offset + 0);
   measurement.tmf8829_footer.timestamp_t_last           = ByteOperations::readUint32(buffer, footer_offset + 4);
   measurement.tmf8829_footer.frame_valid                = (buffer[footer_offset + 8] >> 0) & 0x01; // Bit 0
