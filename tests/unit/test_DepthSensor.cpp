@@ -37,11 +37,11 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
     REQUIRE(m.lutY().size() == resolution_y);
 
     for (unsigned int i = 0; i < resolution_x; ++i) {
-      CHECK(m.lutX()[i] == Catch::Approx(expected_lut_x_8[i]).margin(1e-6));
+      CHECK(m.lutX()[i] == Catch::Approx(expected_lut_x_8[i]).margin(1e-4)); // Reference values have 4 decimal places -> margin of 1e-4
     }
 
     for (unsigned int j = 0; j < resolution_y; ++j) {
-      CHECK(m.lutY()[j] == Catch::Approx(expected_lut_y_8[j]).margin(1e-6));
+      CHECK(m.lutY()[j] == Catch::Approx(expected_lut_y_8[j]).margin(1e-4)); // Reference values have 4 decimal places -> margin of 1e-4
     }
   }
 

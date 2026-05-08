@@ -25,14 +25,37 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
   auto fov_x_rad = math::degreesToRadians(fov_x_deg);
   auto fov_y_rad = math::degreesToRadians(fov_y_deg);
 
+  auto side_length_x = std::tan(fov_x_rad / 2.0);
+  auto side_length_y = std::tan(fov_y_rad / 2.0);
+
   for (unsigned int i = 0; i < res_x; ++i) {
-    double angle_x = (0.5 - ((static_cast<double>(i) + 0.5) / res_x)) * fov_x_rad;
-    lut_x[i]       = std::tan(angle_x);
+    // Constant angle assumption (slightly incorrect from what we know from the datasheet):
+    // auto angle_x = (0.5 - ((static_cast<double>(i) + 0.5) / res_x)) * fov_x_rad;
+    
+    // Constant zone length assumption (correct from what we know from the datasheet):
+    auto idx_factor = (i - (res_x / 2.0) + 0.5) / (res_x / 2.0);
+    auto corrected_angle_x = std::atan(idx_factor * side_length_x);
+    
+    // Convention for the vl53l8cx
+    // ToDo: Verify for the tmf8829
+    corrected_angle_x = -corrected_angle_x;
+
+    lut_x[i]       = std::tan(corrected_angle_x);
   }
 
   for (unsigned int j = 0; j < res_y; ++j) {
-    double angle_y = (0.5 - ((static_cast<double>(j) + 0.5) / res_y)) * fov_y_rad;
-    lut_y[j]       = std::tan(angle_y);
+    // Constant angle assumption (slightly incorrect from what we know from the datasheet):
+    // auto angle_y = (0.5 - ((static_cast<double>(j) + 0.5) / res_y)) * fov_y_rad;
+
+    // Constant zone length assumption (correct from what we know from the datasheet):
+    auto idx_factor = (j - (res_y / 2.0) + 0.5) / (res_y / 2.0);
+    auto corrected_angle_y = std::atan(idx_factor * side_length_y);
+  
+    // Convention for the vl53l8cx
+    // ToDo: Verify for the tmf8829
+    corrected_angle_y = -corrected_angle_y;
+
+    lut_y[j]       = std::tan(corrected_angle_y);
   }
 }
 
