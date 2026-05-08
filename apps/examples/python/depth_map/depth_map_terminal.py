@@ -43,15 +43,15 @@ def depth_to_color(depth, min_d, max_d):
   return f"\033[38;2;{r};{g};{b}m"
 
 
-def print_depth_map(points, reset_cursor):
-  """Print an 8x8 colored depth map to the terminal."""
+def print_depth_map(meas, reset_cursor):
+  """Print a colored depth map to the terminal."""
   if reset_cursor:
-    print("\033[8F", end="")
+    print(f"\033[{meas.resolution_y}F", end="")
 
-  for row in range(8):
-    for col in range(8):
-      idx = row * 8 + col
-      print(depth_to_color(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
+  for row in range(meas.resolution_x):
+    for col in range(meas.resolution_y):
+      idx = row * meas.resolution_y + col
+      print(depth_to_color(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
     print("\033[0m")
 
   print("", end="", flush=True)
@@ -74,7 +74,7 @@ class DepthMapClient:
 
   def _on_depth_measurement(self, meas):
     self._init_flag = True
-    print_depth_map(meas.point_cloud, self._reset_cursor[0])
+    print_depth_map(meas, self._reset_cursor[0])
     self._reset_cursor[0] = True
 
   def got_first_measurement(self):
