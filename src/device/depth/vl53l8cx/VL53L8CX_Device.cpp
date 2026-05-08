@@ -47,13 +47,12 @@ void VL53L8CX_Device::publishMeasurement() {
   auto [transformed, state2] = _impl->getLatestTransformedMeasurement();
 
   measurement::DepthMeasurement m;
-  m.sensor_index            = _id.index;
-  m.frame_id                = raw.frame_id;
-  m.nr_valid_points         = raw.nr_valid_points;
-  m.timestamp               = std::chrono::system_clock::now();
-  m.state                   = state;
-  m.point_cloud             = raw.point_cloud;
-  m.transformed_point_cloud = transformed.point_cloud;
+  m.header.device_id = _id;
+  m.header.frame_id  = raw.header.frame_id;
+  m.header.timestamp = std::chrono::system_clock::now();
+  m.header.state     = state;
+  m.nr_valid_points  = raw.nr_valid_points;
+  m.point_cloud      = raw.point_cloud;
   _depth_publisher.publish(m);
 }
 

@@ -75,14 +75,14 @@ int main(int, char*[]) {
 
     // Subscribe to all depth sensors for measurement rate tracking
     auto depth_sub = manager->depthSensors().subscribe([&vl53l8cx_rate, depth_sensor_count](const measurement::DepthMeasurement& meas) {
-      if (meas.sensor_index == 0) {
+      if (meas.header.device_id.index == 0) {
         vl53l8cx_rate->tick(depth_sensor_count);
       }
     });
 
     // Subscribe to all thermal sensors for measurement rate tracking
     auto thermal_sub = manager->thermalSensors().subscribe([&htpa32_rate, thermal_sensor_count](const measurement::ThermalMeasurement& meas) {
-      if (meas.sensor_index == 0) {
+      if (meas.header.device_id.index == 0) {
         htpa32_rate->tick(thermal_sensor_count);
       }
     });

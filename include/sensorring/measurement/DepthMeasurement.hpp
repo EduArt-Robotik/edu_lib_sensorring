@@ -11,7 +11,7 @@
 #include <chrono>
 #include <vector>
 
-#include "sensorring/device/types/DeviceState.hpp"
+#include "sensorring/measurement/Header.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -29,20 +29,12 @@ namespace measurement {
  * raw (sensor-frame) and transformed (ring-frame) point clouds.
  */
 struct SENSORRING_EXPORT DepthMeasurement {
-  /// Index of the sensor that produced this measurement.
-  unsigned int sensor_index = 0;
 
-  /// Frame sequence counter.
-  unsigned int frame_id = 0;
+  /// Measurement header
+  Header header;
 
   /// Number of valid points in this measurement.
   unsigned int nr_valid_points = 0;
-
-  /// Timestamp when the measurement was taken.
-  std::chrono::system_clock::time_point timestamp;
-
-  /// Device health state at the time of publication.
-  device::DeviceState state = device::DeviceState::Undefined;
 
   /// Point cloud in the sensor's local coordinate frame.
   PointCloud point_cloud;

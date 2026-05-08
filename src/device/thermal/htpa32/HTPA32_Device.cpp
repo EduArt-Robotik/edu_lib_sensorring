@@ -53,8 +53,8 @@ void HTPA32_Device::publishMeasurement() {
   auto [measurement, state] = _impl->getLatestMeasurement();
 
   measurement::ThermalMeasurement m = measurement;
-  m.timestamp                       = std::chrono::system_clock::now();
-  m.state                           = state;
+  m.header.timestamp                = std::chrono::system_clock::now();
+  m.header.state                    = state;
   _thermal_publisher.publish(m);
 }
 

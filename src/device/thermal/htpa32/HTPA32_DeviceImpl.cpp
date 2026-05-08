@@ -188,9 +188,9 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
   std::vector<double> buffer(len);
 
   measurement::ThermalMeasurement result;
-  result.sensor_index = _params.id.index;
-  result.frame_id     = frame_id;
-  result.min_deg_c    = 1e6;
+  result.header.device_id.index = _params.id.index;
+  result.header.frame_id        = frame_id;
+  result.min_deg_c              = 1e6;
 
   float t_ambient        = _ptat * eeprom.data.ptat_gradient + eeprom.data.ptat_offset;
   result.t_ambient_deg_c = (t_ambient - 2732) / 10.0F;

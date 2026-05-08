@@ -180,7 +180,7 @@ int main(int, char*[]) {
     // =========================================================================
     std::atomic<unsigned int> thermal_frame_count{ 0 };
     auto thermal_sub = all_thermal.subscribe([&thermal_frame_count](const measurement::ThermalMeasurement& m) {
-      if (m.sensor_index == 0) {
+      if (m.header.device_id.index == 0) {
         thermal_frame_count++;
       }
       // m.temperatures holds the 32×32 temperature array in °C.

@@ -12,7 +12,7 @@
 #include <chrono>
 #include <cstdint>
 
-#include "sensorring/device/types/DeviceState.hpp"
+#include "sensorring/measurement/Header.hpp"
 #include "sensorring/measurement/Image.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -77,14 +77,9 @@ public:
  * @brief  Structure for holding a measurement from a thermal sensor
  */
 struct ThermalMeasurement {
-  /// Index of the sensor that produced this measurement.
-  unsigned int sensor_index = 0;
 
-  /// Frame number of the ThermalMeasurement
-  unsigned int frame_id = 0;
-
-  /// Timestamp when the measurement was taken.
-  std::chrono::system_clock::time_point timestamp;
+  /// Measurement header
+  Header header;
 
   /// Device health state at the time of publication.
   device::DeviceState state = device::DeviceState::Undefined;

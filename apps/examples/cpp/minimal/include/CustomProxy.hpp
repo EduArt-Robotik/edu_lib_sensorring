@@ -58,7 +58,7 @@ public:
    * @param meas The latest depth measurement
    */
   void onDepthMeasurement(const measurement::DepthMeasurement& meas) {
-    if (meas.sensor_index == 0) {
+    if (meas.header.device_id.index == 0) {
       vl53l8cx_rate.tick(_depth_sensor_count);
     }
   }
@@ -68,7 +68,7 @@ public:
    * @param meas The latest thermal measurement
    */
   void onThermalMeasurement(const measurement::ThermalMeasurement& meas) {
-    if (meas.sensor_index == 0) {
+    if (meas.header.device_id.index == 0) {
       htpa32_rate.tick(_thermal_sensor_count);
     }
   }

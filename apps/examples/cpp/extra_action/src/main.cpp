@@ -75,7 +75,7 @@ int main(int, char*[]) {
     std::atomic<bool> got_first       = false;
     std::atomic<unsigned int> counter = 0;
     auto tof_sub                      = manager->depthSensors().subscribe([&got_first, &counter](const measurement::DepthMeasurement& meas) {
-      if (meas.sensor_index == 0) {
+      if (meas.header.device_id.index == 0) {
         got_first = true;
         counter++;
       }
