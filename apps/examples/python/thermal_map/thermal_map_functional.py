@@ -97,7 +97,7 @@ def main():
     # Subscribe to thermal sensors to get the measurements
     def on_thermal_measurement(meas):
       got_first_measurement[0] = True
-      print_false_color_image(meas.falsecolor_img, reset_cursor[0])
+      print_false_color_image(meas.temperatures.toFalseColor(), reset_cursor[0])
       reset_cursor[0] = True
 
     thermal_sub = manager.thermalSensors().subscribe(on_thermal_measurement)

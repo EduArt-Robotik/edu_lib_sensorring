@@ -26,13 +26,13 @@ namespace measurement {
  * @class  GrayscaleImage
  * @brief  Grayscale image with 1 channel and 8 bit color depth
  */
-class SENSORRING_EXPORT GrayscaleImage : public GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT GrayscaleImage : public ScalarImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  FalseColorImage
  * @brief  False color image with 3 channels (red, green, blue) and 8 bit color depth
  */
-class SENSORRING_EXPORT FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT FalseColorImage : public RgbImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  TemperatureImage
@@ -41,7 +41,7 @@ class SENSORRING_EXPORT FalseColorImage : public GenericRGBImage<std::uint8_t, T
  * Each pixel stores a temperature value in °C. Provides methods to convert to
  * visualization images (grayscale or false-color iron palette).
  */
-class SENSORRING_EXPORT TemperatureImage : public GenericGrayscaleImage<double, THERMAL_RESOLUTION> {
+class SENSORRING_EXPORT TemperatureImage : public ScalarImage<double, THERMAL_RESOLUTION> {
 public:
   /**
    * @brief Convert to grayscale with explicit temperature range.

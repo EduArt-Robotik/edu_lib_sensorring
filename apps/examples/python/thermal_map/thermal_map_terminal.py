@@ -64,7 +64,7 @@ class ThermalMapClient:
 
   def _on_thermal_measurement(self, meas):
     self._init_flag = True
-    print_false_color_image(meas.falsecolor_img, self._reset_cursor[0])
+    print_false_color_image(meas.temperatures.toFalseColor(), self._reset_cursor[0])
     self._reset_cursor[0] = True
 
   def got_first_measurement(self):

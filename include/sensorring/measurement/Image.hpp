@@ -26,10 +26,10 @@ static constexpr unsigned int MAX_MSG_LENGTH = 64;
 namespace measurement {
 
 /**
- * @class  GenericGrayscaleImage
- * @brief  Template for images with one channel and variable type
+ * @class  ScalarImage
+ * @brief  Template for images with one scalar value per pixel and variable arithmetic type
  */
-template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericGrayscaleImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT ScalarImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
 
   /// Internal data structure for the image
@@ -51,58 +51,58 @@ template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericGr
 
   /**
    * @brief Round each pixel value when a floating point type is used
-   * @return Averaged GrayScaleImage of the same type
+   * @return ScalarImage of the same type with rounded values
    */
-  GenericGrayscaleImage& round();
+  ScalarImage& round();
 
   /**
    * @brief Divide each pixel by the same value
-   * @return Resulting GrayScaleImage with updated values
+   * @return Resulting ScalarImage with updated values
    */
-  GenericGrayscaleImage& operator/=(const T other);
+  ScalarImage& operator/=(const T other);
 
   /**
    * @brief Add the same value to each pixel
-   * @return Resulting GrayScaleImage with updated values
+   * @return Resulting ScalarImage with updated values
    */
-  GenericGrayscaleImage& operator+=(const T other);
+  ScalarImage& operator+=(const T other);
 
   /**
    * @brief Subtract the same value from each pixel
-   * @return Resulting GrayScaleImage with updated values
+   * @return Resulting ScalarImage with updated values
    */
-  GenericGrayscaleImage& operator-=(const T other);
+  ScalarImage& operator-=(const T other);
 
   /**
-   * @brief Add two GrayScaleImage images pixel wise
-   * @return Resulting GrayScaleImage with updated values
+   * @brief Add two ScalarImage images pixel wise
+   * @return Resulting ScalarImage with updated values
    */
-  GenericGrayscaleImage& operator+=(const GenericGrayscaleImage& other);
+  ScalarImage& operator+=(const ScalarImage& other);
 
   /**
-   * @brief Subtract two GrayScaleImage images pixel wise
-   * @return Resulting GrayScaleImage with updated values
+   * @brief Subtract two ScalarImage images pixel wise
+   * @return Resulting ScalarImage with updated values
    */
-  GenericGrayscaleImage& operator-=(const GenericGrayscaleImage& other);
+  ScalarImage& operator-=(const ScalarImage& other);
 
   /**
-   * @brief Add two GrayScaleImage images of different data types pixel wise
-   * @return Resulting GrayScaleImage with updated values
+   * @brief Add two ScalarImage images of different data types pixel wise
+   * @return Resulting ScalarImage with updated values
    */
-  template <typename U> GenericGrayscaleImage& operator+=(const GenericGrayscaleImage<U, RESOLUTION>& other);
+  template <typename U> ScalarImage& operator+=(const ScalarImage<U, RESOLUTION>& other);
 
   /**
-   * @brief Subtract two GrayScaleImage images of different data types pixel wise
-   * @return Resulting GrayScaleImage with updated values
+   * @brief Subtract two ScalarImage images of different data types pixel wise
+   * @return Resulting ScalarImage with updated values
    */
-  template <typename U> GenericGrayscaleImage& operator-=(const GenericGrayscaleImage<U, RESOLUTION>& other);
+  template <typename U> ScalarImage& operator-=(const ScalarImage<U, RESOLUTION>& other);
 };
 
 /**
- * @class  GenericRGBImage
- * @brief  Template for images with three channels and variable type
+ * @class  RgbImage
+ * @brief  Template for images with three channels (R, G, B) and variable arithmetic type
  */
-template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT GenericRGBImage {
+template <typename T, std::size_t RESOLUTION> struct SENSORRING_EXPORT RgbImage {
   static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
 
   /// Internal data structure for the image
