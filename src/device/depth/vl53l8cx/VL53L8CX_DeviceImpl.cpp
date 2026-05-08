@@ -28,11 +28,7 @@ const VL53L8CX_Params& VL53L8CX_DeviceImpl::getParams() const {
 }
 
 std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_raw_measurement, _parent._state };
-}
-
-std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestTransformedMeasurement() const {
-  return { _latest_transformed_measurement, _parent._state };
+  return { _latest_measurement, _parent._state };
 }
 
 void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
@@ -48,8 +44,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
     // Complete measurement data delivered by reassembly layer.
     // Expected: [frame_id, nr of valid points, <192 bytes of point data>]
     if (data.size() >= (RESOLUTION * 3 + 2)) {
-      _latest_raw_measurement         = processMeasurement(data);
-      _latest_transformed_measurement = transformMeasurement(_latest_raw_measurement, _parent._rot_m, _parent._translation);
+      _latest_measurement = processMeasurement(data);
       _parent.setMeasurementReady(true);
     }
     break;
@@ -80,12 +75,6 @@ measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std:
   _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, result.point_cloud);
   result.point_cloud.data.shrink_to_fit();
   return result;
-}
-
-measurement::DepthMeasurement VL53L8CX_DeviceImpl::transformMeasurement(const measurement::DepthMeasurement& measurement, const math::Matrix3 rotation, const math::Vector3 translation) {
-  auto transformed_measurement        = measurement;
-  transformed_measurement.point_cloud = measurement::PointCloud::transform(measurement.point_cloud, rotation, translation);
-  return transformed_measurement;
 }
 
 } // namespace device

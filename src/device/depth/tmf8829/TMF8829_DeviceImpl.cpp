@@ -27,11 +27,7 @@ const TMF8829_Params& TMF8829_DeviceImpl::getParams() const {
 }
 
 std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_raw_measurement, _parent._state };
-}
-
-std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_DeviceImpl::getLatestTransformedMeasurement() const {
-  return { _latest_transformed_measurement, _parent._state };
+  return { _latest_measurement, _parent._state };
 }
 
 void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {

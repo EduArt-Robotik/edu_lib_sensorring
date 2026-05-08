@@ -57,12 +57,7 @@ public:
    * @return Pair of latest depth measurement and associated sensor state.
    */
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
-  /**
-   * @brief Get the most recent transformed measurement and current sensor state.
-   * @return Pair of latest transformed depth measurement and associated sensor state.
-   */
-  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
-
+ 
   /**
    * @brief Request Time-of-Flight measurements asynchronously on a set of devices.
    *

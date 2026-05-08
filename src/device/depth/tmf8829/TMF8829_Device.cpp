@@ -31,10 +31,6 @@ std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_Device::get
   return _impl->getLatestMeasurement();
 }
 
-std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_Device::getLatestTransformedMeasurement() const {
-  return _impl->getLatestTransformedMeasurement();
-}
-
 void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   _impl->comCallback(source, command, data);
 }
@@ -42,9 +38,9 @@ void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source,
 void TMF8829_Device::publishMeasurement() {
   if (!getEnable())
     return;
-  auto [raw, state]          = _impl->getLatestMeasurement();
-  auto [transformed, state2] = _impl->getLatestTransformedMeasurement();
+  auto [raw, state] = _impl->getLatestMeasurement();
 
+  // ToDo: Should be populated when measurement is received, not here
   measurement::DepthMeasurement m;
   m.header.device_id = _id;
   m.header.frame_id  = raw.header.frame_id;

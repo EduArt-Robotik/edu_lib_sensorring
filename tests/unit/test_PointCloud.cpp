@@ -119,7 +119,7 @@ TEST_CASE("PointCloud transform applies rotation and translation", "[PointCloud]
   translation.y() = 2.0;
   translation.z() = 3.0;
 
-  const PointCloud transformed = PointCloud::transform(cloud, rot, translation);
+  const PointCloud transformed = PointCloud::transform(cloud, translation, rot);
 
   REQUIRE(transformed.data[0].point.x() == Catch::Approx(1.0));
   REQUIRE(transformed.data[0].point.y() == Catch::Approx(3.0));
@@ -134,7 +134,7 @@ TEST_CASE("PointCloud transform applies rotation and translation", "[PointCloud]
   const Matrix3 inv_rot         = rotMatrixFromEulerDegrees(inverse_euler);
   const Vector3 inv_translation = (inv_rot * translation) * -1.0;
 
-  const PointCloud roundtrip = PointCloud::transform(transformed, inv_rot, inv_translation);
+  const PointCloud roundtrip = PointCloud::transform(transformed, inv_translation, inv_rot);
 
   REQUIRE(roundtrip.data[0].point.x() == Catch::Approx(cloud.data[0].point.x()).margin(1e-6));
   REQUIRE(roundtrip.data[0].point.y() == Catch::Approx(cloud.data[0].point.y()).margin(1e-6));

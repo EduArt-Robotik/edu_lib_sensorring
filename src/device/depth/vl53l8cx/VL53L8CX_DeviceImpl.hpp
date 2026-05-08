@@ -35,7 +35,6 @@ public:
   const VL53L8CX_Params& getParams() const;
 
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
-  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestTransformedMeasurement() const;
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
@@ -52,8 +51,7 @@ private:
   VL53L8CX_Device& _parent;
 
   const VL53L8CX_Params _params;
-  measurement::DepthMeasurement _latest_raw_measurement;
-  measurement::DepthMeasurement _latest_transformed_measurement;
+  measurement::DepthMeasurement _latest_measurement;
 };
 
 } // namespace device

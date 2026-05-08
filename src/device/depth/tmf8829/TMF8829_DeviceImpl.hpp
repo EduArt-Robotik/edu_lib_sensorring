@@ -52,8 +52,7 @@ private:
   TMF8829_Device& _parent;
 
   const TMF8829_Params _params;
-  measurement::DepthMeasurement _latest_raw_measurement;
-  measurement::DepthMeasurement _latest_transformed_measurement;
+  TMF8829_Measurement _latest_measurement;
 };
 
 } // namespace device

@@ -39,22 +39,8 @@ struct SENSORRING_EXPORT DepthMeasurement {
   /// Point cloud in the sensor's local coordinate frame.
   PointCloud point_cloud;
 
-  /// Point cloud transformed into the ring's coordinate frame (using configured pose).
-  PointCloud transformed_point_cloud;
-
-  /**
-   * @brief Combine the transformed point clouds from multiple depth measurements.
-   * @param[in] measurements Vector of depth measurements to merge.
-   * @return Single PointCloud containing all transformed points.
-   */
-  static inline PointCloud combinePointClouds(const std::vector<DepthMeasurement>& measurements) {
-    std::vector<PointCloud> clouds;
-    clouds.reserve(measurements.size());
-    for (const auto& m : measurements) {
-      clouds.push_back(m.transformed_point_cloud);
-    }
-    return PointCloud::combine(clouds);
-  }
+  /// Point cloud transformed to the ring's global coordinate frame with the pose from the header.
+  inline PointCloud transformToGlobalFrame() { return PointCloud::transform(point_cloud, header.position, header.orientation); };
 };
 
 } // namespace measurement
