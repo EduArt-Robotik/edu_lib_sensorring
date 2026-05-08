@@ -5,6 +5,8 @@
 
 #include "sensorring/logger/Logger.hpp"
 
+#include "TMF8829_Constants.hpp"
+
 using namespace eduart::sensorring::transport;
 using namespace eduart::sensorring::transport::protocol;
 
