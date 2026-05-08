@@ -38,12 +38,15 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
   case MEASUREMENT_RESPONSE:
     // "Measurement done" notification
     _parent.setDataAvailableReady(true);
-    break;
+    return;
 
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
     try {
       _latest_measurement = TMF8829_Measurement::fromBuffer(data);
+      _parent.setMeasurementReady(true);
+      return;
     } catch (std::exception& e) {
+      _parent.setMeasurementReady(false);
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception while processing TMF8829 measurement data: " + std::string(e.what()));
     }
     break;
