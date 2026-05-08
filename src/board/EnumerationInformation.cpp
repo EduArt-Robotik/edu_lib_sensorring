@@ -146,6 +146,8 @@ std::string EnumerationInformation::toString() const {
       ss << devices[i];
     }
     ss << "\n";
+  }else{
+    ss << "    Devices (HW):   None\n";
   }
 
   if (!configured_devices.empty() && configured_devices != devices) {
