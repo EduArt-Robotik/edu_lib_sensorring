@@ -22,6 +22,7 @@
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
+#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -71,7 +72,7 @@ enum class ValidationMode {
 class SENSORRING_EXPORT SensorRingFactory {
 public:
   /// Currently supported devices for explicit configuration in expectBoard().
-  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
+  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params, device::AnyDepthSensor_Params, device::AnyThermalSensor_Params, device::AnyLight_Params>;
 
   /// Per-interface enumeration results, keyed by interface ID.
   using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<board::EnumerationInformation> >;
@@ -177,8 +178,13 @@ private:
 
   static device::DeviceType deviceTypeFromVariant(const DeviceParamsVariant& v);
 
+  /// Concrete device params variant — sentinel category types excluded.
+  /// Structurally identical to board::SensorBoardManager::DeviceParamsVariant.
+  using ConcreteDeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
+  using ConcreteDeviceParamsMap = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
+
   /// Build a DeviceParamsMap for the given device types, applying user defaults where available.
-  std::unordered_map<device::DeviceType, DeviceParamsVariant> buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
+  ConcreteDeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
 
   std::vector<InterfaceConfig> _interfaces;
   std::unordered_map<device::DeviceType, DeviceParamsVariant> _default_device_params;

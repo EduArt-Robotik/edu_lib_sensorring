@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/device/AnyDeviceParams.hpp>
 #include <sensorring/device/depth/DepthSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
@@ -97,12 +98,12 @@ int main(int, char*[]) {
       }
     });
 
-    // Create a SensorRing with one VL53L8CX board via auto-discovery
+    // Create a SensorRing with one depth sensor board via auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{} });
+    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
     factory.addInterface(usbtingo_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{} });
+    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
 
     // Create the MeasurementManager directly from the factory
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);

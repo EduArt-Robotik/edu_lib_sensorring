@@ -36,7 +36,13 @@ enum class DeviceType {
   /// Time-of-flight sensor (TMF8829).
   TMF8829,
   /// Undefined device type.
-  UNDEFINED
+  UNDEFINED,
+  /// Category wildcard: matches any depth sensor (VL53L8CX, TMF8829, ...).
+  ANY_DEPTH,
+  /// Category wildcard: matches any thermal sensor (HTPA32, ...).
+  ANY_THERMAL,
+  /// Category wildcard: matches any light device (WS2812b, ...).
+  ANY_LIGHT
 };
 
 /**
@@ -44,6 +50,17 @@ enum class DeviceType {
  * @return Device type string.
  */
 SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
+
+/**
+ * @brief Returns true if type is a category wildcard (ANY_DEPTH, ANY_THERMAL, ANY_LIGHT).
+ */
+SENSORRING_EXPORT bool isCategory(DeviceType type) noexcept;
+
+/**
+ * @brief Returns true if actual matches expected exactly, or if expected is a category
+ *        wildcard and actual belongs to that category.
+ */
+SENSORRING_EXPORT bool deviceMatchesExpected(DeviceType actual, DeviceType expected) noexcept;
 
 /**
  * @brief Stream device type as string.
