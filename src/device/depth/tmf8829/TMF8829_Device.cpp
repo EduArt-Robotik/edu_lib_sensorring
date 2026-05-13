@@ -18,6 +18,7 @@ TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interf
     : BaseDevice(DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable)
     , DepthSensor{ 45.0, 45.0, 8, 8 }
     , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
+  setResolutionMode(params.resolution_mode);
 }
 
 TMF8829_Device::~TMF8829_Device() {
@@ -27,11 +28,18 @@ const TMF8829_Params& TMF8829_Device::getParams() const {
   return _impl->getParams();
 }
 
+bool TMF8829_Device::setResolutionMode(std::uint8_t mode) {
+  return _impl->setResolutionMode(mode);
+}
+
 std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_Device::getLatestMeasurement() const {
   return _impl->getLatestMeasurement();
 }
 
 void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
+  if (!_impl) { // ToDo: add as general check in BaseDevice to avoid this in all devices
+    return;
+  }
   _impl->comCallback(source, command, data);
 }
 

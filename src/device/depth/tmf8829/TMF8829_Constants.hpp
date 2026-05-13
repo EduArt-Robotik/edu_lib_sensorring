@@ -20,8 +20,8 @@ constexpr std::uint16_t RESULT_FRAME_EOF_MARKER    = 0xE0F7; // End-of-frame mar
 constexpr std::uint8_t RESULT_FRAME_PAYLOAD_OFFSET = 4u;     // Offset to add to the payload field of the header to get the actual length including header, point data and footer
 constexpr double DISTANCE_FIXED_POINT_FACTOR       = 0.25l;  // Each unit in the raw distance corresponds to 0.25 mm
 
-constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X[] = { 8, 8, 16, 32, 32, 32, 48 };
-constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y[] = { 8, 8, 16, 32, 32, 32, 32 };
+constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X[] = { 8, 8, 16, 32, 32, 48 };
+constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y[] = { 8, 8, 16, 32, 32, 32 };
 
 } // namespace tmf8829
 

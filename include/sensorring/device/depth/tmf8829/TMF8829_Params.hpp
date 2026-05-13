@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "sensorring/device/types/DeviceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -23,8 +25,10 @@ namespace device {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
-  /// @brief Default constructor; sets the maximum measurement rate to 15 Hz.
-  TMF8829_Params() { max_rate_hz = 15.0; }
+  /// @brief Default constructor; sets the maximum measurement rate to 30 Hz.
+  TMF8829_Params() { max_rate_hz = 30.0; }
+
+  std::uint8_t resolution_mode = 8; // ToDo: Maybe implement a enum class for this
 };
 
 } // namespace device

@@ -35,6 +35,10 @@ public:
 
   const TMF8829_Params& getParams() const;
 
+  int getResolutionMode();
+
+  bool setResolutionMode(std::uint8_t mode);
+
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
@@ -42,8 +46,9 @@ public:
 private:
   static constexpr unsigned int RESOLUTION = 64;
 
-  TMF8829_Device& _parent;
+  int _resolution_mode;
 
+  TMF8829_Device& _parent;
   const TMF8829_Params _params;
   TMF8829_Measurement _latest_measurement;
 };

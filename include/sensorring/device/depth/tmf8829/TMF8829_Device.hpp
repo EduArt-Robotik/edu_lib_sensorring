@@ -53,6 +53,19 @@ public:
   const TMF8829_Params& getParams() const;
 
   /**
+   * @brief Get the resolution mode of the sensor.
+   * @return Current resolution mode. Valid values are 0 to 8.
+   */
+  int getResolutionMode();
+
+  /**
+   * @brief Set the resolution mode of the sensor.
+   * @param[in] mode Resolution mode to set. Valid values are 0 to 8.
+   * @return Return true if setting the resolution mode was successful.
+   */
+  bool setResolutionMode(std::uint8_t mode);
+
+  /**
    * @brief Get the most recent measurement and current sensor state.
    * @return Pair of latest depth measurement and associated sensor state.
    */
