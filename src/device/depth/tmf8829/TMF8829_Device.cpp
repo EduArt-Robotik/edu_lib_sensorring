@@ -52,6 +52,7 @@ void TMF8829_Device::publishMeasurement() {
 
 std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
+    (void)timeout;
     struct InterfaceGroup {
       std::vector<TMF8829_Device*> devices;
       unsigned int active_sensors = 0;
@@ -87,13 +88,12 @@ std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8
       iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::TMF8829 }, MEASUREMENT_REQUEST, tx_buf);
     }
 
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-
     for (auto& fut : futures) {
-      if (fut.wait_until(deadline) != std::future_status::ready) {
-        return false;
-      }
-      if (!fut.get()) {
+      try {
+        if (!fut.get()) {
+          return false;
+        }
+      } catch (const std::future_error&) {
         return false;
       }
     }
