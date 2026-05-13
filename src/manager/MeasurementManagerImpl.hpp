@@ -110,8 +110,9 @@ private:
   unsigned long _tick_count;
   std::vector<SensorGroupSchedule> _schedule;
 
-  // Pending future for VL53L8CX data-available signal (non-blocking request).
-  std::future<bool> _tof_data_available_future;
+  // Pending futures for data-available signals (one per ToF family).
+  std::future<bool> _vl53_data_available_future;
+  std::future<bool> _tmf_data_available_future;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;

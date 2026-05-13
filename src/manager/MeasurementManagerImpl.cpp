@@ -469,9 +469,18 @@ bool MeasurementManagerImpl::waitForPendingData() {
     if (group.type == device::DeviceType::VL53L8CX) {
       // Wait for the data-available future that was launched in the previous tick's
       // requestMeasurements(). This blocks until all sensors signal measurement complete.
-      if (_tof_data_available_future.valid()) {
-        if (_tof_data_available_future.wait_for(_params.timeout) != std::future_status::ready || !_tof_data_available_future.get()) {
+      if (_vl53_data_available_future.valid()) {
+        if (_vl53_data_available_future.wait_for(_params.timeout) != std::future_status::ready || !_vl53_data_available_future.get()) {
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "VL53L8CX data-available wait timed out.");
+          return false;
+        }
+      }
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      if (_tmf_data_available_future.valid()) {
+        if (_tmf_data_available_future.wait_for(_params.timeout) != std::future_status::ready || !_tmf_data_available_future.get()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 data-available wait timed out.");
           return false;
         }
       }
@@ -505,7 +514,7 @@ bool MeasurementManagerImpl::fetchPendingData() {
           return false;
         }
       }
-      //ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
       publishDepthMeasurements();
     }
 
@@ -518,7 +527,7 @@ bool MeasurementManagerImpl::fetchPendingData() {
           return false;
         }
       }
-      //ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
       publishDepthMeasurements();
     }
 
@@ -550,8 +559,8 @@ void MeasurementManagerImpl::requestMeasurements() {
       if (!_vl53l8cx_devices.empty()) {
         // Launch request — the async thread sends the broadcast and waits for
         // data-available. The future is consumed in the next tick's waitForPendingData().
-        _tof_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-        group.has_pending_request  = true;
+        _vl53_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+        group.has_pending_request   = true;
       }
     }
 
@@ -559,7 +568,7 @@ void MeasurementManagerImpl::requestMeasurements() {
       if (!_tmf8829_devices.empty()) {
         // Launch request — the async thread sends the broadcast and waits for
         // data-available. The future is consumed in the next tick's waitForPendingData().
-        _tof_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
+        _tmf_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
         group.has_pending_request  = true;
       }
     }
