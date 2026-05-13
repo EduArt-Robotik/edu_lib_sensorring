@@ -73,7 +73,7 @@ private:
   enum class Phase {
     init,
     reset_sensors,
-    sync_lights,
+    configure_devices,
     get_eeprom,
     pre_loop_init,
     tick,

@@ -246,15 +246,24 @@ void MeasurementManagerImpl::runPhase() {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
     board::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    _phase = Phase::sync_lights;
+    _phase = Phase::configure_devices;
     break;
   }
 
-  case Phase::sync_lights: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
-    device::WS2812b_Device::syncLight();
-    device::WS2812b_Device::setLight(device::LightMode::Pulsation, 0, 0, 0);
-    _phase = Phase::get_eeprom;
+  case Phase::configure_devices: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Configuring devices after reset");
+
+    success = true;
+    for (auto* dev : _sensor_ring->getDevices()) {
+      success &= dev->configure();
+    }
+
+    if (success) {
+      _phase = Phase::get_eeprom;
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to configure at least one device after reset.");
+      _phase = Phase::shutdown;
+    }
     break;
   }
 

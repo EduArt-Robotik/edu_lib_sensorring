@@ -66,6 +66,12 @@ public:
   bool setResolutionMode(std::uint8_t mode);
 
   /**
+   * @brief Re-apply runtime configuration after a board reset.
+   * @return true on success.
+   */
+  bool configure() override;
+
+  /**
    * @brief Get the most recent measurement and current sensor state.
    * @return Pair of latest depth measurement and associated sensor state.
    */

@@ -32,6 +32,13 @@ bool TMF8829_Device::setResolutionMode(std::uint8_t mode) {
   return _impl->setResolutionMode(mode);
 }
 
+bool TMF8829_Device::configure() {
+  if (!getEnable()) {
+    return true;
+  }
+  return setResolutionMode(getParams().resolution_mode);
+}
+
 std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_Device::getLatestMeasurement() const {
   return _impl->getLatestMeasurement();
 }

@@ -60,6 +60,12 @@ public:
    */
   void setMode(LightMode mode) override;
 
+  /**
+   * @brief Re-apply runtime light synchronization and default mode after board reset.
+   * @return true on success.
+   */
+  bool configure() override;
+
   // Simple static helpers to control all WS2812b devices on the bus.
   /**
    * @brief Set light mode and color for all WS2812b devices on the bus.

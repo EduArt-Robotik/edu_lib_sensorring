@@ -53,6 +53,10 @@ bool BaseDevice::getEnable() const {
   return _enable;
 }
 
+bool BaseDevice::configure() {
+  return true;
+}
+
 std::future<bool> BaseDevice::beginMeasurementWait() {
   std::lock_guard<std::mutex> lock(_promise_mutex);
 

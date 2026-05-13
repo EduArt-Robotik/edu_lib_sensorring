@@ -90,6 +90,12 @@ public:
   bool getEnable() const;
 
   /**
+   * @brief Apply post-reset runtime configuration for this device.
+   * @return true on success.
+   */
+  virtual bool configure();
+
+  /**
    * @brief Enable or disable this device.
    * @param[in] enable @c true to enable, @c false to disable.
    */
