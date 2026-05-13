@@ -55,38 +55,26 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   const std::size_t point_buffer_size = measurement.tmf8829_header.payload - tmf8829::RESULT_FRAME_HEADER_SIZE - tmf8829::RESULT_FRAME_FOOTER_SIZE + tmf8829::RESULT_FRAME_PAYLOAD_OFFSET;
   const std::size_t num_points        = point_buffer_size / 3u; // ToDo: Evaluate the header layout byte for point size
 
-  if (measurement.tmf8829_header.focal_plane_mode > 2) {
-    measurement.point_cloud.data.resize(num_points * 2);
+  const bool is_double_frame_mode            = measurement.tmf8829_header.focal_plane_mode > 2;
+  const std::size_t total_num_points         = is_double_frame_mode ? num_points * 2u : num_points;
+  const std::size_t second_frame_data_offset = (buffer.size() - 1) / 2 + data_offset;
 
-    std::size_t current_frame_data_offset      = data_offset;
-    const std::size_t second_frame_data_offset = (buffer.size() - 1) / 2 + data_offset;
+  measurement.point_cloud.data.resize(total_num_points);
 
-    for (std::size_t row = 0; row < measurement.resolution_y; row++) {
+  for (std::size_t row = 0; row < measurement.resolution_y; row++) {
 
-      const std::size_t result_row_idx = row * measurement.resolution_x;
-      const std::size_t frame_row_idx  = (row / 2) * measurement.resolution_x;
+    const std::size_t result_row_idx            = row * measurement.resolution_x;
+    const std::size_t frame_row_idx             = (is_double_frame_mode ? (row / 2) : row) * measurement.resolution_x;
+    const std::size_t current_frame_data_offset = (is_double_frame_mode && (row % 2u == 1u)) ? second_frame_data_offset : data_offset;
 
-      current_frame_data_offset = (row % 2 == 0) ? data_offset : second_frame_data_offset;
+    for (std::size_t col = 0; col < measurement.resolution_x; col++) {
 
-      for (std::size_t col = 0; col < measurement.resolution_x; col++) {
+      const std::size_t result_point_idx = result_row_idx + col;
+      const std::size_t frame_point_idx  = (frame_row_idx + col) * 3;
 
-        const std::size_t result_point_idx = result_row_idx + col;
-        const std::size_t frame_point_idx  = (frame_row_idx + col) * 3;
-
-        measurement.point_cloud.data[result_point_idx].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, current_frame_data_offset + frame_point_idx));
-        measurement.point_cloud.data[result_point_idx].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
-        measurement.point_cloud.data[result_point_idx].raw_distance *= MM_TO_M;
-        measurement.nr_valid_points++;
-      }
-    }
-
-  } else {
-    measurement.point_cloud.data.resize(num_points);
-
-    for (std::size_t i = 0; i < num_points; i++) {
-      measurement.point_cloud.data[i].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, data_offset + i * 3));
-      measurement.point_cloud.data[i].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
-      measurement.point_cloud.data[i].raw_distance *= MM_TO_M;
+      measurement.point_cloud.data[result_point_idx].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, current_frame_data_offset + frame_point_idx));
+      measurement.point_cloud.data[result_point_idx].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
+      measurement.point_cloud.data[result_point_idx].raw_distance *= MM_TO_M;
       measurement.nr_valid_points++;
     }
   }

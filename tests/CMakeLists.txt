@@ -8,6 +8,7 @@ add_executable(sensorring_unit_tests
     unit/test_PointCloud.cpp
     unit/test_DepthSensor.cpp
     unit/test_DepthMeasurement.cpp
+    unit/test_TMF8829_Measurement.cpp
     unit/test_ThermalMeasurement.cpp
     unit/test_ComEndpoint.cpp
     unit/test_DeviceID.cpp
