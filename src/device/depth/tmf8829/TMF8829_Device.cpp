@@ -28,7 +28,7 @@ const TMF8829_Params& TMF8829_Device::getParams() const {
   return _impl->getParams();
 }
 
-bool TMF8829_Device::setResolutionMode(std::uint8_t mode) {
+bool TMF8829_Device::setResolutionMode(ResolutionMode mode) {
   return _impl->setResolutionMode(mode);
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
-#include <mutex>
 #include <vector>
 
 #include "sensorring/device/BaseDevice.hpp"
@@ -22,6 +22,8 @@ class ComInterface;
 
 namespace device {
 
+using namespace std::chrono_literals;
+
 class TMF8829_Device;
 
 /**
@@ -35,16 +37,17 @@ public:
 
   const TMF8829_Params& getParams() const;
 
-  int getResolutionMode();
+  bool getResolutionMode(ResolutionMode& mode);
 
-  bool setResolutionMode(std::uint8_t mode);
+  bool setResolutionMode(ResolutionMode mode);
 
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
 
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
 private:
-  static constexpr unsigned int RESOLUTION = 64;
+  static constexpr unsigned int RESOLUTION                         = 64;
+  static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
 
   int _resolution_mode;
 

@@ -5,8 +5,8 @@
 #include <thread>
 
 #include "interface/ComInterface.hpp"
-#include "interface/ComManager.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
@@ -21,7 +21,7 @@ namespace sensorring {
 namespace device {
 
 TMF8829_DeviceImpl::TMF8829_DeviceImpl(TMF8829_Device& parent, TMF8829_Params params, com::ComInterface*, unsigned int)
-    : _resolution_mode(params.resolution_mode)
+    : _resolution_mode(static_cast<int>(params.resolution_mode))
     , _parent(parent)
     , _params(params) {
 }
@@ -33,23 +33,39 @@ const TMF8829_Params& TMF8829_DeviceImpl::getParams() const {
   return _params;
 }
 
-int TMF8829_DeviceImpl::getResolutionMode() {
+bool TMF8829_DeviceImpl::getResolutionMode(ResolutionMode& mode) {
   _resolution_mode = 0xff;
 
   _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_GET_RESOLUTION, {});
   auto now = std::chrono::steady_clock::now();
 
-  while (_resolution_mode == 0xff && std::chrono::steady_clock::now() - now < 100ms) { // ToDo: Add timeout parameter
+  while (_resolution_mode == 0xff && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
     std::this_thread::sleep_for(10ms);
   }
 
-  return _resolution_mode;
+  if (_resolution_mode == 0xff) {
+    return false;
+  }
+
+  mode = static_cast<ResolutionMode>(_resolution_mode);
+
+  return true;
 }
 
-bool TMF8829_DeviceImpl::setResolutionMode(std::uint8_t mode) {
+bool TMF8829_DeviceImpl::setResolutionMode(ResolutionMode mode) {
   bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { mode });
-  success &= getResolutionMode() == mode;
+  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { static_cast<std::uint8_t>(mode) });
+
+  ResolutionMode current_mode;
+  success &= getResolutionMode(current_mode);
+  success &= (current_mode == mode);
+
+  if (success) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 resolution on board " + std::to_string(_parent.getDeviceID().index) + " to mode " + toString(mode));
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set TMF8829 resolution on board " + std::to_string(_parent.getDeviceID().index) + " to mode " + toString(mode));
+  }
+
   return success;
 }
 

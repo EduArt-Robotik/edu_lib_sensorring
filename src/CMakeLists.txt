@@ -65,6 +65,7 @@ set(SENSORRING_DEVICE_SOURCES
   device/depth/vl53l8cx/VL53L8CX_Device.cpp
   device/depth/vl53l8cx/VL53L8CX_DeviceImpl.cpp
   device/depth/tmf8829/TMF8829_Device.cpp
+  device/depth/tmf8829/TMF8829_Params.cpp
   device/depth/tmf8829/TMF8829_DeviceImpl.cpp
   device/depth/tmf8829/TMF8829_Measurement.cpp
   device/thermal/htpa32/htpa32_eeprom.c

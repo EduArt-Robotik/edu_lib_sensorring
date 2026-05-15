@@ -54,16 +54,17 @@ public:
 
   /**
    * @brief Get the resolution mode of the sensor.
-   * @return Current resolution mode. Valid values are 0 to 8.
+   * @param[out] mode Reference to store the current resolution mode.
+   * @return Return true if reading the resolution mode was successful.
    */
-  int getResolutionMode();
+  bool getResolutionMode(ResolutionMode& mode);
 
   /**
    * @brief Set the resolution mode of the sensor.
-   * @param[in] mode Resolution mode to set. Valid values are 0 to 8.
+   * @param[in] mode Resolution mode to set.
    * @return Return true if setting the resolution mode was successful.
    */
-  bool setResolutionMode(std::uint8_t mode);
+  bool setResolutionMode(ResolutionMode mode);
 
   /**
    * @brief Re-apply runtime configuration after a board reset.
