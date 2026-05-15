@@ -68,6 +68,7 @@ set(SENSORRING_DEVICE_SOURCES
   device/depth/tmf8829/TMF8829_Params.cpp
   device/depth/tmf8829/TMF8829_DeviceImpl.cpp
   device/depth/tmf8829/TMF8829_Measurement.cpp
+  device/depth/tmf8829/TMF8829_ResultFormat.cpp
   device/thermal/htpa32/htpa32_eeprom.c
   device/thermal/htpa32/HTPA32_Device.cpp
   device/thermal/htpa32/HTPA32_DeviceImpl.cpp

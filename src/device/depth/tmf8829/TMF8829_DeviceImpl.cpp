@@ -297,11 +297,10 @@ bool TMF8829_DeviceImpl::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
   success &= getResultNrOfPeaks(current_nr_of_peaks);
   success &= (current_nr_of_peaks == nr_of_peaks);
 
-  std::string enable_str = nr_of_peaks ? "true" : "false";
   if (success) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 number of peaks on board " + std::to_string(_parent.getDeviceID().index) + " to " + enable_str);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 number of peaks on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(nr_of_peaks));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set TMF8829 number of peaks on board " + std::to_string(_parent.getDeviceID().index) + " to " + enable_str);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set TMF8829 number of peaks on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(nr_of_peaks));
   }
 
   return success;

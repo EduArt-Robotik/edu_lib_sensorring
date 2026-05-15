@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 
 namespace eduart {
@@ -34,6 +35,7 @@ struct TMF8829_Measurement : public measurement::DepthMeasurement {
 
   TMF8829_Header tmf8829_header;
   TMF8829_Footer tmf8829_footer;
+  TMF8829_ResultFormat tmf8829_result_format;
 
   /**
    * @brief Parse a TMF8829 frame from a raw byte buffer.

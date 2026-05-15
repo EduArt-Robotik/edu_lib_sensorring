@@ -3,6 +3,7 @@
 #include <sensorring_transport/ByteOperations.hpp>
 #include <sensorring_transport/Protocol.hpp>
 
+#include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 #include "TMF8829_Constants.hpp"
@@ -45,6 +46,15 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   measurement.tmf8829_header.frame_number        = ByteOperations::readUint32(buffer, header_offset + 4);
   measurement.tmf8829_header.temperature         = (static_cast<double>(buffer[header_offset + 8] + buffer[header_offset + 9] + buffer[header_offset + 10])) / 3.0; // Average of the three independent temperature sensors
 
+  // result format
+  const auto& fmt                                   = measurement.tmf8829_header.result_frame_format;
+  measurement.tmf8829_result_format.full_noise      = (fmt & tmf8829::RESULT_FRAME_FULL_NOISE_MASK) != 0;
+  measurement.tmf8829_result_format.xtalk           = (fmt & tmf8829::RESULT_FRAME_XTALK_MASK) != 0;
+  measurement.tmf8829_result_format.noise_strength  = (fmt & tmf8829::RESULT_FRAME_NOISE_STRENGTH_MASK) != 0;
+  measurement.tmf8829_result_format.signal_strength = (fmt & tmf8829::RESULT_FRAME_SIGNAL_STRENGTH_MASK) != 0;
+  measurement.tmf8829_result_format.nr_of_peaks     = (fmt & tmf8829::RESULT_FRAME_SIGNAL_NR_PEAKS_MASK);
+  const std::size_t point_size                      = measurement.tmf8829_result_format.calculatePointSize();
+
   // Common DepthMeasurement fields
   measurement.header.frame_id  = buffer[0];
   measurement.header.timestamp = std::chrono::system_clock::now();
@@ -53,7 +63,7 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
 
   // tmf8829 point data
   const std::size_t point_buffer_size = measurement.tmf8829_header.payload - tmf8829::RESULT_FRAME_HEADER_SIZE - tmf8829::RESULT_FRAME_FOOTER_SIZE + tmf8829::RESULT_FRAME_PAYLOAD_OFFSET;
-  const std::size_t num_points        = point_buffer_size / 3u; // ToDo: Evaluate the header layout byte for point size
+  const std::size_t num_points        = point_buffer_size / point_size;
 
   const bool is_double_frame_mode            = measurement.tmf8829_header.focal_plane_mode > 2;
   const std::size_t total_num_points         = is_double_frame_mode ? num_points * 2u : num_points;
@@ -70,11 +80,42 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
     for (std::size_t col = 0; col < measurement.resolution_x; col++) {
 
       const std::size_t result_point_idx = result_row_idx + col;
-      const std::size_t frame_point_idx  = (frame_row_idx + col) * 3;
+      const std::size_t frame_point_idx  = (frame_row_idx + col) * point_size;
 
-      measurement.point_cloud.data[result_point_idx].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, current_frame_data_offset + frame_point_idx));
-      measurement.point_cloud.data[result_point_idx].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
-      measurement.point_cloud.data[result_point_idx].raw_distance *= MM_TO_M;
+      std::size_t read_idx = frame_point_idx;
+
+      // 2 bytes noise
+      if (measurement.tmf8829_result_format.noise_strength) {
+        // Read noise strength
+        read_idx += 2;
+      }
+
+      // 2 bytes xtalk
+      if (measurement.tmf8829_result_format.xtalk) {
+        // Read xtalk
+        read_idx += 2;
+      }
+
+      for (std::size_t peak_idx = 0; peak_idx < measurement.tmf8829_result_format.nr_of_peaks; peak_idx++) {
+        // Peak n: 2 bytes distance
+        measurement.point_cloud.data[result_point_idx].raw_distance = static_cast<double>(ByteOperations::readUint16(buffer, current_frame_data_offset + read_idx));
+        measurement.point_cloud.data[result_point_idx].raw_distance *= tmf8829::DISTANCE_FIXED_POINT_FACTOR;
+        measurement.point_cloud.data[result_point_idx].raw_distance *= MM_TO_M;
+        read_idx += 2;
+
+        // Peak n: 1 byte Snr
+        if (measurement.tmf8829_result_format.signal_strength) {
+          // Read noise strength
+          read_idx += 1;
+        }
+
+        // Peak n: 2 bytes signal strength
+        if (measurement.tmf8829_result_format.signal_strength) {
+          // Read signal strength
+          read_idx += 2;
+        }
+      }
+
       measurement.nr_valid_points++;
     }
   }
