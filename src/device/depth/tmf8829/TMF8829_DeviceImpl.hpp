@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <vector>
@@ -37,9 +38,26 @@ public:
 
   const TMF8829_Params& getParams() const;
 
+  bool setResolutionMode(ResolutionMode mode);
   bool getResolutionMode(ResolutionMode& mode);
 
-  bool setResolutionMode(ResolutionMode mode);
+  bool getResultFormat(TMF8829_ResultFormat& format);
+  bool setResultFormat(TMF8829_ResultFormat format);
+
+  bool setResultFullNoise(bool full_noise);
+  bool getResultFullNoise(bool& full_noise);
+
+  bool setResultXtalk(bool xtalk);
+  bool getResultXtalk(bool& xtalk);
+
+  bool setResultNoiseStrength(bool noise_strength);
+  bool getResultNoiseStrength(bool& noise_strength);
+
+  bool setResultSignalStrength(bool signal_strength);
+  bool getResultSignalStrength(bool& signal_strength);
+
+  bool setResultNrOfPeaks(std::uint8_t nr_of_peaks);
+  bool getResultNrOfPeaks(std::uint8_t& nr_of_peaks);
 
   std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
 
@@ -49,10 +67,10 @@ private:
   static constexpr unsigned int RESOLUTION                         = 64;
   static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
 
-  int _resolution_mode;
+  std::atomic<bool> _got_update;
 
+  TMF8829_Params _params;
   TMF8829_Device& _parent;
-  const TMF8829_Params _params;
   TMF8829_Measurement _latest_measurement;
 };
 

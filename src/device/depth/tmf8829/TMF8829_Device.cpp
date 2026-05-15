@@ -32,6 +32,58 @@ bool TMF8829_Device::setResolutionMode(ResolutionMode mode) {
   return _impl->setResolutionMode(mode);
 }
 
+bool TMF8829_Device::getResolutionMode(ResolutionMode& mode) {
+  return _impl->getResolutionMode(mode);
+}
+
+bool TMF8829_Device::getResultFormat(TMF8829_ResultFormat& format) {
+  return _impl->getResultFormat(format);
+}
+
+bool TMF8829_Device::setResultFormat(TMF8829_ResultFormat format) {
+  return _impl->setResultFormat(format);
+}
+
+bool TMF8829_Device::setResultFullNoise(bool full_noise) {
+  return _impl->setResultFullNoise(full_noise);
+}
+
+bool TMF8829_Device::getResultFullNoise(bool& full_noise) {
+  return _impl->getResultFullNoise(full_noise);
+}
+
+bool TMF8829_Device::setResultXtalk(bool xtalk) {
+  return _impl->setResultXtalk(xtalk);
+}
+
+bool TMF8829_Device::getResultXtalk(bool& xtalk) {
+  return _impl->getResultXtalk(xtalk);
+}
+
+bool TMF8829_Device::setResultNoiseStrength(bool noise_strength) {
+  return _impl->setResultNoiseStrength(noise_strength);
+}
+
+bool TMF8829_Device::getResultNoiseStrength(bool& noise_strength) {
+  return _impl->getResultNoiseStrength(noise_strength);
+}
+
+bool TMF8829_Device::setResultSignalStrength(bool signal_strength) {
+  return _impl->setResultSignalStrength(signal_strength);
+}
+
+bool TMF8829_Device::getResultSignalStrength(bool& signal_strength) {
+  return _impl->getResultSignalStrength(signal_strength);
+}
+
+bool TMF8829_Device::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
+  return _impl->setResultNrOfPeaks(nr_of_peaks);
+}
+
+bool TMF8829_Device::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
+  return _impl->getResultNrOfPeaks(nr_of_peaks);
+}
+
 bool TMF8829_Device::configure() {
   if (!getEnable()) {
     return true;

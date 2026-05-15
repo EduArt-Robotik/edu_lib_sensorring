@@ -19,7 +19,6 @@ namespace eduart {
 namespace sensorring {
 
 namespace device {
-
 /**
  * @brief Supported resolution modes of the TMF8829 sensor.
  */
