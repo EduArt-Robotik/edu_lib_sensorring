@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
@@ -37,7 +38,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   try {
     eduart::sensorring::ring::SensorRingFactory factory;
     factory.addInterface(interface);
-    factory.expectBoard({}, { eduart::sensorring::device::VL53L8CX_Params() });
+    factory.expectBoard({}, { eduart::sensorring::device::AnyDepthSensor_Params() });
 
     MeasurementManager manager(params, factory);
 
@@ -89,7 +90,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     // Heuristic 2: if we observed at least two frames, frame_id should differ.
     if (count >= 2) {
       const auto& second = measurements[1];
-      if (second.frame_id == first.frame_id) {
+      if (second.header.frame_id == first.header.frame_id) {
         return TestResult::Failed;
       }
     }
