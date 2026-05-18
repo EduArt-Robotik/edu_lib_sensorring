@@ -31,7 +31,7 @@ void setupCommonHeaderAndFooter(std::vector<std::uint8_t>& buffer, std::uint8_t 
   buffer[0] = 0x2Au;
 
   buffer[HEADER_OFFSET + 0] = static_cast<std::uint8_t>((0x1u << 4) | (focal_plane_mode & 0x0Fu));
-  buffer[HEADER_OFFSET + 1] = 0x00u;
+  buffer[HEADER_OFFSET + 1] = 0x01u; // nr_of_peaks = 1 (bits 0-2), no other flags
   writeUint16LE(buffer, HEADER_OFFSET + 2, payload);
   writeUint32LE(buffer, HEADER_OFFSET + 4, 0x12345678u);
 
