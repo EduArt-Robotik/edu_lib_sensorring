@@ -15,6 +15,7 @@
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 
 using namespace eduart::sensorring;
@@ -100,6 +101,11 @@ int main(int, char*[]) {
 
     // Create a SensorRing with one depth sensor board via auto-discovery
     ring::SensorRingFactory factory;
+
+    device::TMF8829_Params tmf_params;
+    tmf_params.resolution_mode = device::ResolutionMode::RES_16X16;
+    factory.setDefaultDeviceParams(tmf_params);
+
     factory.addInterface(can_interface);
     factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
     factory.addInterface(usbtingo_interface);
