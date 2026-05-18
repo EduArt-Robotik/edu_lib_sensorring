@@ -34,13 +34,26 @@ const TMF8829_Params& TMF8829_DeviceImpl::getParams() const {
   return _params;
 }
 
-bool TMF8829_DeviceImpl::setResolutionMode(ResolutionMode mode) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { static_cast<std::uint8_t>(mode) });
+bool TMF8829_DeviceImpl::isParamCombinationValid(const TMF8829_Params& params) const {
+  if (!params.isResultSizeValid()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 on board " + std::to_string(_parent.getDeviceID().index) + ": requested parameter combination exceeds the maximum result frame size.");
+    return false;
+  }
+  return true;
+}
 
-  ResolutionMode current_mode;
-  success &= getResolutionMode(current_mode);
-  success &= (current_mode == mode);
+bool TMF8829_DeviceImpl::setResolutionMode(ResolutionMode mode) {
+  TMF8829_Params proposed  = _params;
+  proposed.resolution_mode = mode;
+  bool success             = isParamCombinationValid(proposed);
+
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { static_cast<std::uint8_t>(mode) });
+
+    ResolutionMode current_mode;
+    success &= getResolutionMode(current_mode);
+    success &= (current_mode == mode);
+  }
 
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 resolution on board " + std::to_string(_parent.getDeviceID().index) + " to mode " + toString(mode));
@@ -103,41 +116,49 @@ bool TMF8829_DeviceImpl::getResultFormat(TMF8829_ResultFormat& format) {
 }
 
 bool TMF8829_DeviceImpl::setResultFormat(TMF8829_ResultFormat format) {
-  bool success = true;
+  TMF8829_Params proposed = _params;
+  proposed.result_format  = format;
+  bool success            = isParamCombinationValid(proposed);
 
-  do {
-    success = setResultFullNoise(format.full_noise);
-    if (!success)
-      break;
+  if (success)
+    do {
+      success = setResultFullNoise(format.full_noise);
+      if (!success)
+        break;
 
-    success = setResultXtalk(format.xtalk);
-    if (!success)
-      break;
+      success = setResultXtalk(format.xtalk);
+      if (!success)
+        break;
 
-    success = setResultNoiseStrength(format.noise_strength);
-    if (!success)
-      break;
+      success = setResultNoiseStrength(format.noise_strength);
+      if (!success)
+        break;
 
-    success = setResultSignalStrength(format.signal_strength);
-    if (!success)
-      break;
+      success = setResultSignalStrength(format.signal_strength);
+      if (!success)
+        break;
 
-    success = setResultNrOfPeaks(format.nr_of_peaks);
-    if (!success)
-      break;
+      success = setResultNrOfPeaks(format.nr_of_peaks);
+      if (!success)
+        break;
 
-  } while (false);
+    } while (false);
 
   return success;
 }
 
 bool TMF8829_DeviceImpl::setResultFullNoise(bool full_noise) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_FULL_NOISE, { static_cast<std::uint8_t>(full_noise) });
+  TMF8829_Params proposed           = _params;
+  proposed.result_format.full_noise = full_noise;
+  bool success                      = isParamCombinationValid(proposed);
 
-  bool current_full_noise;
-  success &= getResultFullNoise(current_full_noise);
-  success &= (current_full_noise == full_noise);
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_FULL_NOISE, { static_cast<std::uint8_t>(full_noise) });
+
+    bool current_full_noise;
+    success &= getResultFullNoise(current_full_noise);
+    success &= (current_full_noise == full_noise);
+  }
 
   std::string enable_str = full_noise ? "true" : "false";
   if (success) {
@@ -171,12 +192,17 @@ bool TMF8829_DeviceImpl::getResultFullNoise(bool& full_noise) {
 }
 
 bool TMF8829_DeviceImpl::setResultXtalk(bool xtalk) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_XTALK, { static_cast<std::uint8_t>(xtalk) });
+  TMF8829_Params proposed      = _params;
+  proposed.result_format.xtalk = xtalk;
+  bool success                 = isParamCombinationValid(proposed);
 
-  bool current_xtalk;
-  success &= getResultXtalk(current_xtalk);
-  success &= (current_xtalk == xtalk);
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_XTALK, { static_cast<std::uint8_t>(xtalk) });
+
+    bool current_xtalk;
+    success &= getResultXtalk(current_xtalk);
+    success &= (current_xtalk == xtalk);
+  }
 
   std::string enable_str = xtalk ? "true" : "false";
   if (success) {
@@ -210,12 +236,17 @@ bool TMF8829_DeviceImpl::getResultXtalk(bool& xtalk) {
 }
 
 bool TMF8829_DeviceImpl::setResultNoiseStrength(bool noise_strength) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NOISE_STRENGTH, { static_cast<std::uint8_t>(noise_strength) });
+  TMF8829_Params proposed               = _params;
+  proposed.result_format.noise_strength = noise_strength;
+  bool success                          = isParamCombinationValid(proposed);
 
-  bool current_noise_strength;
-  success &= getResultNoiseStrength(current_noise_strength);
-  success &= (current_noise_strength == noise_strength);
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NOISE_STRENGTH, { static_cast<std::uint8_t>(noise_strength) });
+
+    bool current_noise_strength;
+    success &= getResultNoiseStrength(current_noise_strength);
+    success &= (current_noise_strength == noise_strength);
+  }
 
   std::string enable_str = noise_strength ? "true" : "false";
   if (success) {
@@ -250,12 +281,18 @@ bool TMF8829_DeviceImpl::getResultNoiseStrength(bool& noise_strength) {
 }
 
 bool TMF8829_DeviceImpl::setResultSignalStrength(bool signal_strength) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_SIGNAL_STRENGTH, { static_cast<std::uint8_t>(signal_strength) });
+  TMF8829_Params proposed                = _params;
+  proposed.result_format.signal_strength = signal_strength;
+  bool success                           = isParamCombinationValid(proposed);
 
-  bool current_signal_strength;
-  success &= getResultSignalStrength(current_signal_strength);
-  success &= (current_signal_strength == signal_strength);
+  if (success) {
+    success
+        &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_SIGNAL_STRENGTH, { static_cast<std::uint8_t>(signal_strength) });
+
+    bool current_signal_strength;
+    success &= getResultSignalStrength(current_signal_strength);
+    success &= (current_signal_strength == signal_strength);
+  }
 
   std::string enable_str = signal_strength ? "true" : "false";
   if (success) {
@@ -290,12 +327,17 @@ bool TMF8829_DeviceImpl::getResultSignalStrength(bool& signal_strength) {
 }
 
 bool TMF8829_DeviceImpl::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
-  bool success = true;
-  success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NR_PEAKS, { static_cast<std::uint8_t>(nr_of_peaks) });
+  TMF8829_Params proposed            = _params;
+  proposed.result_format.nr_of_peaks = nr_of_peaks;
+  bool success                       = isParamCombinationValid(proposed);
 
-  std::uint8_t current_nr_of_peaks;
-  success &= getResultNrOfPeaks(current_nr_of_peaks);
-  success &= (current_nr_of_peaks == nr_of_peaks);
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NR_PEAKS, { static_cast<std::uint8_t>(nr_of_peaks) });
+
+    std::uint8_t current_nr_of_peaks;
+    success &= getResultNrOfPeaks(current_nr_of_peaks);
+    success &= (current_nr_of_peaks == nr_of_peaks);
+  }
 
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 number of peaks on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(nr_of_peaks));

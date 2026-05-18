@@ -64,6 +64,13 @@ public:
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
 private:
+  /**
+   * @brief Validates whether the given parameter combination produces a result frame within the size limit.
+   * @param params Proposed parameter set to validate.
+   * @return True if valid, false otherwise (an error is logged).
+   */
+  bool isParamCombinationValid(const TMF8829_Params& params) const;
+
   static constexpr unsigned int RESOLUTION                         = 64;
   static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
 
