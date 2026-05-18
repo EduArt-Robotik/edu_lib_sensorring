@@ -12,7 +12,7 @@
 #include <chrono>
 #include <cstdint>
 
-#include "sensorring/device/DeviceState.hpp"
+#include "sensorring/measurement/Header.hpp"
 #include "sensorring/measurement/Image.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -26,13 +26,13 @@ namespace measurement {
  * @class  GrayscaleImage
  * @brief  Grayscale image with 1 channel and 8 bit color depth
  */
-class GrayscaleImage : public GenericGrayscaleImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT GrayscaleImage : public ScalarImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  FalseColorImage
  * @brief  False color image with 3 channels (red, green, blue) and 8 bit color depth
  */
-class FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION> {};
+class SENSORRING_EXPORT FalseColorImage : public RgbImage<std::uint8_t, THERMAL_RESOLUTION> {};
 
 /**
  * @class  TemperatureImage
@@ -41,7 +41,7 @@ class FalseColorImage : public GenericRGBImage<std::uint8_t, THERMAL_RESOLUTION>
  * Each pixel stores a temperature value in °C. Provides methods to convert to
  * visualization images (grayscale or false-color iron palette).
  */
-class SENSORRING_EXPORT TemperatureImage : public GenericGrayscaleImage<double, THERMAL_RESOLUTION> {
+class SENSORRING_EXPORT TemperatureImage : public ScalarImage<double, THERMAL_RESOLUTION> {
 public:
   /**
    * @brief Convert to grayscale with explicit temperature range.
@@ -76,15 +76,10 @@ public:
  * @class  ThermalMeasurement
  * @brief  Structure for holding a measurement from a thermal sensor
  */
-struct ThermalMeasurement {
-  /// Index of the sensor that produced this measurement.
-  unsigned int sensor_index = 0;
+struct SENSORRING_EXPORT ThermalMeasurement {
 
-  /// Frame number of the ThermalMeasurement
-  unsigned int frame_id = 0;
-
-  /// Timestamp when the measurement was taken.
-  std::chrono::system_clock::time_point timestamp;
+  /// Measurement header
+  Header header;
 
   /// Device health state at the time of publication.
   device::DeviceState state = device::DeviceState::Undefined;
@@ -100,7 +95,6 @@ struct ThermalMeasurement {
 
   /// Image structure where each pixel represents the temperature measured at that point in °C
   TemperatureImage temperatures;
-
 };
 
 } // namespace measurement

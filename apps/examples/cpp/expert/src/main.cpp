@@ -23,18 +23,17 @@
 #include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/DepthSensor.hpp>
-#include <sensorring/device/Group.hpp>
-#include <sensorring/device/Light.hpp>
-#include <sensorring/device/ThermalSensor.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp>
+#include <sensorring/device/light/Light.hpp>
+#include <sensorring/device/light/ws2812b/WS2812b_Params.hpp>
+#include <sensorring/device/thermal/ThermalSensor.hpp>
+#include <sensorring/device/thermal/htpa32/HTPA32_Params.hpp>
+#include <sensorring/device/types/Group.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 #include <vector>
-
-#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
 
 using namespace eduart::sensorring;
 using namespace std::chrono_literals;
@@ -88,20 +87,20 @@ int main(int, char*[]) {
     htpa_params.auto_min_max = true;
     device::WS2812b_Params ws_params;
 
-    device::SensorBoardParams board_0;
+    board::SensorBoardParams board_0;
     board_0.rotation    = { 0, 0, 45 };
     board_0.translation = { 0.1, 0.05, 0 };
     factory.expectBoard(board_0, { vl53_params, htpa_params, ws_params });
 
     // Board 1: Front-right, rotated -45° around Z.
-    device::SensorBoardParams board_1;
+    board::SensorBoardParams board_1;
     board_1.rotation    = { 0, 0, -45 };
     board_1.translation = { 0.1, -0.05, 0 };
     factory.expectBoard(board_1, { vl53_params, htpa_params, ws_params });
 
     // Second interface (if available).
     factory.addInterface(usbtingo_interface);
-    device::SensorBoardParams board_2;
+    board::SensorBoardParams board_2;
     board_2.rotation    = { 0, 0, 0 };
     board_2.translation = { -0.1, 0, 0 };
     factory.expectBoard(board_2, { vl53_params, htpa_params, ws_params });
@@ -177,11 +176,13 @@ int main(int, char*[]) {
     }
 
     // =========================================================================
-    // 8. Group subscription for thermal (all sensors at once)
+    // 8. Group subscription for thermal (per-sensor callbacks)
     // =========================================================================
     std::atomic<unsigned int> thermal_frame_count{ 0 };
-    auto thermal_sub = all_thermal.subscribe([&thermal_frame_count](const measurement::ThermalMeasurement& /*m*/) {
-      thermal_frame_count++;
+    auto thermal_sub = all_thermal.subscribe([&thermal_frame_count](const measurement::ThermalMeasurement& m) {
+      if (m.header.device_id.index == 0) {
+        thermal_frame_count++;
+      }
       // m.temperatures holds the 32×32 temperature array in °C.
       // m.min_deg_c / m.max_deg_c give the frame extremes.
     });

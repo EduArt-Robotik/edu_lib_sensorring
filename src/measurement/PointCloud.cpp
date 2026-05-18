@@ -39,6 +39,19 @@ PointCloud PointCloud::combine(const std::vector<PointCloud>& clouds) {
   return result;
 }
 
+PointCloud PointCloud::transform(const PointCloud& cloud, const math::Vector3 translation, const math::Vector3 rotation) {
+  auto rot_matrix = math::rotMatrixFromEulerDegrees(rotation);
+  return transform(cloud, translation, rot_matrix);
+}
+
+PointCloud PointCloud::transform(const PointCloud& cloud, const math::Vector3 translation, const math::Matrix3 rotation) {
+  PointCloud result = cloud;
+  for (size_t i = 0; i < result.data.size(); ++i) {
+    result.data[i].point = (rotation * cloud.data[i].point) + translation;
+  }
+  return result;
+}
+
 } // namespace measurement
 
 } // namespace sensorring

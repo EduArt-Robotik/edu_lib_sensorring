@@ -19,10 +19,11 @@ namespace sensorring {
 namespace subscription {
 
 /**
+ * @struct SubscriberToken
  * @brief Opaque token identifying a subscription (state or device group).
  */
 struct SubscriberToken {
-  /// Token type.
+  /// @brief Underlying numeric type used to represent the token value.
   using TokenType = unsigned long long;
 
   /**

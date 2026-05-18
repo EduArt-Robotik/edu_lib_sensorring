@@ -25,9 +25,9 @@ namespace com {
  * @brief Type of the communication interface.
  */
 enum class InterfaceType {
-  Undefined,
-  SocketCan,
-  UsbTingo
+  Undefined,  ///< Type not yet assigned.
+  SocketCan,  ///< Linux SocketCAN interface (e.g. can0).
+  UsbTingo    ///< USBtingo CAN adapter.
 };
 
 /**
@@ -45,8 +45,8 @@ SENSORRING_EXPORT std::string toString(InterfaceType type) noexcept;
 SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const InterfaceType type) noexcept;
 
 /**
- * @struct InterfaceParams
- * @brief Parameters of a communication interface.
+ * @struct ComInterfaceID
+ * @brief Uniquely identifies a communication interface by type and name.
  */
 struct ComInterfaceID {
   /// Type of the communication interface.
@@ -55,10 +55,10 @@ struct ComInterfaceID {
   /// Name of the communication interface.
   std::string name = "";
 
-  /// Equality operators for ComInterfaceID
+  /// Equality operator for ComInterfaceID.
   bool operator==(const ComInterfaceID& other) const;
 
-  /// Inequality operator for ComInterfaceID
+  /// Inequality operator for ComInterfaceID.
   bool operator!=(const ComInterfaceID& other) const;
 };
 

@@ -4,6 +4,7 @@
  * @file   DepthMeasurement.hpp
  * @author EduArt Robotik GmbH
  * @brief  Pure data structure for depth sensor measurements.
+ * @date   2026-05-08
  */
 
 #pragma once
@@ -11,7 +12,7 @@
 #include <chrono>
 #include <vector>
 
-#include "sensorring/device/DeviceState.hpp"
+#include "sensorring/measurement/Header.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -29,40 +30,27 @@ namespace measurement {
  * raw (sensor-frame) and transformed (ring-frame) point clouds.
  */
 struct SENSORRING_EXPORT DepthMeasurement {
-  /// Index of the sensor that produced this measurement.
-  unsigned int sensor_index = 0;
 
-  /// Frame sequence counter.
-  unsigned int frame_id = 0;
+  /// Measurement header
+  Header header;
 
   /// Number of valid points in this measurement.
   unsigned int nr_valid_points = 0;
 
-  /// Timestamp when the measurement was taken.
-  std::chrono::system_clock::time_point timestamp;
+  /// Resolution of the depth sensor in x direction. Part of the DepthMeasurement as the PointCloud itself may be unstructured.
+  unsigned int resolution_x = 0;
 
-  /// Device health state at the time of publication.
-  device::DeviceState state = device::DeviceState::Undefined;
+  /// Resolution of the depth sensor in y direction. Part of the DepthMeasurement as the PointCloud itself may be unstructured.
+  unsigned int resolution_y = 0;
 
   /// Point cloud in the sensor's local coordinate frame.
   PointCloud point_cloud;
 
-  /// Point cloud transformed into the ring's coordinate frame (using configured pose).
-  PointCloud transformed_point_cloud;
-
   /**
-   * @brief Combine the transformed point clouds from multiple depth measurements.
-   * @param[in] measurements Vector of depth measurements to merge.
-   * @return Single PointCloud containing all transformed points.
+   * @brief Transform the point cloud from the sensor's local frame to the ring's global frame.
+   * @return A new PointCloud with all points expressed in the global coordinate frame.
    */
-  static inline PointCloud combinePointClouds(const std::vector<DepthMeasurement>& measurements) {
-    std::vector<PointCloud> clouds;
-    clouds.reserve(measurements.size());
-    for (const auto& m : measurements) {
-      clouds.push_back(m.transformed_point_cloud);
-    }
-    return PointCloud::combine(clouds);
-  }
+  inline PointCloud transformToGlobalFrame() { return PointCloud::transform(point_cloud, header.position, header.orientation); };
 };
 
 } // namespace measurement

@@ -1,11 +1,10 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
-#include "device/SensorBoardCommands.hpp"
+#include "board/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
-#include "sensorring/SensorBoard.hpp"
 #include "sensorring/SensorBus.hpp"
+#include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/device/BaseDevice.hpp"
-#include "sensorring/device/IDevice.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 using namespace std::chrono_literals;
@@ -19,16 +18,12 @@ namespace manager {
 MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
     : _params(params)
     , _manager_state(ManagerState::Uninitialized)
-    , _measurement_state(MeasurementState::init)
+    , _phase(Phase::init)
     , _sensor_ring(std::move(sensor_ring))
-    , _first_measurement(true)
-    , _tof_measurement_period(1.0F / params.frequency_tof_hz)
-    , _thermal_measurement_period(1.0F / params.frequency_thermal_hz)
-    , _last_tof_measurement_timestamp(std::chrono::steady_clock::now())
-    , _last_thermal_measurement_timestamp(std::chrono::steady_clock::now())
-    , _is_tof_throttled(params.frequency_tof_hz > 0.0)
-    , _is_thermal_throttled(params.frequency_thermal_hz > 0.0)
-    , _thermal_measurement_flag(false)
+    , _base_rate_hz(0.0)
+    , _tick_period(0.0)
+    , _next_tick_time(std::chrono::steady_clock::now())
+    , _tick_count(0)
     , _is_running(false) {
 
   if (_sensor_ring->getDevices().empty()) {
@@ -42,7 +37,7 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
   }
 
-  // Populate typed device vectors via dynamic_cast
+  // Populate typed device vectors via dynamic_cast.
   for (auto* dev : _sensor_ring->getDevices()) {
     if (auto* ds = dynamic_cast<device::DepthSensor*>(dev))
       _depth_sensors.push_back(ds);
@@ -52,9 +47,13 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
       _lights.push_back(lt);
     if (auto* vl = dynamic_cast<device::VL53L8CX_Device*>(dev))
       _vl53l8cx_devices.push_back(vl);
+    if (auto* tmf = dynamic_cast<device::TMF8829_Device*>(dev))
+      _tmf8829_devices.push_back(tmf);
     if (auto* ht = dynamic_cast<device::HTPA32_Device*>(dev))
       _htpa32_devices.push_back(ht);
   }
+
+  buildSchedule();
 
   _manager_state = ManagerState::Initialized;
 }
@@ -68,24 +67,78 @@ ManagerParams MeasurementManagerImpl::getParams() const noexcept {
 }
 
 /* =======================================================================================
+        Schedule computation
+==========================================================================================
+*/
+
+void MeasurementManagerImpl::buildSchedule() {
+  _schedule.clear();
+
+  // Build one group per device type that has enabled sensors.
+  if (!_vl53l8cx_devices.empty()) {
+    SensorGroupSchedule group;
+    group.type = device::DeviceType::VL53L8CX;
+    // Group max rate is limited by the slowest sensor in the group.
+    group.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _vl53l8cx_devices) {
+      if (dev->getEnable()) {
+        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      }
+    }
+    _schedule.push_back(group);
+  }
+
+  if (!_tmf8829_devices.empty()) {
+    SensorGroupSchedule group;
+    group.type = device::DeviceType::TMF8829;
+    // Group max rate is limited by the slowest sensor in the group.
+    group.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _tmf8829_devices) {
+      if (dev->getEnable()) {
+        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      }
+    }
+    _schedule.push_back(group);
+  }
+
+  if (!_htpa32_devices.empty()) {
+    SensorGroupSchedule group;
+    group.type        = device::DeviceType::HTPA32;
+    group.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _htpa32_devices) {
+      if (dev->getEnable()) {
+        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      }
+    }
+    _schedule.push_back(group);
+  }
+
+  _base_rate_hz = computeScheduleFastest(_schedule, _params.frequency_tof_hz, _params.frequency_thermal_hz);
+  //_base_rate_hz = computeScheduleCommonMultiple(_schedule, _params.frequency_tof_hz, _params.frequency_thermal_hz);
+
+  if (_base_rate_hz > 0.0) {
+    _tick_period = std::chrono::duration<double>(1.0 / _base_rate_hz);
+  } else {
+    _tick_period = std::chrono::duration<double>(0.1); // 10 Hz fallback.
+  }
+
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Scheduler: base rate = " + std::to_string(_base_rate_hz) + " Hz, tick period = " + std::to_string(_tick_period.count() * 1000.0) + " ms");
+  for (const auto& g : _schedule) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "  Group " + device::toString(g.type) + ": divisor = " + std::to_string(g.divisor) + ", effective rate = " + std::to_string(g.effective_rate_hz) + " Hz");
+  }
+}
+
+bool MeasurementManagerImpl::isGroupDue(const SensorGroupSchedule& group) const {
+  return (_tick_count % group.divisor) == 0;
+}
+
+/* =======================================================================================
         Subscriptions
 ==========================================================================================
 */
 
 subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
   return _state_publisher.subscribe(std::move(callback));
-}
-
-bool MeasurementManagerImpl::waitForMeasurementFuture(MeasurementFutureKey key, std::chrono::steady_clock::duration timeout) noexcept {
-  auto it = _measurement_futures.find(key);
-  if (it == _measurement_futures.end()) {
-    return true;
-  }
-  auto& fut = it->second;
-  if (fut.wait_for(timeout) != std::future_status::ready) {
-    return false;
-  }
-  return fut.get();
 }
 
 void MeasurementManagerImpl::publishDepthMeasurements() {
@@ -119,11 +172,11 @@ bool MeasurementManagerImpl::measureSome() noexcept {
   if (!_is_running) {
     notifyState(ManagerState::Running);
     try {
-      StateMachine();
+      runPhase();
       success = true;
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in state machine: " + std::string(e.what()));
-      _measurement_state = MeasurementState::error_handler_communication;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in scheduler: " + std::string(e.what()));
+      _phase = Phase::error_handler_communication;
     }
   }
 
@@ -133,7 +186,7 @@ bool MeasurementManagerImpl::measureSome() noexcept {
 bool MeasurementManagerImpl::startMeasuring() noexcept {
   if (!_is_running) {
     _is_running    = true;
-    _worker_thread = std::thread(&MeasurementManagerImpl::StateMachineWorker, this);
+    _worker_thread = std::thread(&MeasurementManagerImpl::runWorker, this);
     notifyState(ManagerState::Running);
     return true;
   }
@@ -160,56 +213,62 @@ bool MeasurementManagerImpl::isMeasuring() noexcept {
 }
 
 /* =======================================================================================
-  State machine function
+        Scheduler phases
 ==========================================================================================
 */
-void MeasurementManagerImpl::StateMachineWorker() noexcept {
+
+void MeasurementManagerImpl::runWorker() noexcept {
   while (_is_running) {
     try {
-      StateMachine();
+      runPhase();
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in state machine: " + std::string(e.what()));
-      _measurement_state = MeasurementState::error_handler_communication;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in scheduler: " + std::string(e.what()));
+      _phase = Phase::error_handler_communication;
     }
   }
 }
 
-void MeasurementManagerImpl::StateMachine() {
-  bool success               = true;
-  const bool tof_enabled     = !_vl53l8cx_devices.empty();
-  const bool thermal_enabled = !_htpa32_devices.empty();
+void MeasurementManagerImpl::runPhase() {
+  bool success = true;
 
-  switch (_measurement_state) {
+  switch (_phase) {
     /* =============================================
-      Initialization part of the state machine
-      Runs once at start and may be triggered
-      again on error conditions
+      Initialization sequence
     ============================================= */
 
-  case MeasurementState::init: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager state machine");
-    _measurement_state = MeasurementState::reset_sensors;
+  case Phase::init: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager scheduler");
+    _phase = Phase::reset_sensors;
     break;
   }
 
-  case MeasurementState::reset_sensors: {
+  case Phase::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
-    device::resetBoards();
+    board::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    _measurement_state = MeasurementState::sync_lights;
+    _phase = Phase::configure_devices;
     break;
   }
 
-  case MeasurementState::sync_lights: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Syncing all lights and set to mode pulsation");
-    device::WS2812b_Device::syncLight();
-    device::WS2812b_Device::setLight(device::LightMode::Pulsation, 0, 0, 0);
-    _measurement_state = MeasurementState::get_eeprom;
+  case Phase::configure_devices: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Configuring devices after reset");
+
+    success = true;
+    for (auto* dev : _sensor_ring->getDevices()) {
+      success &= dev->configure();
+    }
+
+    if (success) {
+      _phase = Phase::get_eeprom;
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to configure at least one device after reset.");
+      _phase = Phase::shutdown;
+    }
     break;
   }
 
-  case MeasurementState::get_eeprom: {
-    if (thermal_enabled) {
+  case Phase::get_eeprom: {
+    if (!_htpa32_devices.empty()) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
       const auto timeout_ms = _params.timeout;
       for (auto* device : _htpa32_devices) {
@@ -221,195 +280,123 @@ void MeasurementManagerImpl::StateMachine() {
     }
 
     if (success) {
-      _measurement_state = MeasurementState::pre_loop_init;
+      _phase = Phase::pre_loop_init;
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
-      _measurement_state = MeasurementState::shutdown;
+      _phase = Phase::shutdown;
     }
     break;
   }
 
-  case MeasurementState::pre_loop_init: {
+  case Phase::pre_loop_init: {
     _sensor_ring->setBitRateSwitching(_params.enable_brs);
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting to fetch measurements now.");
-    _last_tof_measurement_timestamp     = std::chrono::steady_clock::now();
-    _last_thermal_measurement_timestamp = std::chrono::steady_clock::now();
-    _measurement_state                  = MeasurementState::device_actions;
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting tick-based measurement loop.");
+    _tick_count     = 0;
+    _next_tick_time = std::chrono::steady_clock::now();
+
+    // Clear pending flags.
+    for (auto& g : _schedule) {
+      g.has_pending_request = false;
+      g.has_fetch_ready     = false;
+    }
+
+    _phase = Phase::tick;
     break;
   }
 
     /* =============================================
-      Loop part of the state machine
-      Runs continuously to fetch data
+      Tick-based measurement loop
     ============================================= */
 
-  case MeasurementState::device_actions: {
-    // Drain and execute all per-device action queues.
-    for (auto* dev : _sensor_ring->getDevices()) {
-      for (auto& action : dev->drainActions()) {
-        try {
-          action();
-        } catch (const std::exception& e) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception in device action: " + std::string(e.what()));
-        }
-      }
-    }
-    _measurement_state = MeasurementState::request_tof_measurement;
-    break;
-  }
-
-  case MeasurementState::request_tof_measurement: {
-    if (tof_enabled) {
-      _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-    }
-    _last_tof_measurement_timestamp = std::chrono::steady_clock::now();
-    _measurement_state              = MeasurementState::request_thermal_measurement;
-    break;
-  }
-
-  case MeasurementState::request_thermal_measurement: {
-    if (thermal_enabled && !_thermal_measurement_flag) {
-      if (!_is_thermal_throttled || ((std::chrono::steady_clock::now() - _last_thermal_measurement_timestamp) > _thermal_measurement_period)) {
-        _measurement_futures[MeasurementFutureKey::ThermalRequest] = device::HTPA32_Device::requestThermalMeasurementAsync(_htpa32_devices, _params.timeout);
-        _last_thermal_measurement_timestamp                        = std::chrono::steady_clock::now();
-        _thermal_measurement_flag                                  = true;
-      }
-    }
-    _measurement_state = MeasurementState::wait_for_data;
-    break;
-  }
-
-  case MeasurementState::wait_for_data: {
-    if (_is_tof_throttled || _first_measurement) {
-      if (tof_enabled)
-        success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
+  case Phase::tick: {
+    // Step 1: Wait for pending data from previous requests (self-regulating).
+    if (!waitForPendingData()) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout while waiting for pending measurement data.");
+      _phase = Phase::error_handler_measurement;
+      break;
     }
 
-    if (success) {
-      if (_first_measurement) {
-        _first_measurement = false;
-        _measurement_state = MeasurementState::device_actions;
-        break;
-      } else {
-        _measurement_state = MeasurementState::fetch_tof_data;
-      }
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while waiting for completion of measurements.");
-      _measurement_state = MeasurementState::error_handler_measurement;
-    }
-    break;
-  }
+    // Step 2: Request new measurements for groups due this tick.
+    // Done before fetching so sensors start working on N+1 while we transfer N.
+    requestMeasurements();
 
-  case MeasurementState::fetch_tof_data: {
-    if (tof_enabled) {
-      auto fut = device::VL53L8CX_Device::fetchTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-      if (fut.wait_for(_params.timeout) == std::future_status::ready) {
-        success = fut.get();
-      } else {
-        success = false;
-      }
-
-      if (success) {
-        publishDepthMeasurements();
-      }
+    // Step 3: Fetch data from groups that completed (has_fetch_ready was set before request).
+    if (!fetchPendingData()) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout while fetching measurement data.");
+      _phase = Phase::error_handler_measurement;
+      break;
     }
 
-    if (success) {
-      _measurement_state = MeasurementState::fetch_thermal_data;
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching tof measurements.");
-      _measurement_state = MeasurementState::error_handler_measurement;
-    }
-    break;
-  }
+    // Step 4: Execute device actions (actuators) at end of tick.
+    executeDeviceActions();
 
-  case MeasurementState::fetch_thermal_data: {
-    if (thermal_enabled && _thermal_measurement_flag) {
-      auto fut = device::HTPA32_Device::fetchThermalMeasurementAsync(_htpa32_devices, _params.timeout);
-      success  = fut.wait_for(_params.timeout) == std::future_status::ready && fut.get();
+    // Step 5: Sleep until next tick boundary.
+    _tick_count++;
+    _next_tick_time += std::chrono::duration_cast<std::chrono::steady_clock::duration>(_tick_period);
+    std::this_thread::sleep_until(_next_tick_time);
 
-      if (success) {
-        publishThermalMeasurements();
-      }
-      _thermal_measurement_flag = false;
-    }
-
-    if (success) {
-      _measurement_state = MeasurementState::throttle_measurement;
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while fetching thermal measurements.");
-      _measurement_state = MeasurementState::error_handler_measurement;
-    }
-    break;
-  }
-
-  case MeasurementState::throttle_measurement: {
-    if (tof_enabled && _is_tof_throttled) {
-      std::this_thread::sleep_until(_last_tof_measurement_timestamp + _tof_measurement_period);
-    } else {
-      success &= waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
-    }
-
-    if (success) {
-      _measurement_state = MeasurementState::device_actions;
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout occurred while taking tof measurements.");
-      _measurement_state = MeasurementState::error_handler_measurement;
-    }
     break;
   }
 
     /* =============================================
-      Error handler
+      Error handlers
     ============================================= */
 
-  case MeasurementState::error_handler_measurement: {
+  case Phase::error_handler_measurement: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler for measurement errors called.");
     notifyState(ManagerState::Error);
-
-    unsigned int attempts = 0;
 
     if (_params.repair_errors) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Trying to restart measurements.");
 
-      if (success) {
-        attempts = 0;
-        for (device::IDevice* d : _sensor_ring->getDevices())
-          if (auto bd = dynamic_cast<device::BaseDevice*>(d))
-            bd->resetSensorState();
-        do {
-          attempts++;
-          if (!_vl53l8cx_devices.empty()) {
-            _measurement_futures[MeasurementFutureKey::ToFRequest] = device::VL53L8CX_Device::requestTofMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-          }
-          success = waitForMeasurementFuture(MeasurementFutureKey::ToFRequest, _params.timeout);
-        } while (!success && _is_running && (attempts < 10));
+      // Reset sensor state.
+      for (auto* dev : _sensor_ring->getDevices()) {
+        dev->resetSensorState();
       }
-    }
 
-    if (_params.repair_errors) {
+      // Clear all pending flags and attempt a single request cycle.
+      for (auto& g : _schedule) {
+        g.has_pending_request = false;
+        g.has_fetch_ready     = false;
+      }
+
+      unsigned int attempts = 0;
+      success               = false;
+
+      do {
+        attempts++;
+        if (!_vl53l8cx_devices.empty()) {
+          auto fut = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+          if (fut.wait_for(_params.timeout) != std::future_status::ready) {
+            success = false;
+          } else {
+            success = fut.get();
+          }
+        } else {
+          success = true;
+        }
+      } while (!success && _is_running && (attempts < 10));
+
       if (success) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting measurements succeeded after " + std::to_string(attempts) + " attempts.");
-        _measurement_state = MeasurementState::device_actions;
+        _tick_count     = 0;
+        _next_tick_time = std::chrono::steady_clock::now();
+        _phase          = Phase::tick;
         notifyState(ManagerState::Running);
       } else {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart measurements. Resetting all sensors.");
-        _measurement_state = MeasurementState::reset_sensors;
+        _phase = Phase::reset_sensors;
       }
     } else {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter "
-                                      "\"repair_errors\" is set to \"false\".");
-      _measurement_state = MeasurementState::shutdown;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter \"repair_errors\" is set to \"false\".");
+      _phase = Phase::shutdown;
     }
     break;
   }
 
-  case MeasurementState::error_handler_communication: {
+  case Phase::error_handler_communication: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Error handler for communication errors called.");
     notifyState(ManagerState::Error);
-
-    unsigned int attempts = 0;
 
     if (_params.repair_errors) {
       bool communication_error = false;
@@ -419,9 +406,10 @@ void MeasurementManagerImpl::StateMachine() {
       }
 
       if (communication_error) {
-        logger::Logger::getInstance()->log(
-            logger::LogVerbosity::Info, "Communication error detected. Trying "
-                                        "to restart affected interfaces.");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Communication error detected. Trying to restart affected interfaces.");
+
+        unsigned int attempts = 0;
+        success               = true;
 
         do {
           attempts++;
@@ -439,22 +427,24 @@ void MeasurementManagerImpl::StateMachine() {
           std::this_thread::sleep_for(std::chrono::milliseconds(250));
         } while (!success && _is_running && (attempts < 40));
       }
-    }
 
-    if (_params.repair_errors) {
       if (success) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting communication succeeded after " + std::to_string(attempts) + " attempts.");
-        _measurement_state = MeasurementState::device_actions;
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Restarting communication succeeded.");
+        _tick_count     = 0;
+        _next_tick_time = std::chrono::steady_clock::now();
+        for (auto& g : _schedule) {
+          g.has_pending_request = false;
+          g.has_fetch_ready     = false;
+        }
+        _phase = Phase::tick;
         notifyState(ManagerState::Running);
       } else {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to restart communication. Please check the interfaces.");
-        _measurement_state = MeasurementState::shutdown;
+        _phase = Phase::shutdown;
       }
     } else {
-      logger::Logger::getInstance()->log(
-          logger::LogVerbosity::Info, "Will not attempt to restart measurements because parameter "
-                                      "\"repair_errors\" is set to \"false\".");
-      _measurement_state = MeasurementState::shutdown;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Will not attempt to restart communication because parameter \"repair_errors\" is set to \"false\".");
+      _phase = Phase::shutdown;
     }
     break;
   }
@@ -463,13 +453,155 @@ void MeasurementManagerImpl::StateMachine() {
       Shutdown
     ============================================= */
 
-  case MeasurementState::shutdown: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down state machine.");
+  case Phase::shutdown: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down scheduler.");
     notifyState(ManagerState::Shutdown);
     _is_running = false;
     break;
   }
   };
+}
+
+/* =======================================================================================
+        Tick sub-steps
+==========================================================================================
+*/
+
+bool MeasurementManagerImpl::waitForPendingData() {
+  // Wait for all groups that have a pending request from the previous tick.
+  // After waiting, promote them to fetch-ready state.
+  for (auto& group : _schedule) {
+    if (!group.has_pending_request) {
+      continue;
+    }
+
+    if (group.type == device::DeviceType::VL53L8CX) {
+      // Wait for the data-available future that was launched in the previous tick's
+      // requestMeasurements(). This blocks until all sensors signal measurement complete.
+      if (_vl53_data_available_future.valid()) {
+        if (_vl53_data_available_future.wait_for(_params.timeout) != std::future_status::ready || !_vl53_data_available_future.get()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "VL53L8CX data-available wait timed out.");
+          return false;
+        }
+      }
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      if (_tmf_data_available_future.valid()) {
+        if (_tmf_data_available_future.wait_for(_params.timeout) != std::future_status::ready || !_tmf_data_available_future.get()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 data-available wait timed out.");
+          return false;
+        }
+      }
+    }
+
+    if (group.type == device::DeviceType::HTPA32) {
+      // HTPA32 request is fire-and-forget. The actual wait happens during fetch
+      // (fetchMeasurementAsync blocks until data arrives).
+    }
+
+    // Data is available — mark ready for fetch.
+    group.has_fetch_ready     = true;
+    group.has_pending_request = false;
+  }
+
+  return true;
+}
+
+bool MeasurementManagerImpl::fetchPendingData() {
+  for (auto& group : _schedule) {
+    if (!group.has_fetch_ready) {
+      continue;
+    }
+
+    if (group.type == device::DeviceType::VL53L8CX) {
+      for (auto* dev : _vl53l8cx_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          return false;
+        }
+      }
+      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+      publishDepthMeasurements();
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      for (auto* dev : _tmf8829_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          return false;
+        }
+      }
+      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+      publishDepthMeasurements();
+    }
+
+    if (group.type == device::DeviceType::HTPA32) {
+      for (auto* dev : _htpa32_devices) {
+        if (!dev->getEnable())
+          continue;
+        auto fut = dev->fetchMeasurementAsync(_params.timeout);
+        if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
+          return false;
+        }
+      }
+      publishThermalMeasurements();
+    }
+
+    group.has_fetch_ready = false;
+  }
+
+  return true;
+}
+
+void MeasurementManagerImpl::requestMeasurements() {
+  for (auto& group : _schedule) {
+    if (!isGroupDue(group)) {
+      continue;
+    }
+
+    if (group.type == device::DeviceType::VL53L8CX) {
+      if (!_vl53l8cx_devices.empty()) {
+        // Launch request — the async thread sends the broadcast and waits for
+        // data-available. The future is consumed in the next tick's waitForPendingData().
+        _vl53_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
+        group.has_pending_request   = true;
+      }
+    }
+
+    if (group.type == device::DeviceType::TMF8829) {
+      if (!_tmf8829_devices.empty()) {
+        // Launch request — the async thread sends the broadcast and waits for
+        // data-available. The future is consumed in the next tick's waitForPendingData().
+        _tmf_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
+        group.has_pending_request  = true;
+      }
+    }
+
+    if (group.type == device::DeviceType::HTPA32) {
+      if (!_htpa32_devices.empty()) {
+        // Fire-and-forget broadcast request.
+        device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
+        group.has_pending_request = true;
+      }
+    }
+  }
+}
+
+void MeasurementManagerImpl::executeDeviceActions() {
+  for (auto* dev : _sensor_ring->getDevices()) {
+    for (auto& action : dev->drainActions()) {
+      try {
+        action();
+      } catch (const std::exception& e) {
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception in device action: " + std::string(e.what()));
+      }
+    }
+  }
 }
 
 /* =======================================================================================

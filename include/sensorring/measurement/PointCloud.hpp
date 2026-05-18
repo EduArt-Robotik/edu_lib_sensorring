@@ -59,6 +59,24 @@ struct SENSORRING_EXPORT PointCloud {
    * @return Single PointCloud containing all points.
    */
   static PointCloud combine(const std::vector<PointCloud>& clouds);
+
+  /**
+   * @brief Transforms a point cloud using a rotation matrix and a translation vector.
+   * @param[in] cloud The point cloud to transform.
+   * @param[in] translation The translation vector.
+   * @param[in] rotation The rotation vector (Euler angles in degrees).
+   * @return Transformed point cloud.
+   */
+  static PointCloud transform(const PointCloud& cloud, const math::Vector3 translation, const math::Vector3 rotation);
+
+    /**
+   * @brief Transforms a point cloud using a rotation matrix and a translation vector.
+   * @param[in] cloud The point cloud to transform.
+   * @param[in] translation The translation vector.
+   * @param[in] rotation The rotation matrix.
+   * @return Transformed point cloud.
+   */
+  static PointCloud transform(const PointCloud& cloud, const math::Vector3 translation, const math::Matrix3 rotation);
 };
 
 } // namespace measurement

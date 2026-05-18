@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
+#include "device/thermal/htpa32/HTPA32_Eeprom.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/measurement/Image.hpp"
 

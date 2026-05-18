@@ -222,9 +222,9 @@ typedef ::int64_t int64_t;
 
 %template (PointDataVector) std::vector<eduart::sensorring::measurement::PointData>;
 
-%template (TemperatureImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
-%template (GrayscaleImageTemplate) eduart::sensorring::measurement::GenericGrayscaleImage<double, eduart::sensorring::THERMAL_RESOLUTION>;
-%template (FalseColorImageTemplate) eduart::sensorring::measurement::GenericRGBImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
+%template (ScalarImageUint8Template) eduart::sensorring::measurement::ScalarImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
+%template (ScalarImageDoubleTemplate) eduart::sensorring::measurement::ScalarImage<double, eduart::sensorring::THERMAL_RESOLUTION>;
+%template (RgbImageTemplate) eduart::sensorring::measurement::RgbImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
 %include "sensorring/measurement/ThermalMeasurement.hpp"
 
 

@@ -25,11 +25,11 @@ namespace manager {
  * @brief Health state of the sensorring state machine worker
  */
 enum class ManagerState {
-  Uninitialized,
-  Initialized,
-  Running,
-  Shutdown,
-  Error
+  Uninitialized, ///< State machine has not been started yet.
+  Initialized,   ///< State machine has been configured but not yet running.
+  Running,       ///< State machine is actively executing measurement cycles.
+  Shutdown,      ///< State machine has been stopped gracefully.
+  Error          ///< State machine encountered an unrecoverable error.
 };
 
 /**

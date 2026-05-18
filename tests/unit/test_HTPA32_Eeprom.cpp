@@ -1,55 +1,54 @@
 // Unit tests for eduart::sensorring::device::htpa32::HTPA32_Eeprom serialize/deserialize roundtrip.
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <catch2/catch_all.hpp>
 
-#include "device/hardware/htpa32/HTPA32_Eeprom.hpp"
+#include "device/thermal/htpa32/HTPA32_Eeprom.hpp"
 
 using eduart::sensorring::device::htpa32::HTPA32_Eeprom;
 
 namespace {
 
-void fill_test_eeprom(HTPA32_Eeprom& eeprom)
-{
+void fill_test_eeprom(HTPA32_Eeprom& eeprom) {
   auto& d = eeprom.data;
 
   d.pixc_min = -1.25f;
   d.pixc_max = 42.5f;
 
-  d.grad_scale = 7;
+  d.grad_scale  = 7;
   d.tablenumber = 1234u;
 
-  d.epsilon = 95;
+  d.epsilon    = 95;
   d.mbit_calib = 1;
   d.bias_calib = 2;
-  d.clk_calib = 3;
-  d.bpa_calib = 4;
-  d.pu_calib = 5;
-  d.arraytype = 6;
+  d.clk_calib  = 3;
+  d.bpa_calib  = 4;
+  d.pu_calib   = 5;
+  d.arraytype  = 6;
 
   d.vddth1 = 0x1234;
   d.vddth2 = 0xABCD;
 
   d.ptat_gradient = 0.125f;
-  d.ptat_offset = -0.5f;
+  d.ptat_offset   = -0.5f;
 
   d.ptat_th1 = 0x0102;
   d.ptat_th2 = 0x0304;
 
   d.vddsc_gradient = 9;
-  d.vddsc_offset = 10;
-  d.global_offset = 11;
+  d.vddsc_offset   = 10;
+  d.global_offset  = 11;
 
   d.global_gain = 0x0F0F;
 
   d.mbit_user = 12;
   d.bias_user = 13;
-  d.clk_user = 14;
-  d.bpa_user = 15;
-  d.pu_user = 16;
+  d.clk_user  = 14;
+  d.bpa_user  = 15;
+  d.pu_user   = 16;
 
-  d.device_id = 0xDEADBEEF;
+  d.device_id     = 0xDEADBEEF;
   d.norof_deadpix = 3;
 
   for (int i = 0; i < 24; ++i) {
@@ -61,12 +60,12 @@ void fill_test_eeprom(HTPA32_Eeprom& eeprom)
 
   for (int i = 0; i < 256; ++i) {
     d.vddcomp_gradient[i] = static_cast<int16_t>(-128 + i);
-    d.vddcomp_offset[i] = static_cast<int16_t>(i * 2 - 256);
+    d.vddcomp_offset[i]   = static_cast<int16_t>(i * 2 - 256);
   }
 
   for (int i = 0; i < 1024; ++i) {
     d.th_gradient[i] = static_cast<int16_t>(i - 512);
-    d.th_offset[i] = static_cast<int16_t>(512 - i);
+    d.th_offset[i]   = static_cast<int16_t>(512 - i);
   }
 
   for (int i = 0; i < 1024; ++i) {
@@ -170,20 +169,20 @@ TEST_CASE("HTPA32_Eeprom primitive field encoding/decoding matches expected byte
   auto& d = eeprom.data;
 
   // Values taken from the MCU example in the bug report.
-  U32F pixc_min_bits{0x4BAC2819u};
-  U32F pixc_max_bits{0x4CE8DF46u};
+  U32F pixc_min_bits{ 0x4BAC2819u };
+  U32F pixc_max_bits{ 0x4CE8DF46u };
 
   d.pixc_min = pixc_min_bits.f;
   d.pixc_max = pixc_max_bits.f;
 
-  d.grad_scale = 0x16u;
+  d.grad_scale  = 0x16u;
   d.tablenumber = 0x0072u;
 
-  d.epsilon = 0x64u;
+  d.epsilon    = 0x64u;
   d.mbit_calib = 0x2Cu;
   d.bias_calib = 0x05u;
-  d.clk_calib = 0x15u;
-  d.bpa_calib = 0x03u;
+  d.clk_calib  = 0x15u;
+  d.bpa_calib  = 0x03u;
 
   std::array<std::uint8_t, HTPA32_Eeprom::SERIALIZED_SIZE> buffer{};
   const auto written = eeprom.serialize(buffer.data(), buffer.size());
@@ -196,15 +195,15 @@ TEST_CASE("HTPA32_Eeprom primitive field encoding/decoding matches expected byte
   //  - tablenumber (2 bytes, LE)
   //  - epsilon, mbit_calib, bias_calib, clk_calib, bpa_calib (1 byte each)
   const std::array<std::uint8_t, 16> expected_prefix{
-      0x19, 0x28, 0xAC, 0x4B,  // pixc_min  = 0x4BAC2819
-      0x46, 0xDF, 0xE8, 0x4C,  // pixc_max  = 0x4CE8DF46
-      0x16,                    // grad_scale
-      0x72, 0x00,              // tablenumber (0x0072 LE)
-      0x64,                    // epsilon
-      0x2C,                    // mbit_calib
-      0x05,                    // bias_calib
-      0x15,                    // clk_calib
-      0x03                     // bpa_calib
+    0x19, 0x28, 0xAC, 0x4B, // pixc_min  = 0x4BAC2819
+    0x46, 0xDF, 0xE8, 0x4C, // pixc_max  = 0x4CE8DF46
+    0x16,                   // grad_scale
+    0x72, 0x00,             // tablenumber (0x0072 LE)
+    0x64,                   // epsilon
+    0x2C,                   // mbit_calib
+    0x05,                   // bias_calib
+    0x15,                   // clk_calib
+    0x03                    // bpa_calib
   };
 
   for (std::size_t i = 0; i < expected_prefix.size(); ++i) {
@@ -220,7 +219,7 @@ TEST_CASE("HTPA32_Eeprom primitive field encoding/decoding matches expected byte
   auto maybe_eeprom2 = HTPA32_Eeprom::deserialize(buffer2.data(), buffer2.size());
   REQUIRE(maybe_eeprom2.has_value());
   const auto& eeprom2 = *maybe_eeprom2;
-  const auto& d2 = eeprom2.data;
+  const auto& d2      = eeprom2.data;
 
   // Compare float bit patterns exactly rather than with Approx.
   U32F pixc_min_bits2{};
@@ -239,4 +238,3 @@ TEST_CASE("HTPA32_Eeprom primitive field encoding/decoding matches expected byte
   REQUIRE(d2.clk_calib == d.clk_calib);
   REQUIRE(d2.bpa_calib == d.bpa_calib);
 }
-

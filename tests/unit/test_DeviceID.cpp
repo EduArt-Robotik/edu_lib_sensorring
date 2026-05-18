@@ -2,7 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "sensorring/device/DeviceID.hpp"
+#include "sensorring/device/types/DeviceID.hpp"
 
 using eduart::sensorring::device::DeviceID;
 using eduart::sensorring::device::DeviceType;

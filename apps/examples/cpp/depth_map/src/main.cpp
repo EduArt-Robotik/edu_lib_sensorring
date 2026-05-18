@@ -9,10 +9,13 @@
 
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/DepthSensor.hpp>
+#include <sensorring/device/AnyDeviceParams.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
+
+#include "sensorring/measurement/DepthMeasurement.hpp"
 
 using namespace eduart::sensorring;
 using namespace std::chrono_literals;
@@ -47,16 +50,16 @@ std::string depthToColor(double depth, double min, double max) {
   return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
 }
 
-void printDepthMap(const measurement::PointCloud& points, bool reset_cursor) {
+void printDepthMap(const measurement::DepthMeasurement& meas, bool reset_cursor) {
 
   if (reset_cursor) {
-    std::cout << "\033[8F";
+    std::cout << "\033[" << meas.resolution_y << "F";
   }
 
-  for (int row = 0; row < 8; ++row) {
-    for (int col = 0; col < 8; ++col) {
-      int idx = row * 8 + col;
-      std::cout << depthToColor(points.data[idx].raw_distance, MIN_DIST, MAX_DIST) << "██";
+  for (unsigned int row = 0; row < meas.resolution_x; ++row) {
+    for (unsigned int col = 0; col < meas.resolution_y; ++col) {
+      int idx = row * meas.resolution_y + col;
+      std::cout << depthToColor(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) << "██";
     }
     std::cout << "\033[0m\n";
   }
@@ -95,12 +98,12 @@ int main(int, char*[]) {
       }
     });
 
-    // Create a SensorRing with one VL53L8CX board via auto-discovery
+    // Create a SensorRing with one depth sensor board via auto-discovery
     ring::SensorRingFactory factory;
     factory.addInterface(can_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{} });
+    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
     factory.addInterface(usbtingo_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{} });
+    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
 
     // Create the MeasurementManager directly from the factory
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
@@ -113,7 +116,7 @@ int main(int, char*[]) {
     // Subscribe to the first depth sensor to get the measurements
     auto depth_sub = manager->depthSensors().subscribe([&got_first_measurement, &reset_cursor](const measurement::DepthMeasurement& meas) {
       got_first_measurement = true;
-      printDepthMap(meas.point_cloud, reset_cursor);
+      printDepthMap(meas, reset_cursor);
       reset_cursor = true;
     });
 

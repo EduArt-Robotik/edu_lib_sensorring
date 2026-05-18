@@ -1,3 +1,51 @@
+#########################################################
+# Transport module (submodule or FetchContent fallback)
+if(EXISTS "${PROJECT_SOURCE_DIR}/external/edu_sensorring_transport/CMakeLists.txt")
+  message(STATUS "Transport submodule found")
+  set(SENSORRING_TRANSPORT_SOURCE_DIR
+    "${PROJECT_SOURCE_DIR}/external/edu_sensorring_transport"
+  )
+  add_subdirectory(external/edu_sensorring_transport)
+else()
+  message(STATUS "Transport submodule not found, fetching from GitHub...")
+  include(FetchContentCompat)
+  fetchcontent_declare_compat(
+    edu_sensorring_transport
+    URL https://github.com/EduArt-Robotik/edu_sensorring_transport/archive/refs/heads/master.zip
+  )
+  FetchContent_MakeAvailable(edu_sensorring_transport)
+  set(SENSORRING_TRANSPORT_SOURCE_DIR
+    "${edu_sensorring_transport_SOURCE_DIR}"
+  )
+endif()
+
+#########################################################
+# Frankly bootloader (submodule or FetchContent fallback)
+if(SENSORRING_BUILD_FIRMWARE_UPDATE)
+  if(EXISTS "${PROJECT_SOURCE_DIR}/external/frankly_bootloader/CMakeLists.txt")
+    message(STATUS "Bootloader submodule found")
+    set(SENSORRING_BOOTLOADER_SOURCE_DIR
+      "${PROJECT_SOURCE_DIR}/external/frankly_bootloader"
+    )
+  else()
+    message(STATUS "Bootloader submodule not found, fetching from GitHub...")
+    include(FetchContentCompat)
+    fetchcontent_declare_compat(
+      frankly_bootloader
+      URL https://github.com/EduArt-Robotik/frankly_bootloader/archive/refs/heads/master.zip
+    )
+    FetchContent_GetProperties(frankly_bootloader)
+    if(NOT frankly_bootloader_POPULATED)
+      FetchContent_Populate(frankly_bootloader)
+    endif()
+    set(SENSORRING_BOOTLOADER_SOURCE_DIR
+      "${frankly_bootloader_SOURCE_DIR}"
+    )
+  endif()
+endif()
+
+#########################################################
+# USBtingo (optional dependency)
 if(SENSORRING_USE_USBTINGO)
   find_package(usbtingo QUIET)
 
@@ -28,6 +76,8 @@ if(SENSORRING_USE_USBTINGO)
   endif()
 endif()
 
+#########################################################
+# Catch2 (optional dependency for tests)
 if(SENSORRING_BUILD_TESTS)
   find_package(Catch2 QUIET)
 

@@ -3,8 +3,8 @@
 #include <chrono>
 #include <thread>
 
-#include "device/DeviceEnumerator.hpp"
-#include "device/SensorBoardCommands.hpp"
+#include "board/BoardEnumerator.hpp"
+#include "board/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -15,7 +15,7 @@ namespace sensorring {
 
 namespace ring {
 
-SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<device::SensorBoard> > board_vec)
+SensorBus::SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<board::SensorBoard> > board_vec)
     : _interface(com::ComManager::getInstance()->getInterface(interface))
     , _board_vec(std::move(board_vec)) {
   if (!_interface) {
@@ -27,9 +27,9 @@ com::ComInterface* SensorBus::getInterface() const {
   return _interface;
 }
 
-std::vector<device::SensorBoard*> SensorBus::getSensorBoards() const {
+std::vector<board::SensorBoard*> SensorBus::getSensorBoards() const {
 
-  std::vector<device::SensorBoard*> ref_vec;
+  std::vector<board::SensorBoard*> ref_vec;
   for (const auto& sensor : _board_vec) {
     ref_vec.push_back(sensor.get());
   }
@@ -42,16 +42,16 @@ unsigned int SensorBus::getSensorCount() const {
 }
 
 void SensorBus::setBitRateSwitching(bool brs_enable) {
-  device::cmdSetBitRateSwitching(_interface->getID(), brs_enable);
+  board::cmdSetBitRateSwitching(_interface->getID(), brs_enable);
 }
 
-std::vector<device::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {
+std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (!iface) {
     return {};
   }
 
-  device::DeviceEnumerator enumerator(iface);
+  board::BoardEnumerator enumerator(iface);
   enumerator.startEnumeration();
   std::this_thread::sleep_for(timeout);
   return enumerator.getResult();

@@ -11,8 +11,8 @@
 
 #include <functional>
 #include <iostream>
-#include <sensorring/device/DepthSensor.hpp>
-#include <sensorring/device/ThermalSensor.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/device/thermal/ThermalSensor.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <sensorring/subscription/Subscription.hpp>
 #include <vector>
@@ -37,6 +37,9 @@ public:
     // Subscribe to depth and thermal sensors via the new typed API
     _subscriptions.emplace_back(manager->depthSensors().subscribe(std::bind(&CustomProxy::onDepthMeasurement, this, std::placeholders::_1)));
     _subscriptions.emplace_back(manager->thermalSensors().subscribe(std::bind(&CustomProxy::onThermalMeasurement, this, std::placeholders::_1)));
+
+    _depth_sensor_count   = static_cast<unsigned int>(manager->depthSensors().size());
+    _thermal_sensor_count = static_cast<unsigned int>(manager->thermalSensors().size());
   }
 
   /// Destructor
@@ -55,8 +58,9 @@ public:
    * @param meas The latest depth measurement
    */
   void onDepthMeasurement(const measurement::DepthMeasurement& meas) {
-    (void)meas;
-    vl53l8cx_rate.tick(1);
+    if (meas.header.device_id.index == 0) {
+      vl53l8cx_rate.tick(_depth_sensor_count);
+    }
   }
 
   /**
@@ -64,8 +68,9 @@ public:
    * @param meas The latest thermal measurement
    */
   void onThermalMeasurement(const measurement::ThermalMeasurement& meas) {
-    (void)meas;
-    htpa32_rate.tick(1);
+    if (meas.header.device_id.index == 0) {
+      htpa32_rate.tick(_thermal_sensor_count);
+    }
   }
 
 public:
@@ -74,6 +79,8 @@ public:
 
 private:
   std::vector<subscription::Subscription> _subscriptions;
+  unsigned int _depth_sensor_count = 0;
+  unsigned int _thermal_sensor_count = 0;
 };
 
 } // namespace sensorring

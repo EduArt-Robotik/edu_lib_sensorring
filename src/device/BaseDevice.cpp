@@ -25,6 +25,18 @@ BaseDevice::~BaseDevice() {
   // _com_subscription auto-cancels via RAII.
 }
 
+void BaseDevice::enqueueAction(std::function<void()> action) {
+  std::lock_guard<std::mutex> lock(_action_mutex);
+  _pending_actions.push_back(std::move(action));
+}
+
+std::vector<std::function<void()> > BaseDevice::drainActions() {
+  std::lock_guard<std::mutex> lock(_action_mutex);
+  std::vector<std::function<void()> > actions;
+  actions.swap(_pending_actions);
+  return actions;
+}
+
 DeviceID BaseDevice::getDeviceID() const {
   return _id;
 }
@@ -39,6 +51,10 @@ void BaseDevice::setEnable(bool enable) {
 
 bool BaseDevice::getEnable() const {
   return _enable;
+}
+
+bool BaseDevice::configure() {
+  return true;
 }
 
 std::future<bool> BaseDevice::beginMeasurementWait() {

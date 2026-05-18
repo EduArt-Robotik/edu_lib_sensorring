@@ -45,7 +45,7 @@ class ThermalViewClient:
     self._state = state
 
   def _on_thermal_measurement(self, meas):
-    meas.falsecolor_img.copyTo(self._img_np)
+    meas.temperatures.toFalseColor().copyTo(self._img_np)
     self._got_measurement = True
 
   def wait_for_new_measurement(self):
