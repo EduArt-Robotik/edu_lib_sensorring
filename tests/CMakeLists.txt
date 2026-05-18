@@ -16,6 +16,7 @@ add_executable(sensorring_unit_tests
     unit/test_Subscription.cpp
     unit/test_Publisher.cpp
     unit/test_HTPA32_Eeprom.cpp
+    unit/test_TMF8829_Params.cpp
 )
 
 target_include_directories(sensorring_unit_tests PRIVATE

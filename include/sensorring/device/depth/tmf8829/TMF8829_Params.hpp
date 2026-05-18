@@ -55,12 +55,25 @@ SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, ResolutionMode mode
  * @brief Parameter structure of the TMF8829 sensor of a sensor board.
  */
 struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
-  /// @brief Default constructor; sets the maximum measurement rate to 30 Hz.
+  /// Default constructor; sets the maximum measurement rate to 30 Hz.
   TMF8829_Params() { max_rate_hz = 30.0; }
 
-  ResolutionMode resolution_mode = ResolutionMode::RES_8X8; ///< Specifies the resolution mode of the sensor
+  /// Resolution mode of the sensor. See TMF8829 datasheet for details on the different modes.
+  ResolutionMode resolution_mode = ResolutionMode::RES_8X8;
 
-  TMF8829_ResultFormat result_format; ///< Specifies which additional values are included in the measurement
+  /// Result format of the measurement. Specifies which additional values are included in each measurement.
+  TMF8829_ResultFormat result_format;
+
+  /**
+   * @brief Check if the combination of the specified parameters is valid.
+   * 
+   * The maximum result size per frame is limited to 8192 bytes.
+   * The result size is a function of the resolution mode (point count)
+   * and the result format (point size).
+   * 
+   * @return True if the parameters are valid, false otherwise.
+   */
+  bool isResultSizeValid() const;
 };
 
 } // namespace device
