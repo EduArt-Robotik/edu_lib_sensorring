@@ -56,9 +56,9 @@ void printDepthMap(const measurement::DepthMeasurement& meas, bool reset_cursor)
     std::cout << "\033[" << meas.resolution_y << "F";
   }
 
-  for (unsigned int row = 0; row < meas.resolution_x; ++row) {
-    for (unsigned int col = 0; col < meas.resolution_y; ++col) {
-      int idx = row * meas.resolution_y + col;
+  for (unsigned int row = 0; row < meas.resolution_y; ++row) {
+    for (unsigned int col = 0; col < meas.resolution_x; ++col) {
+      int idx = row * meas.resolution_x + col;
       std::cout << depthToColor(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) << "██";
     }
     std::cout << "\033[0m\n";
