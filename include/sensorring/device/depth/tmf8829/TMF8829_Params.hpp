@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/device/types/DeviceParams.hpp"

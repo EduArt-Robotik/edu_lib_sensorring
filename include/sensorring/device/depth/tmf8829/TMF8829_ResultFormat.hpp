@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #include "sensorring/platform/SensorringExport.hpp"
 
