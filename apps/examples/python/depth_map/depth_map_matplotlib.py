@@ -87,8 +87,13 @@ def main():
         if verbosity > sensorring.LogVerbosity_Debug else None
     )
 
-    # Create a SensorRing with one VL53L8CX board via auto-discovery
+    # Create a SensorRing with one depth sensor board via auto-discovery
     factory = sensorring.SensorRingFactory()
+
+    tmf_params = sensorring.TMF8829_Params()
+    tmf_params.resolution_mode = sensorring.ResolutionMode_RES_16X16
+    factory.setDefaultTMF8829Params(tmf_params)
+
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
     factory.addInterface(usbtingo_interface)

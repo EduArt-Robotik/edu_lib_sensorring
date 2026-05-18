@@ -48,9 +48,9 @@ def print_depth_map(meas, reset_cursor):
   if reset_cursor:
     print(f"\033[{meas.resolution_y}F", end="")
 
-  for row in range(meas.resolution_x):
-    for col in range(meas.resolution_y):
-      idx = row * meas.resolution_y + col
+  for row in range(meas.resolution_y):
+    for col in range(meas.resolution_x):
+      idx = row * meas.resolution_x + col
       print(depth_to_color(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
     print("\033[0m")
 
@@ -109,8 +109,13 @@ def main():
       ) if verbosity > sensorring.LogVerbosity_Debug else None
     )
 
-    # Create a SensorRing with one VL53L8CX board via auto-discovery
+    # Create a SensorRing with one depth sensor board via auto-discovery
     factory = sensorring.SensorRingFactory()
+
+    tmf_params = sensorring.TMF8829_Params()
+    tmf_params.resolution_mode = sensorring.ResolutionMode_RES_16X16
+    factory.setDefaultTMF8829Params(tmf_params)
+
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
