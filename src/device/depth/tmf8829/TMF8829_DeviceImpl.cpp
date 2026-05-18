@@ -36,7 +36,9 @@ const TMF8829_Params& TMF8829_DeviceImpl::getParams() const {
 
 bool TMF8829_DeviceImpl::isParamCombinationValid(const TMF8829_Params& params) const {
   if (!params.isResultSizeValid()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 on board " + std::to_string(_parent.getDeviceID().index) + ": requested parameter combination exceeds the maximum result frame size.");
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Error,
+        "Requested parameter combination of TMF8829 on board " + std::to_string(_parent.getDeviceID().index) + " exceeds the maximum result frame size (" + std::to_string(params.calculateResultFrameSize()) + " > 8192 bytes).");
     return false;
   }
   return true;

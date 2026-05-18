@@ -65,12 +65,22 @@ struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
   TMF8829_ResultFormat result_format;
 
   /**
-   * @brief Check if the combination of the specified parameters is valid.
+   * @brief Calculate the resulting frame size of the current parameters.
    * 
+   * In high resolution modes, the measurement is split across two frames.
+   * This method returns the per-frame size.
+   * 
+   * @return The size of the result frame in bytes.
+   */
+  std::size_t calculateResultFrameSize() const;
+
+  /**
+   * @brief Check if the combination of the specified parameters is valid.
+   *
    * The maximum result size per frame is limited to 8192 bytes.
    * The result size is a function of the resolution mode (point count)
    * and the result format (point size).
-   * 
+   *
    * @return True if the parameters are valid, false otherwise.
    */
   bool isResultSizeValid() const;
