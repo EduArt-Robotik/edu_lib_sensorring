@@ -115,8 +115,7 @@ int main(int, char*[]) {
 
         // Update the light color via the Light interface (applied in next state-machine cycle)
         for (std::size_t i = 0; i < lights.size(); ++i) {
-          lights[i].setMode(device::LightMode::FixedColor);
-          lights[i].setColor(red, green, blue);
+          lights[i].setLight(device::LightMode::FixedColor, red, green, blue);
         }
 
         if (std::chrono::steady_clock::now() - last_print > 1s) {

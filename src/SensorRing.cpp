@@ -6,8 +6,11 @@ namespace sensorring {
 
 namespace ring {
 
-SensorRing::SensorRing(std::vector<std::unique_ptr<SensorBus> > bus_vec)
-    : _bus_vec(std::move(bus_vec)) {
+SensorRing::SensorRing(std::vector<std::unique_ptr<SensorBus> > bus_vec) {
+  _bus_vec.reserve(bus_vec.size());
+  for (auto& bus : bus_vec) {
+    _bus_vec.push_back(std::move(bus));
+  }
 }
 
 SensorRing::~SensorRing() {
@@ -19,7 +22,6 @@ std::vector<SensorBus*> SensorRing::getSensorBuses() const {
   for (auto& sensor_bus : _bus_vec) {
     ref_vec.push_back(sensor_bus.get());
   }
-
   return ref_vec;
 }
 

@@ -115,6 +115,9 @@ public:
   /// Convenience: return all lights.
   device::Group<device::Light> lights() const noexcept;
 
+  /// Access the underlying sensor ring
+  ring::SensorRing* getRing() const noexcept;
+
 private:
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;
 };

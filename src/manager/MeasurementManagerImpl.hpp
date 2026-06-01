@@ -69,6 +69,8 @@ public:
   device::Group<device::ThermalSensor> thermalSensors() const noexcept;
   device::Group<device::Light> lights() const noexcept;
 
+  ring::SensorRing* getRing() const noexcept;
+
 private:
   enum class Phase {
     init,

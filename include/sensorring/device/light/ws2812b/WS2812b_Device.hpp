@@ -47,35 +47,32 @@ public:
   // --- Light interface overrides ---
 
   /**
-   * @brief Set the RGB color. Enqueues a CAN command into the device action queue.
-   * @param[in] r Red channel (0–255).
-   * @param[in] g Green channel (0–255).
-   * @param[in] b Blue channel (0–255).
-   */
-  void setColor(std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
-
-  /**
-   * @brief Set the light mode. Enqueues a CAN command into the device action queue.
+   * @brief Set the light mode and color. Enqueues a per-device CAN command into the action queue.
    * @param[in] mode Light mode to apply.
+   * @param[in] r    Red channel (0–255).
+   * @param[in] g    Green channel (0–255).
+   * @param[in] b    Blue channel (0–255).
    */
-  void setMode(LightMode mode) override;
+  void setLight(LightMode mode, std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 
   /**
-   * @brief Re-apply runtime light synchronization and default mode after board reset.
+   * @brief Re-apply runtime configuration after board reset.
    * @return true on success.
    */
   bool configure() override;
 
-  // Simple static helpers to control all WS2812b devices on the bus.
   /**
-   * @brief Set light mode and color for all WS2812b devices on the bus.
+   * @brief Broadcast a mode+color command to ALL WS2812b devices on ALL interfaces.
+   *
+   * Useful for turning off all lights (including unconfigured boards).
    * @param[in] mode  Light mode to apply.
    * @param[in] red   Red channel value.
    * @param[in] green Green channel value.
    * @param[in] blue  Blue channel value.
    * @return true on success.
    */
-  static bool setLight(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+  static bool setAllLights(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+
   /**
    * @brief Synchronize pending light updates on all WS2812b devices.
    * @return true on success.

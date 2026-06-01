@@ -621,6 +621,10 @@ device::Group<device::Light> MeasurementManagerImpl::lights() const noexcept {
   return device::Group<device::Light>(_lights);
 }
 
+ring::SensorRing* MeasurementManagerImpl::getRing() const noexcept {
+  return _sensor_ring.get();
+}
+
 } // namespace manager
 
 } // namespace sensorring

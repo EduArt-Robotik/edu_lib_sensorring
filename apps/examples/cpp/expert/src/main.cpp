@@ -198,7 +198,7 @@ int main(int, char*[]) {
     // 10. Set initial light state via the action queue
     // =========================================================================
     for (auto& light : all_lights) {
-      light.setMode(device::LightMode::Pulsation);
+      light.setLight(device::LightMode::Pulsation, 0, 0, 0);
     }
 
     // =========================================================================
@@ -214,8 +214,7 @@ int main(int, char*[]) {
 
     // Switch lights to fixed green before shutdown.
     for (auto& light : all_lights) {
-      light.setMode(device::LightMode::FixedColor);
-      light.setColor(0, 128, 0);
+      light.setLight(device::LightMode::FixedColor, 0, 128, 0);
     }
     std::this_thread::sleep_for(500ms); // Give state machine one cycle to drain the queue.
 

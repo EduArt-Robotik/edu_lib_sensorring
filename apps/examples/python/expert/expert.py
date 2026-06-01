@@ -172,7 +172,7 @@ def main():
     # 9. Set initial light state via the action queue
     # =========================================================================
     for i in range(all_lights.size()):
-      all_lights[i].setMode(sensorring.LightMode_Pulsation)
+      all_lights[i].setLight(sensorring.LightMode_Pulsation, 0, 0, 0)
 
     # =========================================================================
     # 10. Start the threaded measurement loop
@@ -188,8 +188,7 @@ def main():
 
     # Switch lights to fixed green before shutdown.
     for i in range(all_lights.size()):
-      all_lights[i].setMode(sensorring.LightMode_FixedColor)
-      all_lights[i].setColor(0, 128, 0)
+      all_lights[i].setLight(sensorring.LightMode_FixedColor, 0, 128, 0)
     time.sleep(0.5)  # Give state machine one cycle to drain the queue.
 
     manager.stopMeasuring()

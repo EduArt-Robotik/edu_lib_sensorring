@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <future>
 #include <mutex>
 #include <optional>
@@ -69,6 +70,17 @@ public:
    *                   Should be non-blocking and exception-safe.
    */
   void enqueueAction(std::function<void()> action);
+
+  /**
+   * @brief Set a single replaceable action (latest-wins semantics).
+   *
+   * Unlike enqueueAction(), repeated calls overwrite the previous action so that
+   * at most one instance is executed per drain cycle. Use this for high-frequency
+   * actuator commands (e.g. lights) where only the most recent state matters.
+   *
+   * @param[in] action Callable executed once during the next device_actions slot.
+   */
+  void setReplacableAction(std::function<void()> action);
 
   /**
    * @brief Atomically drain and return all pending actions.
@@ -154,6 +166,7 @@ public:
 protected:
   std::mutex _action_mutex;
   std::vector<std::function<void()> > _pending_actions;
+  std::optional<std::function<void()> > _replaceable_action;
   virtual void onResetSensorState() {}
   virtual void onClearDataFlag() {}
 

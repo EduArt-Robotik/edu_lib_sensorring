@@ -503,9 +503,6 @@ SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 %ignore MeasurementManager::subscribeToStateChanges;
 %include "sensorring/manager/MeasurementManager.hpp"
 
-// WS2812b_Device: static setLight/syncLight are no longer needed in the Python API.
-// Use Light.setColor() and Light.setMode() instead.
-
 
 %rename (LogVerbosityToString) toString(LogVerbosity);
 %include "sensorring/logger/LogVerbosity.hpp"

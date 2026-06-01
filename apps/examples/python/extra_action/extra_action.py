@@ -104,8 +104,7 @@ def main():
 
         # Update the light color via the Light interface (applied in next state-machine cycle)
         for i in range(len(lights)):
-          lights[i].setMode(sensorring.LightMode_FixedColor)
-          lights[i].setColor(red, green, blue)
+          lights[i].setLight(sensorring.LightMode_FixedColor, red, green, blue)
 
         now = time.time()
         if now - last_print > 1.0:
