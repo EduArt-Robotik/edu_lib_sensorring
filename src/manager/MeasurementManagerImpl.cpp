@@ -26,15 +26,22 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _tick_count(0)
     , _is_running(false) {
 
+  if (!_sensor_ring) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "MeasurementManager got passed an invalid SensorRing.");
+    _phase = Phase::shutdown;
+    return;
+  }
+
   if (_sensor_ring->getDevices().empty()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Empty SensorRing passed to MeasurementManager");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "MeasurementManager got passed an empty SensorRing without any devices.");
+    _phase = Phase::shutdown;
     return;
   }
 
   if (_params.timeout == 0ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter is 0.0s");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "MeasurementManager got passed a SensorRing timeout parameter of 0.0s");
   } else if (_params.timeout < 200ms) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms is probably too low");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "MeasurementManager got passed a SensorRing timeout parameter of " + std::to_string(_params.timeout.count()) + " ms, which is probably too low");
   }
 
   // Populate typed device vectors via dynamic_cast.
