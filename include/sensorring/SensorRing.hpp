@@ -24,8 +24,6 @@ namespace device {
 class BaseDevice;
 }
 
-namespace ring {
-
 /**
  * @class SensorRing
  * @brief Top-level container managing multiple sensor buses and coordinating operations across them.
@@ -64,8 +62,6 @@ private:
   /// Vector of sensor buses managed by this sensor ring.
   std::vector<std::unique_ptr<SensorBus> > _bus_vec;
 };
-
-} // namespace ring
 
 } // namespace sensorring
 

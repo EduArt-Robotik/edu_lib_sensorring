@@ -48,9 +48,9 @@ The minimal workflow is:
 4. Call `build()` to enumerate hardware and construct the `SensorRing`
 
 ```cpp
-ring::SensorRingFactory factory;
+SensorRingFactory factory;
 factory.addInterface(interface);
-auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
+auto sensor_ring = factory.build(ValidationMode::Relaxed);
 ```
 
 The returned `SensorRing` is passed to the `MeasurementManager` as before:
@@ -78,7 +78,7 @@ In relaxed mode the factory finds compatible boards regardless of their position
 
 ```cpp
 factory.addInterface(interface);
-auto sensor_ring = factory.build(ring::ValidationMode::Relaxed);
+auto sensor_ring = factory.build(ValidationMode::Relaxed);
 ```
 
 **Board type constraint**: only boards of the specified type are accepted.

@@ -7,12 +7,12 @@
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 
+using eduart::sensorring::SensorRingFactory;
 using eduart::sensorring::com::InterfaceType;
 using eduart::sensorring::device::ResolutionMode;
 using eduart::sensorring::device::TMF8829_Device;
 using eduart::sensorring::device::TMF8829_Params;
 using eduart::sensorring::device::TMF8829_ResultFormat;
-using eduart::sensorring::ring::SensorRingFactory;
 
 namespace {
 
@@ -23,7 +23,7 @@ namespace {
  *         the interface is not available or no TMF8829 is connected.
  */
 struct HardwareContext {
-  std::unique_ptr<eduart::sensorring::ring::SensorRing> ring;
+  std::unique_ptr<eduart::sensorring::SensorRing> ring;
   TMF8829_Device* device = nullptr;
 };
 

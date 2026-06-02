@@ -52,7 +52,7 @@ namespace manager {
  */
 class MeasurementManagerImpl {
 public:
-  MeasurementManagerImpl(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
+  MeasurementManagerImpl(ManagerParams params, std::unique_ptr<SensorRing> sensor_ring);
   ~MeasurementManagerImpl() noexcept;
 
   bool measureSome() noexcept;
@@ -69,7 +69,7 @@ public:
   device::Group<device::ThermalSensor> thermalSensors() const noexcept;
   device::Group<device::Light> lights() const noexcept;
 
-  ring::SensorRing* getRing() const noexcept;
+  SensorRing* getRing() const noexcept;
 
 private:
   enum class Phase {
@@ -103,7 +103,7 @@ private:
   const ManagerParams _params;
   std::atomic<ManagerState> _manager_state;
   Phase _phase;
-  std::unique_ptr<ring::SensorRing> _sensor_ring;
+  std::unique_ptr<SensorRing> _sensor_ring;
 
   // Scheduler state
   double _base_rate_hz;

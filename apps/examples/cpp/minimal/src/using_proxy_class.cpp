@@ -53,7 +53,7 @@ int main(int, char*[]) {
     });
 
     // Create SensorRing via factory auto-discovery
-    ring::SensorRingFactory factory;
+    SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.addInterface(usbtingo_interface);
 

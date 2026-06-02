@@ -26,8 +26,6 @@ namespace com {
 class ComInterface;
 }
 
-namespace ring {
-
 using namespace std::chrono_literals;
 
 /**
@@ -82,8 +80,6 @@ private:
 
   subscription::Subscription _com_subscription;
 };
-
-} // namespace ring
 
 } // namespace sensorring
 

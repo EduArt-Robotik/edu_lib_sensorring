@@ -17,20 +17,18 @@
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
+#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
-#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
 
 namespace sensorring {
-
-namespace ring {
 
 /**
  * @enum ValidationMode
@@ -64,8 +62,8 @@ enum class ValidationMode {
  *
  * When expectations are present, the validation mode controls how mismatches are
  * handled:
- *  - Strict (default): boards are matched by index; any mismatch fails the build.
- *  - Relaxed: for each expectation, the factory searches all unclaimed boards
+ *  - Strict: boards are matched by index; any mismatch fails the build.
+ *  - Relaxed (default): for each expectation, the factory searches all unclaimed boards
  *    for the first one with a compatible board type and the required device
  *    types. Boards that are not claimed by any expectation remain unconfigured.
  */
@@ -181,7 +179,7 @@ private:
   /// Concrete device params variant — sentinel category types excluded.
   /// Structurally identical to board::SensorBoardManager::DeviceParamsVariant.
   using ConcreteDeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
-  using ConcreteDeviceParamsMap = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
+  using ConcreteDeviceParamsMap     = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
 
   /// Build a DeviceParamsMap for the given device types, applying user defaults where available.
   ConcreteDeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
@@ -191,8 +189,6 @@ private:
   EnumerationMap _enumeration_results;
   ValidationMode _mode;
 };
-
-} // namespace ring
 
 } // namespace sensorring
 

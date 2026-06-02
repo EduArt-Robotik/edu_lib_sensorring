@@ -63,7 +63,7 @@ int main(int, char*[]) {
     });
 
     // Create SensorRing via factory auto-discovery
-    ring::SensorRingFactory factory;
+    SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
     factory.addInterface(usbtingo_interface);

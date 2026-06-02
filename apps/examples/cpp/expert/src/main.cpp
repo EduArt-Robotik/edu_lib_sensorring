@@ -76,7 +76,7 @@ int main(int, char*[]) {
 
     // Use Relaxed validation so that the build succeeds even if not all
     // expected boards are physically present.
-    ring::SensorRingFactory factory(ring::ValidationMode::Relaxed);
+    SensorRingFactory factory(ValidationMode::Relaxed);
 
     factory.addInterface(can_interface);
 

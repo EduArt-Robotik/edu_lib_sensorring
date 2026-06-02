@@ -11,19 +11,23 @@ namespace eduart {
 
 namespace sensorring {
 
-namespace ring {
-
 // Converts the user-facing DeviceParamsVariant (including sentinel category types) to the
 // concrete board::SensorBoardManager::DeviceParamsVariant. Sentinel types must not be passed.
 static board::SensorBoardManager::DeviceParamsVariant toConcreteVariant(const SensorRingFactory::DeviceParamsVariant& v) {
   return std::visit(
       [](auto&& arg) -> board::SensorBoardManager::DeviceParamsVariant {
         using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, device::VL53L8CX_Params>) { return arg; }
-        else if constexpr (std::is_same_v<T, device::HTPA32_Params>) { return arg; }
-        else if constexpr (std::is_same_v<T, device::WS2812b_Params>) { return arg; }
-        else if constexpr (std::is_same_v<T, device::TMF8829_Params>) { return arg; }
-        else { return device::VL53L8CX_Params{}; } // unreachable — sentinel types handled separately
+        if constexpr (std::is_same_v<T, device::VL53L8CX_Params>) {
+          return arg;
+        } else if constexpr (std::is_same_v<T, device::HTPA32_Params>) {
+          return arg;
+        } else if constexpr (std::is_same_v<T, device::WS2812b_Params>) {
+          return arg;
+        } else if constexpr (std::is_same_v<T, device::TMF8829_Params>) {
+          return arg;
+        } else {
+          return device::VL53L8CX_Params{};
+        } // unreachable — sentinel types handled separately
       },
       v);
 }
@@ -184,7 +188,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
                 if (device::isCategory(dt)) {
                   for (auto actual_dt : enum_info.devices) {
                     if (device::deviceMatchesExpected(actual_dt, dt)) {
-                      auto resolved = buildDefaultParamsMap({actual_dt});
+                      auto resolved = buildDefaultParamsMap({ actual_dt });
                       if (auto it = resolved.find(actual_dt); it != resolved.end()) {
                         params_map[actual_dt] = it->second;
                       }
@@ -251,9 +255,10 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
               if (expectation.has_explicit_devices) {
                 bool has_all = true;
                 for (const auto& dp : expectation.device_params) {
-                  auto dt   = deviceTypeFromVariant(dp);
-                  bool found = std::any_of(enum_info.devices.begin(), enum_info.devices.end(),
-                      [dt](const device::DeviceType actual) { return device::deviceMatchesExpected(actual, dt); });
+                  auto dt    = deviceTypeFromVariant(dp);
+                  bool found = std::any_of(enum_info.devices.begin(), enum_info.devices.end(), [dt](const device::DeviceType actual) {
+                    return device::deviceMatchesExpected(actual, dt);
+                  });
                   if (!found) {
                     has_all = false;
                     break;
@@ -282,7 +287,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
                   if (device::isCategory(dt)) {
                     for (auto actual_dt : enum_info.devices) {
                       if (device::deviceMatchesExpected(actual_dt, dt)) {
-                        auto resolved = buildDefaultParamsMap({actual_dt});
+                        auto resolved = buildDefaultParamsMap({ actual_dt });
                         if (auto it = resolved.find(actual_dt); it != resolved.end()) {
                           params_map[actual_dt] = it->second;
                         }
@@ -471,8 +476,6 @@ device::DeviceType SensorRingFactory::deviceTypeFromVariant(const DeviceParamsVa
       },
       v);
 }
-
-} // namespace ring
 
 } // namespace sensorring
 

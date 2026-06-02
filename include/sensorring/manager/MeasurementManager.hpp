@@ -15,9 +15,9 @@
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
-#include "sensorring/device/types/Group.hpp"
 #include "sensorring/device/light/Light.hpp"
 #include "sensorring/device/thermal/ThermalSensor.hpp"
+#include "sensorring/device/types/Group.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
@@ -44,14 +44,14 @@ public:
    * @param[in] params Manager configuration.
    * @param[in] factory Configured SensorRingFactory (interfaces and expectations already set).
    */
-  MeasurementManager(ManagerParams params, ring::SensorRingFactory& factory);
+  MeasurementManager(ManagerParams params, SensorRingFactory& factory);
 
   /**
    * @brief Construct the manager from a pre-built SensorRing (expert-user constructor).
    * @param[in] params Manager configuration.
    * @param[in] sensor_ring Fully configured SensorRing. Ownership is transferred.
    */
-  MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring);
+  MeasurementManager(ManagerParams params, std::unique_ptr<SensorRing> sensor_ring);
 
   /// Destructor
   ~MeasurementManager() noexcept;
@@ -116,7 +116,7 @@ public:
   device::Group<device::Light> lights() const noexcept;
 
   /// Access the underlying sensor ring
-  ring::SensorRing* getRing() const noexcept;
+  SensorRing* getRing() const noexcept;
 
 private:
   std::unique_ptr<MeasurementManagerImpl> _mm_impl;

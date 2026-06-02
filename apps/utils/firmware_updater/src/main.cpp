@@ -2,11 +2,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
-#include <string>
-#include <thread>
-
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/firmware/FirmwareUpdater.hpp>
+#include <string>
+#include <thread>
 
 using namespace eduart::sensorring;
 
@@ -20,8 +19,7 @@ enum class Mode {
 };
 
 void printUsage(const char* executable) {
-  std::cerr << "Usage: " << executable
-            << " -m <enter|flash|enter-flash|auto-all> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
+  std::cerr << "Usage: " << executable << " -m <enter|flash|enter-flash|auto-all> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
             << "Modes:\n"
             << "  enter        : switch one app board to bootloader mode (requires -n)\n"
             << "  flash        : detect one board already in bootloader mode and flash it (requires -f)\n"
@@ -73,10 +71,10 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
 }
 
 bool enterBootloaderOnBoard(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int board_index) {
-  ring::SensorRingFactory factory(ring::ValidationMode::Relaxed);
+  SensorRingFactory factory(ValidationMode::Relaxed);
   factory.addInterface(interface);
 
-  const auto enumeration = factory.enumerate();
+  const auto enumeration  = factory.enumerate();
   std::size_t board_count = 0U;
   for (const auto& [iface, boards] : enumeration) {
     (void)iface;
@@ -103,10 +101,7 @@ bool enterBootloaderOnBoard(const firmware_update::FirmwareUpdater& updater, con
   return true;
 }
 
-std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const firmware_update::FirmwareUpdater& updater,
-                                                             const com::ComInterfaceID& interface,
-                                                             unsigned int retries,
-                                                             std::chrono::milliseconds retry_delay) {
+std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int retries, std::chrono::milliseconds retry_delay) {
   for (unsigned int attempt = 0; attempt < retries; ++attempt) {
     const auto node_id = updater.detectBootloaderNode(interface);
     if (node_id.has_value()) {
@@ -135,7 +130,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      const std::string arg = argv[i];
+      const std::string arg   = argv[i];
       const std::string value = argv[i + 1];
 
       if (arg == "-m") {
@@ -183,7 +178,7 @@ int main(int argc, char* argv[]) {
     interface.name = interface_name;
 
     constexpr unsigned int bootloader_detect_retries = 10U;
-    const auto bootloader_detect_retry_delay = std::chrono::milliseconds(200);
+    const auto bootloader_detect_retry_delay         = std::chrono::milliseconds(200);
     firmware_update::FirmwareUpdater updater;
     const auto log_callback = [](const std::string& msg) {
       std::cout << msg << '\n';

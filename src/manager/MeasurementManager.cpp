@@ -8,11 +8,11 @@ namespace sensorring {
 
 namespace manager {
 
-MeasurementManager::MeasurementManager(ManagerParams params, ring::SensorRingFactory& factory)
+MeasurementManager::MeasurementManager(ManagerParams params, SensorRingFactory& factory)
     : _mm_impl(std::make_unique<MeasurementManagerImpl>(params, factory.build())) {
 }
 
-MeasurementManager::MeasurementManager(ManagerParams params, std::unique_ptr<ring::SensorRing> sensor_ring)
+MeasurementManager::MeasurementManager(ManagerParams params, std::unique_ptr<SensorRing> sensor_ring)
     : _mm_impl(std::make_unique<MeasurementManagerImpl>(params, std::move(sensor_ring))) {
 }
 
@@ -59,7 +59,7 @@ device::Group<device::Light> MeasurementManager::lights() const noexcept {
   return _mm_impl->lights();
 }
 
-ring::SensorRing* MeasurementManager::getRing() const noexcept {
+SensorRing* MeasurementManager::getRing() const noexcept {
   return _mm_impl->getRing();
 }
 

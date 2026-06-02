@@ -100,7 +100,7 @@ int main(int, char*[]) {
     });
 
     // Create a SensorRing with one depth sensor board via auto-discovery
-    ring::SensorRingFactory factory;
+    SensorRingFactory factory;
 
     device::TMF8829_Params tmf_params;
     tmf_params.resolution_mode = device::ResolutionMode::RES_16X16;

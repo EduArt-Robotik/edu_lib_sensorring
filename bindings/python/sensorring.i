@@ -389,19 +389,19 @@ typedef ::int64_t int64_t;
 
 // SWIG cannot handle std::variant or std::unique_ptr natively.
 // We ignore the C++ methods that use them and provide typed alternatives.
-%ignore eduart::sensorring::ring::SensorRingFactory::DeviceParamsVariant;
-%ignore eduart::sensorring::ring::SensorRingFactory::EnumerationMap;
-%ignore eduart::sensorring::ring::SensorRingFactory::build;
-%ignore eduart::sensorring::ring::SensorRingFactory::enumerate;
-%ignore eduart::sensorring::ring::SensorRingFactory::getLatestEnumerationResult;
-%ignore eduart::sensorring::ring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
-%ignore eduart::sensorring::ring::SensorRingFactory::setDefaultDeviceParams;
-%ignore eduart::sensorring::ring::SensorRingFactory::buildDefaultParamsMap;
+%ignore eduart::sensorring::SensorRingFactory::DeviceParamsVariant;
+%ignore eduart::sensorring::SensorRingFactory::EnumerationMap;
+%ignore eduart::sensorring::SensorRingFactory::build;
+%ignore eduart::sensorring::SensorRingFactory::enumerate;
+%ignore eduart::sensorring::SensorRingFactory::getLatestEnumerationResult;
+%ignore eduart::sensorring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
+%ignore eduart::sensorring::SensorRingFactory::setDefaultDeviceParams;
+%ignore eduart::sensorring::SensorRingFactory::buildDefaultParamsMap;
 
 %include "sensorring/SensorRingFactory.hpp"
 
 // Typed alternatives for std::variant-based methods
-%extend eduart::sensorring::ring::SensorRingFactory {
+%extend eduart::sensorring::SensorRingFactory {
     void setDefaultVL53L8CXParams(eduart::sensorring::device::VL53L8CX_Params params) {
         $self->setDefaultDeviceParams(std::move(params));
     }
@@ -424,7 +424,7 @@ typedef ::int64_t int64_t;
         eduart::sensorring::device::WS2812b_Params* ws,
         eduart::sensorring::device::TMF8829_Params* tmf = nullptr)
     {
-        std::vector<eduart::sensorring::ring::SensorRingFactory::DeviceParamsVariant> device_params;
+        std::vector<eduart::sensorring::SensorRingFactory::DeviceParamsVariant> device_params;
         if (vl53) device_params.push_back(*vl53);
         if (htpa) device_params.push_back(*htpa);
         if (ws)   device_params.push_back(*ws);
@@ -435,23 +435,23 @@ typedef ::int64_t int64_t;
 
 // Factory returning raw pointer from unique_ptr (ownership transferred to Python)
 %inline %{
-namespace eduart { namespace ring {
+namespace eduart { namespace sensorring {
 
-  eduart::sensorring::ring::SensorRing* SensorRingFactory_build(eduart::sensorring::ring::SensorRingFactory* factory) {
+  eduart::sensorring::SensorRing* SensorRingFactory_build(eduart::sensorring::SensorRingFactory* factory) {
     auto ptr = factory->build();
     return ptr.release();
   }
 
-  std::string SensorRingFactory_enumerate_str(eduart::sensorring::ring::SensorRingFactory* factory) {
+  std::string SensorRingFactory_enumerate_str(eduart::sensorring::SensorRingFactory* factory) {
     factory->enumerate();
     return factory->printTopology();
   }
 
 }}
 %}
-%newobject eduart::sensorring::ring::SensorRingFactory_build;
+%newobject eduart::sensorring::SensorRingFactory_build;
 
-%exception eduart::sensorring::ring::SensorRingFactory_build {
+%exception eduart::sensorring::SensorRingFactory_build {
     try {
         $action
     } catch (const std::exception& e) {
@@ -498,7 +498,7 @@ SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 // The factory constructor is directly wrappable (takes reference):
 // MeasurementManager(ManagerParams, SensorRingFactory&)
 // The unique_ptr<SensorRing> constructor is for C++ power users only — ignore in SWIG.
-%ignore MeasurementManager::MeasurementManager(ManagerParams, std::unique_ptr<ring::SensorRing>);
+%ignore MeasurementManager::MeasurementManager(ManagerParams, std::unique_ptr<SensorRing>);
 %ignore MeasurementManager::devices;
 %ignore MeasurementManager::subscribeToStateChanges;
 %include "sensorring/manager/MeasurementManager.hpp"

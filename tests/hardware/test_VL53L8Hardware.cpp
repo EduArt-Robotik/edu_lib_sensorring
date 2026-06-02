@@ -36,7 +36,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
   std::atomic<std::size_t> count{ 0 };
 
   try {
-    eduart::sensorring::ring::SensorRingFactory factory;
+    eduart::sensorring::SensorRingFactory factory;
     factory.addInterface(interface);
     factory.expectBoard({}, { eduart::sensorring::device::AnyDepthSensor_Params() });
 
