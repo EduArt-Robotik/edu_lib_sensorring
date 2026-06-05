@@ -27,7 +27,7 @@ namespace device {
 struct SENSORRING_EXPORT DeviceID {
 public:
   /// Hardware device type.
-  DeviceType type = DeviceType::UNDEFINED;
+  DeviceType type = DeviceType::Undefined;
 
   /// Instance index when multiple devices of same type exist.
   unsigned int index = 0;
@@ -60,7 +60,7 @@ inline unsigned int DeviceID::getIndex() const {
 }
 
 inline bool DeviceID::isValid() const {
-  return type != DeviceType::UNDEFINED;
+  return type != DeviceType::Undefined;
 }
 
 } // namespace device

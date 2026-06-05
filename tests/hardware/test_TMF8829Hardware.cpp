@@ -83,27 +83,27 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   // -------------------------------------------------------------------------
   SECTION("Resolution modes – all modes can be set and read back") {
     const ResolutionMode modes[] = {
-      ResolutionMode::RES_8X8,
-      ResolutionMode::RES_8X8_LONG_RANGE,
-      ResolutionMode::RES_8X8_HIGH_ACCURACY,
-      ResolutionMode::RES_16X16,
-      ResolutionMode::RES_16X16_HIGH_ACCURACY,
-      ResolutionMode::RES_32X32,
-      ResolutionMode::RES_32X32_HIGH_ACCURACY,
-      ResolutionMode::RES_48X32,
-      ResolutionMode::RES_48X32_HIGH_ACCURACY,
+      ResolutionMode::Res8x8,
+      ResolutionMode::Res8x8LongRange,
+      ResolutionMode::Res8x8HighAccuracy,
+      ResolutionMode::Res16x16,
+      ResolutionMode::Res16x16HighAccuracy,
+      ResolutionMode::Res32x32,
+      ResolutionMode::Res32x32HighAccuracy,
+      ResolutionMode::Res48x32,
+      ResolutionMode::Res48x32HighAccuracy,
     };
 
     for (const auto mode : modes) {
       REQUIRE(dev.setResolutionMode(mode));
 
-      ResolutionMode readback = ResolutionMode::RES_8X8;
+      ResolutionMode readback = ResolutionMode::Res8x8;
       REQUIRE(dev.getResolutionMode(readback));
       REQUIRE(readback == mode);
     }
 
     // Leave the sensor in the default mode.
-    REQUIRE(dev.setResolutionMode(ResolutionMode::RES_8X8));
+    REQUIRE(dev.setResolutionMode(ResolutionMode::Res8x8));
   }
 
   // -------------------------------------------------------------------------

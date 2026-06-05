@@ -26,7 +26,7 @@ namespace device {
  */
 enum class DeviceType {
   /// Base board (for reset, firmware revision, etc.).
-  SENSORBOARD,
+  SensorBoard,
   /// Time-of-flight sensor (VL53L8CX).
   VL53L8CX,
   /// Thermal sensor (HTPA32).
@@ -36,13 +36,13 @@ enum class DeviceType {
   /// Time-of-flight sensor (TMF8829).
   TMF8829,
   /// Undefined device type.
-  UNDEFINED,
+  Undefined,
   /// Category wildcard: matches any depth sensor (VL53L8CX, TMF8829, ...).
-  ANY_DEPTH,
+  AnyDepth,
   /// Category wildcard: matches any thermal sensor (HTPA32, ...).
-  ANY_THERMAL,
+  AnyThermal,
   /// Category wildcard: matches any light device (WS2812b, ...).
-  ANY_LIGHT
+  AnyLight
 };
 
 /**
@@ -52,7 +52,7 @@ enum class DeviceType {
 SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
 
 /**
- * @brief Returns true if type is a category wildcard (ANY_DEPTH, ANY_THERMAL, ANY_LIGHT).
+ * @brief Returns true if type is a category wildcard (AnyDepth, AnyThermal, AnyLight).
  */
 SENSORRING_EXPORT bool isCategory(DeviceType type) noexcept;
 

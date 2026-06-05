@@ -19,7 +19,7 @@ namespace tmf8829 = eduart::sensorring::device::tmf8829;
 
 TEST_CASE("TMF8829_Params isResultSizeValid edge cases around 8192-byte limit", "[TMF8829][Params]") {
   TMF8829_Params params;
-  params.resolution_mode = ResolutionMode::RES_16X16; // 1024 points per frame
+  params.resolution_mode = ResolutionMode::Res16x16; // 1024 points per frame
 
   SECTION("returns true when total frame size is just below limit (point_size=7, total=7201)") {
     // calculatePointSize: base=3, +signal_strength=5, *nr_of_peaks(1)=5, +xtalk=7  =>  7
@@ -59,7 +59,7 @@ TEST_CASE("TMF8829_Params isResultSizeValid edge cases around 8192-byte limit", 
 
 TEST_CASE("TMF8829_Params isResultSizeValid double-frame split for high-res modes", "[TMF8829][Params]") {
   TMF8829_Params params;
-  params.resolution_mode = ResolutionMode::RES_32X32; // mode > RES_16X16_HIGH_ACCURACY → halved points per frame
+  params.resolution_mode = ResolutionMode::Res32x32; // mode > Res16x16HighAccuracy → halved points per frame
 
   SECTION("returns true when each half frame fits within limit (point_size=6, half_total=4641)") {
     // calculatePointSize: base=3, *nr_of_peaks(2)=6  =>  6

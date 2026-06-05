@@ -10,24 +10,24 @@ namespace device {
 
 std::string toString(ResolutionMode mode) noexcept {
   switch (mode) {
-  case ResolutionMode::RES_8X8:
-    return "RES_8X8";
-  case ResolutionMode::RES_8X8_LONG_RANGE:
-    return "RES_8X8_LONG_RANGE";
-  case ResolutionMode::RES_8X8_HIGH_ACCURACY:
-    return "RES_8X8_HIGH_ACCURACY";
-  case ResolutionMode::RES_16X16:
-    return "RES_16X16";
-  case ResolutionMode::RES_16X16_HIGH_ACCURACY:
-    return "RES_16X16_HIGH_ACCURACY";
-  case ResolutionMode::RES_32X32:
-    return "RES_32X32";
-  case ResolutionMode::RES_32X32_HIGH_ACCURACY:
-    return "RES_32X32_HIGH_ACCURACY";
-  case ResolutionMode::RES_48X32:
-    return "RES_48X32";
-  case ResolutionMode::RES_48X32_HIGH_ACCURACY:
-    return "RES_48X32_HIGH_ACCURACY";
+  case ResolutionMode::Res8x8:
+    return "Res8x8";
+  case ResolutionMode::Res8x8LongRange:
+    return "Res8x8LongRange";
+  case ResolutionMode::Res8x8HighAccuracy:
+    return "Res8x8HighAccuracy";
+  case ResolutionMode::Res16x16:
+    return "Res16x16";
+  case ResolutionMode::Res16x16HighAccuracy:
+    return "Res16x16HighAccuracy";
+  case ResolutionMode::Res32x32:
+    return "Res32x32";
+  case ResolutionMode::Res32x32HighAccuracy:
+    return "Res32x32HighAccuracy";
+  case ResolutionMode::Res48x32:
+    return "Res48x32";
+  case ResolutionMode::Res48x32HighAccuracy:
+    return "Res48x32HighAccuracy";
   default:
     return "UNKNOWN";
   }
@@ -42,7 +42,7 @@ std::size_t TMF8829_Params::calculateResultFrameSize() const {
   const auto nr_of_points = tmf8829::LOOKUP_TABLE_RESOLUTION_X[static_cast<std::size_t>(resolution_mode)] * tmf8829::LOOKUP_TABLE_RESOLUTION_Y[static_cast<std::size_t>(resolution_mode)];
 
   // High resolution modes send their points in two equal sized frames
-  const auto points_per_frame = (resolution_mode > ResolutionMode::RES_16X16_HIGH_ACCURACY) ? nr_of_points / 2 : nr_of_points;
+  const auto points_per_frame = (resolution_mode > ResolutionMode::Res16x16HighAccuracy) ? nr_of_points / 2 : nr_of_points;
   const auto total_size       = tmf8829::RESULT_FRAME_PRE_HEADER_SIZE + tmf8829::RESULT_FRAME_HEADER_SIZE + tmf8829::RESULT_FRAME_FOOTER_SIZE + point_size * points_per_frame;
 
   return total_size;

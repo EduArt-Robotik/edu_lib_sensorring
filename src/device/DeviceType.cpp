@@ -8,6 +8,8 @@ namespace device {
 
 std::string toString(DeviceType type) noexcept {
   switch (type) {
+  case DeviceType::SensorBoard:
+    return "SensorBoard";
   case DeviceType::VL53L8CX:
     return "VL53L8CX";
   case DeviceType::HTPA32:
@@ -16,13 +18,13 @@ std::string toString(DeviceType type) noexcept {
     return "WS2812b";
   case DeviceType::TMF8829:
     return "TMF8829";
-  case DeviceType::UNDEFINED:
+  case DeviceType::Undefined:
     return "Undefined";
-  case DeviceType::ANY_DEPTH:
+  case DeviceType::AnyDepth:
     return "AnyDepth";
-  case DeviceType::ANY_THERMAL:
+  case DeviceType::AnyThermal:
     return "AnyThermal";
-  case DeviceType::ANY_LIGHT:
+  case DeviceType::AnyLight:
     return "AnyLight";
   default:
     return "Unknown";
@@ -34,7 +36,7 @@ std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept {
 }
 
 bool isCategory(DeviceType type) noexcept {
-  return type == DeviceType::ANY_DEPTH || type == DeviceType::ANY_THERMAL || type == DeviceType::ANY_LIGHT;
+  return type == DeviceType::AnyDepth || type == DeviceType::AnyThermal || type == DeviceType::AnyLight;
 }
 
 bool deviceMatchesExpected(DeviceType actual, DeviceType expected) noexcept {
@@ -42,11 +44,11 @@ bool deviceMatchesExpected(DeviceType actual, DeviceType expected) noexcept {
     return actual == expected;
   }
   switch (expected) {
-  case DeviceType::ANY_DEPTH:
+  case DeviceType::AnyDepth:
     return actual == DeviceType::VL53L8CX || actual == DeviceType::TMF8829;
-  case DeviceType::ANY_THERMAL:
+  case DeviceType::AnyThermal:
     return actual == DeviceType::HTPA32;
-  case DeviceType::ANY_LIGHT:
+  case DeviceType::AnyLight:
     return actual == DeviceType::WS2812b;
   default:
     return false;

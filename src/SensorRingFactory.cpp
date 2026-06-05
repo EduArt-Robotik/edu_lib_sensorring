@@ -465,14 +465,14 @@ device::DeviceType SensorRingFactory::deviceTypeFromVariant(const DeviceParamsVa
         } else if constexpr (std::is_same_v<T, device::TMF8829_Params>) {
           return device::DeviceType::TMF8829;
         } else if constexpr (std::is_same_v<T, device::AnyDepthSensor_Params>) {
-          return device::DeviceType::ANY_DEPTH;
+          return device::DeviceType::AnyDepth;
         } else if constexpr (std::is_same_v<T, device::AnyThermalSensor_Params>) {
-          return device::DeviceType::ANY_THERMAL;
+          return device::DeviceType::AnyThermal;
         } else if constexpr (std::is_same_v<T, device::AnyLight_Params>) {
-          return device::DeviceType::ANY_LIGHT;
+          return device::DeviceType::AnyLight;
         }
 
-        return device::DeviceType::UNDEFINED;
+        return device::DeviceType::Undefined;
       },
       v);
 }

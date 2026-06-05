@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/device/types/DeviceParams.hpp"
@@ -25,15 +25,15 @@ namespace device {
  * @brief Supported resolution modes of the TMF8829 sensor.
  */
 enum class ResolutionMode : std::uint8_t {
-  RES_8X8                 = 0,
-  RES_8X8_LONG_RANGE      = 1,
-  RES_8X8_HIGH_ACCURACY   = 2,
-  RES_16X16               = 3,
-  RES_16X16_HIGH_ACCURACY = 4,
-  RES_32X32               = 5,
-  RES_32X32_HIGH_ACCURACY = 6,
-  RES_48X32               = 7,
-  RES_48X32_HIGH_ACCURACY = 8
+  Res8x8               = 0,
+  Res8x8LongRange      = 1,
+  Res8x8HighAccuracy   = 2,
+  Res16x16             = 3,
+  Res16x16HighAccuracy = 4,
+  Res32x32             = 5,
+  Res32x32HighAccuracy = 6,
+  Res48x32             = 7,
+  Res48x32HighAccuracy = 8
 };
 
 /**
@@ -60,17 +60,17 @@ struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
   TMF8829_Params() { max_rate_hz = 30.0; }
 
   /// Resolution mode of the sensor. See TMF8829 datasheet for details on the different modes.
-  ResolutionMode resolution_mode = ResolutionMode::RES_8X8;
+  ResolutionMode resolution_mode = ResolutionMode::Res8x8;
 
   /// Result format of the measurement. Specifies which additional values are included in each measurement.
   TMF8829_ResultFormat result_format;
 
   /**
    * @brief Calculate the resulting frame size of the current parameters.
-   * 
+   *
    * In high resolution modes, the measurement is split across two frames.
    * This method returns the per-frame size.
-   * 
+   *
    * @return The size of the result frame in bytes.
    */
   std::size_t calculateResultFrameSize() const;

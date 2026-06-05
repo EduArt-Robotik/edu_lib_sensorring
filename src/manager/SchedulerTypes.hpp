@@ -30,7 +30,7 @@ namespace manager {
  */
 struct SensorGroupSchedule {
   /// Device type this group represents.
-  device::DeviceType type = device::DeviceType::UNDEFINED;
+  device::DeviceType type = device::DeviceType::Undefined;
 
   /// Integer divisor: group fires every N-th base tick.
   unsigned int divisor = 1;

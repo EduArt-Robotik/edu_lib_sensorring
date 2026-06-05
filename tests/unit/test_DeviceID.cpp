@@ -10,7 +10,7 @@ using eduart::sensorring::device::DeviceType;
 TEST_CASE("DeviceID construction and defaults", "[DeviceID]") {
   SECTION("default construction") {
     DeviceID id{};
-    REQUIRE(id.type == DeviceType::UNDEFINED);
+    REQUIRE(id.type == DeviceType::Undefined);
     REQUIRE(id.index == 0u);
   }
 
@@ -24,11 +24,11 @@ TEST_CASE("DeviceID construction and defaults", "[DeviceID]") {
     DeviceID vl53{ DeviceType::VL53L8CX, 0u };
     DeviceID htpa{ DeviceType::HTPA32, 0u };
     DeviceID ws2812{ DeviceType::WS2812b, 0u };
-    DeviceID undef{ DeviceType::UNDEFINED, 0u };
+    DeviceID undef{ DeviceType::Undefined, 0u };
     REQUIRE(vl53.type == DeviceType::VL53L8CX);
     REQUIRE(htpa.type == DeviceType::HTPA32);
     REQUIRE(ws2812.type == DeviceType::WS2812b);
-    REQUIRE(undef.type == DeviceType::UNDEFINED);
+    REQUIRE(undef.type == DeviceType::Undefined);
   }
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("DeviceID isValid", "[DeviceID]") {
   }
 
   SECTION("UNDEFINED type is invalid even with name") {
-    DeviceID id{ DeviceType::UNDEFINED, 0u };
+    DeviceID id{ DeviceType::Undefined, 0u };
     REQUIRE_FALSE(id.isValid());
   }
 

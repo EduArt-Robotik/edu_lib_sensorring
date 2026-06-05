@@ -108,7 +108,7 @@ EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint
 }
 
 bool EnumerationInformation::hasDevice(device::DeviceType type) const noexcept {
-  if (type == device::DeviceType::UNDEFINED) {
+  if (type == device::DeviceType::Undefined) {
     return false;
   }
   const auto bit = static_cast<std::uint16_t>(1u) << static_cast<std::uint8_t>(type);
@@ -146,7 +146,7 @@ std::string EnumerationInformation::toString() const {
       ss << devices[i];
     }
     ss << "\n";
-  }else{
+  } else {
     ss << "    Devices (HW):   None\n";
   }
 
