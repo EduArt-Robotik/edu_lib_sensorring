@@ -90,7 +90,7 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::millisecon
       return false;
     }
 
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
 
     return true;
   });
@@ -105,7 +105,7 @@ std::future<bool> HTPA32_Device::fetchMeasurementAsync(std::chrono::milliseconds
     clearDataFlag();
     auto fut = beginMeasurementWait();
 
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::HTPA32 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     if (fut.wait_until(deadline) != std::future_status::ready) {

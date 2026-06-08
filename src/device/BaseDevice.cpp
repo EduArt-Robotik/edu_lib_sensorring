@@ -10,7 +10,7 @@ namespace device {
 
 BaseDevice::BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable)
     : _id(id)
-    , _idx(id.getIndex())
+    , _hw_idx(id.getIndex())
     , _state(DeviceState::Undefined)
     , _enable(enable)
     , _interface(interface) {
@@ -51,7 +51,11 @@ DeviceID BaseDevice::getDeviceID() const {
 }
 
 unsigned int BaseDevice::getIdx() const {
-  return _idx;
+  return _hw_idx;
+}
+
+void BaseDevice::setDeviceIndex(unsigned int index) {
+  _id.index = index;
 }
 
 void BaseDevice::setEnable(bool enable) {

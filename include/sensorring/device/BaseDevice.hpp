@@ -93,8 +93,14 @@ public:
   /// @brief Return the full device identifier (type + index).
   DeviceID getDeviceID() const;
 
-  /// @brief Return the zero-based index of this device on its bus.
+  /// @brief Return the zero-based hardware board index on its bus (used for CAN addressing and protocol bitmasks).
   unsigned int getIdx() const;
+
+  /**
+   * @brief Reassign the logical device index (DeviceID.index) without changing the hardware index.
+   * @param[in] index New globally unique per-type index.
+   */
+  void setDeviceIndex(unsigned int index);
 
   // -- enable --
 
@@ -175,7 +181,7 @@ protected:
   // -- members --
 
   DeviceID _id;
-  unsigned int _idx;
+  unsigned int _hw_idx;
   DeviceState _state;
   bool _enable;
 

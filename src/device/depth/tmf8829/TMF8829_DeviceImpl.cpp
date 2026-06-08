@@ -50,7 +50,7 @@ bool TMF8829_DeviceImpl::setResolutionMode(ResolutionMode mode) {
   bool success             = isParamCombinationValid(proposed);
 
   if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { static_cast<std::uint8_t>(mode) });
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_SET_RESOLUTION, { static_cast<std::uint8_t>(mode) });
 
     ResolutionMode current_mode;
     success &= getResolutionMode(current_mode);
@@ -69,7 +69,7 @@ bool TMF8829_DeviceImpl::setResolutionMode(ResolutionMode mode) {
 bool TMF8829_DeviceImpl::getResolutionMode(ResolutionMode& mode) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_GET_RESOLUTION, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_CONFIG_GET_RESOLUTION, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
@@ -155,7 +155,7 @@ bool TMF8829_DeviceImpl::setResultFullNoise(bool full_noise) {
   bool success                      = isParamCombinationValid(proposed);
 
   if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_FULL_NOISE, { static_cast<std::uint8_t>(full_noise) });
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_FULL_NOISE, { static_cast<std::uint8_t>(full_noise) });
 
     bool current_full_noise;
     success &= getResultFullNoise(current_full_noise);
@@ -175,7 +175,7 @@ bool TMF8829_DeviceImpl::setResultFullNoise(bool full_noise) {
 bool TMF8829_DeviceImpl::getResultFullNoise(bool& full_noise) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_FULL_NOISE, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_FULL_NOISE, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
@@ -199,7 +199,7 @@ bool TMF8829_DeviceImpl::setResultXtalk(bool xtalk) {
   bool success                 = isParamCombinationValid(proposed);
 
   if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_XTALK, { static_cast<std::uint8_t>(xtalk) });
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_XTALK, { static_cast<std::uint8_t>(xtalk) });
 
     bool current_xtalk;
     success &= getResultXtalk(current_xtalk);
@@ -219,7 +219,7 @@ bool TMF8829_DeviceImpl::setResultXtalk(bool xtalk) {
 bool TMF8829_DeviceImpl::getResultXtalk(bool& xtalk) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_XTALK, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_XTALK, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
@@ -243,7 +243,7 @@ bool TMF8829_DeviceImpl::setResultNoiseStrength(bool noise_strength) {
   bool success                          = isParamCombinationValid(proposed);
 
   if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NOISE_STRENGTH, { static_cast<std::uint8_t>(noise_strength) });
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NOISE_STRENGTH, { static_cast<std::uint8_t>(noise_strength) });
 
     bool current_noise_strength;
     success &= getResultNoiseStrength(current_noise_strength);
@@ -263,7 +263,7 @@ bool TMF8829_DeviceImpl::setResultNoiseStrength(bool noise_strength) {
 bool TMF8829_DeviceImpl::getResultNoiseStrength(bool& noise_strength) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_NOISE_STRENGTH, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_NOISE_STRENGTH, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
@@ -289,7 +289,7 @@ bool TMF8829_DeviceImpl::setResultSignalStrength(bool signal_strength) {
 
   if (success) {
     success
-        &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_SIGNAL_STRENGTH, { static_cast<std::uint8_t>(signal_strength) });
+        &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_SIGNAL_STRENGTH, { static_cast<std::uint8_t>(signal_strength) });
 
     bool current_signal_strength;
     success &= getResultSignalStrength(current_signal_strength);
@@ -309,7 +309,7 @@ bool TMF8829_DeviceImpl::setResultSignalStrength(bool signal_strength) {
 bool TMF8829_DeviceImpl::getResultSignalStrength(bool& signal_strength) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_SIGNAL_STRENGTH, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_SIGNAL_STRENGTH, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
@@ -334,7 +334,7 @@ bool TMF8829_DeviceImpl::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
   bool success                       = isParamCombinationValid(proposed);
 
   if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NR_PEAKS, { static_cast<std::uint8_t>(nr_of_peaks) });
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_SET_NR_PEAKS, { static_cast<std::uint8_t>(nr_of_peaks) });
 
     std::uint8_t current_nr_of_peaks;
     success &= getResultNrOfPeaks(current_nr_of_peaks);
@@ -353,7 +353,7 @@ bool TMF8829_DeviceImpl::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
 bool TMF8829_DeviceImpl::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
   _got_update = false;
 
-  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_NR_PEAKS, {});
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, tmf8829::PARAMETER_RESULT_GET_NR_PEAKS, {});
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {

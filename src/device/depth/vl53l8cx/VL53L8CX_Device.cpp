@@ -93,7 +93,7 @@ std::future<bool> VL53L8CX_Device::fetchMeasurementAsync(std::chrono::millisecon
     clearDataFlag();
     auto fut = beginMeasurementWait();
 
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::VL53L8CX }, MEASUREMENT_TRANSMISSION_REQUEST, {});
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::VL53L8CX }, MEASUREMENT_TRANSMISSION_REQUEST, {});
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     if (fut.wait_until(deadline) != std::future_status::ready) {

@@ -356,6 +356,16 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
 
   auto ring = std::make_unique<SensorRing>(std::move(bus_vec));
 
+  // Assign globally unique per-type device indices across all buses.
+  {
+    std::unordered_map<int, unsigned int> type_counters;
+    for (auto* dev : ring->getDevices()) {
+      auto type_key = static_cast<int>(dev->getDeviceID().getType());
+      unsigned int seq = type_counters[type_key]++;
+      dev->setDeviceIndex(seq);
+    }
+  }
+
   // Print topology summary via the logger.
   logger::Logger::getInstance()->log(logger::LogVerbosity::Info, printTopology());
 

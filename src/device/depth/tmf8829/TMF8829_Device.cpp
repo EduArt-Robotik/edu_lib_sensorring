@@ -168,7 +168,7 @@ std::future<bool> TMF8829_Device::fetchMeasurementAsync(std::chrono::millisecond
     clearDataFlag();
     auto fut = beginMeasurementWait();
 
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::TMF8829 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
+    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
 
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     if (fut.wait_until(deadline) != std::future_status::ready) {

@@ -20,7 +20,7 @@ WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interf
 
 void WS2812b_Device::setLight(LightMode mode, std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   auto* iface     = _interface;
-  auto board_addr = static_cast<std::uint8_t>(_idx + 1);
+  auto board_addr = static_cast<std::uint8_t>(_hw_idx + 1);
   setReplacableAction([mode, r, g, b, iface, board_addr]() {
     std::uint8_t mode_cmd       = static_cast<uint8_t>(mode);
     std::vector<uint8_t> tx_buf = { mode_cmd, r, g, b };
