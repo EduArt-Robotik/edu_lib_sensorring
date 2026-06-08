@@ -53,12 +53,6 @@ public:
   const VL53L8CX_Params& getParams() const;
 
   /**
-   * @brief Get the most recent measurement and current sensor state.
-   * @return Pair of latest depth measurement and associated sensor state.
-   */
-  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
- 
-  /**
    * @brief Request Time-of-Flight measurements asynchronously on a set of devices.
    *
    * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
@@ -77,10 +71,8 @@ public:
    */
   std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
 
-  /**
-   * @brief Build a DepthMeasurement from internal state and publish to subscribers.
-   */
-  void publishMeasurement() override;
+protected:
+  bool deviceEnabled() const override { return BaseDevice::getEnable(); }
 
 private:
   /**

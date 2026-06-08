@@ -62,6 +62,7 @@ set(SENSORRING_DEVICE_SOURCES
   device/DeviceType.cpp
   device/types/DeviceState.cpp
   device/depth/DepthSensor.cpp
+  device/thermal/ThermalSensor.cpp
   device/depth/vl53l8cx/VL53L8CX_Device.cpp
   device/depth/vl53l8cx/VL53L8CX_DeviceImpl.cpp
   device/depth/tmf8829/TMF8829_Device.cpp

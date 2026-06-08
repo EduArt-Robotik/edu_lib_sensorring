@@ -371,10 +371,6 @@ bool TMF8829_DeviceImpl::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
   return true;
 }
 
-std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_measurement, _parent._state };
-}
-
 void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
 
@@ -434,11 +430,11 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
 
   case MEASUREMENT_TRANSMISSION_RESPONSE: {
     try {
-      _latest_measurement                  = TMF8829_Measurement::fromBuffer(data);
-      _latest_measurement.header.device_id = _parent.getDeviceID();
+      _parent._latest_measurement                  = TMF8829_Measurement::fromBuffer(data);
+      _parent._latest_measurement.header.device_id = _parent.getDeviceID();
 
-      if (_latest_measurement.header.state == device::DeviceState::Ok) {
-        _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, _latest_measurement.point_cloud);
+      if (_parent._latest_measurement.header.state == device::DeviceState::Ok) {
+        _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, _parent._latest_measurement.point_cloud);
       }
       _parent.setMeasurementReady(true);
       return;

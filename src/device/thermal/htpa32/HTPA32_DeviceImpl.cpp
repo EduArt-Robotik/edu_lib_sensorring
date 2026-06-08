@@ -57,10 +57,6 @@ const HTPA32_Params& HTPA32_DeviceImpl::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::ThermalMeasurement&, DeviceState> HTPA32_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_measurement, _parent._state };
-}
-
 bool HTPA32_DeviceImpl::stopCalibration() {
   if (!_calibration_active) {
     return false;
@@ -114,11 +110,11 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
       _vdd  = (uint16_t)(data[0] << 0 | data[1] << 8);
       _ptat = (uint16_t)(data[2] << 0 | data[3] << 8);
 
-      std::tie(_latest_measurement, _parent._state) = processMeasurement(0, data.data() + 4, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
+      std::tie(_parent._latest_measurement, _parent._state) = processMeasurement(0, data.data() + 4, _eeprom, _vdd, _ptat, NUMBER_OF_PIXEL);
       if (_parent._state == DeviceState::Ok) {
         if (_calibration_active && _measurement_init_counter > 5) {
           if (_calibration_count_current < _calibration_count_goal) {
-            _calibration_image += _latest_measurement.temperatures;
+            _calibration_image += _parent._latest_measurement.temperatures;
             _calibration_count_current++;
           }
           if (_calibration_count_current >= _calibration_count_goal) {
@@ -138,8 +134,8 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
         }
 
         if (!_calibration_active && _got_calibration) {
-          _latest_measurement.temperatures -= _calibration_image;
-          _latest_measurement.temperatures += _calibration_average;
+          _parent._latest_measurement.temperatures -= _calibration_image;
+          _parent._latest_measurement.temperatures += _calibration_average;
         }
 
         _has_ready_measurement = true;
@@ -188,9 +184,9 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
   std::vector<double> buffer(len);
 
   measurement::ThermalMeasurement result;
-  result.header.device_id.index = _params.id.index;
-  result.header.frame_id        = frame_id;
-  result.min_deg_c              = 1e6;
+  result.header.device_id = _parent.getDeviceID();
+  result.header.frame_id  = frame_id;
+  result.min_deg_c        = 1e6;
 
   float t_ambient        = _ptat * eeprom.data.ptat_gradient + eeprom.data.ptat_offset;
   result.t_ambient_deg_c = (t_ambient - 2732) / 10.0F;
@@ -238,10 +234,12 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
       }
     } else {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Processing thermal image failed for pixel " + std::to_string(i));
+      result.header.state = DeviceState::ProcessError;
       return { result, DeviceState::ProcessError };
     }
   }
 
+  result.header.state = DeviceState::Ok;
   return { result, DeviceState::Ok };
 }
 

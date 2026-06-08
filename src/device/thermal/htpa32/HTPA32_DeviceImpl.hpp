@@ -38,8 +38,6 @@ public:
 
   const HTPA32_Params& getParams() const;
 
-  std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
-
   std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   bool stopCalibration();
   bool startCalibration(unsigned int window);
@@ -64,7 +62,6 @@ private:
 
   uint16_t _vdd  = 0;
   uint16_t _ptat = 0;
-  measurement::ThermalMeasurement _latest_measurement;
 
   std::atomic<bool> _read_eeprom{ false };
   std::atomic<bool> _got_eeprom{ false };

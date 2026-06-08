@@ -39,6 +39,12 @@ public:
   virtual ~ThermalSensor() = default;
 
   /**
+   * @brief Get the most recent measurement.
+   * @return Reference to the latest thermal measurement (check header.state for validity).
+   */
+  const measurement::ThermalMeasurement& getLatestMeasurement() const;
+
+  /**
    * @brief Subscribe to thermal measurements from this sensor.
    * @param[in] callback Invoked with each new measurement.
    * @return RAII Subscription that auto-cancels on destruction.
@@ -50,7 +56,7 @@ public:
    *
    * Called by the state machine after a successful measurement fetch.
    */
-  virtual void publishMeasurement() = 0;
+  virtual void publishMeasurement();
 
   /**
    * @brief Start a thermal calibration over a sliding window of frames.
@@ -66,6 +72,10 @@ public:
   virtual bool stopCalibration() = 0;
 
 protected:
+  /// @brief Return whether the device is enabled (provided by concrete device).
+  virtual bool deviceEnabled() const = 0;
+
+  measurement::ThermalMeasurement _latest_measurement;
   subscription::Publisher<const measurement::ThermalMeasurement&> _thermal_publisher; ///< Publisher that delivers thermal measurements to subscribers.
 };
 

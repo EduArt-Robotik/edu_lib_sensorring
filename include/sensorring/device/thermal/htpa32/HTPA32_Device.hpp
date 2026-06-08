@@ -73,12 +73,6 @@ public:
   bool startCalibration(unsigned int window);
 
   /**
-   * @brief Get the latest thermal measurement and current sensor state.
-   * @return Pair of latest thermal measurement and associated sensor state.
-   */
-  std::pair<const measurement::ThermalMeasurement&, DeviceState> getLatestMeasurement() const;
-
-  /**
    * @brief Request thermal measurements asynchronously on a set of devices.
    *
    * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
@@ -105,10 +99,8 @@ public:
    */
   std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
 
-  /**
-   * @brief Build a ThermalMeasurement from internal state and publish to subscribers.
-   */
-  void publishMeasurement() override;
+protected:
+  bool deviceEnabled() const override { return BaseDevice::getEnable(); }
 
 private:
   /**

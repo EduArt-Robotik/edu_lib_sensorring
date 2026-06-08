@@ -82,6 +82,17 @@ void DepthSensor::processRawMeasurement(const std::vector<double>& lut_x, const 
   }
 }
 
+const measurement::DepthMeasurement& DepthSensor::getLatestMeasurement() const {
+  return _latest_measurement;
+}
+
+void DepthSensor::publishMeasurement() {
+  if (!deviceEnabled())
+    return;
+  _latest_measurement.header.timestamp = std::chrono::system_clock::now();
+  _depth_publisher.publish(_latest_measurement);
+}
+
 } // namespace device
 
 } // namespace sensorring

@@ -26,10 +26,6 @@ const VL53L8CX_Params& VL53L8CX_DeviceImpl::getParams() const {
   return _params;
 }
 
-std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_DeviceImpl::getLatestMeasurement() const {
-  return { _latest_measurement, _parent._state };
-}
-
 void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
 
@@ -43,7 +39,7 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
     // Complete measurement data delivered by reassembly layer.
     // Expected: [frame_id, nr of valid points, <192 bytes of point data>]
     if (data.size() >= (RESOLUTION * 3 + 2)) {
-      _latest_measurement = processMeasurement(data);
+      _parent._latest_measurement = processMeasurement(data);
       _parent.setMeasurementReady(true);
     }
     break;
@@ -73,6 +69,7 @@ measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std:
 
   _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, result.point_cloud);
   result.point_cloud.data.shrink_to_fit();
+  result.header.state = DeviceState::Ok;
   return result;
 }
 

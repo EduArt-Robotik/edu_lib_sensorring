@@ -100,22 +100,11 @@ bool TMF8829_Device::configure() {
   return true;
 }
 
-std::pair<const measurement::DepthMeasurement&, DeviceState> TMF8829_Device::getLatestMeasurement() const {
-  return _impl->getLatestMeasurement();
-}
-
 void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   if (!_impl) { // ToDo: add as general check in BaseDevice to avoid this in all devices
     return;
   }
   _impl->comCallback(source, command, data);
-}
-
-void TMF8829_Device::publishMeasurement() {
-  if (!getEnable())
-    return;
-  auto [meas, state] = _impl->getLatestMeasurement();
-  _depth_publisher.publish(meas);
 }
 
 std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout) {

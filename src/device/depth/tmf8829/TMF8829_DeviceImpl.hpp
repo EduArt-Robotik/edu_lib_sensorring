@@ -59,8 +59,6 @@ public:
   bool setResultNrOfPeaks(std::uint8_t nr_of_peaks);
   bool getResultNrOfPeaks(std::uint8_t& nr_of_peaks);
 
-  std::pair<const measurement::DepthMeasurement&, DeviceState> getLatestMeasurement() const;
-
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
 private:
@@ -78,7 +76,6 @@ private:
 
   TMF8829_Params _params;
   TMF8829_Device& _parent;
-  TMF8829_Measurement _latest_measurement;
 };
 
 } // namespace device

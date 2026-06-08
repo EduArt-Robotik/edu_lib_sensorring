@@ -49,6 +49,12 @@ public:
   virtual ~DepthSensor() = default;
 
   /**
+   * @brief Get the most recent measurement.
+   * @return Reference to the latest depth measurement (check header.state for validity).
+   */
+  const measurement::DepthMeasurement& getLatestMeasurement() const;
+
+  /**
    * @brief Subscribe to depth measurements from this sensor.
    * @param[in] callback Invoked with each new measurement.
    * @return RAII Subscription that auto-cancels on destruction.
@@ -60,7 +66,7 @@ public:
    *
    * Called by the state machine after a successful measurement fetch.
    */
-  virtual void publishMeasurement() = 0;
+  virtual void publishMeasurement();
 
 protected:
   /**
@@ -82,6 +88,9 @@ protected:
    */
   void processRawMeasurement(const std::vector<double>& lut_x, const std::vector<double>& lut_y, measurement::PointCloud& pcl);
 
+  /// @brief Return whether the device is enabled (provided by concrete device).
+  virtual bool deviceEnabled() const = 0;
+
   double _fov_x_deg;
   double _fov_y_deg;
   unsigned int _resolution_x;
@@ -89,6 +98,7 @@ protected:
   std::vector<double> _lut_x;
   std::vector<double> _lut_y;
 
+  measurement::DepthMeasurement _latest_measurement;
   subscription::Publisher<const measurement::DepthMeasurement&> _depth_publisher;
 };
 

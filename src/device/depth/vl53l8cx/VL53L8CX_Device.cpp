@@ -28,29 +28,13 @@ const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _impl->getParams();
 }
 
-std::pair<const measurement::DepthMeasurement&, DeviceState> VL53L8CX_Device::getLatestMeasurement() const {
-  return _impl->getLatestMeasurement();
-}
+
 
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   _impl->comCallback(source, command, data);
 }
 
-void VL53L8CX_Device::publishMeasurement() {
-  if (!getEnable())
-    return;
-  auto [raw, state] = _impl->getLatestMeasurement();
 
-  // ToDo: Should be populated when measurement is received, not here
-  measurement::DepthMeasurement m;
-  m.header.device_id = _id;
-  m.header.frame_id  = raw.header.frame_id;
-  m.header.timestamp = std::chrono::system_clock::now();
-  m.header.state     = state;
-  m.nr_valid_points  = raw.nr_valid_points;
-  m.point_cloud      = raw.point_cloud;
-  _depth_publisher.publish(m);
-}
 
 std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
