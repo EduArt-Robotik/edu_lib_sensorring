@@ -28,13 +28,9 @@ const VL53L8CX_Params& VL53L8CX_Device::getParams() const {
   return _impl->getParams();
 }
 
-
-
 void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   _impl->comCallback(source, command, data);
 }
-
-
 
 std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
