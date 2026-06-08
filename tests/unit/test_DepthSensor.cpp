@@ -17,6 +17,7 @@ public:
       : DepthSensor(fov_x, fov_y, res_x, res_y) {}
 
   void publishMeasurement() override {}
+  bool deviceEnabled() const override { return true; }
 
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }
