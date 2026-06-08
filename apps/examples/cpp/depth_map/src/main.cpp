@@ -31,7 +31,7 @@ static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType
 
 // Distance range for color mapping (in meters)
 static constexpr double MIN_DIST = 0.0;
-static constexpr double MAX_DIST = 1.0;
+static constexpr double MAX_DIST = 1.5;
 
 std::string depthToColor(double depth, double min, double max) {
 
@@ -103,7 +103,7 @@ int main(int, char*[]) {
     SensorRingFactory factory;
 
     device::TMF8829_Params tmf_params;
-    tmf_params.resolution_mode = device::ResolutionMode::RES_16X16;
+    tmf_params.resolution_mode = device::ResolutionMode::Res16x16;
     factory.setDefaultDeviceParams(tmf_params);
 
     factory.addInterface(can_interface);
