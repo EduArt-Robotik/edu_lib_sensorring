@@ -50,7 +50,7 @@ struct SENSORRING_EXPORT DepthMeasurement {
    * @brief Transform the point cloud from the sensor's local frame to the ring's global frame.
    * @return A new PointCloud with all points expressed in the global coordinate frame.
    */
-  inline PointCloud transformToGlobalFrame() { return PointCloud::transform(point_cloud, header.position, header.orientation); };
+  inline PointCloud transformToGlobalFrame() const { return PointCloud::transform(point_cloud, header.position, header.orientation); }
 };
 
 } // namespace measurement
