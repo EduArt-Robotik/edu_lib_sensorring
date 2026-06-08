@@ -5,6 +5,7 @@
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/light/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 using namespace std::chrono_literals;
@@ -253,6 +254,13 @@ void MeasurementManagerImpl::runPhase() {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
     board::resetBoards();
     std::this_thread::sleep_for(std::chrono::seconds(2));
+    _phase = Phase::sync_lights;
+    break;
+  }
+
+  case Phase::sync_lights: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Synchronizing lights");
+    device::WS2812b_Device::syncLight();
     _phase = Phase::configure_devices;
     break;
   }
