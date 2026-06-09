@@ -56,7 +56,7 @@ else:
 #include "sensorring/logger/LogVerbosity.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/measurement/Image.hpp"
-#include "sensorring/device/LightMode.hpp"
+#include "sensorring/device/light/LightMode.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
 #include "sensorring/subscription/SubscriberToken.hpp"
@@ -66,26 +66,28 @@ else:
 #include "sensorring/math/Matrix3.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/device/DeviceType.hpp"
-#include "sensorring/device/DeviceID.hpp"
-#include "sensorring/device/DeviceParams.hpp"
-#include "sensorring/device/hardware/SensorBoardType.hpp"
-#include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
-#include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
-#include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/device/types/DeviceID.hpp"
+#include "sensorring/device/types/DeviceParams.hpp"
+#include "sensorring/board/SensorBoardType.hpp"
+#include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
+#include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
-#include "sensorring/SensorBoardParams.hpp"
+#include "sensorring/board/SensorBoardParams.hpp"
+#include "sensorring/measurement/Header.hpp"
+#include "sensorring/device/types/DeviceState.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/SensorRingFactory.hpp"
-#include "sensorring/device/EnumerationInformation.hpp"
+#include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/device/IDevice.hpp"
-#include "sensorring/device/DepthSensor.hpp"
-#include "sensorring/device/ThermalSensor.hpp"
-#include "sensorring/device/Light.hpp"
-#include "sensorring/device/Group.hpp"
+#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/depth/DepthSensor.hpp"
+#include "sensorring/device/thermal/ThermalSensor.hpp"
+#include "sensorring/device/light/Light.hpp"
+#include "sensorring/device/types/Group.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 %}
 
@@ -206,7 +208,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/measurement/Image.hpp"
 
 
-%include "sensorring/device/LightMode.hpp"
+%include "sensorring/device/light/LightMode.hpp"
 
 
 %include "sensorring/interface/ComInterfaceID.hpp"
@@ -223,6 +225,10 @@ typedef ::int64_t int64_t;
 
 
 %template (PointDataVector) std::vector<eduart::sensorring::measurement::PointData>;
+
+%rename (DeviceStateToString) eduart::sensorring::device::toString(DeviceState);
+%include "sensorring/device/types/DeviceState.hpp"
+%include "sensorring/measurement/Header.hpp"
 
 %template (ScalarImageUint8Template) eduart::sensorring::measurement::ScalarImage<std::uint8_t, eduart::sensorring::THERMAL_RESOLUTION>;
 %template (ScalarImageDoubleTemplate) eduart::sensorring::measurement::ScalarImage<double, eduart::sensorring::THERMAL_RESOLUTION>;
@@ -257,19 +263,19 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/DeviceType.hpp"
 
 
-%include "sensorring/device/DeviceID.hpp"
+%include "sensorring/device/types/DeviceID.hpp"
 
 
 %rename (Orientation_None) eduart::sensorring::device::Orientation::None;
-%include "sensorring/device/DeviceParams.hpp"
+%include "sensorring/device/types/DeviceParams.hpp"
 
-%include "sensorring/device/hardware/ws2812b/WS2812b_Params.hpp"
-
-
-%include "sensorring/device/hardware/vl53l8cx/VL53L8CX_Params.hpp"
+%include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 
 
-%include "sensorring/device/hardware/htpa32/HTPA32_Params.hpp"
+%include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
+
+
+%include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 
 
 %rename (ResolutionModeToString) eduart::sensorring::device::toString(ResolutionMode);
@@ -277,36 +283,36 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 
 
-%rename (SensorBoardTypeToString) eduart::sensorring::device::toString(SensorBoardType);
-%include "sensorring/device/hardware/SensorBoardType.hpp"
+%rename (SensorBoardTypeToString) eduart::sensorring::board::toString(SensorBoardType);
+%include "sensorring/board/SensorBoardType.hpp"
 
 
-%include "sensorring/SensorBoardParams.hpp"
+%include "sensorring/board/SensorBoardParams.hpp"
 
 
 /****
  * Typed device interfaces (new API)
  */
 
-// IDevice: action queue is internal, not for Python users
-%ignore eduart::sensorring::device::IDevice::enqueueAction;
-%ignore eduart::sensorring::device::IDevice::drainActions;
-%import "sensorring/device/IDevice.hpp"
+// BaseDevice: action queue is internal, not for Python users
+%ignore eduart::sensorring::device::BaseDevice::enqueueAction;
+%ignore eduart::sensorring::device::BaseDevice::drainActions;
+%import "sensorring/device/BaseDevice.hpp"
 
 // --- DepthSensor ---
 %ignore eduart::sensorring::device::DepthSensor::subscribe;     // Manual GIL wrapper below
 %ignore eduart::sensorring::device::DepthSensor::publishMeasurement;
 %ignore eduart::sensorring::device::DepthSensor::_depth_publisher;
-%include "sensorring/device/DepthSensor.hpp"
+%include "sensorring/device/depth/DepthSensor.hpp"
 
 // --- ThermalSensor ---
 %ignore eduart::sensorring::device::ThermalSensor::subscribe;
 %ignore eduart::sensorring::device::ThermalSensor::publishMeasurement;
 %ignore eduart::sensorring::device::ThermalSensor::_thermal_publisher;
-%include "sensorring/device/ThermalSensor.hpp"
+%include "sensorring/device/thermal/ThermalSensor.hpp"
 
 // --- Light ---
-%include "sensorring/device/Light.hpp"
+%include "sensorring/device/light/Light.hpp"
 
 // --- Group<T> ---
 %ignore eduart::sensorring::device::Group::subscribe;  // Manual GIL wrapper below
@@ -314,7 +320,7 @@ typedef ::int64_t int64_t;
 %ignore eduart::sensorring::device::Group::end;
 %ignore eduart::sensorring::device::Group::iterator;
 %ignore eduart::sensorring::device::Group::const_iterator;
-%include "sensorring/device/Group.hpp"
+%include "sensorring/device/types/Group.hpp"
 
 %template(DepthSensorGroup) eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>;
 %template(ThermalSensorGroup) eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>;
@@ -372,12 +378,12 @@ typedef ::int64_t int64_t;
  * Enumeration information
  */
 
-%rename (ConnectionStateToString) eduart::sensorring::device::toString(ConnectionState);
-%rename (ConfigurationStateToString) eduart::sensorring::device::toString(ConfigurationState);
+%rename (ConnectionStateToString) eduart::sensorring::board::toString(ConnectionState);
+%rename (ConfigurationStateToString) eduart::sensorring::board::toString(ConfigurationState);
 %warnfilter(503) eduart::sensorring::Version;
 %warnfilter(503) eduart::sensorring::CommitHash;
 %template (DeviceTypeVector) std::vector<eduart::sensorring::device::DeviceType>;
-%include "sensorring/device/EnumerationInformation.hpp"
+%include "sensorring/board/EnumerationInformation.hpp"
 
 %rename (ManagerStateToString) eduart::sensorring::manager::toString(ManagerState);
 %include "sensorring/manager/ManagerState.hpp"
@@ -394,10 +400,11 @@ typedef ::int64_t int64_t;
 %ignore eduart::sensorring::SensorRingFactory::build;
 %ignore eduart::sensorring::SensorRingFactory::enumerate;
 %ignore eduart::sensorring::SensorRingFactory::getLatestEnumerationResult;
-%ignore eduart::sensorring::SensorRingFactory::expectBoard(device::SensorBoardParams, std::vector<DeviceParamsVariant>);
+%ignore eduart::sensorring::SensorRingFactory::expectBoard(board::SensorBoardParams, std::vector<DeviceParamsVariant>);
 %ignore eduart::sensorring::SensorRingFactory::setDefaultDeviceParams;
 %ignore eduart::sensorring::SensorRingFactory::buildDefaultParamsMap;
 
+%import "sensorring/SensorRing.hpp"
 %include "sensorring/SensorRingFactory.hpp"
 
 // Typed alternatives for std::variant-based methods
@@ -418,7 +425,7 @@ typedef ::int64_t int64_t;
     // expectBoard with explicit device params (replaces the std::variant overload).
     // Called from Python via the expectBoard() wrapper below.
     void _expectBoardWithDevices(
-        eduart::sensorring::device::SensorBoardParams board_params,
+        eduart::sensorring::board::SensorBoardParams board_params,
         eduart::sensorring::device::VL53L8CX_Params* vl53,
         eduart::sensorring::device::HTPA32_Params* htpa,
         eduart::sensorring::device::WS2812b_Params* ws,
@@ -498,9 +505,9 @@ SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 // The factory constructor is directly wrappable (takes reference):
 // MeasurementManager(ManagerParams, SensorRingFactory&)
 // The unique_ptr<SensorRing> constructor is for C++ power users only — ignore in SWIG.
-%ignore MeasurementManager::MeasurementManager(ManagerParams, std::unique_ptr<SensorRing>);
-%ignore MeasurementManager::devices;
-%ignore MeasurementManager::subscribeToStateChanges;
+%ignore eduart::sensorring::manager::MeasurementManager::MeasurementManager(ManagerParams, std::unique_ptr<SensorRing>);
+%ignore eduart::sensorring::manager::MeasurementManager::devices;
+%ignore eduart::sensorring::manager::MeasurementManager::subscribeToStateChanges;
 %include "sensorring/manager/MeasurementManager.hpp"
 
 
