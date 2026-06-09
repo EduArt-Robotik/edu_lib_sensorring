@@ -120,6 +120,62 @@ public:
     });
   }
 
+  /**
+   * @brief Subscribe to all devices in the group with synchronized frame delivery.
+   *
+   * The callback is invoked once per complete frame — i.e. only after every device in the
+   * group has produced a new measurement. The callback receives a vector containing exactly
+   * one measurement per device (ordered by device index). The effective callback rate equals
+   * the rate of the slowest device in the group.
+   *
+   * Only available when T defines a MeasurementType alias (e.g. DepthSensor, ThermalSensor).
+   *
+   * @param[in] callback Invoked with a complete frame (one measurement per device, ordered by index).
+   * @return RAII Subscription managing all individual subscriptions.
+   */
+  template <typename U = T, typename = typename U::MeasurementType> subscription::Subscription subscribeAll(std::function<void(const std::vector<typename U::MeasurementType>&)> callback) {
+    const std::size_t n = _devices.size();
+
+    struct FrameState {
+      std::vector<typename U::MeasurementType> buffer;
+      std::vector<bool> received;
+      std::size_t count    = 0;
+      std::size_t expected = 0;
+      std::function<void(const std::vector<typename U::MeasurementType>&)> callback;
+    };
+
+    auto state = std::make_shared<FrameState>();
+    state->buffer.resize(n);
+    state->received.resize(n, false);
+    state->count    = 0;
+    state->expected = n;
+    state->callback = std::move(callback);
+
+    auto subs = std::make_shared<std::vector<subscription::Subscription> >();
+    for (std::size_t i = 0; i < n; ++i) {
+      subs->push_back(_devices[i]->subscribe([state, i](const typename U::MeasurementType& m) {
+        state->buffer[i] = m;
+        if (!state->received[i]) {
+          state->received[i] = true;
+          state->count++;
+        }
+        if (state->count == state->expected) {
+          state->callback(state->buffer);
+          // Reset for next frame
+          std::fill(state->received.begin(), state->received.end(), false);
+          state->count = 0;
+        }
+      }));
+    }
+
+    auto token = subscription::SubscriberToken::getNextToken();
+    return subscription::Subscription(token, [subs]() {
+      for (auto& s : *subs)
+        s.cancel();
+      subs->clear();
+    });
+  }
+
 private:
   std::vector<T*> _devices;
 };
