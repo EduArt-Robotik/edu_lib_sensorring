@@ -34,6 +34,56 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "DebugAll",
+      "description": "",
+      "displayName": "",
+      "inherits": [
+        "Debug"
+      ],
+      "cacheVariables": {
+        "SENSORRING_BUILD_TESTS": "ON",
+        "SENSORRING_BUILD_HARDWARE_TESTS": "ON",
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "ON",
+        "SENSORRING_BUILD_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "ReleaseAll",
+      "description": "",
+      "displayName": "",
+      "inherits": [
+        "Release"
+      ],
+      "cacheVariables": {
+        "SENSORRING_BUILD_TESTS": "ON",
+        "SENSORRING_BUILD_HARDWARE_TESTS": "ON",
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "ON",
+        "SENSORRING_BUILD_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "ReleaseDocs",
+      "description": "",
+      "displayName": "",
+      "inherits": [
+        "Release"
+      ],
+      "cacheVariables": {
+        "SENSORRING_BUILD_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "ReleasePython",
+      "description": "",
+      "displayName": "",
+      "inherits": [
+        "Release"
+      ],
+      "cacheVariables": {
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "ON"
+      }
     }
   ],
   "buildPresets": [
