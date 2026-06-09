@@ -113,7 +113,7 @@ def main():
     factory = sensorring.SensorRingFactory()
 
     tmf_params = sensorring.TMF8829_Params()
-    tmf_params.resolution_mode = sensorring.ResolutionMode_RES_16X16
+    tmf_params.resolution_mode = sensorring.ResolutionMode_Res16x16
     factory.setDefaultTMF8829Params(tmf_params)
 
     factory.addInterface(can_interface)
