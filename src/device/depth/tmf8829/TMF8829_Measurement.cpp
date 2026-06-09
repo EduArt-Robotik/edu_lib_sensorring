@@ -17,6 +17,21 @@ namespace sensorring {
 
 namespace device {
 
+math::Vector3 calculateXYZ(unsigned int x, unsigned int y, unsigned int x_res, unsigned int y_res, double distance) {
+
+  // ToDo: Replace by LUT, recalculate on every resolution change
+  double x_corr = (x - ((x_res / 2.0) + 0.5)) / (x_res * 3.0 / 2.0);
+  double y_corr = (y - ((y_res / 2.0) + 0.5)) / (y_res * 3.0 / 2.0);
+  double z_corr = std::sqrt(1 + x_corr * x_corr + y_corr * y_corr);
+
+  math::Vector3 point;
+  point.x() = distance * x_corr / z_corr;
+  point.y() = distance * y_corr / z_corr;
+  point.z() = distance / z_corr;
+
+  return point;
+}
+
 TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8_t>& buffer) {
   static constexpr double MM_TO_M = 0.001;
 
@@ -114,6 +129,9 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
           // Read signal strength
           read_idx += 2;
         }
+
+        // Populate x, y, z coordinated according to the tmf8829 python driver implementation
+        measurement.point_cloud.data[result_point_idx].point = calculateXYZ(col, row, measurement.resolution_x, measurement.resolution_y, measurement.point_cloud.data[result_point_idx].raw_distance);
       }
 
       measurement.nr_valid_points++;
