@@ -70,6 +70,15 @@ public:
 
 protected:
   /**
+   * @brief Update the sensor's FOV and resolution, and recalculate the lookup tables.
+   * @param[in] fov_x_deg New horizontal field of view in degrees.
+   * @param[in] fov_y_deg New vertical field of view in degrees.
+   * @param[in] res_x     New horizontal resolution in pixels (columns).
+   * @param[in] res_y     New vertical resolution in pixels (rows).
+   */
+  void updateResolution(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+
+  /**
    * @brief Create lookup tables for x and y angles based on FOV and resolution.
    * @param[in] fov_x Horizontal field of view in degrees.
    * @param[in] fov_y Vertical field of view in degrees.
