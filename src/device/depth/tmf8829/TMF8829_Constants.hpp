@@ -29,8 +29,14 @@ static constexpr std::uint8_t RESULT_FRAME_SIGNAL_NR_PEAKS_MASK = 0x07;   // Off
 // TMFF8829 point data constants
 static constexpr double DISTANCE_FIXED_POINT_FACTOR = 0.25l; // Each unit in the raw distance corresponds to 0.25 mm
 
-static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X[] = { 8, 8, 16, 32, 32, 48 };
-static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y[] = { 8, 8, 16, 32, 32, 32 };
+static constexpr double FOV_X_DEG = 67.9;
+static constexpr double FOV_Y_DEG = 52.8;
+
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 48, 48};
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 32, 32};
+
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X_FP_MODE[] = { 8, 8, 16, 32, 32, 48 };
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y_FP_MODE[] = { 8, 8, 16, 32, 32, 32 };
 
 } // namespace tmf8829
 

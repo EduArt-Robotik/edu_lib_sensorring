@@ -37,6 +37,20 @@ enum class ResolutionMode : std::uint8_t {
 };
 
 /**
+ * @brief Get the horizontal resolution (number of columns) for a given resolution mode.
+ * @param[in] mode Resolution mode for which to get the horizontal resolution.
+ * @return Number of columns in the TMF8829 frame for the specified resolution mode.
+ */
+unsigned int getXResolution(ResolutionMode mode);
+
+/**
+ * @brief Get the vertical resolution (number of rows) for a given resolution mode.
+ * @param[in] mode Resolution mode for which to get the vertical resolution.
+ * @return Number of rows in the TMF8829 frame for the specified resolution mode.
+ */
+unsigned int getYResolution(ResolutionMode mode);
+
+/**
  * @brief Function to convert the ResolutionMode enum class members to string
  * @param[in] mode to be converted to a string
  * @return Name of the resolution mode written out as string

@@ -8,6 +8,14 @@ namespace sensorring {
 
 namespace device {
 
+unsigned int getXResolution(ResolutionMode mode) {
+  return tmf8829::LOOKUP_TABLE_RESOLUTION_X_RES_MODE[static_cast<std::size_t>(mode)];
+}
+
+unsigned int getYResolution(ResolutionMode mode) {
+  return tmf8829::LOOKUP_TABLE_RESOLUTION_Y_RES_MODE[static_cast<std::size_t>(mode)];
+}
+
 std::string toString(ResolutionMode mode) noexcept {
   switch (mode) {
   case ResolutionMode::Res8x8:
@@ -39,7 +47,7 @@ std::ostream& operator<<(std::ostream& os, ResolutionMode mode) noexcept {
 
 std::size_t TMF8829_Params::calculateResultFrameSize() const {
   const auto point_size   = result_format.calculatePointSize();
-  const auto nr_of_points = tmf8829::LOOKUP_TABLE_RESOLUTION_X[static_cast<std::size_t>(resolution_mode)] * tmf8829::LOOKUP_TABLE_RESOLUTION_Y[static_cast<std::size_t>(resolution_mode)];
+  const auto nr_of_points = tmf8829::LOOKUP_TABLE_RESOLUTION_X_FP_MODE[static_cast<std::size_t>(resolution_mode)] * tmf8829::LOOKUP_TABLE_RESOLUTION_Y_FP_MODE[static_cast<std::size_t>(resolution_mode)];
 
   // High resolution modes send their points in two equal sized frames
   const auto points_per_frame = (resolution_mode > ResolutionMode::Res16x16HighAccuracy) ? nr_of_points / 2 : nr_of_points;
