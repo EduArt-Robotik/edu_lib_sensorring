@@ -61,6 +61,16 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
 
 void DepthSensor::processRawMeasurement(const std::vector<double>& lut_x, const std::vector<double>& lut_y, measurement::PointCloud& pcl) {
 
+  if (pcl.data.size() != (_resolution_x * _resolution_y)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Point cloud size does not match sensor resolution");
+    return;
+  }
+
+  if (lut_x.size() != _resolution_x || lut_y.size() != _resolution_y) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Lookup table size does not match sensor resolution");
+    return;
+  }
+
   unsigned int i = 0;
   for (const auto lut_val_x : lut_x) {
     for (const auto lut_val_y : lut_y) {
