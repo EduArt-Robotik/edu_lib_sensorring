@@ -315,7 +315,8 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/light/Light.hpp"
 
 // --- Group<T> ---
-%ignore eduart::sensorring::device::Group::subscribe;  // Manual GIL wrapper below
+%ignore eduart::sensorring::device::Group::subscribe;     // Manual GIL wrapper below
+%ignore eduart::sensorring::device::Group::subscribeAll;  // Manual GIL wrapper below
 %ignore eduart::sensorring::device::Group::begin;
 %ignore eduart::sensorring::device::Group::end;
 %ignore eduart::sensorring::device::Group::iterator;
@@ -706,17 +707,75 @@ static eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscr
   return new eduart::sensorring::subscription::Subscription(std::move(sub));
 }
 
+static eduart::sensorring::subscription::Subscription* DepthSensorGroup_subscribeAll_py(
+    eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>* group, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto cb = [prevent_leak](const std::vector<eduart::sensorring::measurement::DepthMeasurement>& measurements) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::DepthMeasurement *");
+    PyObject* py_list = PyList_New(static_cast<Py_ssize_t>(measurements.size()));
+    for (std::size_t i = 0; i < measurements.size(); ++i) {
+      auto* copy = new eduart::sensorring::measurement::DepthMeasurement(measurements[i]);
+      PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+      PyList_SET_ITEM(py_list, static_cast<Py_ssize_t>(i), py_meas);
+    }
+    PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_list, nullptr);
+    Py_XDECREF(py_list);
+    Py_XDECREF(result);
+    if (PyErr_Occurred()) PyErr_Print();
+    PyGILState_Release(gstate);
+  };
+  auto sub = group->subscribeAll(cb);
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
+static eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscribeAll_py(
+    eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>* group, PyObject* callable) {
+  Py_INCREF(callable);
+  auto prevent_leak = std::shared_ptr<PyObject>(callable, [](PyObject* p) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    Py_DECREF(p);
+    PyGILState_Release(gstate);
+  });
+  auto cb = [prevent_leak](const std::vector<eduart::sensorring::measurement::ThermalMeasurement>& measurements) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    swig_type_info* ti = SWIG_TypeQuery("eduart::sensorring::measurement::ThermalMeasurement *");
+    PyObject* py_list = PyList_New(static_cast<Py_ssize_t>(measurements.size()));
+    for (std::size_t i = 0; i < measurements.size(); ++i) {
+      auto* copy = new eduart::sensorring::measurement::ThermalMeasurement(measurements[i]);
+      PyObject* py_meas = SWIG_NewPointerObj(copy, ti, SWIG_POINTER_OWN);
+      PyList_SET_ITEM(py_list, static_cast<Py_ssize_t>(i), py_meas);
+    }
+    PyObject* result = PyObject_CallFunctionObjArgs(prevent_leak.get(), py_list, nullptr);
+    Py_XDECREF(py_list);
+    Py_XDECREF(result);
+    if (PyErr_Occurred()) PyErr_Print();
+    PyGILState_Release(gstate);
+  };
+  auto sub = group->subscribeAll(cb);
+  return new eduart::sensorring::subscription::Subscription(std::move(sub));
+}
+
 %}
 
 %newobject DepthSensor_subscribe_py;
 %newobject ThermalSensor_subscribe_py;
 %newobject DepthSensorGroup_subscribe_py;
 %newobject ThermalSensorGroup_subscribe_py;
+%newobject DepthSensorGroup_subscribeAll_py;
+%newobject ThermalSensorGroup_subscribeAll_py;
 
 eduart::sensorring::subscription::Subscription* DepthSensor_subscribe_py(eduart::sensorring::device::DepthSensor* sensor, PyObject* callable);
 eduart::sensorring::subscription::Subscription* ThermalSensor_subscribe_py(eduart::sensorring::device::ThermalSensor* sensor, PyObject* callable);
 eduart::sensorring::subscription::Subscription* DepthSensorGroup_subscribe_py(eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>* group, PyObject* callable);
 eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscribe_py(eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>* group, PyObject* callable);
+eduart::sensorring::subscription::Subscription* DepthSensorGroup_subscribeAll_py(eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>* group, PyObject* callable);
+eduart::sensorring::subscription::Subscription* ThermalSensorGroup_subscribeAll_py(eduart::sensorring::device::Group<eduart::sensorring::device::ThermalSensor>* group, PyObject* callable);
 
 %pythoncode %{
 def _DepthSensor_subscribe(self, callback):
@@ -738,6 +797,16 @@ def _ThermalSensorGroup_subscribe(self, callback):
     """Subscribe to thermal measurements from all sensors in the group."""
     return ThermalSensorGroup_subscribe_py(self, callback)
 ThermalSensorGroup.subscribe = _ThermalSensorGroup_subscribe
+
+def _DepthSensorGroup_subscribeAll(self, callback):
+    """Subscribe to synchronized depth measurements from all sensors (one callback per complete frame)."""
+    return DepthSensorGroup_subscribeAll_py(self, callback)
+DepthSensorGroup.subscribeAll = _DepthSensorGroup_subscribeAll
+
+def _ThermalSensorGroup_subscribeAll(self, callback):
+    """Subscribe to synchronized thermal measurements from all sensors (one callback per complete frame)."""
+    return ThermalSensorGroup_subscribeAll_py(self, callback)
+ThermalSensorGroup.subscribeAll = _ThermalSensorGroup_subscribeAll
 %}
 
 

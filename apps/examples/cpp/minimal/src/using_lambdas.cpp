@@ -74,17 +74,13 @@ int main(int, char*[]) {
     });
 
     // Subscribe to all depth sensors for measurement rate tracking
-    auto depth_sub = manager->depthSensors().subscribe([&vl53l8cx_rate, depth_sensor_count](const measurement::DepthMeasurement& meas) {
-      if (meas.header.device_id.index == 0) {
-        vl53l8cx_rate->tick(depth_sensor_count);
-      }
+    auto depth_sub = manager->depthSensors().subscribeAll([&vl53l8cx_rate, depth_sensor_count](const std::vector<measurement::DepthMeasurement>&) {
+      vl53l8cx_rate->tick(depth_sensor_count);
     });
 
     // Subscribe to all thermal sensors for measurement rate tracking
-    auto thermal_sub = manager->thermalSensors().subscribe([&htpa32_rate, thermal_sensor_count](const measurement::ThermalMeasurement& meas) {
-      if (meas.header.device_id.index == 0) {
-        htpa32_rate->tick(thermal_sensor_count);
-      }
+    auto thermal_sub = manager->thermalSensors().subscribeAll([&htpa32_rate, thermal_sensor_count](const std::vector<measurement::ThermalMeasurement>&) {
+      htpa32_rate->tick(thermal_sensor_count);
     });
 
     // Start the measurements

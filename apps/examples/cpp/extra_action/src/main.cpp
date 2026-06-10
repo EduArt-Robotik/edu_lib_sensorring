@@ -74,11 +74,9 @@ int main(int, char*[]) {
     // Subscribe to depth sensors for rate tracking
     std::atomic<bool> got_first       = false;
     std::atomic<unsigned int> counter = 0;
-    auto tof_sub                      = manager->depthSensors().subscribe([&got_first, &counter](const measurement::DepthMeasurement& meas) {
-      if (meas.header.device_id.index == 0) {
-        got_first = true;
-        counter++;
-      }
+    auto tof_sub                      = manager->depthSensors().subscribeAll([&got_first, &counter](const std::vector<measurement::DepthMeasurement>&) {
+      got_first = true;
+      counter++;
     });
 
     // Get a handle to the lights

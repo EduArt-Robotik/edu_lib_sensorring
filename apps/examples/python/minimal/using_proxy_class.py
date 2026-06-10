@@ -71,9 +71,9 @@ class CustomProxy:
     self._subscriptions.append(
       manager.subscribeToStateChanges(self.on_manager_state_change))
     self._subscriptions.append(
-      manager.depthSensors().subscribe(self.on_depth_measurement))
+      manager.depthSensors().subscribeAll(self.on_depth_frame))
     self._subscriptions.append(
-      manager.thermalSensors().subscribe(self.on_thermal_measurement))
+      manager.thermalSensors().subscribeAll(self.on_thermal_frame))
 
   def cancel_all(self):
     """Cancel all subscriptions."""
@@ -84,13 +84,11 @@ class CustomProxy:
   def on_manager_state_change(self, state):
     print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
 
-  def on_depth_measurement(self, meas):
-    if meas.sensor_index == 0:
-      self.vl53l8cx_rate.tick(self._depth_sensor_count)
+  def on_depth_frame(self, measurements):
+    self.vl53l8cx_rate.tick(self._depth_sensor_count)
 
-  def on_thermal_measurement(self, meas):
-    if meas.sensor_index == 0:
-      self.htpa32_rate.tick(self._thermal_sensor_count)
+  def on_thermal_frame(self, measurements):
+    self.htpa32_rate.tick(self._thermal_sensor_count)
 
 
 def main():

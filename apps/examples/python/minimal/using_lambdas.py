@@ -99,19 +99,17 @@ def main():
       lambda state: print(f"[State] State changed to: {sensorring.ManagerStateToString(state)}")
     )
 
-    def on_depth_measurement(meas):
-      if meas.sensor_index == 0:
-        vl53l8cx_rate.tick(depth_sensor_count)
+    def on_depth_frame(measurements):
+      vl53l8cx_rate.tick(depth_sensor_count)
 
-    def on_thermal_measurement(meas):
-      if meas.sensor_index == 0:
-        htpa32_rate.tick(thermal_sensor_count)
+    def on_thermal_frame(measurements):
+      htpa32_rate.tick(thermal_sensor_count)
 
     # Subscribe to all depth sensors for measurement rate tracking
-    depth_sub = manager.depthSensors().subscribe(on_depth_measurement)
+    depth_sub = manager.depthSensors().subscribeAll(on_depth_frame)
 
     # Subscribe to all thermal sensors for measurement rate tracking
-    thermal_sub = manager.thermalSensors().subscribe(on_thermal_measurement)
+    thermal_sub = manager.thermalSensors().subscribeAll(on_thermal_frame)
 
     # Start the measurements
     manager.startMeasuring()

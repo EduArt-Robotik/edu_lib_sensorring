@@ -154,19 +154,19 @@ def main():
       print(f"Front depth subgroup: {front_depth.size()} sensors")
 
     # =========================================================================
-    # 8. Group subscription for thermal (per-sensor callbacks)
+    # 8. Group subscription for thermal (synchronized frame delivery)
     # =========================================================================
     thermal_frame_count = [0]
     lock = threading.Lock()
 
-    def thermal_callback(meas):
-      if meas.sensor_index == 0:
-        with lock:
-          thermal_frame_count[0] += 1
-      # meas.temperatures holds the 32x32 temperature array in deg C.
-      # meas.min_deg_c / meas.max_deg_c give the frame extremes.
+    def thermal_frame_callback(measurements):
+      with lock:
+        thermal_frame_count[0] += 1
+      # measurements is a list of ThermalMeasurement (one per sensor).
+      # Each m.temperatures holds the 32x32 temperature array in deg C.
+      # Each m.min_deg_c / m.max_deg_c give the frame extremes.
 
-    thermal_sub = all_thermal.subscribe(thermal_callback)
+    thermal_sub = all_thermal.subscribeAll(thermal_frame_callback)
 
     # =========================================================================
     # 9. Set initial light state via the action queue

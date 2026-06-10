@@ -176,15 +176,14 @@ int main(int, char*[]) {
     }
 
     // =========================================================================
-    // 8. Group subscription for thermal (per-sensor callbacks)
+    // 8. Group subscription for thermal (synchronized frame delivery)
     // =========================================================================
     std::atomic<unsigned int> thermal_frame_count{ 0 };
-    auto thermal_sub = all_thermal.subscribe([&thermal_frame_count](const measurement::ThermalMeasurement& m) {
-      if (m.header.device_id.index == 0) {
-        thermal_frame_count++;
-      }
-      // m.temperatures holds the 32×32 temperature array in °C.
-      // m.min_deg_c / m.max_deg_c give the frame extremes.
+    auto thermal_sub = all_thermal.subscribeAll([&thermal_frame_count](const std::vector<measurement::ThermalMeasurement>&) {
+      thermal_frame_count++;
+      // measurements contains one ThermalMeasurement per sensor.
+      // Each m.temperatures holds the 32×32 temperature array in °C.
+      // Each m.min_deg_c / m.max_deg_c give the frame extremes.
     });
 
     // =========================================================================

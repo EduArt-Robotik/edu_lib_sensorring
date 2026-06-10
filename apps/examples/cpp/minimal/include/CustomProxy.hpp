@@ -34,9 +34,9 @@ public:
     // Subscribe to the manager state changes
     _subscriptions.emplace_back(manager->subscribeToStateChanges(std::bind(&CustomProxy::onManagerStateChange, this, std::placeholders::_1)));
 
-    // Subscribe to depth and thermal sensors via the new typed API
-    _subscriptions.emplace_back(manager->depthSensors().subscribe(std::bind(&CustomProxy::onDepthMeasurement, this, std::placeholders::_1)));
-    _subscriptions.emplace_back(manager->thermalSensors().subscribe(std::bind(&CustomProxy::onThermalMeasurement, this, std::placeholders::_1)));
+    // Subscribe to depth and thermal sensors via subscribeAll (synchronized frame delivery)
+    _subscriptions.emplace_back(manager->depthSensors().subscribeAll(std::bind(&CustomProxy::onDepthFrame, this, std::placeholders::_1)));
+    _subscriptions.emplace_back(manager->thermalSensors().subscribeAll(std::bind(&CustomProxy::onThermalFrame, this, std::placeholders::_1)));
 
     _depth_sensor_count   = static_cast<unsigned int>(manager->depthSensors().size());
     _thermal_sensor_count = static_cast<unsigned int>(manager->thermalSensors().size());
@@ -54,23 +54,19 @@ public:
   void onManagerStateChange(const manager::ManagerState state) { std::cout << "[State] State changed to: " << state << std::endl; }
 
   /**
-   * @brief Callback method for depth measurements
-   * @param meas The latest depth measurement
+   * @brief Callback method for a complete depth frame
+   * @param measurements Vector of depth measurements (one per sensor)
    */
-  void onDepthMeasurement(const measurement::DepthMeasurement& meas) {
-    if (meas.header.device_id.index == 0) {
-      vl53l8cx_rate.tick(_depth_sensor_count);
-    }
+  void onDepthFrame(const std::vector<measurement::DepthMeasurement>&) {
+    vl53l8cx_rate.tick(_depth_sensor_count);
   }
 
   /**
-   * @brief Callback method for thermal measurements
-   * @param meas The latest thermal measurement
+   * @brief Callback method for a complete thermal frame
+   * @param measurements Vector of thermal measurements (one per sensor)
    */
-  void onThermalMeasurement(const measurement::ThermalMeasurement& meas) {
-    if (meas.header.device_id.index == 0) {
-      htpa32_rate.tick(_thermal_sensor_count);
-    }
+  void onThermalFrame(const std::vector<measurement::ThermalMeasurement>&) {
+    htpa32_rate.tick(_thermal_sensor_count);
   }
 
 public:
