@@ -53,13 +53,6 @@ public:
   const TMF8829_Params& getParams() const;
 
   /**
-   * @brief Get the resolution mode of the sensor.
-   * @param[out] mode Reference to store the current resolution mode.
-   * @return Return true if reading the current resolution mode was successful.
-   */
-  bool getResolutionMode(ResolutionMode& mode);
-
-  /**
    * @brief Set the resolution mode of the sensor.
    * @param[in] mode Resolution mode to set.
    * @return Return true if setting the resolution mode was successful.
@@ -67,11 +60,26 @@ public:
   bool setResolutionMode(ResolutionMode mode);
 
   /**
-   * @brief Get the result format of the sensor.
-   * @param[out] format Reference to store the current result format.
-   * @return Return true if reading the current result format was successful.
+   * @brief Get the resolution mode of the sensor.
+   * @param[out] mode Reference to store the current resolution mode.
+   * @return Return true if reading the current resolution mode was successful.
    */
-  bool getResultFormat(TMF8829_ResultFormat& format);
+  bool getResolutionMode(ResolutionMode& mode);
+
+  /**
+   * @brief Set the iterations setting of the sensor in kilo iteration per measurement.
+   * @param[in] k_iterations Iterations setting to set. Refer to the TMF8829 datasheet for more details about this setting.
+   * @return Return true if setting the iterations setting was successful.
+   */
+  bool setIterationsSetting(std::uint16_t k_iterations);
+
+  /**
+   * @brief Get the iterations setting of the sensor in kilo iteration per measurement.
+   * @param[out] k_iterations Reference to store the current iterations setting. Refer to the TMF8829 datasheet for more details about this setting.
+   * @return Return true if reading the current iterations setting was successful.
+   */
+  bool getIterationsSetting(std::uint16_t& k_iterations);
+
   /**
    * @brief Set the result format of the sensor.
    * @param[in] format Result format to set.
@@ -80,11 +88,19 @@ public:
   bool setResultFormat(TMF8829_ResultFormat format);
 
   /**
+   * @brief Get the result format of the sensor.
+   * @param[out] format Reference to store the current result format.
+   * @return Return true if reading the current result format was successful.
+   */
+  bool getResultFormat(TMF8829_ResultFormat& format);
+
+  /**
    * @brief Enable or disable full noise data in measurement results.
    * @param[in] full_noise Set to true to include full noise data in results.
    * @return Return true if setting the full noise flag was successful.
    */
   bool setResultFullNoise(bool full_noise);
+
   /**
    * @brief Get whether full noise data is included in measurement results.
    * @param[out] full_noise Reference to store the current full noise flag.
@@ -98,6 +114,7 @@ public:
    * @return Return true if setting the crosstalk flag was successful.
    */
   bool setResultXtalk(bool xtalk);
+
   /**
    * @brief Get whether crosstalk data is included in measurement results.
    * @param[out] xtalk Reference to store the current crosstalk flag.
@@ -111,6 +128,7 @@ public:
    * @return Return true if setting the noise strength flag was successful.
    */
   bool setResultNoiseStrength(bool noise_strength);
+  
   /**
    * @brief Get whether noise strength data is included in measurement results.
    * @param[out] noise_strength Reference to store the current noise strength flag.
@@ -124,6 +142,7 @@ public:
    * @return Return true if setting the signal strength flag was successful.
    */
   bool setResultSignalStrength(bool signal_strength);
+
   /**
    * @brief Get whether signal strength data is included in measurement results.
    * @param[out] signal_strength Reference to store the current signal strength flag.
@@ -137,6 +156,7 @@ public:
    * @return Return true if setting the number of peaks was successful.
    */
   bool setResultNrOfPeaks(std::uint8_t nr_of_peaks);
+  
   /**
    * @brief Get the maximum number of peaks reported per pixel in measurement results.
    * @param[out] nr_of_peaks Reference to store the current maximum number of peaks.

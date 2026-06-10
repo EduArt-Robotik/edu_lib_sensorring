@@ -2,6 +2,7 @@
 
 #include <sensorring_transport/Protocol.hpp>
 
+#include "device/depth/tmf8829/TMF8829_Constants.hpp"
 #include "device/depth/tmf8829/TMF8829_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
 
@@ -16,7 +17,7 @@ namespace device {
 
 TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx)
     : BaseDevice(DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable)
-    , DepthSensor{ 45.0, 45.0, 8, 8 }
+    , DepthSensor{ tmf8829::FOV_X_DEG, tmf8829::FOV_Y_DEG, getXResolution(params.resolution_mode), getYResolution(params.resolution_mode) }
     , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
   configure();
 }
@@ -36,12 +37,20 @@ bool TMF8829_Device::getResolutionMode(ResolutionMode& mode) {
   return _impl->getResolutionMode(mode);
 }
 
-bool TMF8829_Device::getResultFormat(TMF8829_ResultFormat& format) {
-  return _impl->getResultFormat(format);
+bool TMF8829_Device::setIterationsSetting(std::uint16_t k_iterations) {
+  return _impl->setIterationsSetting(k_iterations);
+}
+
+bool TMF8829_Device::getIterationsSetting(std::uint16_t& k_iterations) {
+  return _impl->getIterationsSetting(k_iterations);
 }
 
 bool TMF8829_Device::setResultFormat(TMF8829_ResultFormat format) {
   return _impl->setResultFormat(format);
+}
+
+bool TMF8829_Device::getResultFormat(TMF8829_ResultFormat& format) {
+  return _impl->getResultFormat(format);
 }
 
 bool TMF8829_Device::setResultFullNoise(bool full_noise) {
@@ -90,6 +99,10 @@ bool TMF8829_Device::configure() {
   }
 
   if (!setResolutionMode(getParams().resolution_mode)) {
+    return false;
+  }
+
+  if (getParams().k_iterations != 0 && !setIterationsSetting(getParams().k_iterations)) {
     return false;
   }
 

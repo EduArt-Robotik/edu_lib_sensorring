@@ -41,8 +41,11 @@ public:
   bool setResolutionMode(ResolutionMode mode);
   bool getResolutionMode(ResolutionMode& mode);
 
-  bool getResultFormat(TMF8829_ResultFormat& format);
+  bool setIterationsSetting(std::uint16_t k_iterations);
+  bool getIterationsSetting(std::uint16_t& k_iterations);
+  
   bool setResultFormat(TMF8829_ResultFormat format);
+  bool getResultFormat(TMF8829_ResultFormat& format);
 
   bool setResultFullNoise(bool full_noise);
   bool getResultFullNoise(bool& full_noise);

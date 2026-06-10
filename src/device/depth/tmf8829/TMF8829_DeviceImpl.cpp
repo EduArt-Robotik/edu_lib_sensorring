@@ -90,31 +90,42 @@ bool TMF8829_DeviceImpl::getResolutionMode(ResolutionMode& mode) {
 bool TMF8829_DeviceImpl::getResultFormat(TMF8829_ResultFormat& format) {
   bool success = true;
 
-  do {
-    success = getResultFullNoise(format.full_noise);
-    if (!success)
-      break;
+  if (success) {
+    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, PARAMETER_CONFIG_SET_ITERATIONS, transport::ByteOperations::toBytes(k_iterations));
 
-    success = getResultXtalk(format.xtalk);
-    if (!success)
-      break;
+    std::uint16_t current_iterations;
+    success &= getIterationsSetting(current_iterations);
+    success &= (current_iterations == k_iterations);
+  }
 
-    success = getResultNoiseStrength(format.noise_strength);
-    if (!success)
-      break;
+  if (success) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations));
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations));
+  }
 
-    success = getResultSignalStrength(format.signal_strength);
-    if (!success)
-      break;
-
-    success = getResultNrOfPeaks(format.nr_of_peaks);
-    if (!success)
-      break;
-
-  } while (false);
-
-  format = _params.result_format;
   return success;
+}
+
+bool TMF8829_DeviceImpl::getIterationsSetting(std::uint16_t& k_iterations) {
+  _got_update = false;
+
+  _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, PARAMETER_CONFIG_GET_ITERATIONS, {});
+  auto now = std::chrono::steady_clock::now();
+
+  while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
+    std::this_thread::sleep_for(10ms);
+  }
+
+  if (_got_update) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got TMF8829 iterations update on board " + std::to_string(_parent.getDeviceID().index) + ": iterations " + std::to_string(_params.k_iterations));
+  } else {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index));
+    return false;
+  }
+
+  k_iterations = _params.k_iterations;
+  return true;
 }
 
 bool TMF8829_DeviceImpl::setResultFormat(TMF8829_ResultFormat format) {
@@ -146,6 +157,36 @@ bool TMF8829_DeviceImpl::setResultFormat(TMF8829_ResultFormat format) {
 
     } while (false);
 
+  return success;
+}
+
+bool TMF8829_DeviceImpl::getResultFormat(TMF8829_ResultFormat& format) {
+  bool success = true;
+
+  do {
+    success = getResultFullNoise(format.full_noise);
+    if (!success)
+      break;
+
+    success = getResultXtalk(format.xtalk);
+    if (!success)
+      break;
+
+    success = getResultNoiseStrength(format.noise_strength);
+    if (!success)
+      break;
+
+    success = getResultSignalStrength(format.signal_strength);
+    if (!success)
+      break;
+
+    success = getResultNrOfPeaks(format.nr_of_peaks);
+    if (!success)
+      break;
+
+  } while (false);
+
+  format = _params.result_format;
   return success;
 }
 
@@ -384,6 +425,14 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
     if (data.size() >= 1) {
       _params.resolution_mode = static_cast<ResolutionMode>(data[0]);
       _got_update             = true;
+    }
+    return;
+  }
+
+  case PARAMETER_CONFIG_GET_ITERATIONS: {
+    if (data.size() >= 2) {
+      _params.k_iterations = transport::ByteOperations::readUint16(data, 0);
+      _got_update          = true;
     }
     return;
   }

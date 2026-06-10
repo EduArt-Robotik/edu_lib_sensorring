@@ -62,6 +62,9 @@ struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
   /// Resolution mode of the sensor. See TMF8829 datasheet for details on the different modes.
   ResolutionMode resolution_mode = ResolutionMode::Res8x8;
 
+  /// Iterations setting of the sensor in kilo iteration per measurement. Refer to the TMF8829 datasheet for more details about this setting. Set to 0 for sensor default value.
+  std::uint16_t k_iterations = 0;
+
   /// Result format of the measurement. Specifies which additional values are included in each measurement.
   TMF8829_ResultFormat result_format;
 

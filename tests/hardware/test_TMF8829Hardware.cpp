@@ -82,6 +82,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
 
   // -------------------------------------------------------------------------
   SECTION("Resolution modes – all modes can be set and read back") {
+    // clang-format off
     const ResolutionMode modes[] = {
       ResolutionMode::Res8x8,
       ResolutionMode::Res8x8LongRange,
@@ -93,6 +94,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
       ResolutionMode::Res48x32,
       ResolutionMode::Res48x32HighAccuracy,
     };
+    // clang-format on
 
     for (const auto mode : modes) {
       REQUIRE(dev.setResolutionMode(mode));
@@ -104,6 +106,25 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
 
     // Leave the sensor in the default mode.
     REQUIRE(dev.setResolutionMode(ResolutionMode::Res8x8));
+  }
+
+  // -------------------------------------------------------------------------
+  SECTION("Iteration setting – values can be set and read back") {
+    static constexpr std::uint16_t DEFAULT_ITERATIONS = 586;
+    const std::uint16_t iterations[]                  = { 50, 200, 600, 1000, 1500, 2000 };
+
+    REQUIRE_FALSE(dev.setIterationsSetting(0));
+
+    std::uint16_t readback = 0;
+    REQUIRE(dev.getIterationsSetting(readback));
+    REQUIRE(readback == DEFAULT_ITERATIONS);
+
+    for (const auto k_iterations : iterations) {
+      readback = 0;
+      REQUIRE(dev.setIterationsSetting(k_iterations));
+      REQUIRE(dev.getIterationsSetting(readback));
+      REQUIRE(readback == k_iterations);
+    }
   }
 
   // -------------------------------------------------------------------------
