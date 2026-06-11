@@ -51,12 +51,12 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
     std::vector<double> lut_y{ -2.0, 2.0 };
 
     PointCloud pcl;
-    pcl.data.resize(4);
+    pcl.data.resize(4); // Has to match LUT size otherwise processRawMeasurement throws
     pcl.data[0].raw_distance = 1.0;
     pcl.data[1].raw_distance = 2.0;
     pcl.data[2].raw_distance = -1.0;
     pcl.data[3].raw_distance = 3.0;
-    m.toPointCloud(lut_x, lut_y, pcl);
+    REQUIRE_NOTHROW(m.toPointCloud(lut_x, lut_y, pcl));
 
     REQUIRE(pcl.data.size() == 4u);
 
@@ -83,5 +83,8 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
     REQUIRE(pcl.data[3].point.z() == Catch::Approx(3.0));
     REQUIRE(pcl.data[3].raw_distance == Catch::Approx(3.0));
     REQUIRE(pcl.data[3].sigma == Catch::Approx(0.0));
+
+    pcl.data.resize(64); // Has to match LUT size otherwise processRawMeasurement throws
+    REQUIRE_THROWS_AS(m.toPointCloud(lut_x, lut_y, pcl), std::runtime_error);
   }
 }
