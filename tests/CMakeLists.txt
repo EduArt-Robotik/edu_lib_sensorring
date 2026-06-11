@@ -35,7 +35,7 @@ catch_discover_tests(sensorring_unit_tests
 
 if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
-      hardware/test_VL53L8Hardware.cpp
+      hardware/test_DepthSensorHardware.cpp
       hardware/test_TMF8829Hardware.cpp
     )
 
