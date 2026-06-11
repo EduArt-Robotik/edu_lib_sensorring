@@ -1,5 +1,6 @@
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <cmath>
 
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
@@ -7,24 +8,30 @@
 using eduart::sensorring::device::DepthSensor;
 using eduart::sensorring::measurement::PointCloud;
 
-static constexpr double expected_lut_x_8[] = { 0.3624, 0.2589, 0.1553, 0.0518, -0.0518, -0.1553, -0.2589, -0.3624 };
-
-static constexpr double expected_lut_y_8[] = { 0.3624, 0.2589, 0.1553, 0.0518, -0.0518, -0.1553, -0.2589, -0.3624 };
+static constexpr double fov_x              = 45.0;
+static constexpr double fov_y              = 45.0;
+static constexpr unsigned int resolution_x = 8;
+static constexpr unsigned int resolution_y = 8;
+static constexpr double expected_lut_x_8[] = { -0.3624, -0.2589, -0.1553, -0.0518, 0.0518, 0.1553, 0.2589, 0.3624 };
+static constexpr double expected_lut_y_8[] = { -0.3624, -0.2589, -0.1553, -0.0518, 0.0518, 0.1553, 0.2589, 0.3624 };
 
 class MockDepthSensor : public DepthSensor {
 public:
-  MockDepthSensor(double fov_x = 45.0, double fov_y = 45.0, unsigned int res_x = 8, unsigned int res_y = 8)
-      : DepthSensor(fov_x, fov_y, res_x, res_y) {}
+  MockDepthSensor(DepthSensor::Config config = {}, double fov_x = 45.0, double fov_y = 45.0, unsigned int res_x = 8, unsigned int res_y = 8)
+      : DepthSensor(config, fov_x, fov_y, res_x, res_y) {}
 
   void publishMeasurement() override {}
   bool deviceEnabled() const override { return true; }
 
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }
+  const std::vector<double>& lutZ() const { return _lut_z; }
+
+  using DepthSensor::processRawMeasurement;
 
   void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, PointCloud& pcl) {
-    _lut_x = lut_x;
-    _lut_y = lut_y;
+    _lut_x        = lut_x;
+    _lut_y        = lut_y;
     _resolution_x = static_cast<unsigned int>(lut_x.size());
     _resolution_y = static_cast<unsigned int>(lut_y.size());
     processRawMeasurement(pcl);
@@ -33,11 +40,7 @@ public:
 
 TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
 
-  static constexpr double fov_x              = 45.0;
-  static constexpr double fov_y              = 45.0;
-  static constexpr unsigned int resolution_x = 8;
-  static constexpr unsigned int resolution_y = 8;
-  MockDepthSensor m(fov_x, fov_y, resolution_x, resolution_y);
+  MockDepthSensor m({}, fov_x, fov_y, resolution_x, resolution_y);
 
   SECTION("DepthSensor lookup table creation") {
     REQUIRE(m.lutX().size() == resolution_x);
@@ -72,8 +75,8 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
     REQUIRE(pcl.data[0].raw_distance == Catch::Approx(1.0));
     REQUIRE(pcl.data[0].sigma == Catch::Approx(0.0));
 
-    REQUIRE(pcl.data[1].point.x() == Catch::Approx(-2.0));
-    REQUIRE(pcl.data[1].point.y() == Catch::Approx(4.0));
+    REQUIRE(pcl.data[1].point.x() == Catch::Approx(2.0));
+    REQUIRE(pcl.data[1].point.y() == Catch::Approx(-4.0));
     REQUIRE(pcl.data[1].point.z() == Catch::Approx(2.0));
     REQUIRE(pcl.data[1].raw_distance == Catch::Approx(2.0));
     REQUIRE(pcl.data[1].sigma == Catch::Approx(0.0));
@@ -92,5 +95,164 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
 
     pcl.data.resize(64); // Has to match LUT size otherwise processRawMeasurement throws
     REQUIRE_THROWS_AS(m.toPointCloud(lut_x, lut_y, pcl), std::runtime_error);
+  }
+}
+
+TEST_CASE("DepthSensor Config invert_x_lut", "[DepthSensor]") {
+
+  static constexpr double fov_x              = 45.0;
+  static constexpr double fov_y              = 45.0;
+  static constexpr unsigned int resolution_x = 8;
+  static constexpr unsigned int resolution_y = 8;
+
+  DepthSensor::Config config;
+  config.invert_x_lut = true;
+  MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+
+  SECTION("Inverted X LUT values are negated compared to default") {
+    REQUIRE(m.lutX().size() == resolution_x);
+    for (unsigned int i = 0; i < resolution_x; ++i) {
+      CHECK(m.lutX()[i] == Catch::Approx(-expected_lut_x_8[i]).margin(1e-4));
+    }
+    // Y LUT should remain unchanged
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      CHECK(m.lutY()[j] == Catch::Approx(expected_lut_y_8[j]).margin(1e-4));
+    }
+  }
+
+  SECTION("Inverted X LUT affects point cloud X coordinates") {
+    DepthSensor::Config cfg;
+    cfg.invert_x_lut = false;
+    MockDepthSensor default_sensor(cfg, fov_x, fov_y, resolution_x, resolution_y);
+
+    // The inverted sensor's X LUT values should be negated
+    for (unsigned int i = 0; i < resolution_x; ++i) {
+      CHECK(m.lutX()[i] == Catch::Approx(-default_sensor.lutX()[i]).margin(1e-10));
+    }
+  }
+}
+
+TEST_CASE("DepthSensor Config invert_y_lut", "[DepthSensor]") {
+
+  static constexpr double fov_x              = 45.0;
+  static constexpr double fov_y              = 45.0;
+  static constexpr unsigned int resolution_x = 8;
+  static constexpr unsigned int resolution_y = 8;
+
+  DepthSensor::Config config;
+  config.invert_y_lut = true;
+  MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+
+  SECTION("Inverted Y LUT values are negated compared to default") {
+    REQUIRE(m.lutY().size() == resolution_y);
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      CHECK(m.lutY()[j] == Catch::Approx(-expected_lut_y_8[j]).margin(1e-4));
+    }
+    // X LUT should remain unchanged
+    for (unsigned int i = 0; i < resolution_x; ++i) {
+      CHECK(m.lutX()[i] == Catch::Approx(expected_lut_x_8[i]).margin(1e-4));
+    }
+  }
+
+  SECTION("Inverted Y LUT affects point cloud Y coordinates") {
+    DepthSensor::Config cfg;
+    cfg.invert_y_lut = false;
+    MockDepthSensor default_sensor(cfg, fov_x, fov_y, resolution_x, resolution_y);
+
+    // The inverted sensor's Y LUT values should be negated
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      CHECK(m.lutY()[j] == Catch::Approx(-default_sensor.lutY()[j]).margin(1e-10));
+    }
+  }
+}
+
+TEST_CASE("DepthSensor Config reports_perpendicular_distance", "[DepthSensor]") {
+
+  static constexpr double fov_x              = 45.0;
+  static constexpr double fov_y              = 45.0;
+  static constexpr unsigned int resolution_x = 2;
+  static constexpr unsigned int resolution_y = 2;
+
+  SECTION("Default config (perpendicular distance) does not create Z LUT") {
+    DepthSensor::Config config;
+    config.reports_perpendicular_distance = true;
+    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+    REQUIRE(m.lutZ().empty());
+  }
+
+  SECTION("Non-perpendicular distance creates Z LUT with correction factors") {
+    DepthSensor::Config config;
+    config.reports_perpendicular_distance = false;
+    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+
+    REQUIRE(m.lutZ().size() == resolution_x * resolution_y);
+
+    // Each Z LUT entry should be 1/sqrt(1 + lut_x[i]^2 + lut_y[j]^2)
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      for (unsigned int i = 0; i < resolution_x; ++i) {
+        double expected = 1.0 / std::sqrt(1.0 + m.lutX()[i] * m.lutX()[i] + m.lutY()[j] * m.lutY()[j]);
+        CHECK(m.lutZ()[j * resolution_x + i] == Catch::Approx(expected).margin(1e-10));
+      }
+    }
+
+    // All correction factors should be in (0, 1] range
+    for (const auto& z : m.lutZ()) {
+      CHECK(z > 0.0);
+      CHECK(z <= 1.0);
+    }
+  }
+
+  SECTION("Non-perpendicular distance corrects point cloud Z values") {
+    DepthSensor::Config config;
+    config.reports_perpendicular_distance = false;
+    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+
+    PointCloud pcl;
+    pcl.data.resize(resolution_x * resolution_y);
+    double raw_dist = 5.0;
+    for (auto& point : pcl.data) {
+      point.raw_distance = raw_dist;
+    }
+
+    m.processRawMeasurement(pcl);
+
+    // With correction, distance = raw_distance * lut_z[i], which is less than raw_distance
+    // z coordinate equals the corrected distance, x = distance * lut_x, y = distance * lut_y
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      for (unsigned int i = 0; i < resolution_x; ++i) {
+        unsigned int idx          = j * resolution_x + i;
+        double corrected_distance = raw_dist * m.lutZ()[idx];
+        CHECK(pcl.data[idx].point.z() == Catch::Approx(corrected_distance).margin(1e-10));
+        CHECK(pcl.data[idx].point.x() == Catch::Approx(corrected_distance * m.lutX()[i]).margin(1e-10));
+        CHECK(pcl.data[idx].point.y() == Catch::Approx(corrected_distance * m.lutY()[j]).margin(1e-10));
+        // Raw distance should remain unchanged
+        CHECK(pcl.data[idx].raw_distance == Catch::Approx(raw_dist));
+      }
+    }
+  }
+
+  SECTION("Perpendicular distance does not correct point cloud Z values") {
+    DepthSensor::Config config;
+    config.reports_perpendicular_distance = true;
+    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+
+    PointCloud pcl;
+    pcl.data.resize(resolution_x * resolution_y);
+    double raw_dist = 5.0;
+    for (auto& point : pcl.data) {
+      point.raw_distance = raw_dist;
+    }
+
+    m.processRawMeasurement(pcl);
+
+    // Without correction, z equals raw_distance directly
+    for (unsigned int j = 0; j < resolution_y; ++j) {
+      for (unsigned int i = 0; i < resolution_x; ++i) {
+        unsigned int idx = j * resolution_x + i;
+        CHECK(pcl.data[idx].point.z() == Catch::Approx(raw_dist).margin(1e-10));
+        CHECK(pcl.data[idx].point.x() == Catch::Approx(raw_dist * m.lutX()[i]).margin(1e-10));
+        CHECK(pcl.data[idx].point.y() == Catch::Approx(raw_dist * m.lutY()[j]).margin(1e-10));
+      }
+    }
   }
 }

@@ -15,12 +15,14 @@ namespace sensorring {
 
 namespace device {
 
+// clang-format off
 TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable)
-    , DepthSensor{ tmf8829::FOV_X_DEG, tmf8829::FOV_Y_DEG, getXResolution(params.resolution_mode), getYResolution(params.resolution_mode), false }
+    : BaseDevice( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable)
+    , DepthSensor({ true, false, false }, tmf8829::FOV_X_DEG, tmf8829::FOV_Y_DEG, getXResolution(params.resolution_mode), getYResolution(params.resolution_mode))
     , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
   configure();
 }
+// clang-format on
 
 TMF8829_Device::~TMF8829_Device() {
 }

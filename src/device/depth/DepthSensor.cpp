@@ -11,12 +11,13 @@ namespace sensorring {
 
 namespace device {
 
-DepthSensor::DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, bool reports_perpendicular_distance)
-    : _fov_x_deg(fov_x_deg)
+DepthSensor::DepthSensor(Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y)
+    : _config(config)
+    , _fov_x_deg(fov_x_deg)
     , _fov_y_deg(fov_y_deg)
     , _resolution_x(res_x)
-    , _resolution_y(res_y)
-    , _reports_perpendicular_distance(reports_perpendicular_distance) {
+    , _resolution_y(res_y) {
+
   createLookupTable(_fov_x_deg, _fov_y_deg, _resolution_x, _resolution_y, _lut_x, _lut_y, _lut_z);
 }
 
@@ -47,9 +48,9 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
     auto idx_factor        = (i - (res_x / 2.0) + 0.5) / (res_x / 2.0);
     auto corrected_angle_x = std::atan(idx_factor * side_length_x);
 
-    // Convention for the vl53l8cx
-    // ToDo: Verify for the tmf8829
-    corrected_angle_x = -corrected_angle_x;
+    if (_config.invert_x_lut) {
+      corrected_angle_x = -corrected_angle_x;
+    }
 
     lut_x[i] = std::tan(corrected_angle_x);
   }
@@ -63,15 +64,15 @@ void DepthSensor::createLookupTable(double fov_x_deg, double fov_y_deg, unsigned
     auto idx_factor        = (j - (res_y / 2.0) + 0.5) / (res_y / 2.0);
     auto corrected_angle_y = std::atan(idx_factor * side_length_y);
 
-    // Convention for the vl53l8cx
-    // ToDo: Verify for the tmf8829
-    corrected_angle_y = -corrected_angle_y;
+    if (_config.invert_y_lut) {
+      corrected_angle_y = -corrected_angle_y;
+    }
 
     lut_y[j] = std::tan(corrected_angle_y);
   }
 
   // depth LUT (correction factor if the sensor reports the direct distance (hypotenuse) instead of perpendicular distance)
-  if (!_reports_perpendicular_distance) {
+  if (!_config.reports_perpendicular_distance) {
     lut_z.resize(res_x * res_y);
     for (unsigned int i = 0; i < res_x; ++i) {
       for (unsigned int j = 0; j < res_y; ++j) {
@@ -94,14 +95,14 @@ void DepthSensor::processRawMeasurement(measurement::PointCloud& pcl) {
   }
 
   unsigned int i = 0;
-  for (const auto lut_val_x : _lut_x) {
-    for (const auto lut_val_y : _lut_y) {
+  for (const auto lut_val_y : _lut_y) {
+    for (const auto lut_val_x : _lut_x) {
 
       const auto& raw_distance = pcl.data[i].raw_distance;
       if (raw_distance > 0) {
 
         // Apply distance correction if the sensor reports the direct distance but keep raw distance unchanged
-        const auto distance = _reports_perpendicular_distance ? raw_distance : raw_distance * _lut_z[i];
+        const auto distance = _config.reports_perpendicular_distance ? raw_distance : raw_distance * _lut_z[i];
 
         double x          = distance * lut_val_x;
         double y          = distance * lut_val_y;

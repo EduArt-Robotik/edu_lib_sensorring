@@ -36,15 +36,26 @@ public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::DepthMeasurement;
 
+  struct SENSORRING_EXPORT Config {
+    /// Invert x LUT to match sensor coordinate system
+    bool invert_x_lut = false;
+
+    /// Invert y LUT to match sensor coordinate system
+    bool invert_y_lut = false;
+
+    /// Apply correction factor to convert from direct distance (hypotenuse) to perpendicular distance if the sensor does not report perpendicular distance directly.
+    bool reports_perpendicular_distance = true;
+  };
+
   /**
    * @brief Construct a DepthSensor with its field-of-view and pixel resolution.
+   * @param[in] config    Configuration options for the depth sensor.
    * @param[in] fov_x_deg Horizontal field of view in degrees.
    * @param[in] fov_y_deg Vertical field of view in degrees.
    * @param[in] res_x     Horizontal resolution in pixels (columns).
    * @param[in] res_y     Vertical resolution in pixels (rows).
-   * @param[in] reports_perpendicular_distance Whether the sensor reports perpendicular distance or the direct distance (hypotenuse). Used to process the raw data accordingly.
    */
-  DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, bool reports_perpendicular_distance = true);
+  DepthSensor(Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
 
   /// @brief Virtual destructor.
   virtual ~DepthSensor() = default;
@@ -103,6 +114,7 @@ protected:
   /// @brief Return whether the device is enabled (provided by concrete device).
   virtual bool deviceEnabled() const = 0;
 
+  Config _config;
   double _fov_x_deg;
   double _fov_y_deg;
   unsigned int _resolution_x;
@@ -110,7 +122,6 @@ protected:
   std::vector<double> _lut_x;
   std::vector<double> _lut_y;
   std::vector<double> _lut_z;
-  const bool _reports_perpendicular_distance;
 
   measurement::DepthMeasurement _latest_measurement;
   subscription::Publisher<const measurement::DepthMeasurement&> _depth_publisher;
