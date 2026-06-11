@@ -73,8 +73,8 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
   // Common DepthMeasurement fields
   measurement.header.frame_id  = buffer[0];
   measurement.header.timestamp = std::chrono::system_clock::now();
-  measurement.resolution_x     = tmf8829::LOOKUP_TABLE_RESOLUTION_X[measurement.tmf8829_header.focal_plane_mode];
-  measurement.resolution_y     = tmf8829::LOOKUP_TABLE_RESOLUTION_Y[measurement.tmf8829_header.focal_plane_mode];
+  measurement.resolution_x     = tmf8829::LOOKUP_TABLE_RESOLUTION_X_FP_MODE[measurement.tmf8829_header.focal_plane_mode];
+  measurement.resolution_y     = tmf8829::LOOKUP_TABLE_RESOLUTION_Y_FP_MODE[measurement.tmf8829_header.focal_plane_mode];
 
   // tmf8829 point data
   const std::size_t point_buffer_size = measurement.tmf8829_header.payload - tmf8829::RESULT_FRAME_HEADER_SIZE - tmf8829::RESULT_FRAME_FOOTER_SIZE + tmf8829::RESULT_FRAME_PAYLOAD_OFFSET;
