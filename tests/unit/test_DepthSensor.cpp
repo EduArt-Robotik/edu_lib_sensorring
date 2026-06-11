@@ -25,6 +25,8 @@ public:
   void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, PointCloud& pcl) {
     _lut_x = lut_x;
     _lut_y = lut_y;
+    _resolution_x = static_cast<unsigned int>(lut_x.size());
+    _resolution_y = static_cast<unsigned int>(lut_y.size());
     processRawMeasurement(pcl);
   }
 };

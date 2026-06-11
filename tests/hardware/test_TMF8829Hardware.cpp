@@ -111,7 +111,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   // -------------------------------------------------------------------------
   SECTION("Iteration setting – values can be set and read back") {
     static constexpr std::uint16_t DEFAULT_ITERATIONS = 586;
-    const std::uint16_t iterations[]                  = { 50, 200, 600, 1000, 1500, 2000 };
+    const std::uint16_t iterations[]                  = { 50, 200, 600, 800, 1000, 1500, 2000 };
 
     REQUIRE_FALSE(dev.setIterationsSetting(0));
 
