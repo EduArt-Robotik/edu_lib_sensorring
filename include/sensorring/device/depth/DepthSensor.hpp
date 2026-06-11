@@ -42,8 +42,9 @@ public:
    * @param[in] fov_y_deg Vertical field of view in degrees.
    * @param[in] res_x     Horizontal resolution in pixels (columns).
    * @param[in] res_y     Vertical resolution in pixels (rows).
+   * @param[in] reports_perpendicular_distance Whether the sensor reports perpendicular distance or the direct distance (hypotenuse). Used to process the raw data accordingly.
    */
-  DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+  DepthSensor(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, bool reports_perpendicular_distance = true);
 
   /// @brief Virtual destructor.
   virtual ~DepthSensor() = default;
@@ -84,10 +85,11 @@ protected:
    * @param[in] fov_y Vertical field of view in degrees.
    * @param[in] res_x Horizontal resolution (number of columns).
    * @param[in] res_y Vertical resolution (number of rows).
-   * @param[out] lut_x Output vector for horizontal angle lookup table.
-   * @param[out] lut_y Output vector for vertical angle lookup table.
+   * @param[out] lut_x Output vector for horizontal angle lookup table. Output length is res_x.
+   * @param[out] lut_y Output vector for vertical angle lookup table. Output length is res_y.
+   * @param[out] lut_z Output vector for depth lookup table. Output length is res_x * res_y.
    */
-  virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y);
+  virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y, std::vector<double>& lut_z);
 
   /**
    * @brief Calculate the x,y,z coordinates from the raw distance measurements.
@@ -107,6 +109,8 @@ protected:
   unsigned int _resolution_y;
   std::vector<double> _lut_x;
   std::vector<double> _lut_y;
+  std::vector<double> _lut_z;
+  const bool _reports_perpendicular_distance;
 
   measurement::DepthMeasurement _latest_measurement;
   subscription::Publisher<const measurement::DepthMeasurement&> _depth_publisher;

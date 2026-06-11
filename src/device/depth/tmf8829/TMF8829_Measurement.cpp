@@ -143,8 +143,7 @@ TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8
         }
 
         // Populate x, y, z coordinated according to the tmf8829 python driver implementation
-        //calculateXYZ(col, result_row_idx, measurement.resolution_x, measurement.resolution_y, measurement.point_cloud.data[result_point_idx].raw_distance);
-        measurement.point_cloud.data[result_point_idx].point = calculateXYZ(col, result_row_idx, measurement.resolution_x, measurement.resolution_y, measurement.point_cloud.data[result_point_idx].raw_distance);
+        //measurement.point_cloud.data[result_point_idx].point = calculateXYZ(col, result_row_idx, measurement.resolution_x, measurement.resolution_y, measurement.point_cloud.data[result_point_idx].raw_distance);
       }
 
       measurement.nr_valid_points++;
