@@ -488,7 +488,7 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
       _parent._latest_measurement.header.orientation = _parent._rotation;
 
       if (_parent._latest_measurement.header.state == device::DeviceState::Ok) {
-        _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, _parent._latest_measurement.point_cloud);
+        _parent.processRawMeasurement(_parent._latest_measurement.point_cloud);
       }
       _parent.setMeasurementReady(true);
       return;

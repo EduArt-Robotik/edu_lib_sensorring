@@ -91,11 +91,12 @@ protected:
 
   /**
    * @brief Calculate the x,y,z coordinates from the raw distance measurements.
-   * @param[in] lut_x Horizontal angle lookup table.
-   * @param[in] lut_y Vertical angle lookup table.
+   *
+   * Uses the internally managed lookup tables (_lut_x/_lut_y), which are
+   * updated on construction and via updateResolution().
    * @param[in,out] pcl Point cloud to operate on. Distance must be populated, x,y,z will be calculated and filled in.
    */
-  void processRawMeasurement(const std::vector<double>& lut_x, const std::vector<double>& lut_y, measurement::PointCloud& pcl);
+  void processRawMeasurement(measurement::PointCloud& pcl);
 
   /// @brief Return whether the device is enabled (provided by concrete device).
   virtual bool deviceEnabled() const = 0;

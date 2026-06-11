@@ -22,7 +22,11 @@ public:
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }
 
-  void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, PointCloud& pcl) { processRawMeasurement(lut_x, lut_y, pcl); }
+  void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, PointCloud& pcl) {
+    _lut_x = lut_x;
+    _lut_y = lut_y;
+    processRawMeasurement(pcl);
+  }
 };
 
 TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {

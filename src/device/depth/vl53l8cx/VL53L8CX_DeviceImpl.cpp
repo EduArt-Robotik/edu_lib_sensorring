@@ -72,7 +72,7 @@ measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std:
     }
   }
 
-  _parent.processRawMeasurement(_parent._lut_x, _parent._lut_y, result.point_cloud);
+  _parent.processRawMeasurement(result.point_cloud);
   result.point_cloud.data.shrink_to_fit();
   result.header.state = DeviceState::Ok;
   return result;
