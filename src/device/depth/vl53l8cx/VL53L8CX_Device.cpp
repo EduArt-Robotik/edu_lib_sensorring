@@ -18,7 +18,7 @@ namespace device {
 // clang-format off
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
     : BaseDevice( DeviceID({ DeviceType::VL53L8CX, idx}), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, params.enable)
-    , DepthSensor{ { true, true, false }, 45.0, 45.0, 8, 8 },
+    , DepthSensor{ { true, true, true }, 45.0, 45.0, 8, 8 },
     _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 // clang-format on
