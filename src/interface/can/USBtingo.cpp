@@ -78,7 +78,7 @@ bool USBtingo::openInterface() {
   std::stringstream ss;
   ss << "0x" << std::hex << std::nouppercase << std::setw(8) << std::setfill('0') << _dev->get_serial();
 
-  _id.name             = ss.str();
+  _serial_str          = ss.str();
   _communication_error = false;
   return true;
 }

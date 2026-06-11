@@ -71,6 +71,7 @@ public:
 private:
   bool listener() override;
 
+  std::string _serial_str;
   std::unique_ptr<usbtingo::device::Device> _dev;
   sensorring::transport::MessageAssembler _assembler;
   sensorring::transport::MessageReassembler _reassembler;
