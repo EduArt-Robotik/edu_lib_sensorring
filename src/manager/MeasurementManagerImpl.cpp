@@ -364,32 +364,27 @@ void MeasurementManagerImpl::runPhase() {
     if (_params.repair_errors) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Trying to restart measurements.");
 
-      // Reset sensor state.
-      for (auto* dev : _sensor_ring->getDevices()) {
-        dev->resetSensorState();
-      }
-
-      // Clear all pending flags and attempt a single request cycle.
-      for (auto& g : _schedule) {
-        g.has_pending_request = false;
-        g.has_fetch_ready     = false;
-      }
+      // Force update on all groups
+      _tick_count = 0;
 
       unsigned int attempts = 0;
       success               = false;
 
       do {
         attempts++;
-        if (!_vl53l8cx_devices.empty()) {
-          auto fut = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-          if (fut.wait_for(_params.timeout) != std::future_status::ready) {
-            success = false;
-          } else {
-            success = fut.get();
-          }
-        } else {
-          success = true;
+
+        for (auto* dev : _sensor_ring->getDevices()) {
+          dev->resetSensorState();
         }
+        for (auto& g : _schedule) {
+          g.has_pending_request = false;
+          g.has_fetch_ready     = false;
+        }
+
+        // Reuse the pipeline in the error handler
+        requestMeasurements();
+        success = waitForPendingData();
+
       } while (!success && _is_running && (attempts < 10));
 
       if (success) {
