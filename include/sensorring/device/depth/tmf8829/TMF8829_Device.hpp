@@ -191,6 +191,7 @@ public:
 
 protected:
   bool deviceEnabled() const override { return BaseDevice::getEnable(); }
+  unsigned int deviceIndex() const override { return BaseDevice::getDeviceID().getIndex(); }
 
 private:
   /**

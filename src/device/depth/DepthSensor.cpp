@@ -121,6 +121,11 @@ void DepthSensor::processRawMeasurement(measurement::PointCloud& pcl) {
       i++;
     }
   }
+
+  const auto idx = deviceIndex();
+  for (auto& p : pcl.data) {
+    p.sensor_index = idx;
+  }
 }
 
 const measurement::DepthMeasurement& DepthSensor::getLatestMeasurement() const {

@@ -72,7 +72,6 @@ private:
    */
   bool isParamCombinationValid(const TMF8829_Params& params) const;
 
-  static constexpr unsigned int RESOLUTION                         = 64;
   static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
 
   std::atomic<bool> _got_update;

@@ -22,6 +22,7 @@ public:
 
   void publishMeasurement() override {}
   bool deviceEnabled() const override { return true; }
+  unsigned int deviceIndex() const override { return 0; }
 
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }

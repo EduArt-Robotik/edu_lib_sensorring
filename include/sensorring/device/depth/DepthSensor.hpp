@@ -114,6 +114,9 @@ protected:
   /// @brief Return whether the device is enabled (provided by concrete device).
   virtual bool deviceEnabled() const = 0;
 
+  /// @brief Return the device's globally unique per-type index (provided by concrete device).
+  virtual unsigned int deviceIndex() const = 0;
+
   Config _config;
   double _fov_x_deg;
   double _fov_y_deg;
