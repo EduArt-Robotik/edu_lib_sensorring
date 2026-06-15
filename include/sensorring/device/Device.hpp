@@ -83,7 +83,7 @@ public:
   DeviceID getDeviceID() const;
 
   /// @brief Return the zero-based hardware board index on its bus (used for CAN addressing and protocol bitmasks).
-  unsigned int getIdx() const;
+  unsigned int getHwIdx() const;
 
   /**
    * @brief Reassign the logical device index (DeviceID.index) without changing the hardware index.

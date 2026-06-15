@@ -49,7 +49,7 @@ DeviceID Device::getDeviceID() const {
   return _id;
 }
 
-unsigned int Device::getIdx() const {
+unsigned int Device::getHwIdx() const {
   return _hw_idx;
 }
 

@@ -60,7 +60,7 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA3
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
-        group.active_sensors |= (1u << dev->getIdx());
+        group.active_sensors |= (1u << dev->getHwIdx());
       }
     }
 

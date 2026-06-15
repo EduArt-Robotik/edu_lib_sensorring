@@ -49,7 +49,7 @@ std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL5
         auto& group = groups[iface];
         group.devices.push_back(dev);
         futures.emplace_back(dev->beginDataAvailableWait());
-        group.active_sensors |= (1u << dev->getIdx());
+        group.active_sensors |= (1u << dev->getHwIdx());
       }
     }
 

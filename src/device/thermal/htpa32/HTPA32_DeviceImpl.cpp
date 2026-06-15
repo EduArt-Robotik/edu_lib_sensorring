@@ -37,8 +37,8 @@ HTPA32_DeviceImpl::HTPA32_DeviceImpl(HTPA32_Device& parent, HTPA32_Params params
   _calibration_count_goal    = 0;
   _calibration_average       = 0;
 
-  _eeprom_filename      = "sensor" + std::to_string(_parent.getIdx()) + "_hpta32_eeprom.bin";
-  _calibration_filename = "sensor" + std::to_string(_parent.getIdx()) + "_hpta32_calibration.txt";
+  _eeprom_filename      = "sensor" + std::to_string(_parent.getHwIdx()) + "_hpta32_eeprom.bin";
+  _calibration_filename = "sensor" + std::to_string(_parent.getHwIdx()) + "_hpta32_calibration.txt";
 
   if (_params.use_eeprom_file) {
     _got_eeprom = filemanager::StructHandler<htpa32::HTPA32_Eeprom>::readStructFromFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
@@ -88,11 +88,11 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
     if (_read_eeprom && data.size() >= htpa32::HTPA32_Eeprom::SERIALIZED_SIZE) {
       auto result = htpa32::HTPA32_Eeprom::deserialize(data.data(), data.size());
       if (!result.has_value()) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getIdx()));
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to deserialize EEPROM data for sensor " + std::to_string(_parent.getHwIdx()));
       } else {
         _eeprom = result.value();
         if (_params.use_eeprom_file) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving EEPROM data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving EEPROM data to file for sensor " + std::to_string(_parent.getHwIdx()) + ".");
           filemanager::StructHandler<htpa32::HTPA32_Eeprom>::saveStructToFile(_params.eeprom_dir, _eeprom_filename, _eeprom);
         }
         _got_eeprom = true;
@@ -123,9 +123,9 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
             _calibration_active  = false;
             _got_calibration     = true;
 
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Calibration finished for sensor " + std::to_string(_parent.getIdx()) + ". Average temperature: " + std::to_string(_calibration_average) + " deg C.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Calibration finished for sensor " + std::to_string(_parent.getHwIdx()) + ". Average temperature: " + std::to_string(_calibration_average) + " deg C.");
             if (_params.use_calibration_file) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving calibration data to file for sensor " + std::to_string(_parent.getIdx()) + ".");
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Saving calibration data to file for sensor " + std::to_string(_parent.getHwIdx()) + ".");
               filemanager::ArrayHandler<double, NUMBER_OF_PIXEL>::saveArrayToFile(_params.calibration_dir, _calibration_filename, _calibration_image.data);
             }
           }
@@ -162,7 +162,7 @@ std::future<bool> HTPA32_DeviceImpl::getEepromAsync(std::chrono::milliseconds ti
     _eeprom_buffer.reserve(htpa32::HTPA32_Eeprom::SERIALIZED_SIZE);
 
     _read_eeprom                = true;
-    uint16_t sensor_select      = (1u << _parent.getIdx());
+    uint16_t sensor_select      = (1u << _parent.getHwIdx());
     uint8_t sensor_select_high  = (uint8_t)(sensor_select >> 8);
     uint8_t sensor_select_low   = (uint8_t)(sensor_select >> 0);
     std::vector<uint8_t> tx_buf = { sensor_select_high, sensor_select_low };

@@ -137,7 +137,7 @@ std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8
         auto& group = groups[iface];
         group.devices.push_back(dev);
         futures.emplace_back(dev->beginDataAvailableWait());
-        group.active_sensors |= (1u << dev->getIdx());
+        group.active_sensors |= (1u << dev->getHwIdx());
       }
     }
 
