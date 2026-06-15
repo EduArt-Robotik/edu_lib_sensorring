@@ -63,7 +63,7 @@ if(SENSORRING_USE_USBTINGO)
       #URL https://github.com/hannesduske/libusbtingo/archive/refs/heads/develop.zip
     )
 
-    set(USBTINGO_INSTALL_DEV_COMPONENTS OFF)
+    set(USBTINGO_INSTALL_DEV_COMPONENTS ON)
     set(USBTINGO_BUILD_SHARED_LIBS ${SENSORRING_BUILD_SHARED_LIBS})
     set(USBTINGO_BUILD_EXAMPLES OFF)
     set(USBTINGO_BUILD_UTILS OFF)
