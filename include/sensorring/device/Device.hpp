@@ -77,12 +77,14 @@ public:
    */
   std::vector<std::function<void()> > drainActions();
 
-  // -- identity --
-
-  /// @brief Return the full device identifier (type + index).
+  /**
+   * @brief Return the full device identifier (type + index).
+   */ 
   DeviceID getDeviceID() const;
 
-  /// @brief Return the zero-based hardware board index on its bus (used for CAN addressing and protocol bitmasks).
+  /**
+   * @brief Return the zero-based hardware board index on its bus (used for CAN addressing and protocol bitmasks).
+   */ 
   unsigned int getHwIdx() const;
 
   /**
@@ -91,9 +93,9 @@ public:
    */
   void setDeviceIndex(unsigned int index);
 
-  // -- enable --
-
-  /// @brief Return whether this device is currently enabled.
+  /**
+   * @brief Return whether this device is currently enabled.
+   */ 
   bool getEnable() const;
 
   /**
@@ -108,13 +110,8 @@ public:
    */
   void setEnable(bool enable);
 
-  // -- pose --
-
   /**
    * @brief Set the non-owning pointer to the board's pose.
-   *
-   * The referenced Pose must outlive this device. Typically owned by the SensorBoard.
-   *
    * @param[in] board_pose Pointer to the board's pose.
    */
   void setBoardPose(const math::Pose* board_pose);
@@ -133,9 +130,6 @@ public:
 
   /**
    * @brief Compute and return the global pose in the ring coordinate frame.
-   *
-   * Combines the board pose with this device's offset on-the-fly.
-   *
    * @return Global pose (board pose combined with device offset).
    */
   math::Pose getGlobalPose() const;
@@ -146,8 +140,6 @@ protected:
   std::optional<std::function<void()> > _replaceable_action;
 
   virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
-
-  // -- members --
 
   DeviceID _id;
   unsigned int _hw_idx;
