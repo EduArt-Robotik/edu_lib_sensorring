@@ -30,6 +30,11 @@ USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 MIN_DIST = 0.0
 MAX_DIST = 2.0
 
+# Optional forced TMF8829 resolution mode. Set to None to use library/device defaults.
+TMF_RESOLUTION_MODE = sensorring.ResolutionMode_Res16x16
+
+ENABLE_HISTOGRAM = False
+
 # Fixed bin range for sigma histogram (in meters, typically very small)
 SIGMA_MAX = 0.01
 
@@ -38,8 +43,9 @@ class DepthMapClient:
   """Client that copies ToF point clouds to a NumPy buffer for visualization."""
 
   def __init__(self, manager):
-    # Buffer for point cloud data: 64 points, 6 columns (x, y, z, raw_distance, sigma, sensor_index)
-    self._points_np = np.zeros((64, 6), dtype=np.float64)
+    # Buffer for point cloud data: N points, 6 columns (x, y, z, raw_distance, sigma, sensor_index)
+    self._points_np = np.zeros((0, 6), dtype=np.float64)
+    self._point_count = 0
     self._got_measurement = False
     self._state = sensorring.ManagerState_Uninitialized
     self._subscriptions = []
@@ -52,7 +58,15 @@ class DepthMapClient:
     self._state = state
 
   def _on_depth_measurement(self, meas):
+    point_count = meas.resolution_x * meas.resolution_y
+    if point_count <= 0:
+      return
+
+    if self._points_np.shape[0] != point_count:
+      self._points_np = np.zeros((point_count, 6), dtype=np.float64)
+
     meas.point_cloud.copyTo(self._points_np)
+    self._point_count = point_count
     self._got_measurement = True
 
   def wait_for_new_measurement(self):
@@ -60,7 +74,7 @@ class DepthMapClient:
     self._got_measurement = False
     while not self._got_measurement and self._state != sensorring.ManagerState_Shutdown:
       time.sleep(0.001)
-    return self._points_np
+    return self._points_np[:self._point_count]
 
 
 def main():
@@ -91,7 +105,8 @@ def main():
     factory = sensorring.SensorRingFactory()
 
     tmf_params = sensorring.TMF8829_Params()
-    tmf_params.resolution_mode = sensorring.ResolutionMode_Res16x16
+    if TMF_RESOLUTION_MODE is not None:
+      tmf_params.resolution_mode = TMF_RESOLUTION_MODE
     factory.setDefaultTMF8829Params(tmf_params)
 
     factory.addInterface(can_interface)
@@ -110,8 +125,13 @@ def main():
 
     # Create matplotlib figure with two subplots: 3D scatter (left) and sigma histogram (right)
     fig = plt.figure(figsize=(12, 5))
-    ax_3d = fig.add_subplot(1, 2, 1, projection="3d")
-    ax_hist = fig.add_subplot(1, 2, 2)
+    
+    if ENABLE_HISTOGRAM:
+        ax_3d = fig.add_subplot(1, 2, 1, projection="3d")
+        ax_hist = fig.add_subplot(1, 2, 2)
+    else:
+        ax_3d = fig.add_subplot(1, 1, 1, projection="3d")
+        ax_hist = None
 
     # Configure the 3D scatter plot
     d = np.tan(np.deg2rad(22.5)) * MAX_DIST
@@ -138,21 +158,22 @@ def main():
       ax_3d.autoscale_view()
 
       # Update sigma histogram
-      ax_hist.clear()
-      ax_hist.set_xlim(0, SIGMA_MAX)
-      sigmas = points[valid, 4]
-      if len(sigmas) > 0:
-        sigmas_clipped = np.clip(sigmas, 0, SIGMA_MAX)
-        ax_hist.hist(sigmas_clipped, bins=sigma_bins, edgecolor="black", alpha=0.7)
-        mean_sigma = np.mean(sigmas)
-        ax_hist.axvline(mean_sigma, color="red", linestyle="--", label=f"mean = {mean_sigma:.5f} m")
-        ax_hist.legend()
-        ax_hist.set_ylim(0, 64)
-      else:
-        ax_hist.set_ylim(0, 20)
-      ax_hist.set_xlabel("Sigma (m)")
-      ax_hist.set_ylabel("Count")
-      ax_hist.set_title("Sigma distribution of valid ToF points")
+      if ENABLE_HISTOGRAM and ax_hist is not None:
+        ax_hist.clear()
+        ax_hist.set_xlim(0, SIGMA_MAX)
+        sigmas = points[valid, 4]
+        if len(sigmas) > 0:
+          sigmas_clipped = np.clip(sigmas, 0, SIGMA_MAX)
+          ax_hist.hist(sigmas_clipped, bins=sigma_bins, edgecolor="black", alpha=0.7)
+          mean_sigma = np.mean(sigmas)
+          ax_hist.axvline(mean_sigma, color="red", linestyle="--", label=f"mean = {mean_sigma:.5f} m")
+          ax_hist.legend()
+          ax_hist.set_ylim(0, max(20, points.shape[0]))
+        else:
+          ax_hist.set_ylim(0, max(20, points.shape[0]))
+        ax_hist.set_xlabel("Sigma (m)")
+        ax_hist.set_ylabel("Count")
+        ax_hist.set_title("Sigma distribution of valid ToF points")
 
       fig.canvas.draw()
       fig.canvas.flush_events()
