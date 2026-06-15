@@ -14,7 +14,7 @@
 
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
@@ -42,7 +42,7 @@ public:
    * @param[in] idx Board index on the bus.
    * @param[in] devices Owned devices (sensors/actuators) on this board.
    */
-  SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<device::BaseDevice> > devices);
+  SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<device::Device> > devices);
   /// Destructor
   ~SensorBoard();
 
@@ -64,9 +64,9 @@ public:
 
   /**
    * @brief Return non-owning pointers to all devices on this board.
-   * @return Vector of BaseDevice pointers.
+   * @return Vector of Device pointers.
    */
-  std::vector<device::BaseDevice*> getDevices() const;
+  std::vector<device::Device*> getDevices() const;
 
 private:
   using Mutex      = std::mutex;
@@ -89,7 +89,7 @@ private:
 
   mutable RecursiveMutex _com_mutex;
 
-  std::vector<std::unique_ptr<device::BaseDevice> > _device_vec;
+  std::vector<std::unique_ptr<device::Device> > _device_vec;
 
   subscription::Subscription _com_subscription;
 };

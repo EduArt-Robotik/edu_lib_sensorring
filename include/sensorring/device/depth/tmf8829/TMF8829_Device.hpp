@@ -14,7 +14,6 @@
 #include <memory>
 #include <vector>
 
-#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
@@ -34,7 +33,7 @@ class TMF8829_DeviceImpl;
  * @class TMF8829_Device
  * @brief  Device wrapper for a TMF8829 Time-of-Flight sensor on the sensorring bus.
  */
-class SENSORRING_EXPORT TMF8829_Device : public BaseDevice, public DepthSensor {
+class SENSORRING_EXPORT TMF8829_Device : public DepthSensor {
 public:
   /**
    * @brief Construct a new TMF8829 device instance.
@@ -188,10 +187,6 @@ public:
    * @return Future resolving to true when the measurement data has been received.
    */
   std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
-
-protected:
-  bool deviceEnabled() const override { return BaseDevice::getEnable(); }
-  unsigned int deviceIndex() const override { return BaseDevice::getDeviceID().getIndex(); }
 
 private:
   /**

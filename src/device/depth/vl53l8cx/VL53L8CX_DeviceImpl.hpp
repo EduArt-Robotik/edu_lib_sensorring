@@ -4,7 +4,7 @@
 #include <mutex>
 #include <vector>
 
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"

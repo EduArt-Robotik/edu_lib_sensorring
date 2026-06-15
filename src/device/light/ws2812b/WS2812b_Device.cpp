@@ -14,7 +14,7 @@ namespace sensorring {
 namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::WS2812b, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::WS2812B }, params.enable)
+    : Light(DeviceID({ DeviceType::WS2812b, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::WS2812B }, params.enable)
     , _params(std::move(params)) {
 }
 

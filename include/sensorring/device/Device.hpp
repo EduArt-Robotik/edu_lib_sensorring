@@ -1,7 +1,7 @@
 // Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
- * @file   BaseDevice.hpp
+ * @file   Device.hpp
  * @author EduArt Robotik GmbH
  * @brief  Base class for all concrete sensor/actuator devices.
  * @date   2025-02-09
@@ -11,14 +11,11 @@
 
 #include <cstdint>
 #include <functional>
-#include <future>
 #include <mutex>
 #include <optional>
 #include <vector>
 
 #include "sensorring/device/types/DeviceID.hpp"
-#include "sensorring/device/types/DeviceState.hpp"
-// #include "sensorring/device/IDevice.hpp" // removed, merged into BaseDevice
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Matrix3.hpp"
@@ -45,13 +42,13 @@ struct DevicePoseOffset {
 };
 
 /**
- * @class BaseDevice
- * @brief Single concrete base class for all devices in the SensorRing.
+ * @class Device
+ * @brief Base class for all devices in the SensorRing.
  *
- * Combines the polymorphic IDevice interface with communication, state tracking,
- * pose handling and promise-based measurement synchronisation.
+ * Provides identity, communication, state tracking, pose handling and the
+ * action queue used by the state machine.
  */
-class SENSORRING_EXPORT BaseDevice {
+class SENSORRING_EXPORT Device {
 public:
   /**
    * @brief Construct the device with identity, communication link and enable flag.
@@ -60,9 +57,9 @@ public:
    * @param[in] target    Communication endpoint this device listens to.
    * @param[in] enable    Whether the device starts enabled.
    */
-  BaseDevice(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
 
-  virtual ~BaseDevice();
+  virtual ~Device();
 
   /**
    * @brief Enqueue a self-contained action to be executed by the state machine.
@@ -137,44 +134,10 @@ public:
   /// @brief Return the stored pose offset relative to the board centre.
   DevicePoseOffset getPoseOffset() const { return _pose_offset; }
 
-  // -- state / measurement synchronisation --
-
-  /**
-   * @brief Begin an asynchronous wait for the next measurement trigger.
-   * @return Future that resolves to @c true when the measurement trigger fires, or @c false on shutdown.
-   */
-  std::future<bool> beginMeasurementWait();
-
-  /**
-   * @brief Satisfy the pending measurement-wait future.
-   * @param[in] success @c true if the measurement succeeded, @c false on error.
-   */
-  void setMeasurementReady(bool success);
-
-  /**
-   * @brief Begin an asynchronous wait for new data to become available.
-   * @return Future that resolves to @c true when data is available, or @c false on shutdown.
-   */
-  std::future<bool> beginDataAvailableWait();
-
-  /**
-   * @brief Satisfy the pending data-available-wait future.
-   * @param[in] success @c true if data is ready, @c false on error.
-   */
-  void setDataAvailableReady(bool success);
-
-  /// @brief Reset the device to its initialised state, clearing all error flags.
-  void resetSensorState();
-
-  /// @brief Clear the data-available flag so the device can accept the next measurement cycle.
-  void clearDataFlag();
-
 protected:
   std::mutex _action_mutex;
   std::vector<std::function<void()> > _pending_actions;
   std::optional<std::function<void()> > _replaceable_action;
-  virtual void onResetSensorState() {}
-  virtual void onClearDataFlag() {}
 
   virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
 
@@ -182,7 +145,6 @@ protected:
 
   DeviceID _id;
   unsigned int _hw_idx;
-  DeviceState _state;
   bool _enable;
 
   com::ComInterface* _interface;
@@ -195,12 +157,6 @@ protected:
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 }
   };
-
-  mutable std::mutex _state_mutex;
-
-  std::mutex _promise_mutex;
-  std::optional<std::promise<bool> > _data_available_promise;
-  std::optional<std::promise<bool> > _measurement_promise;
 
   subscription::Subscription _com_subscription;
 };

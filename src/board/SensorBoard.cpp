@@ -15,7 +15,7 @@ namespace sensorring {
 
 namespace board {
 
-SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<BaseDevice> > devices)
+SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface, unsigned int idx, std::vector<std::unique_ptr<device::Device> > devices)
     : _idx(idx)
     , _interface(com::ComManager::getInstance()->getInterface(interface))
     , _params(params)
@@ -44,8 +44,8 @@ SensorBoardType SensorBoard::getBoardType() const {
   return _params.board_type;
 }
 
-std::vector<BaseDevice*> SensorBoard::getDevices() const {
-  std::vector<BaseDevice*> devices;
+std::vector<device::Device*> SensorBoard::getDevices() const {
+  std::vector<device::Device*> devices;
   devices.reserve(_device_vec.size());
   for (auto& device : _device_vec) {
     devices.push_back(device.get());

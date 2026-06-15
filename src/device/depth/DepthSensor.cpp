@@ -11,8 +11,9 @@ namespace sensorring {
 
 namespace device {
 
-DepthSensor::DepthSensor(Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y)
-    : _config(config)
+DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y)
+    : Sensor(id, interface, target, enable)
+    , _config(config)
     , _fov_x_deg(fov_x_deg)
     , _fov_y_deg(fov_y_deg)
     , _resolution_x(res_x)
@@ -122,7 +123,7 @@ void DepthSensor::processRawMeasurement(measurement::PointCloud& pcl) {
     }
   }
 
-  const auto idx = deviceIndex();
+  const auto idx = getDeviceID().getIndex();
   for (auto& p : pcl.data) {
     p.sensor_index = idx;
   }
@@ -133,7 +134,7 @@ const measurement::DepthMeasurement& DepthSensor::getLatestMeasurement() const {
 }
 
 void DepthSensor::publishMeasurement() {
-  if (!deviceEnabled())
+  if (!getEnable())
     return;
   _latest_measurement.header.timestamp = std::chrono::system_clock::now();
   _depth_publisher.publish(_latest_measurement);

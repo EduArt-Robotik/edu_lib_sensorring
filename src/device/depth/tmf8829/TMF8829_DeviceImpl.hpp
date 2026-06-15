@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
@@ -43,7 +43,7 @@ public:
 
   bool setIterationsSetting(std::uint16_t k_iterations);
   bool getIterationsSetting(std::uint16_t& k_iterations);
-  
+
   bool setResultFormat(TMF8829_ResultFormat format);
   bool getResultFormat(TMF8829_ResultFormat& format);
 

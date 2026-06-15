@@ -12,6 +12,7 @@
 #include <functional>
 #include <vector>
 
+#include "sensorring/device/Sensor.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -25,13 +26,14 @@ namespace device {
 
 /**
  * @class DepthSensor
- * @brief Public interface for any depth-sensing device.
+ * @brief Base class for any depth-sensing device.
  *
+ * Inherits from Sensor (which provides Device identity + measurement sync).
  * Users subscribe to depth measurements via subscribe(). The concrete sensor
  * implementation publishes measurements by calling publishMeasurement() from
  * the state machine thread.
  */
-class SENSORRING_EXPORT DepthSensor {
+class SENSORRING_EXPORT DepthSensor : public Sensor {
 public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::DepthMeasurement;
@@ -48,14 +50,18 @@ public:
   };
 
   /**
-   * @brief Construct a DepthSensor with its field-of-view and pixel resolution.
+   * @brief Construct a DepthSensor with Device params, field-of-view and pixel resolution.
+   * @param[in] id        Device identifier.
+   * @param[in] interface Communication interface.
+   * @param[in] target    Communication endpoint this device listens to.
+   * @param[in] enable    Whether the device starts enabled.
    * @param[in] config    Configuration options for the depth sensor.
    * @param[in] fov_x_deg Horizontal field of view in degrees.
    * @param[in] fov_y_deg Vertical field of view in degrees.
    * @param[in] res_x     Horizontal resolution in pixels (columns).
    * @param[in] res_y     Vertical resolution in pixels (rows).
    */
-  DepthSensor(Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
 
   /// @brief Virtual destructor.
   virtual ~DepthSensor() = default;
@@ -110,12 +116,6 @@ protected:
    * @param[in,out] pcl Point cloud to operate on. Distance must be populated, x,y,z will be calculated and filled in.
    */
   void processRawMeasurement(measurement::PointCloud& pcl);
-
-  /// @brief Return whether the device is enabled (provided by concrete device).
-  virtual bool deviceEnabled() const = 0;
-
-  /// @brief Return the device's globally unique per-type index (provided by concrete device).
-  virtual unsigned int deviceIndex() const = 0;
 
   Config _config;
   double _fov_x_deg;

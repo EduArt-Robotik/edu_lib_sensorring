@@ -16,7 +16,7 @@ namespace sensorring {
 namespace board {
 
 std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx) {
-  std::vector<std::unique_ptr<BaseDevice> > devices;
+  std::vector<std::unique_ptr<Device> > devices;
 
   for (const auto& device_type : enum_info.devices) {
     switch (device_type) {
@@ -42,7 +42,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
 }
 
 std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx, const DeviceParamsMap& device_params_map) {
-  std::vector<std::unique_ptr<BaseDevice> > devices;
+  std::vector<std::unique_ptr<Device> > devices;
 
   for (const auto& device_type : enum_info.devices) {
     auto it = device_params_map.find(device_type);

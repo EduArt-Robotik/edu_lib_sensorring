@@ -14,7 +14,6 @@
 #include <memory>
 #include <vector>
 
-#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
@@ -34,7 +33,7 @@ class VL53L8CX_DeviceImpl;
  * @class VL53L8CX_Device
  * @brief  Device wrapper for a VL53L8CX Time-of-Flight sensor on the sensorring bus.
  */
-class SENSORRING_EXPORT VL53L8CX_Device : public BaseDevice, public DepthSensor {
+class SENSORRING_EXPORT VL53L8CX_Device : public DepthSensor {
 public:
   /**
    * @brief Construct a new VL53L8CX device instance.
@@ -70,10 +69,6 @@ public:
    * @return Future resolving to true when the measurement data has been received.
    */
   std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
-
-protected:
-  bool deviceEnabled() const override { return BaseDevice::getEnable(); }
-  unsigned int deviceIndex() const override { return BaseDevice::getDeviceID().getIndex(); }
 
 private:
   /**

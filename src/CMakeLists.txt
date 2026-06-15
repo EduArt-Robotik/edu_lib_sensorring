@@ -58,7 +58,8 @@ set(SENSORRING_BOARD_SOURCES
 )
 
 set(SENSORRING_DEVICE_SOURCES
-  device/BaseDevice.cpp
+  device/Device.cpp
+  device/Sensor.cpp
   device/DeviceType.cpp
   device/types/DeviceState.cpp
   device/depth/DepthSensor.cpp
@@ -73,6 +74,7 @@ set(SENSORRING_DEVICE_SOURCES
   device/thermal/htpa32/htpa32_eeprom.c
   device/thermal/htpa32/HTPA32_Device.cpp
   device/thermal/htpa32/HTPA32_DeviceImpl.cpp
+  device/light/Light.cpp
   device/light/ws2812b/WS2812b_Device.cpp
 )
 

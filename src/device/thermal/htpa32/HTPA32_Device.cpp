@@ -16,7 +16,7 @@ namespace sensorring {
 namespace device {
 
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : BaseDevice(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, params.enable)
+    : ThermalSensor(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, params.enable)
     , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 

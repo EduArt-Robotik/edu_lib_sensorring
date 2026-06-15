@@ -11,6 +11,7 @@
 
 #include <functional>
 
+#include "sensorring/device/Sensor.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -24,19 +25,29 @@ namespace device {
 
 /**
  * @class ThermalSensor
- * @brief Public interface for any thermal-sensing device.
+ * @brief Base class for any thermal-sensing device.
  *
+ * Inherits from Sensor (which provides Device identity + measurement sync).
  * Users subscribe to thermal measurements via subscribe(). The concrete sensor
  * implementation publishes measurements by calling publishMeasurement() from
  * the state machine thread.
  */
-class SENSORRING_EXPORT ThermalSensor {
+class SENSORRING_EXPORT ThermalSensor : public Sensor {
 public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::ThermalMeasurement;
 
+  /**
+   * @brief Construct a ThermalSensor with Device params.
+   * @param[in] id        Device identifier.
+   * @param[in] interface Communication interface.
+   * @param[in] target    Communication endpoint this device listens to.
+   * @param[in] enable    Whether the device starts enabled.
+   */
+  ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+
   /// @brief Virtual destructor.
-  virtual ~ThermalSensor() = default;
+  ~ThermalSensor() override = default;
 
   /**
    * @brief Get the most recent measurement.
@@ -72,9 +83,6 @@ public:
   virtual bool stopCalibration() = 0;
 
 protected:
-  /// @brief Return whether the device is enabled (provided by concrete device).
-  virtual bool deviceEnabled() const = 0;
-
   measurement::ThermalMeasurement _latest_measurement;
   subscription::Publisher<const measurement::ThermalMeasurement&> _thermal_publisher; ///< Publisher that delivers thermal measurements to subscribers.
 };

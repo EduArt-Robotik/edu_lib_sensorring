@@ -17,7 +17,7 @@
 
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardType.hpp"
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
@@ -31,7 +31,7 @@ namespace sensorring {
 
 namespace board {
 
-using device::BaseDevice;
+using device::Device;
 using device::DeviceID;
 using device::DevicePoseOffset;
 using device::DeviceType;

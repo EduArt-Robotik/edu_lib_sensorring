@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "sensorring/device/BaseDevice.hpp"
 #include "sensorring/device/light/Light.hpp"
 #include "sensorring/device/light/LightMode.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
@@ -26,7 +25,7 @@ namespace device {
  * @class WS2812b_Device
  * @brief  Device wrapper for WS2812b LED strips controlled via the sensorring bus.
  */
-class SENSORRING_EXPORT WS2812b_Device : public BaseDevice, public Light {
+class SENSORRING_EXPORT WS2812b_Device : public Light {
 public:
   /**
    * @brief Construct a new WS2812b device instance.
@@ -37,6 +36,12 @@ public:
   WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx);
 
   ~WS2812b_Device() = default;
+
+  /**
+   * @brief Re-apply runtime configuration after board reset.
+   * @return true on success.
+   */
+  bool configure() override;
 
   /**
    * @brief Get the parameters used to configure this device.
@@ -54,12 +59,6 @@ public:
    * @param[in] b    Blue channel (0–255).
    */
   void setLight(LightMode mode, std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
-
-  /**
-   * @brief Re-apply runtime configuration after board reset.
-   * @return true on success.
-   */
-  bool configure() override;
 
   /**
    * @brief Broadcast a mode+color command to ALL WS2812b devices on ALL interfaces.

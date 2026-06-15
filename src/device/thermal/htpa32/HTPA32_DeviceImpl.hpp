@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"

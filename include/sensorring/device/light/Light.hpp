@@ -11,6 +11,7 @@
 
 #include <cstdint>
 
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/light/LightMode.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -22,16 +23,26 @@ namespace device {
 
 /**
  * @class Light
- * @brief Public interface for light/LED actuator devices.
+ * @brief Base class for light/LED actuator devices.
  *
+ * Inherits from Device (identity, enable, pose, action queue).
  * Users call setLight() to update the desired state. The concrete implementation
- * enqueues a self-contained CAN command into the IDevice action queue, which the
+ * enqueues a self-contained CAN command into the action queue, which the
  * state machine drains and executes during the device_actions cycle.
  */
-class SENSORRING_EXPORT Light {
+class SENSORRING_EXPORT Light : public Device {
 public:
+  /**
+   * @brief Construct a Light with Device params.
+   * @param[in] id        Device identifier.
+   * @param[in] interface Communication interface.
+   * @param[in] target    Communication endpoint this device listens to.
+   * @param[in] enable    Whether the device starts enabled.
+   */
+  Light(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+
   /// @brief Virtual destructor.
-  virtual ~Light() = default;
+  ~Light() override = default;
 
   /**
    * @brief Set the light mode and color.

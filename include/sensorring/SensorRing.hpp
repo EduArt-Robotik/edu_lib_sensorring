@@ -21,7 +21,7 @@ namespace eduart {
 namespace sensorring {
 
 namespace device {
-class BaseDevice;
+class Device;
 }
 
 /**
@@ -56,7 +56,7 @@ public:
    * @brief Get all devices connected to the sensor ring.
    * @return Vector of all devices.
    */
-  std::vector<device::BaseDevice*> getDevices() const;
+  std::vector<device::Device*> getDevices() const;
 
 private:
   /// Vector of sensor buses managed by this sensor ring.

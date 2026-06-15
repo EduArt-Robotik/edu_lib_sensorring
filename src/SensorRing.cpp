@@ -23,8 +23,8 @@ std::vector<SensorBus*> SensorRing::getSensorBuses() const {
   return ref_vec;
 }
 
-std::vector<device::BaseDevice*> SensorRing::getDevices() const {
-  std::vector<device::BaseDevice*> devices;
+std::vector<device::Device*> SensorRing::getDevices() const {
+  std::vector<device::Device*> devices;
   for (auto& sensor_bus : _bus_vec) {
     for (auto& sensor_board : sensor_bus->getSensorBoards()) {
       for (auto& device : sensor_board->getDevices()) {

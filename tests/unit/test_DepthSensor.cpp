@@ -2,6 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 
+#include "interface/ComInterface.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/measurement/PointCloud.hpp"
 
@@ -15,14 +16,36 @@ static constexpr unsigned int resolution_y = 8;
 static constexpr double expected_lut_x_8[] = { -0.3624, -0.2589, -0.1553, -0.0518, 0.0518, 0.1553, 0.2589, 0.3624 };
 static constexpr double expected_lut_y_8[] = { -0.3624, -0.2589, -0.1553, -0.0518, 0.0518, 0.1553, 0.2589, 0.3624 };
 
+namespace {
+
+class NullComInterface : public eduart::sensorring::com::ComInterface {
+public:
+  NullComInterface()
+      : ComInterface(eduart::sensorring::com::ComInterfaceID{}) {}
+  bool send(eduart::sensorring::com::ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override { return true; }
+  bool openInterface() override { return true; }
+  bool closeInterface() override { return true; }
+  bool repairInterface() override { return true; }
+
+protected:
+  bool listener() override { return true; }
+};
+
+NullComInterface& getNullInterface() {
+  static NullComInterface instance;
+  return instance;
+}
+
+} // namespace
+
 class MockDepthSensor : public DepthSensor {
 public:
   MockDepthSensor(DepthSensor::Config config = {}, double fov_x = 45.0, double fov_y = 45.0, unsigned int res_x = 8, unsigned int res_y = 8)
-      : DepthSensor(config, fov_x, fov_y, res_x, res_y) {}
+      : DepthSensor(eduart::sensorring::device::DeviceID({ eduart::sensorring::device::DeviceType::VL53L8CX, 0 }), &getNullInterface(), eduart::sensorring::com::ComEndpoint{}, true, config, fov_x, fov_y, res_x, res_y) {}
 
   void publishMeasurement() override {}
-  bool deviceEnabled() const override { return true; }
-  unsigned int deviceIndex() const override { return 0; }
+
+  void comCallback(const eduart::sensorring::com::ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override {}
 
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }

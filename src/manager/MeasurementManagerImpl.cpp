@@ -4,7 +4,7 @@
 #include "interface/ComInterface.hpp"
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/board/SensorBoard.hpp"
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 
@@ -373,7 +373,10 @@ void MeasurementManagerImpl::runPhase() {
       do {
         attempts++;
 
-        for (auto* dev : _sensor_ring->getDevices()) {
+        for (auto* dev : _depth_sensors) {
+          dev->resetSensorState();
+        }
+        for (auto* dev : _thermal_sensors) {
           dev->resetSensorState();
         }
         for (auto& g : _schedule) {

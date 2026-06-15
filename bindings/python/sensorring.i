@@ -83,7 +83,8 @@ else:
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
-#include "sensorring/device/BaseDevice.hpp"
+#include "sensorring/device/Device.hpp"
+#include "sensorring/device/Sensor.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/thermal/ThermalSensor.hpp"
 #include "sensorring/device/light/Light.hpp"
@@ -294,10 +295,11 @@ typedef ::int64_t int64_t;
  * Typed device interfaces (new API)
  */
 
-// BaseDevice: action queue is internal, not for Python users
-%ignore eduart::sensorring::device::BaseDevice::enqueueAction;
-%ignore eduart::sensorring::device::BaseDevice::drainActions;
-%import "sensorring/device/BaseDevice.hpp"
+// Device: action queue is internal, not for Python users
+%ignore eduart::sensorring::device::Device::enqueueAction;
+%ignore eduart::sensorring::device::Device::drainActions;
+%import "sensorring/device/Device.hpp"
+%import "sensorring/device/Sensor.hpp"
 
 // --- DepthSensor ---
 %ignore eduart::sensorring::device::DepthSensor::subscribe;     // Manual GIL wrapper below
