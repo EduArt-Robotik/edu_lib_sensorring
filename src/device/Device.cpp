@@ -69,10 +69,21 @@ bool Device::configure() {
   return true;
 }
 
-void Device::setPose(math::Vector3 translation, math::Vector3 rotation) {
-  _translation = translation;
-  _rotation    = rotation;
-  _rot_m       = math::rotMatrixFromEulerDegrees(_rotation);
+void Device::setPose(Pose pose) {
+  _pose = pose;
+  _rot_m       = math::rotMatrixFromEulerDegrees(_pose.orientation);
+}
+
+Pose Device::getPose() const {
+  return _pose;
+}
+
+void Device::setPoseOffset(const Pose& offset) {
+  _offset = offset;
+}
+
+Pose Device::getPoseOffset() const {
+  return _offset;
 }
 
 } // namespace device

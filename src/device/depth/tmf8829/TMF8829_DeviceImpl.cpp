@@ -484,8 +484,8 @@ void TMF8829_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sou
     try {
       _parent._latest_measurement                    = TMF8829_Measurement::fromBuffer(data);
       _parent._latest_measurement.header.device_id   = _parent.getDeviceID();
-      _parent._latest_measurement.header.position    = _parent._translation;
-      _parent._latest_measurement.header.orientation = _parent._rotation;
+      _parent._latest_measurement.header.position    = _parent._pose.translation;
+      _parent._latest_measurement.header.orientation = _parent._pose.orientation;
 
       if (_parent._latest_measurement.header.state == device::DeviceState::Ok) {
         _parent.processRawMeasurement(_parent._latest_measurement.point_cloud);

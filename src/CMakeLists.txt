@@ -89,6 +89,7 @@ set(SENSORRING_UTILS_SOURCES
 )
 
 set(SENSORRING_MATH_SOURCES
+  math/Pose.cpp  
   math/Math.cpp
   math/Vector3.cpp
   math/Matrix3.cpp

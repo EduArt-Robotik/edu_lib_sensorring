@@ -18,7 +18,7 @@
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
-#include "sensorring/math/Matrix3.hpp"
+#include "sensorring/math/Pose.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
@@ -31,15 +31,6 @@ class ComInterface;
 }
 
 namespace device {
-
-/**
- * @struct DevicePoseOffset
- * @brief Pose offset of a device relative to the center of its sensor board.
- */
-struct DevicePoseOffset {
-  math::Vector3 board_center_translation_offset; ///< Translation (x, y, z in metres) from the board centre to the device.
-  math::Vector3 board_center_rotation_offset;    ///< Rotation offset (roll, pitch, yaw in degrees) from the board centre to the device.
-};
 
 /**
  * @class Device
@@ -123,16 +114,25 @@ public:
    * @param[in] translation Position (x, y, z) in metres.
    * @param[in] rotation    Orientation (roll, pitch, yaw) in degrees.
    */
-  void setPose(math::Vector3 translation, math::Vector3 rotation);
+  void setPose(Pose pose);
+
+  /**
+   * @brief Return the stored pose of the board centre.
+   * @return Pose of the board centre.
+   */
+  Pose getPose() const;
 
   /**
    * @brief Store a pose offset relative to the board centre.
    * @param[in] offset Offset to apply on top of the board centre pose.
    */
-  void setPoseOffset(const DevicePoseOffset& offset) { _pose_offset = offset; }
+  void setPoseOffset(const Pose& offset);
 
-  /// @brief Return the stored pose offset relative to the board centre.
-  DevicePoseOffset getPoseOffset() const { return _pose_offset; }
+  /**
+   * @brief Return the stored pose offset relative to the board centre.
+   * @return Pose offset relative to the board centre.
+   */
+  Pose getPoseOffset() const;
 
 protected:
   std::mutex _action_mutex;
@@ -149,14 +149,9 @@ protected:
 
   com::ComInterface* _interface;
 
-  math::Vector3 _translation;
-  math::Vector3 _rotation;
+  Pose _pose;
+  Pose _offset;
   math::Matrix3 _rot_m;
-
-  DevicePoseOffset _pose_offset{
-    { 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0 }
-  };
 
   subscription::Subscription _com_subscription;
 };

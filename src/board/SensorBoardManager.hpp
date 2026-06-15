@@ -33,7 +33,6 @@ namespace board {
 
 using device::Device;
 using device::DeviceID;
-using device::DevicePoseOffset;
 using device::DeviceType;
 
 struct SensorBoardParams;
@@ -47,7 +46,7 @@ struct BoardDeviceInfo {
   /// Logical device ID (type, name, index).
   DeviceType type;
   /// Pose offset relative to board center.
-  DevicePoseOffset pose_offset;
+  Pose offset;
 };
 
 /**
@@ -78,17 +77,17 @@ public:
    * @brief Pose offset of a device relative to the board center for the given board type and device ID.
    * @param[in] board_type Board type.
    * @param[in] id Device ID (type used for lookup).
-   * @return DevicePoseOffset; zero if device not found in board config.
+   * @return Pose; zero if device not found in board config.
    */
-  static inline DevicePoseOffset getDevicePoseOffset(SensorBoardType board_type, const DeviceID& id) {
+  static inline Pose getDevicePoseOffset(SensorBoardType board_type, const DeviceID& id) {
     const auto& board = sensorBoardDatabase.at(board_type);
     for (const auto& dev : board.devices) {
       if (dev.type == id.getType()) {
-        return dev.pose_offset;
+        return dev.offset;
       }
     }
     // Fallback: zero offset if not found.
-    return DevicePoseOffset{
+    return Pose{
       { 0.0, 0.0, 0.0 },
       { 0.0, 0.0, 0.0 }
     };
@@ -126,27 +125,27 @@ private:
     { SensorBoardType::Headlight,
      { "Headlight",
         {
-            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            { DeviceType::HTPA32, DevicePoseOffset{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::HTPA32, Pose{ { 0.013, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Taillight,
      { "Taillight",
         {
-            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Sidepanel,
      { "Sidepanel",
         {
-            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            { DeviceType::WS2812b, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::WS2812b, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Minipanel,
      { "Minipanel",
         {
-            { DeviceType::VL53L8CX, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
-            { DeviceType::TMF8829, DevicePoseOffset{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::VL53L8CX, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
+            { DeviceType::TMF8829, Pose{ { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } } },
         } } },
     { SensorBoardType::Undefined,
      { "Unknown",

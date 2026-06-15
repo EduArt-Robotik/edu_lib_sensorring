@@ -53,8 +53,8 @@ void VL53L8CX_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint so
 measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std::vector<uint8_t>& data) const {
   measurement::DepthMeasurement result;
   result.header.device_id   = _parent._id;
-  result.header.position    = _parent._translation;
-  result.header.orientation = _parent._rotation;
+  result.header.position    = _parent._pose.translation;
+  result.header.orientation = _parent._pose.orientation;
   result.header.frame_id    = data[0];
   result.nr_valid_points    = data[1];
   result.resolution_x       = _parent._resolution_x;

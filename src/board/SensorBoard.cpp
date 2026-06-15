@@ -69,10 +69,10 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
         const auto offsets = SensorBoardManager::getDevicePoseOffset(board_type, device->getDeviceID());
         device->setPoseOffset(offsets);
 
-        const auto translation = _params.translation + offsets.board_center_translation_offset;
-        const auto rotation    = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(offsets.board_center_rotation_offset));
+        const auto translation = _params.translation + offsets.translation;
+        const auto orientation = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(offsets.orientation));
 
-        device->setPose(translation, rotation);
+        device->setPose({ translation, orientation });
       }
     }
   }
