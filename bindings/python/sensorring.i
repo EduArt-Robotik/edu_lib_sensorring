@@ -75,6 +75,7 @@ else:
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
+#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/measurement/Header.hpp"
 #include "sensorring/device/types/DeviceState.hpp"
@@ -287,6 +288,8 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 %include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 
+%include "sensorring/device/AnyDeviceParams.hpp"
+
 
 %rename (SensorBoardTypeToString) eduart::sensorring::board::toString(SensorBoardType);
 %include "sensorring/board/SensorBoardType.hpp"
@@ -400,52 +403,15 @@ typedef ::int64_t int64_t;
  * SensorRingFactory
  */
 
-// SWIG cannot handle std::variant or std::unique_ptr natively.
-// We ignore the C++ methods that use them and provide typed alternatives.
-%ignore eduart::sensorring::SensorRingFactory::DeviceParamsVariant;
+// SWIG cannot handle std::unique_ptr natively.
+// We ignore methods returning unique_ptr and provide alternatives.
 %ignore eduart::sensorring::SensorRingFactory::EnumerationMap;
 %ignore eduart::sensorring::SensorRingFactory::build;
 %ignore eduart::sensorring::SensorRingFactory::enumerate;
 %ignore eduart::sensorring::SensorRingFactory::getLatestEnumerationResult;
-%ignore eduart::sensorring::SensorRingFactory::expectBoard(board::SensorBoardParams, std::vector<DeviceParamsVariant>);
-%ignore eduart::sensorring::SensorRingFactory::setDefaultDeviceParams;
-%ignore eduart::sensorring::SensorRingFactory::buildDefaultParamsMap;
 
 %import "sensorring/SensorRing.hpp"
 %include "sensorring/SensorRingFactory.hpp"
-
-// Typed alternatives for std::variant-based methods
-%extend eduart::sensorring::SensorRingFactory {
-    void setDefaultVL53L8CXParams(eduart::sensorring::device::VL53L8CX_Params params) {
-        $self->setDefaultDeviceParams(std::move(params));
-    }
-    void setDefaultHTPA32Params(eduart::sensorring::device::HTPA32_Params params) {
-        $self->setDefaultDeviceParams(std::move(params));
-    }
-    void setDefaultWS2812bParams(eduart::sensorring::device::WS2812b_Params params) {
-        $self->setDefaultDeviceParams(std::move(params));
-    }
-    void setDefaultTMF8829Params(eduart::sensorring::device::TMF8829_Params params) {
-        $self->setDefaultDeviceParams(std::move(params));
-    }
-
-    // expectBoard with explicit device params (replaces the std::variant overload).
-    // Called from Python via the expectBoard() wrapper below.
-    void _expectBoardWithDevices(
-        eduart::sensorring::board::SensorBoardParams board_params,
-        eduart::sensorring::device::VL53L8CX_Params* vl53,
-        eduart::sensorring::device::HTPA32_Params* htpa,
-        eduart::sensorring::device::WS2812b_Params* ws,
-        eduart::sensorring::device::TMF8829_Params* tmf = nullptr)
-    {
-        std::vector<eduart::sensorring::SensorRingFactory::DeviceParamsVariant> device_params;
-        if (vl53) device_params.push_back(*vl53);
-        if (htpa) device_params.push_back(*htpa);
-        if (ws)   device_params.push_back(*ws);
-        if (tmf)  device_params.push_back(*tmf);
-        $self->expectBoard(std::move(board_params), std::move(device_params));
-    }
-}
 
 // Factory returning raw pointer from unique_ptr (ownership transferred to Python)
 %inline %{
@@ -480,32 +446,8 @@ def _SensorRingFactory_build(self):
 def _SensorRingFactory_enumerate(self):
     return SensorRingFactory_enumerate_str(self)
 
-# Override expectBoard to accept optional device params:
-#   factory.expectBoard(board_params)                           -> auto-discovery
-#   factory.expectBoard(board_params, VL53L8CX_Params())       -> explicit devices
-#   factory.expectBoard(board_params, VL53L8CX_Params(), WS2812b_Params())
-_orig_expectBoard = SensorRingFactory.expectBoard
-def _SensorRingFactory_expectBoard(self, board_params, *device_params):
-    if not device_params:
-        _orig_expectBoard(self, board_params)
-    else:
-        vl53 = htpa = ws = tmf = None
-        for p in device_params:
-            if isinstance(p, VL53L8CX_Params):
-                vl53 = p
-            elif isinstance(p, HTPA32_Params):
-                htpa = p
-            elif isinstance(p, WS2812b_Params):
-                ws = p
-            elif isinstance(p, TMF8829_Params):
-                tmf = p
-            else:
-                raise TypeError(f"Unknown device param type: {type(p).__name__}")
-        self._expectBoardWithDevices(board_params, vl53, htpa, ws, tmf)
-
 SensorRingFactory.build = _SensorRingFactory_build
 SensorRingFactory.enumerate = _SensorRingFactory_enumerate
-SensorRingFactory.expectBoard = _SensorRingFactory_expectBoard
 %}
 
 // --- MeasurementManager ---

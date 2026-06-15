@@ -10,6 +10,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -71,9 +72,6 @@ enum class ValidationMode {
  */
 class SENSORRING_EXPORT SensorRingFactory {
 public:
-  /// Currently supported devices for explicit configuration in expectBoard().
-  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params, device::AnyDepthSensor_Params, device::AnyThermalSensor_Params, device::AnyLight_Params>;
-
   /// Per-interface enumeration results, keyed by interface ID.
   using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<board::EnumerationInformation> >;
 
@@ -86,6 +84,8 @@ public:
    *            mismatched boards are skipped instead of aborting.
    */
   explicit SensorRingFactory(ValidationMode mode = ValidationMode::Relaxed);
+
+  // ── Interface configuration ──
 
   /**
    * @brief Add a SocketCAN interface to scan during build().
@@ -105,35 +105,65 @@ public:
    */
   void addInterface(com::UsbTingoParams params);
 
+  // ── Board expectations ──
+
   /**
    * @brief Declare an expected board on the current interface.
    *
-   * Matched by index order against enumeration results. If params.board_type is
-   * not Undefined it is validated against the hardware-reported type. All devices
-   * reported by the hardware are instantiated; setDefaultDeviceParams() applies.
-   * @param[in] params Board-level parameters (type, name, enable flag, etc.).
+   * Boards are matched against enumeration results using the configured
+   * ValidationMode. Use expectDevice() after this call to declare which
+   * devices should be instantiated on this board.
+   *
+   * If no expectDevice() calls follow, all devices reported by the hardware
+   * are instantiated with default (or setDefaultDeviceParams()) configuration.
+   *
+   * @param[in] params Board-level parameters (type, name, pose, etc.).
    */
   void expectBoard(board::SensorBoardParams params);
 
-  /**
-   * @brief Declare an expected board together with explicit per-device params.
-   *
-   * Only the device types present in @p device_params are instantiated; the
-   * hardware must have at least those devices or build() fails. If
-   * params.board_type is not Undefined it is additionally validated.
-   * @param[in] params        Board-level parameters.
-   * @param[in] device_params Per-device parameter overrides for this board.
-   */
-  void expectBoard(board::SensorBoardParams params, std::vector<DeviceParamsVariant> device_params);
+  // ── Device expectations (applied to the last expectBoard) ──
 
   /**
-   * @brief Set default params applied to every device of the given type that has
-   *        no explicit params from expectBoard().
+   * @brief Declare an expected device on the most recently added board.
    *
-   * May be called multiple times for different device types.
-   * @param[in] params Device parameter variant containing the defaults to apply.
+   * Only the device types declared via expectDevice() are instantiated for
+   * that board. The provided params override any defaults set via
+   * setDefaultDeviceParams().
+   *
+   * Must be called after expectBoard(). Multiple expectDevice() calls
+   * accumulate devices for the same board.
    */
-  void setDefaultDeviceParams(DeviceParamsVariant params);
+  void expectDevice(device::VL53L8CX_Params params);
+  void expectDevice(device::TMF8829_Params params);
+  void expectDevice(device::HTPA32_Params params);
+  void expectDevice(device::WS2812b_Params params);
+
+  /**
+   * @brief Declare an expected device by category (matches any sensor of that category).
+   *
+   * Use these when you don't care which specific sensor is present, only that
+   * a device of the given category exists. Default params (or hardware defaults)
+   * will be applied to whatever concrete device is discovered.
+   */
+  void expectDevice(device::AnyDepthSensor_Params params);
+  void expectDevice(device::AnyThermalSensor_Params params);
+  void expectDevice(device::AnyLight_Params params);
+
+  // ── Default device parameters ──
+
+  /**
+   * @brief Set default params applied to every device of the given type that
+   *        has no explicit params from expectDevice().
+   *
+   * May be called multiple times for different device types. Each call
+   * replaces any previously set default for that type.
+   */
+  void setDefaultDeviceParams(device::VL53L8CX_Params params);
+  void setDefaultDeviceParams(device::TMF8829_Params params);
+  void setDefaultDeviceParams(device::HTPA32_Params params);
+  void setDefaultDeviceParams(device::WS2812b_Params params);
+
+  // ── Build ──
 
   /**
    * @brief Enumerate hardware on all added interfaces, validate against
@@ -173,9 +203,18 @@ public:
   void reset();
 
 private:
+  /// Concrete device params variant (internal only).
+  using ConcreteDeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
+  using ConcreteDeviceParamsMap     = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
+
+  struct DeviceExpectation {
+    device::DeviceType type;
+    std::optional<ConcreteDeviceParamsVariant> params; ///< nullopt = use defaults or category match.
+  };
+
   struct BoardExpectation {
     board::SensorBoardParams params;
-    std::vector<DeviceParamsVariant> device_params;
+    std::vector<DeviceExpectation> device_expectations;
     bool has_explicit_devices = false;
   };
 
@@ -185,18 +224,14 @@ private:
     bool has_expectations = false;
   };
 
-  static device::DeviceType deviceTypeFromVariant(const DeviceParamsVariant& v);
-
-  /// Concrete device params variant — sentinel category types excluded.
-  /// Structurally identical to board::SensorBoardManager::DeviceParamsVariant.
-  using ConcreteDeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
-  using ConcreteDeviceParamsMap     = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
-
-  /// Build a DeviceParamsMap for the given device types, applying user defaults where available.
+  /// Build a ConcreteDeviceParamsMap for the given device types, applying user defaults where available.
   ConcreteDeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
 
+  /// Get the current (last) board expectation, or nullptr if none exists.
+  BoardExpectation* currentBoardExpectation();
+
   std::vector<InterfaceConfig> _interfaces;
-  std::unordered_map<device::DeviceType, DeviceParamsVariant> _default_device_params;
+  ConcreteDeviceParamsMap _default_device_params;
   EnumerationMap _enumeration_results;
   ValidationMode _mode;
 };

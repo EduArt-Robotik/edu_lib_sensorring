@@ -40,7 +40,8 @@ HardwareContext open_tmf8829(const std::string& interface_name, InterfaceType ty
     } else {
       factory.addInterface(UsbTingoParams{ interface_name });
     }
-    factory.expectBoard({}, { TMF8829_Params() });
+    factory.expectBoard({});
+    factory.expectDevice(TMF8829_Params());
 
     ctx.ring = factory.build();
     if (!ctx.ring) {

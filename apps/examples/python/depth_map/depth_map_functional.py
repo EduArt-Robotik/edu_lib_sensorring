@@ -89,12 +89,14 @@ def main():
 
     tmf_params = sensorring.TMF8829_Params()
     tmf_params.resolution_mode = sensorring.ResolutionMode_Res16x16
-    factory.setDefaultTMF8829Params(tmf_params)
+    factory.setDefaultDeviceParams(tmf_params)
 
     factory.addInterface(can_interface)
-    factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
+    factory.expectBoard(sensorring.SensorBoardParams())
+    factory.expectDevice(sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
-    factory.expectBoard(sensorring.SensorBoardParams(), sensorring.VL53L8CX_Params())
+    factory.expectBoard(sensorring.SensorBoardParams())
+    factory.expectDevice(sensorring.VL53L8CX_Params())
 
     # Create the MeasurementManager directly from the factory
     manager = sensorring.MeasurementManager(params, factory)

@@ -72,20 +72,29 @@ def main():
     board_0 = sensorring.SensorBoardParams()
     board_0.rotation = sensorring.Vector3(0, 0, 45)
     board_0.translation = sensorring.Vector3(0.1, 0.05, 0)
-    factory.expectBoard(board_0, vl53_params, htpa_params, ws_params)
+    factory.expectBoard(board_0)
+    factory.expectDevice(vl53_params)
+    factory.expectDevice(htpa_params)
+    factory.expectDevice(ws_params)
 
     # Board 1: Front-right, rotated -45 deg around Z.
     board_1 = sensorring.SensorBoardParams()
     board_1.rotation = sensorring.Vector3(0, 0, -45)
     board_1.translation = sensorring.Vector3(0.1, -0.05, 0)
-    factory.expectBoard(board_1, vl53_params, htpa_params, ws_params)
+    factory.expectBoard(board_1)
+    factory.expectDevice(vl53_params)
+    factory.expectDevice(htpa_params)
+    factory.expectDevice(ws_params)
 
     # Second interface (if available).
     factory.addInterface(usbtingo_interface)
     board_2 = sensorring.SensorBoardParams()
     board_2.rotation = sensorring.Vector3(0, 0, 0)
     board_2.translation = sensorring.Vector3(-0.1, 0, 0)
-    factory.expectBoard(board_2, vl53_params, htpa_params, ws_params)
+    factory.expectBoard(board_2)
+    factory.expectDevice(vl53_params)
+    factory.expectDevice(htpa_params)
+    factory.expectDevice(ws_params)
 
     # =========================================================================
     # 3. Enumerate hardware (optional - useful for diagnostics)

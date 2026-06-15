@@ -59,12 +59,13 @@ int main(int, char*[]) {
     // Create SensorRing via factory auto-discovery
     SensorRingFactory factory;
     factory.addInterface(can_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
-    factory.expectBoard({}, { device::VL53L8CX_Params{} });
-    factory.expectBoard({}, { device::WS2812b_Params{} });
-    // factory.expectBoard({}, { device::WS2812b_Params{} });
+    factory.expectBoard({});
+    factory.expectDevice(device::VL53L8CX_Params{});
+    factory.expectDevice(device::WS2812b_Params{});
     factory.addInterface(usbtingo_interface);
-    factory.expectBoard({}, { device::VL53L8CX_Params{}, device::WS2812b_Params{} });
+    factory.expectBoard({});
+    factory.expectDevice(device::VL53L8CX_Params{});
+    factory.expectDevice(device::WS2812b_Params{});
 
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 

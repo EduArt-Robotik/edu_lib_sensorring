@@ -103,7 +103,7 @@ def main():
     tmf_params = sensorring.TMF8829_Params()
     if TMF_RESOLUTION_MODE is not None:
       tmf_params.resolution_mode = TMF_RESOLUTION_MODE
-    factory.setDefaultTMF8829Params(tmf_params)
+    factory.setDefaultDeviceParams(tmf_params)
 
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams())

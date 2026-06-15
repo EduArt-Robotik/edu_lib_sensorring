@@ -101,9 +101,11 @@ int main(int, char*[]) {
     factory.setDefaultDeviceParams(tmf_params);
 
     factory.addInterface(can_interface);
-    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
+    factory.expectBoard({});
+    factory.expectDevice(device::AnyDepthSensor_Params{});
     factory.addInterface(usbtingo_interface);
-    factory.expectBoard({}, { device::AnyDepthSensor_Params{} });
+    factory.expectBoard({});
+    factory.expectDevice(device::AnyDepthSensor_Params{});
 
     // Create the MeasurementManager directly from the factory
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);

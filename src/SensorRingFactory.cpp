@@ -26,30 +26,11 @@ com::ComInterface* openInterface(const com::InterfaceParams& params) {
 
 } // namespace
 
-// Converts the user-facing DeviceParamsVariant (including sentinel category types) to the
-// concrete board::SensorBoardManager::DeviceParamsVariant. Sentinel types must not be passed.
-static board::SensorBoardManager::DeviceParamsVariant toConcreteVariant(const SensorRingFactory::DeviceParamsVariant& v) {
-  return std::visit(
-      [](auto&& arg) -> board::SensorBoardManager::DeviceParamsVariant {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, device::VL53L8CX_Params>) {
-          return arg;
-        } else if constexpr (std::is_same_v<T, device::HTPA32_Params>) {
-          return arg;
-        } else if constexpr (std::is_same_v<T, device::WS2812b_Params>) {
-          return arg;
-        } else if constexpr (std::is_same_v<T, device::TMF8829_Params>) {
-          return arg;
-        } else {
-          return device::VL53L8CX_Params{};
-        } // unreachable — sentinel types handled separately
-      },
-      v);
-}
-
 SensorRingFactory::SensorRingFactory(ValidationMode mode)
     : _mode(mode) {
 }
+
+// ── Interface configuration ──
 
 void SensorRingFactory::addInterface(com::SocketCanParams params) {
   _interfaces.push_back(InterfaceConfig{ std::make_unique<com::SocketCanParams>(std::move(params)), {}, false });
@@ -59,6 +40,8 @@ void SensorRingFactory::addInterface(com::UsbTingoParams params) {
   _interfaces.push_back(InterfaceConfig{ std::make_unique<com::UsbTingoParams>(std::move(params)), {}, false });
 }
 
+// ── Board expectations ──
+
 void SensorRingFactory::expectBoard(board::SensorBoardParams params) {
   if (_interfaces.empty()) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectBoard called before addInterface.");
@@ -66,22 +49,111 @@ void SensorRingFactory::expectBoard(board::SensorBoardParams params) {
   }
   auto& cfg            = _interfaces.back();
   cfg.has_expectations = true;
-  cfg.expected_boards.push_back(BoardExpectation{ params, {}, false });
+  cfg.expected_boards.push_back(BoardExpectation{ std::move(params), {}, false });
 }
 
-void SensorRingFactory::expectBoard(board::SensorBoardParams params, std::vector<DeviceParamsVariant> device_params) {
+// ── Device expectations ──
+
+SensorRingFactory::BoardExpectation* SensorRingFactory::currentBoardExpectation() {
   if (_interfaces.empty()) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectBoard called before addInterface.");
+    return nullptr;
+  }
+  auto& boards = _interfaces.back().expected_boards;
+  if (boards.empty()) {
+    return nullptr;
+  }
+  return &boards.back();
+}
+
+void SensorRingFactory::expectDevice(device::VL53L8CX_Params params) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
     return;
   }
-  auto& cfg            = _interfaces.back();
-  cfg.has_expectations = true;
-  cfg.expected_boards.push_back(BoardExpectation{ params, std::move(device_params), true });
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::VL53L8CX, std::move(params) });
 }
 
-void SensorRingFactory::setDefaultDeviceParams(DeviceParamsVariant params) {
-  _default_device_params[deviceTypeFromVariant(params)] = std::move(params);
+void SensorRingFactory::expectDevice(device::TMF8829_Params params) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::TMF8829, std::move(params) });
 }
+
+void SensorRingFactory::expectDevice(device::HTPA32_Params params) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::HTPA32, std::move(params) });
+}
+
+void SensorRingFactory::expectDevice(device::WS2812b_Params params) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::WS2812b, std::move(params) });
+}
+
+void SensorRingFactory::expectDevice(device::AnyDepthSensor_Params /*params*/) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::AnyDepth, std::nullopt });
+}
+
+void SensorRingFactory::expectDevice(device::AnyThermalSensor_Params /*params*/) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::AnyThermal, std::nullopt });
+}
+
+void SensorRingFactory::expectDevice(device::AnyLight_Params /*params*/) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ device::DeviceType::AnyLight, std::nullopt });
+}
+
+// ── Default device parameters ──
+
+void SensorRingFactory::setDefaultDeviceParams(device::VL53L8CX_Params params) {
+  _default_device_params[device::DeviceType::VL53L8CX] = std::move(params);
+}
+
+void SensorRingFactory::setDefaultDeviceParams(device::TMF8829_Params params) {
+  _default_device_params[device::DeviceType::TMF8829] = std::move(params);
+}
+
+void SensorRingFactory::setDefaultDeviceParams(device::HTPA32_Params params) {
+  _default_device_params[device::DeviceType::HTPA32] = std::move(params);
+}
+
+void SensorRingFactory::setDefaultDeviceParams(device::WS2812b_Params params) {
+  _default_device_params[device::DeviceType::WS2812b] = std::move(params);
+}
+
+// ── Reset ──
 
 void SensorRingFactory::reset() {
   _interfaces.clear();
@@ -202,11 +274,10 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
             if (expectation.has_explicit_devices) {
               board::SensorBoardManager::DeviceParamsMap params_map;
               std::vector<device::DeviceType> configured_devs;
-              for (const auto& dp : expectation.device_params) {
-                auto dt = deviceTypeFromVariant(dp);
-                if (device::isCategory(dt)) {
+              for (const auto& de : expectation.device_expectations) {
+                if (device::isCategory(de.type)) {
                   for (auto actual_dt : enum_info.devices) {
-                    if (device::deviceMatchesExpected(actual_dt, dt)) {
+                    if (device::deviceMatchesExpected(actual_dt, de.type)) {
                       auto resolved = buildDefaultParamsMap({ actual_dt });
                       if (auto it = resolved.find(actual_dt); it != resolved.end()) {
                         params_map[actual_dt] = it->second;
@@ -216,8 +287,15 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
                     }
                   }
                 } else {
-                  params_map[dt] = toConcreteVariant(dp);
-                  configured_devs.push_back(dt);
+                  if (de.params.has_value()) {
+                    params_map[de.type] = *de.params;
+                  } else {
+                    auto resolved = buildDefaultParamsMap({ de.type });
+                    if (auto it = resolved.find(de.type); it != resolved.end()) {
+                      params_map[de.type] = it->second;
+                    }
+                  }
+                  configured_devs.push_back(de.type);
                 }
               }
 
@@ -273,10 +351,9 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
               // Check required device types (only when explicit devices are specified).
               if (expectation.has_explicit_devices) {
                 bool has_all = true;
-                for (const auto& dp : expectation.device_params) {
-                  auto dt    = deviceTypeFromVariant(dp);
-                  bool found = std::any_of(enum_info.devices.begin(), enum_info.devices.end(), [dt](const device::DeviceType actual) {
-                    return device::deviceMatchesExpected(actual, dt);
+                for (const auto& de : expectation.device_expectations) {
+                  bool found = std::any_of(enum_info.devices.begin(), enum_info.devices.end(), [&de](const device::DeviceType actual) {
+                    return device::deviceMatchesExpected(actual, de.type);
                   });
                   if (!found) {
                     has_all = false;
@@ -301,11 +378,10 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
               if (expectation.has_explicit_devices) {
                 board::SensorBoardManager::DeviceParamsMap params_map;
                 std::vector<device::DeviceType> configured_devs;
-                for (const auto& dp : expectation.device_params) {
-                  auto dt = deviceTypeFromVariant(dp);
-                  if (device::isCategory(dt)) {
+                for (const auto& de : expectation.device_expectations) {
+                  if (device::isCategory(de.type)) {
                     for (auto actual_dt : enum_info.devices) {
-                      if (device::deviceMatchesExpected(actual_dt, dt)) {
+                      if (device::deviceMatchesExpected(actual_dt, de.type)) {
                         auto resolved = buildDefaultParamsMap({ actual_dt });
                         if (auto it = resolved.find(actual_dt); it != resolved.end()) {
                           params_map[actual_dt] = it->second;
@@ -315,8 +391,15 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
                       }
                     }
                   } else {
-                    params_map[dt] = toConcreteVariant(dp);
-                    configured_devs.push_back(dt);
+                    if (de.params.has_value()) {
+                      params_map[de.type] = *de.params;
+                    } else {
+                      auto resolved = buildDefaultParamsMap({ de.type });
+                      if (auto it = resolved.find(de.type); it != resolved.end()) {
+                        params_map[de.type] = it->second;
+                      }
+                    }
+                    configured_devs.push_back(de.type);
                   }
                 }
 
@@ -449,16 +532,7 @@ std::unordered_map<device::DeviceType, SensorRingFactory::ConcreteDeviceParamsVa
   for (const auto& dev_type : devices) {
     auto def_it = _default_device_params.find(dev_type);
     if (def_it != _default_device_params.end()) {
-      // Convert from user-facing 7-type variant to concrete 4-type variant.
-      // Sentinel types are never stored as defaults, so this visit is always well-formed.
-      std::visit(
-          [&params_map, dev_type](auto&& arg) {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, device::VL53L8CX_Params> || std::is_same_v<T, device::HTPA32_Params> || std::is_same_v<T, device::WS2812b_Params> || std::is_same_v<T, device::TMF8829_Params>) {
-              params_map[dev_type] = arg;
-            }
-          },
-          def_it->second);
+      params_map[dev_type] = def_it->second;
     } else {
       switch (dev_type) {
       case device::DeviceType::VL53L8CX:
@@ -479,31 +553,6 @@ std::unordered_map<device::DeviceType, SensorRingFactory::ConcreteDeviceParamsVa
     }
   }
   return params_map;
-}
-
-device::DeviceType SensorRingFactory::deviceTypeFromVariant(const DeviceParamsVariant& v) {
-  return std::visit(
-      [](auto&& arg) -> device::DeviceType {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, device::VL53L8CX_Params>) {
-          return device::DeviceType::VL53L8CX;
-        } else if constexpr (std::is_same_v<T, device::HTPA32_Params>) {
-          return device::DeviceType::HTPA32;
-        } else if constexpr (std::is_same_v<T, device::WS2812b_Params>) {
-          return device::DeviceType::WS2812b;
-        } else if constexpr (std::is_same_v<T, device::TMF8829_Params>) {
-          return device::DeviceType::TMF8829;
-        } else if constexpr (std::is_same_v<T, device::AnyDepthSensor_Params>) {
-          return device::DeviceType::AnyDepth;
-        } else if constexpr (std::is_same_v<T, device::AnyThermalSensor_Params>) {
-          return device::DeviceType::AnyThermal;
-        } else if constexpr (std::is_same_v<T, device::AnyLight_Params>) {
-          return device::DeviceType::AnyLight;
-        }
-
-        return device::DeviceType::Undefined;
-      },
-      v);
 }
 
 } // namespace sensorring

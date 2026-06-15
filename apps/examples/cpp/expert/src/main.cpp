@@ -84,20 +84,29 @@ int main(int, char*[]) {
     board::SensorBoardParams board_0;
     board_0.rotation    = { 0, 0, 45 };
     board_0.translation = { 0.1, 0.05, 0 };
-    factory.expectBoard(board_0, { vl53_params, htpa_params, ws_params });
+    factory.expectBoard(board_0);
+    factory.expectDevice(vl53_params);
+    factory.expectDevice(htpa_params);
+    factory.expectDevice(ws_params);
 
     // Board 1: Front-right, rotated -45° around Z.
     board::SensorBoardParams board_1;
     board_1.rotation    = { 0, 0, -45 };
     board_1.translation = { 0.1, -0.05, 0 };
-    factory.expectBoard(board_1, { vl53_params, htpa_params, ws_params });
+    factory.expectBoard(board_1);
+    factory.expectDevice(vl53_params);
+    factory.expectDevice(htpa_params);
+    factory.expectDevice(ws_params);
 
     // Second interface (if available).
     factory.addInterface(usbtingo_interface);
     board::SensorBoardParams board_2;
     board_2.rotation    = { 0, 0, 0 };
     board_2.translation = { -0.1, 0, 0 };
-    factory.expectBoard(board_2, { vl53_params, htpa_params, ws_params });
+    factory.expectBoard(board_2);
+    factory.expectDevice(vl53_params);
+    factory.expectDevice(htpa_params);
+    factory.expectDevice(ws_params);
 
     // =========================================================================
     // 3. Enumerate hardware (optional — useful for diagnostics)

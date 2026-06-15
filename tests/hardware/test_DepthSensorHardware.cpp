@@ -40,7 +40,8 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     } else {
       factory.addInterface(UsbTingoParams{ interface_name });
     }
-    factory.expectBoard({}, { eduart::sensorring::device::AnyDepthSensor_Params() });
+    factory.expectBoard({});
+    factory.expectDevice(eduart::sensorring::device::AnyDepthSensor_Params());
 
     MeasurementManager manager(params, factory);
 
