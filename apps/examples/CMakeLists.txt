@@ -40,11 +40,11 @@ target_link_libraries(thermal_map
     PRIVATE sensorring::sensorring
 )
 
-add_executable(extra_action
-    cpp/extra_action/src/main.cpp
+add_executable(light_control
+    cpp/light_control/src/main.cpp
 )
 
-target_link_libraries(extra_action
+target_link_libraries(light_control
     PRIVATE sensorring::sensorring
 )
 
@@ -63,7 +63,7 @@ if(SENSORRING_INSTALL)
     minimal_using_proxy_class
     depth_map
     thermal_map
-    extra_action
+    light_control
     expert
     RUNTIME DESTINATION ${SENSORRING_INSTALL_EXAMPLES_RUNTIME_DIR} COMPONENT Examples
   )

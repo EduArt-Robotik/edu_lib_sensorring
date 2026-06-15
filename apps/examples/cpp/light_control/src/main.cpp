@@ -37,9 +37,9 @@ static constexpr float OFFSET_G   = 2.0943951f; // 120 degrees phase shift
 static constexpr float OFFSET_B   = 4.1887902f; // 240 degrees phase shift
 
 int main(int, char*[]) {
-  std::cout << "===============================" << std::endl;
-  std::cout << "Extra action sensorring example" << std::endl;
-  std::cout << "===============================" << std::endl;
+  std::cout << "================================" << std::endl;
+  std::cout << "Light control sensorring example" << std::endl;
+  std::cout << "================================" << std::endl;
   std::cout << std::endl;
 
   manager::ManagerParams params;

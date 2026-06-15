@@ -22,7 +22,7 @@ The first two examples are **functionally identical** — they all use the `Sens
 
 - [Depth Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/depth_map/src/main.cpp): Prints a colored 8×8 depth map of the first connected ToF sensor on the command line
 - [Thermal Map Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/thermal_map/src/main.cpp): Prints a 32×32 false-color thermal image from the first connected HTPA32 sensor on the command line
-- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/extra_action/src/main.cpp): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
+- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/cpp/light_control/src/main.cpp): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
 
 ### Expert / Expert-User Example
 
@@ -80,7 +80,7 @@ The first two examples are **functionally identical** — they all use the `Sens
 
 ### Action Examples
 
-- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/extra_action/extra_action.py): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
+- [Light Control Example](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/light_control/light_control.py): Demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the `Light` interface
 
 ### Expert / Expert-User Example
 

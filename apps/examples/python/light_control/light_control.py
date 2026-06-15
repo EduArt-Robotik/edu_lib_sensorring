@@ -3,7 +3,7 @@
 # Copyright (c) 2026 EduArt Robotik GmbH
 
 """
- @file   extra_action.py
+ @file   light_control.py
  @author EduArt Robotik GmbH
  @brief  This example demonstrates how to control WS2812b LEDs
          with a smooth color cycling animation.
@@ -35,9 +35,9 @@ def to_channel(value):
 
 
 def main():
-  print("===============================")
-  print("Extra action sensorring example")
-  print("===============================")
+  print("================================")
+  print("Light control sensorring example")
+  print("================================")
   print()
 
   params = sensorring.ManagerParams()
