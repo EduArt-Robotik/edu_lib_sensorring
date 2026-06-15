@@ -128,7 +128,7 @@ public:
    * @return Return true if setting the noise strength flag was successful.
    */
   bool setResultNoiseStrength(bool noise_strength);
-  
+
   /**
    * @brief Get whether noise strength data is included in measurement results.
    * @param[out] noise_strength Reference to store the current noise strength flag.
@@ -156,7 +156,7 @@ public:
    * @return Return true if setting the number of peaks was successful.
    */
   bool setResultNrOfPeaks(std::uint8_t nr_of_peaks);
-  
+
   /**
    * @brief Get the maximum number of peaks reported per pixel in measurement results.
    * @param[out] nr_of_peaks Reference to store the current maximum number of peaks.
