@@ -21,6 +21,10 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _pose{ params.translation, params.rotation }
     , _enum_info()
     , _device_vec(std::move(devices)) {
+  for (auto& device : _device_vec) {
+    device->setBoardPose(&_pose);
+  }
+
   _com_subscription = _interface->subscribe(
       [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
         this->comCallback(source, command, data);
@@ -66,14 +70,7 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
       _enum_info       = EnumerationInformation::fromBuffer(data);
       _enum_info.state = ConnectionState::Connected;
 
-      const auto board_type = _enum_info.type;
-
-      // Set pose for all devices on this board in a device-agnostic way.
-      for (auto& device : _device_vec) {
-        const auto offsets = SensorBoardManager::getDevicePoseOffset(board_type, device->getDeviceID());
-        device->setPoseOffset(offsets);
-        device->setBoardPose(&_pose);
-      }
+      // Board type is now confirmed from hardware; offsets are already set by the factory.
     }
   }
 }

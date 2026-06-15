@@ -19,6 +19,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
   std::vector<std::unique_ptr<Device> > devices;
 
   for (const auto& device_type : enum_info.devices) {
+    const std::size_t size_before = devices.size();
     switch (device_type) {
     case DeviceType::VL53L8CX:
       devices.push_back(std::make_unique<device::VL53L8CX_Device>(device::VL53L8CX_Params{}, interface, idx));
@@ -35,6 +36,9 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
     default:
       // Unknown or unsupported device type – ignore for now.
       break;
+    }
+    if (devices.size() > size_before && params.board_type != SensorBoardType::Undefined) {
+      devices.back()->setPoseOffset(getDevicePoseOffset(params.board_type, devices.back()->getDeviceID()));
     }
   }
 
@@ -64,6 +68,9 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
           }
         },
         it->second);
+    if (params.board_type != SensorBoardType::Undefined) {
+      devices.back()->setPoseOffset(getDevicePoseOffset(params.board_type, devices.back()->getDeviceID()));
+    }
   }
 
   return std::make_unique<SensorBoard>(params, interface, idx, std::move(devices));
