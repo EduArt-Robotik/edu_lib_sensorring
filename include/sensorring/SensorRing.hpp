@@ -47,12 +47,6 @@ public:
   std::vector<SensorBus*> getSensorBuses() const;
 
   /**
-   * @brief Enable or disable bit rate switching on CAN bus interfaces.
-   * @param[in] brs_enable Enable flag
-   */
-  void setBitRateSwitching(bool brs_enable);
-
-  /**
    * @brief Get all devices connected to the sensor ring.
    * @return Vector of all devices.
    */

@@ -4,7 +4,6 @@
 #include <thread>
 
 #include "board/BoardEnumerator.hpp"
-#include "board/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/logger/Logger.hpp"
@@ -37,10 +36,6 @@ std::vector<board::SensorBoard*> SensorBus::getSensorBoards() const {
 
 unsigned int SensorBus::getSensorCount() const {
   return static_cast<unsigned int>(_board_vec.size());
-}
-
-void SensorBus::setBitRateSwitching(bool brs_enable) {
-  board::cmdSetBitRateSwitching(_interface->getID(), brs_enable);
 }
 
 std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {

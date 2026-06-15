@@ -42,12 +42,6 @@ public:
   SensorBus(com::ComInterfaceID interface, std::vector<std::unique_ptr<board::SensorBoard> > board_vec);
 
   /**
-   * @brief Enable or disable bit rate switching on the bus interface.
-   * @param[in] brs_enable Enable flag.
-   */
-  void setBitRateSwitching(bool brs_enable);
-
-  /**
    * @brief Total number of sensor boards on this bus.
    * @return Number of boards.
    */

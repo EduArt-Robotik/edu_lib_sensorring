@@ -22,14 +22,6 @@ bool resetBoards() {
   return success;
 }
 
-void cmdSetBitRateSwitching(com::ComInterfaceID interface, bool enable) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    // TODO: BRS command removed in v2 protocol — re-add when firmware supports it.
-    (void)enable;
-  }
-}
-
 void cmdEnumerateBoards(com::ComInterfaceID interface) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (iface) {

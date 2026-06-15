@@ -304,7 +304,6 @@ void MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::pre_loop_init: {
-    _sensor_ring->setBitRateSwitching(_params.enable_brs);
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting tick-based measurement loop.");
     _tick_count     = 0;
     _next_tick_time = std::chrono::steady_clock::now();

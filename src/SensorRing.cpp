@@ -35,12 +35,6 @@ std::vector<device::Device*> SensorRing::getDevices() const {
   return devices;
 }
 
-void SensorRing::setBitRateSwitching(bool brs_enable) {
-  for (auto& sensor_bus : _bus_vec) {
-    sensor_bus->setBitRateSwitching(brs_enable);
-  }
-}
-
 } // namespace sensorring
 
 } // namespace eduart

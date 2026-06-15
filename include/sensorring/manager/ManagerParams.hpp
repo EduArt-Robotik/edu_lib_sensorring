@@ -27,9 +27,6 @@ struct ManagerParams {
   /// Timeout for individual sensor operations before the error handler is called.
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
 
-  /// Enable bit rate switching on the CAN bus interface.
-  bool enable_brs = false;
-
   /// If set to true error handling is enabled to try to repair communication and timing errors.
   /// When set to false the MeasurementManager instantly shuts down when an error is detected.
   bool repair_errors = true;
