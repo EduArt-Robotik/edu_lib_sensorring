@@ -19,6 +19,7 @@
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Math.hpp"
 #include "sensorring/math/Pose.hpp"
+#include "sensorring/math/Vector3.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
@@ -110,29 +111,34 @@ public:
   // -- pose --
 
   /**
-   * @brief Set the absolute pose of this device in the ring coordinate frame.
-   * @param[in] translation Position (x, y, z) in metres.
-   * @param[in] rotation    Orientation (roll, pitch, yaw) in degrees.
+   * @brief Set the non-owning pointer to the board's pose.
+   *
+   * The referenced Pose must outlive this device. Typically owned by the SensorBoard.
+   *
+   * @param[in] board_pose Pointer to the board's pose.
    */
-  void setPose(Pose pose);
-
-  /**
-   * @brief Return the stored pose of the board centre.
-   * @return Pose of the board centre.
-   */
-  Pose getPose() const;
+  void setBoardPose(const math::Pose* board_pose);
 
   /**
    * @brief Store a pose offset relative to the board centre.
    * @param[in] offset Offset to apply on top of the board centre pose.
    */
-  void setPoseOffset(const Pose& offset);
+  void setPoseOffset(const math::Pose& offset);
 
   /**
    * @brief Return the stored pose offset relative to the board centre.
    * @return Pose offset relative to the board centre.
    */
-  Pose getPoseOffset() const;
+  math::Pose getPoseOffset() const;
+
+  /**
+   * @brief Compute and return the global pose in the ring coordinate frame.
+   *
+   * Combines the board pose with this device's offset on-the-fly.
+   *
+   * @return Global pose (board pose combined with device offset).
+   */
+  math::Pose getGlobalPose() const;
 
 protected:
   std::mutex _action_mutex;
@@ -149,9 +155,8 @@ protected:
 
   com::ComInterface* _interface;
 
-  Pose _pose;
-  Pose _offset;
-  math::Matrix3 _rot_m;
+  const math::Pose* _board_pose = nullptr;
+  math::Pose _offset;
 
   subscription::Subscription _com_subscription;
 };

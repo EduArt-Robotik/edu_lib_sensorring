@@ -16,6 +16,7 @@
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/Device.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/math/Pose.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
@@ -68,6 +69,12 @@ public:
    */
   std::vector<device::Device*> getDevices() const;
 
+  /**
+   * @brief Return the board's pose in the ring coordinate frame.
+   * @return Const reference to the board pose.
+   */
+  const math::Pose& getPose() const;
+
 private:
   using Mutex      = std::mutex;
   using UniqueLock = std::unique_lock<Mutex>;
@@ -85,6 +92,7 @@ private:
   unsigned int _idx;
   com::ComInterface* _interface;
   const SensorBoardParams _params;
+  math::Pose _pose;
   board::EnumerationInformation _enum_info;
 
   mutable RecursiveMutex _com_mutex;

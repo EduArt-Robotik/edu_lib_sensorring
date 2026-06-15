@@ -69,20 +69,22 @@ bool Device::configure() {
   return true;
 }
 
-void Device::setPose(Pose pose) {
-  _pose = pose;
-  _rot_m       = math::rotMatrixFromEulerDegrees(_pose.orientation);
+void Device::setBoardPose(const math::Pose* board_pose) {
+  _board_pose = board_pose;
 }
 
-Pose Device::getPose() const {
-  return _pose;
-}
-
-void Device::setPoseOffset(const Pose& offset) {
+void Device::setPoseOffset(const math::Pose& offset) {
   _offset = offset;
 }
 
-Pose Device::getPoseOffset() const {
+math::Pose Device::getPoseOffset() const {
+  return _offset;
+}
+
+math::Pose Device::getGlobalPose() const {
+  if (_board_pose) {
+    return *_board_pose + _offset;
+  }
   return _offset;
 }
 

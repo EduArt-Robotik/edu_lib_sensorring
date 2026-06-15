@@ -5,7 +5,6 @@
 #include "board/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
-#include "sensorring/math/Math.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 
@@ -19,6 +18,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     : _idx(idx)
     , _interface(com::ComManager::getInstance()->getInterface(interface))
     , _params(params)
+    , _pose{ params.translation, params.rotation }
     , _enum_info()
     , _device_vec(std::move(devices)) {
   _com_subscription = _interface->subscribe(
@@ -53,6 +53,10 @@ std::vector<device::Device*> SensorBoard::getDevices() const {
   return devices;
 }
 
+const Pose& SensorBoard::getPose() const {
+  return _pose;
+}
+
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
   if (command == sensor_board::ACTIVE_DEVICE_RESPONSE && data.size() >= 11 && (data.at(0) == _idx)) {
 
@@ -68,11 +72,7 @@ void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, st
       for (auto& device : _device_vec) {
         const auto offsets = SensorBoardManager::getDevicePoseOffset(board_type, device->getDeviceID());
         device->setPoseOffset(offsets);
-
-        const auto translation = _params.translation + offsets.translation;
-        const auto orientation = math::eulerDegreesFromRotationMatrix(math::rotMatrixFromEulerDegrees(_params.rotation) * math::rotMatrixFromEulerDegrees(offsets.orientation));
-
-        device->setPose({ translation, orientation });
+        device->setBoardPose(&_pose);
       }
     }
   }

@@ -23,6 +23,7 @@
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/math/Pose.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -34,6 +35,7 @@ namespace board {
 using device::Device;
 using device::DeviceID;
 using device::DeviceType;
+using math::Pose;
 
 struct SensorBoardParams;
 class SensorBoard;
