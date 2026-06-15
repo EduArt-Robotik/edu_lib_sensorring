@@ -4,6 +4,7 @@
 #include <optional>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/firmware/FirmwareUpdater.hpp>
+#include <sensorring/interface/InterfaceParams.hpp>
 #include <string>
 #include <thread>
 
@@ -72,7 +73,17 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
 
 bool enterBootloaderOnBoard(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int board_index) {
   SensorRingFactory factory(ValidationMode::Relaxed);
-  factory.addInterface(interface);
+  switch (interface.type) {
+  case com::InterfaceType::SocketCan:
+    factory.addInterface(com::SocketCanParams{ interface.name });
+    break;
+  case com::InterfaceType::UsbTingo:
+    factory.addInterface(com::UsbTingoParams{ interface.name });
+    break;
+  default:
+    std::cerr << "Unsupported interface type.\n";
+    return false;
+  }
 
   const auto enumeration  = factory.enumerate();
   std::size_t board_count = 0U;

@@ -11,6 +11,7 @@
 #include "firmware/internal/BootloaderProtocol.hpp"
 #include "interface/ComManager.hpp"
 #include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 namespace eduart {
 namespace sensorring {
@@ -34,7 +35,16 @@ bool isResultOk(ResultType result) {
 
 std::vector<board::EnumerationInformation> enumerateBoardsOnInterface(const com::ComInterfaceID& interface) {
   SensorRingFactory factory(ValidationMode::Relaxed);
-  factory.addInterface(interface);
+  switch (interface.type) {
+  case com::InterfaceType::SocketCan:
+    factory.addInterface(com::SocketCanParams{ interface.name });
+    break;
+  case com::InterfaceType::UsbTingo:
+    factory.addInterface(com::UsbTingoParams{ interface.name });
+    break;
+  default:
+    return {};
+  }
   const auto enumeration = factory.enumerate();
 
   auto it = enumeration.find(interface);

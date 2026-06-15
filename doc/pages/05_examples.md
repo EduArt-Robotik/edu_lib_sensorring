@@ -112,8 +112,7 @@ def main():
   params = sensorring.ManagerParams()
 
   # Set up the communication interface
-  interface = sensorring.ComInterfaceID()
-  interface.type = sensorring.InterfaceType_UsbTingo
+  interface = sensorring.UsbTingoParams()
   interface.name = "0"
 
   try:

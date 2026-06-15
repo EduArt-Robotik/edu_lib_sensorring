@@ -5,6 +5,7 @@
 #include <string>
 
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 #include "ComInterface.hpp"
 
@@ -33,6 +34,20 @@ public:
    * @note The returned pointer is valid for the lifetime of the ComManager singleton instance.
    */
   ComInterface* getInterface(com::ComInterfaceID id, bool create_if_unknown = true);
+
+  /**
+   * Create or retrieve a SocketCAN interface with the given parameters.
+   * @param[in] params SocketCAN configuration parameters.
+   * @return Raw pointer to the ComInterface, or nullptr on failure.
+   */
+  ComInterface* getInterface(const com::SocketCanParams& params);
+
+  /**
+   * Create or retrieve a USBtingo interface with the given parameters.
+   * @param[in] params USBtingo configuration parameters.
+   * @return Raw pointer to the ComInterface, or nullptr on failure.
+   */
+  ComInterface* getInterface(const com::UsbTingoParams& params);
 
   /**
    * Get all communication interfaces

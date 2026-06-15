@@ -11,6 +11,21 @@ namespace eduart {
 
 namespace sensorring {
 
+namespace {
+
+/// Helper: obtain the ComInterface* from an InterfaceParams via ComManager.
+com::ComInterface* openInterface(const com::InterfaceParams& params) {
+  if (auto* p = dynamic_cast<const com::SocketCanParams*>(&params)) {
+    return com::ComManager::getInstance()->getInterface(*p);
+  }
+  if (auto* p = dynamic_cast<const com::UsbTingoParams*>(&params)) {
+    return com::ComManager::getInstance()->getInterface(*p);
+  }
+  return nullptr;
+}
+
+} // namespace
+
 // Converts the user-facing DeviceParamsVariant (including sentinel category types) to the
 // concrete board::SensorBoardManager::DeviceParamsVariant. Sentinel types must not be passed.
 static board::SensorBoardManager::DeviceParamsVariant toConcreteVariant(const SensorRingFactory::DeviceParamsVariant& v) {
@@ -36,8 +51,12 @@ SensorRingFactory::SensorRingFactory(ValidationMode mode)
     : _mode(mode) {
 }
 
-void SensorRingFactory::addInterface(com::ComInterfaceID interface) {
-  _interfaces.push_back(InterfaceConfig{ interface, {}, false });
+void SensorRingFactory::addInterface(com::SocketCanParams params) {
+  _interfaces.push_back(InterfaceConfig{ std::make_unique<com::SocketCanParams>(std::move(params)), {}, false });
+}
+
+void SensorRingFactory::addInterface(com::UsbTingoParams params) {
+  _interfaces.push_back(InterfaceConfig{ std::make_unique<com::UsbTingoParams>(std::move(params)), {}, false });
 }
 
 void SensorRingFactory::expectBoard(board::SensorBoardParams params) {
@@ -81,9 +100,9 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
   for (auto& iface_cfg : _interfaces) {
     // Obtain the actual interface (may be auto-generated, e.g. USBTINGO).
     try {
-      auto* iface = com::ComManager::getInstance()->getInterface(iface_cfg.interface);
+      auto* iface = openInterface(*iface_cfg.params);
       if (!iface) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Could not open interface " + iface_cfg.interface.name + " – skipping.");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Could not open interface " + iface_cfg.params->name + " – skipping.");
         continue;
       }
       auto id = iface->getID();
@@ -342,7 +361,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
         bus_vec.push_back(std::make_unique<SensorBus>(id, std::move(board_vec)));
       }
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while opening interface " + iface_cfg.interface.name + " – skipping.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while opening interface " + iface_cfg.params->name + " – skipping.");
       continue;
     }
   }
@@ -360,7 +379,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
   {
     std::unordered_map<int, unsigned int> type_counters;
     for (auto* dev : ring->getDevices()) {
-      auto type_key = static_cast<int>(dev->getDeviceID().getType());
+      auto type_key    = static_cast<int>(dev->getDeviceID().getType());
       unsigned int seq = type_counters[type_key]++;
       dev->setDeviceIndex(seq);
     }
@@ -380,7 +399,7 @@ SensorRingFactory::EnumerationMap SensorRingFactory::enumerate() {
 
   for (const auto& iface_cfg : _interfaces) {
     try {
-      auto* iface = com::ComManager::getInstance()->getInterface(iface_cfg.interface);
+      auto* iface = openInterface(*iface_cfg.params);
       if (!iface) {
         continue;
       }
@@ -394,7 +413,7 @@ SensorRingFactory::EnumerationMap SensorRingFactory::enumerate() {
 
       result[id] = std::move(enum_infos);
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while enumerating interface " + iface_cfg.interface.name + " – skipping.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while enumerating interface " + iface_cfg.params->name + " – skipping.");
     }
   }
 

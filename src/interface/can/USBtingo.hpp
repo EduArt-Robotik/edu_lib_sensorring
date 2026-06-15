@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 namespace eduart {
 
@@ -30,6 +31,12 @@ public:
    * @param[in] serial serial number of the USBtingo to use
    */
   USBtingo(std::string serial);
+
+  /**
+   * Constructor with full configuration.
+   * @param[in] params USBtingo configuration parameters.
+   */
+  explicit USBtingo(const UsbTingoParams& params);
 
   /**
    * Destructor
@@ -72,6 +79,7 @@ private:
   bool listener() override;
 
   std::string _serial_str;
+  bool _enable_brs;
   std::unique_ptr<usbtingo::device::Device> _dev;
   sensorring::transport::MessageAssembler _assembler;
   sensorring::transport::MessageReassembler _reassembler;

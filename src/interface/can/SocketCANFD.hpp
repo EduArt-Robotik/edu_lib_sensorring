@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "interface/ComInterface.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 namespace eduart {
 
@@ -31,6 +32,12 @@ public:
    * @param[in] interface_name device file link to CAN interface
    */
   SocketCANFD(std::string interface_name);
+
+  /**
+   * Constructor with full configuration.
+   * @param[in] params SocketCAN configuration parameters.
+   */
+  explicit SocketCANFD(const SocketCanParams& params);
 
   /**
    * Destructor
@@ -76,6 +83,7 @@ private:
   bool listener() override;
 
   int _soc;
+  bool _enable_brs;
   sensorring::transport::MessageAssembler _assembler;
   sensorring::transport::MessageReassembler _reassembler;
 };

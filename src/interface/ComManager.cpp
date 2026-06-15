@@ -96,6 +96,44 @@ ComInterface* ComManager::getInterface(com::ComInterfaceID id, bool create_if_un
   return _interfaces.back().get();
 }
 
+ComInterface* ComManager::getInterface(const com::SocketCanParams& params) {
+#ifdef USE_SOCKETCAN
+  com::ComInterfaceID id{ InterfaceType::SocketCan, params.name };
+
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&id](const auto& it) {
+    return (it->getID() == id);
+  });
+  if (it != _interfaces.end())
+    return it->get();
+
+  _interfaces.emplace_back(std::make_unique<SocketCANFD>(params));
+  return _interfaces.back().get();
+#else
+  (void)params;
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a SocketCAN interface, but the sensorring library is built without -DSENSORRING_USE_SOCKETCAN=ON option.");
+  return nullptr;
+#endif
+}
+
+ComInterface* ComManager::getInterface(const com::UsbTingoParams& params) {
+#ifdef USE_USBTINGO
+  com::ComInterfaceID id{ InterfaceType::UsbTingo, params.name };
+
+  const auto& it = std::find_if(_interfaces.begin(), _interfaces.end(), [&id](const auto& it) {
+    return (it->getID() == id);
+  });
+  if (it != _interfaces.end())
+    return it->get();
+
+  _interfaces.emplace_back(std::make_unique<USBtingo>(params));
+  return _interfaces.back().get();
+#else
+  (void)params;
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Requested to open a USBtingo interface, but the sensorring library is built without -DSENSORRING_USE_USBTINGO=ON option.");
+  return nullptr;
+#endif
+}
+
 std::vector<ComInterface*> ComManager::getInterfaces() {
   std::vector<ComInterface*> interfaces;
   for (const auto& interface : _interfaces) {

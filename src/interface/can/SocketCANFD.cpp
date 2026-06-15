@@ -29,12 +29,33 @@ namespace com {
 namespace {
 // Bound how long one send operation may wait under TX queue pressure.
 constexpr int TX_BACKPRESSURE_POLL_TIMEOUT_MS = 50;
-constexpr int TX_BACKPRESSURE_MAX_RETRIES = 20;
+constexpr int TX_BACKPRESSURE_MAX_RETRIES     = 20;
 } // namespace
 
 SocketCANFD::SocketCANFD(std::string interface_name)
     : ComInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0)
+    , _enable_brs(false)
+    , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
+    , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
+      ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
+      dispatchMessage(ep, frame.command, frame.data);
+    }) {
+
+  try {
+    openInterface();
+  } catch (std::runtime_error& e) {
+    closeInterface();
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface " + _id.name + ": " + e.what());
+  }
+
+  startListener();
+}
+
+SocketCANFD::SocketCANFD(const SocketCanParams& params)
+    : ComInterface({ InterfaceType::SocketCan, params.name })
+    , _soc(0)
+    , _enable_brs(params.enable_brs)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
       ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
@@ -128,7 +149,7 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
 
       if (retval < 0 && (errno == EAGAIN || errno == ENOBUFS)) {
         pollfd pfd{};
-        pfd.fd = _soc;
+        pfd.fd     = _soc;
         pfd.events = POLLOUT;
 
         // Wait until the socket becomes writable again.
@@ -152,12 +173,13 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
         return false;
       }
       // Round the payload length up to the next canonical CAN FD frame size
-      const std::uint8_t dlc_code = sensorring::transport::can::bytesToDlcCode(data.size());
+      const std::uint8_t dlc_code  = sensorring::transport::can::bytesToDlcCode(data.size());
       const std::size_t padded_len = sensorring::transport::can::dlcCodeToBytes(dlc_code);
 
       canfd_frame frame{};
       frame.can_id = static_cast<canid_t>(can_id);
       frame.len    = static_cast<__u8>(padded_len);
+      frame.flags  = _enable_brs ? CANFD_BRS : 0;
       std::copy_n(data.begin(), data.size(), frame.data);
       // bytes data.size()..padded_len-1 stay zeroed from canfd_frame{}.
       if (!writeWithBackpressure(&frame, sizeof(canfd_frame))) {

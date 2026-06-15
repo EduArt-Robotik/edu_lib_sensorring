@@ -7,12 +7,14 @@
 #include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
-#include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
 using eduart::sensorring::com::InterfaceType;
+using eduart::sensorring::com::SocketCanParams;
+using eduart::sensorring::com::UsbTingoParams;
 using eduart::sensorring::manager::ManagerParams;
 using eduart::sensorring::manager::MeasurementManager;
 using eduart::sensorring::measurement::DepthMeasurement;
@@ -28,16 +30,16 @@ enum class TestResult {
 TestResult run_single_interface_test(const std::string& interface_name, InterfaceType type) {
   ManagerParams params;
 
-  eduart::sensorring::com::ComInterfaceID interface;
-  interface.type = type;
-  interface.name = interface_name;
-
   std::vector<DepthMeasurement> measurements;
   std::atomic<std::size_t> count{ 0 };
 
   try {
     eduart::sensorring::SensorRingFactory factory;
-    factory.addInterface(interface);
+    if (type == InterfaceType::SocketCan) {
+      factory.addInterface(SocketCanParams{ interface_name });
+    } else {
+      factory.addInterface(UsbTingoParams{ interface_name });
+    }
     factory.expectBoard({}, { eduart::sensorring::device::AnyDepthSensor_Params() });
 
     MeasurementManager manager(params, factory);

@@ -118,7 +118,6 @@ They are passed as constructor argument and cannot be changed after instantiatio
 | Parameter | Description |
 |:----------|:------------|
 | `timeout` | Duration after which the manager shuts down automatically |
-| `enable_brs` | Enable CAN FD bit rate switching |
 | `repair_errors` | Attempt automatic error recovery |
 | `frequency_tof_hz` | Target frequency for ToF measurements |
 | `frequency_thermal_hz` | Target frequency for thermal measurements |

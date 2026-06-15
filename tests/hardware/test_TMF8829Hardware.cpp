@@ -5,10 +5,12 @@
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
-#include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 
 using eduart::sensorring::SensorRingFactory;
 using eduart::sensorring::com::InterfaceType;
+using eduart::sensorring::com::SocketCanParams;
+using eduart::sensorring::com::UsbTingoParams;
 using eduart::sensorring::device::ResolutionMode;
 using eduart::sensorring::device::TMF8829_Device;
 using eduart::sensorring::device::TMF8829_Params;
@@ -33,11 +35,11 @@ HardwareContext open_tmf8829(const std::string& interface_name, InterfaceType ty
   try {
     SensorRingFactory factory;
 
-    eduart::sensorring::com::ComInterfaceID interface;
-    interface.type = type;
-    interface.name = interface_name;
-
-    factory.addInterface(interface);
+    if (type == InterfaceType::SocketCan) {
+      factory.addInterface(SocketCanParams{ interface_name });
+    } else {
+      factory.addInterface(UsbTingoParams{ interface_name });
+    }
     factory.expectBoard({}, { TMF8829_Params() });
 
     ctx.ring = factory.build();

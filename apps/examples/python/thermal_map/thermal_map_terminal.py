@@ -17,11 +17,9 @@ import eduart.sensorring as sensorring
 
 # Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
 CAN_INTERFACE_NAME = "can0"
-CAN_INTERFACE_TYPE = sensorring.InterfaceType_SocketCan
 
 # Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 USBTINGO_INTERFACE_NAME = "0"
-USBTINGO_INTERFACE_TYPE = sensorring.InterfaceType_UsbTingo
 
 
 def color_string_command(r, g, b):
@@ -83,12 +81,10 @@ def main():
   params = sensorring.ManagerParams()
   params.frequency_thermal_hz = 5.0
 
-  can_interface = sensorring.ComInterfaceID()
-  can_interface.type = CAN_INTERFACE_TYPE
+  can_interface = sensorring.SocketCanParams()
   can_interface.name = CAN_INTERFACE_NAME
 
-  usbtingo_interface = sensorring.ComInterfaceID()
-  usbtingo_interface.type = USBTINGO_INTERFACE_TYPE
+  usbtingo_interface = sensorring.UsbTingoParams()
   usbtingo_interface.name = USBTINGO_INTERFACE_NAME
 
   try:

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/thermal/ThermalSensor.hpp>
+#include <sensorring/interface/InterfaceParams.hpp>
 #include <sensorring/logger/Logger.hpp>
 #include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
@@ -19,12 +20,10 @@ using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
-static constexpr std::string_view CAN_INTERFACE_NAME   = "can0";
-static constexpr com::InterfaceType CAN_INTERFACE_TYPE = com::InterfaceType::SocketCan;
+static constexpr std::string_view CAN_INTERFACE_NAME = "can0";
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
-static constexpr std::string_view USBTINGO_INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType USBTINGO_INTERFACE_TYPE = com::InterfaceType::UsbTingo;
+static constexpr std::string_view USBTINGO_INTERFACE_NAME = "0";
 
 std::string colorStringCommand(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
   return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
@@ -62,13 +61,8 @@ int main(int, char*[]) {
   manager::ManagerParams params;
   params.frequency_thermal_hz = 5.0;
 
-  com::ComInterfaceID can_interface;
-  can_interface.type = CAN_INTERFACE_TYPE;
-  can_interface.name = CAN_INTERFACE_NAME;
-
-  com::ComInterfaceID usbtingo_interface;
-  usbtingo_interface.type = USBTINGO_INTERFACE_TYPE;
-  usbtingo_interface.name = USBTINGO_INTERFACE_NAME;
+  com::SocketCanParams can_interface{ std::string(CAN_INTERFACE_NAME) };
+  com::UsbTingoParams usbtingo_interface{ std::string(USBTINGO_INTERFACE_NAME) };
 
   try {
     // Subscribe to the log messages

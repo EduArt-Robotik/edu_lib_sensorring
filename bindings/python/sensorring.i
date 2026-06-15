@@ -65,6 +65,7 @@ else:
 #include "sensorring/math/Vector3.hpp"
 #include "sensorring/math/Matrix3.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/device/types/DeviceParams.hpp"
@@ -213,6 +214,9 @@ typedef ::int64_t int64_t;
 
 
 %include "sensorring/interface/ComInterfaceID.hpp"
+
+
+%include "sensorring/interface/InterfaceParams.hpp"
 
 
 %include "sensorring/measurement/PointCloud.hpp"

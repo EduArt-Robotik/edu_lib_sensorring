@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -24,6 +25,7 @@
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
+#include "sensorring/interface/InterfaceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -86,13 +88,22 @@ public:
   explicit SensorRingFactory(ValidationMode mode = ValidationMode::Relaxed);
 
   /**
-   * @brief Add a communication interface (bus) to scan during build().
+   * @brief Add a SocketCAN interface to scan during build().
    *
    * All subsequent expectBoard() calls apply to this interface until the next
    * addInterface() call.
-   * @param[in] interface Identifier of the communication interface to add.
+   * @param[in] params SocketCAN configuration parameters.
    */
-  void addInterface(com::ComInterfaceID interface);
+  void addInterface(com::SocketCanParams params);
+
+  /**
+   * @brief Add a USBtingo interface to scan during build().
+   *
+   * All subsequent expectBoard() calls apply to this interface until the next
+   * addInterface() call.
+   * @param[in] params USBtingo configuration parameters.
+   */
+  void addInterface(com::UsbTingoParams params);
 
   /**
    * @brief Declare an expected board on the current interface.
@@ -169,7 +180,7 @@ private:
   };
 
   struct InterfaceConfig {
-    com::ComInterfaceID interface;
+    std::unique_ptr<com::InterfaceParams> params;
     std::vector<BoardExpectation> expected_boards;
     bool has_expectations = false;
   };

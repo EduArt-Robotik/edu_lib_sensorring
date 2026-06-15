@@ -23,6 +23,22 @@ namespace com {
 
 USBtingo::USBtingo(std::string id)
     : ComInterface({ InterfaceType::UsbTingo, id })
+    , _enable_brs(false)
+    , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
+    , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
+      ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
+      dispatchMessage(ep, frame.command, frame.data);
+    }) {
+  if (!openInterface()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Unable to open interface: " + _id.name);
+  }
+
+  startListener();
+}
+
+USBtingo::USBtingo(const UsbTingoParams& params)
+    : ComInterface({ InterfaceType::UsbTingo, params.name })
+    , _enable_brs(params.enable_brs)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
       ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
@@ -100,7 +116,9 @@ bool USBtingo::send(ComEndpoint target, std::uint8_t command, const std::vector<
 bool USBtingo::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) {
   (void)fd;
   usbtingo::bus::Message msg(can_id, data);
-  if (!_dev->send_can(msg.to_CanTxFrame(true))) {
+  auto tx_frame = msg.to_CanTxFrame(true);
+  tx_frame.brs  = _enable_brs ? 1 : 0;
+  if (!_dev->send_can(tx_frame)) {
     _communication_error = true;
     throw std::runtime_error("Unable to send message on interface " + _id.name);
   }
