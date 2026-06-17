@@ -37,6 +37,8 @@ if(SENSORRING_BUILD_HARDWARE_TESTS)
     add_executable(sensorring_hardware_tests
       hardware/test_DepthSensorHardware.cpp
       hardware/test_TMF8829Hardware.cpp
+      hardware/test_SocketCanHardware.cpp
+      hardware/test_UsbTingoHardware.cpp
     )
 
     target_link_libraries(sensorring_hardware_tests PRIVATE

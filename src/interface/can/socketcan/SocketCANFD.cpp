@@ -177,7 +177,7 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
       canfd_frame frame{};
       frame.can_id = static_cast<canid_t>(can_id);
       frame.len    = static_cast<__u8>(padded_len);
-      frame.flags  = _params.send_with_brs ? CANFD_BRS : 0;
+      frame.flags  = _params.send_with_brs() ? CANFD_BRS : 0;
       std::copy_n(data.begin(), data.size(), frame.data);
       // bytes data.size()..padded_len-1 stay zeroed from canfd_frame{}.
       if (!writeWithBackpressure(&frame, sizeof(canfd_frame))) {

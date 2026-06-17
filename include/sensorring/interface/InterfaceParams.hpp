@@ -40,10 +40,6 @@ protected:
  * @brief Shared parameters for a CAN interfaces.
  */
 struct SENSORRING_EXPORT CanParams : InterfaceParams {
-  /// Enable CAN FD bit rate switching for the data phase when the host sends messages to the sensor boards.
-  /// The host must support TDC (transmitter delay compensation) for this to work reliably.
-  /// Receiving messages with BRS enabled works regardless of TDC support.
-  bool send_with_brs = false;
 
   /// Enable CAN FD bit rate switching for the data phase when the sensor boards send messages to the host.
   bool respond_with_brs = false;
@@ -54,14 +50,33 @@ struct SENSORRING_EXPORT CanParams : InterfaceParams {
   /// Data sample point in the range [0, 1]. Optional parameter for fine-tuning. Default 0 uses the CAN controller's default sample point.
   float data_sample_point = 0.0f;
 
-  CanParams() = default;
-  explicit CanParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
-      : InterfaceParams(std::move(interface_name))
-      , send_with_brs(send_with_brs)
+  /**
+   * @brief Enable CAN FD bit rate switching for the data phase when the host sends messages to the sensor boards.
+   * The send_with_brs parameter is protected by this function to prevent accidental misuse.
+   * Be sure that the host CAN controller supports TDC (transmitter delay compensation),
+   * otherwise communication may become unreliable.
+   * @param enable Whether to enable BRS for sending messages.
+   */
+  void send_with_brs(bool enable) { _send_with_brs = enable; }
 
+  /**
+   * @brief Get whether CAN FD bit rate switching for the data phase is enabled when the host sends messages to the sensor boards.
+   * @return Whether BRS for sending messages is enabled.
+   */
+  bool send_with_brs() const { return _send_with_brs; }
+
+  CanParams() = default;
+  explicit CanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : InterfaceParams(std::move(interface_name))
       , respond_with_brs(respond_with_brs)
       , data_bitrate(data_bitrate)
       , data_sample_point(data_sample_point) {}
+
+private:
+  /// Enable CAN FD bit rate switching for the data phase when the host sends messages to the sensor boards.
+  /// The host must support TDC (transmitter delay compensation) for this to work reliably.
+  /// Receiving messages with BRS enabled works regardless of TDC support.
+  bool _send_with_brs = false;
 };
 
 /**
@@ -70,9 +85,9 @@ struct SENSORRING_EXPORT CanParams : InterfaceParams {
  */
 struct SENSORRING_EXPORT SocketCanParams : CanParams {
 
-  //SocketCanParams() = default;
-  explicit SocketCanParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
-      : CanParams(std::move(interface_name), send_with_brs, respond_with_brs, data_bitrate, data_sample_point) {}
+  // SocketCanParams() = default;
+  explicit SocketCanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : CanParams(std::move(interface_name), respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
 /**
@@ -81,9 +96,9 @@ struct SENSORRING_EXPORT SocketCanParams : CanParams {
  */
 struct SENSORRING_EXPORT UsbTingoParams : CanParams {
 
-  //UsbTingoParams() = default;
-  explicit UsbTingoParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
-      : CanParams(std::move(interface_name), send_with_brs, respond_with_brs, data_bitrate, data_sample_point) {}
+  // UsbTingoParams() = default;
+  explicit UsbTingoParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : CanParams(std::move(interface_name), respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
 } // namespace com

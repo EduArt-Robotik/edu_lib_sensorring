@@ -115,7 +115,7 @@ bool USBtingo::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& da
   (void)fd;
   usbtingo::bus::Message msg(can_id, data);
   auto tx_frame = msg.to_CanTxFrame(true);
-  tx_frame.brs  = _params.send_with_brs ? 1 : 0;
+  tx_frame.brs  = _params.send_with_brs() ? 1 : 0;
   if (!_dev->send_can(tx_frame)) {
     _communication_error = true;
     throw std::runtime_error("Unable to send message on interface " + _id.name);

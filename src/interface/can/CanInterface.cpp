@@ -49,26 +49,27 @@ bool CanInterface::configure() {
 
 bool CanInterface::setParams(const CanParams& params) {
 
-  if (!setBrs(params.respond_with_brs))
-    return false;
-
   if (!setDataRate(params.data_bitrate))
     return false;
 
   if (!setDataSamplePoint(params.data_sample_point))
     return false;
 
+  if (!setBrs(params.respond_with_brs))
+    return false;
+
   return true;
 }
 
 bool CanInterface::getParams(CanParams& params) {
-  if (!getBrs(params.respond_with_brs))
-    return false;
 
   if (!getDataRate(params.data_bitrate))
     return false;
 
   if (!getDataSamplePoint(params.data_sample_point))
+    return false;
+
+  if (!getBrs(params.respond_with_brs))
     return false;
 
   params = _params;
