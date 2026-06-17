@@ -99,6 +99,11 @@ bool ComInterface::hasError() const {
   return _communication_error;
 }
 
+bool ComInterface::configure() {
+  return true;
+}
+
+
 } // namespace com
 
 } // namespace sensorring

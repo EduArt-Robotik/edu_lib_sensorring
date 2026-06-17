@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "interface/ComInterface.hpp"
-#include "sensorring/interface/InterfaceParams.hpp"
+#include "interface/can/CanInterface.hpp"
 
 namespace eduart {
 
@@ -25,7 +24,7 @@ namespace com {
  * @author Stefan May, Hannes Duske
  * @date 13.05.2018 (modified 09.08.2024)
  */
-class SocketCANFD : public ComInterface {
+class SocketCANFD : public CanInterface {
 public:
   /**
    * Constructor
@@ -83,7 +82,6 @@ private:
   bool listener() override;
 
   int _soc;
-  bool _enable_brs;
   sensorring::transport::MessageAssembler _assembler;
   sensorring::transport::MessageReassembler _reassembler;
 };

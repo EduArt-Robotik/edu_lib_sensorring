@@ -261,7 +261,24 @@ void MeasurementManagerImpl::runPhase() {
   case Phase::sync_lights: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Synchronizing lights");
     device::WS2812b_Device::syncLight();
-    _phase = Phase::configure_devices;
+    _phase = Phase::configure_interfaces;
+    break;
+  }
+
+  case Phase::configure_interfaces: {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Configuring interfaces after reset");
+
+    success = true;
+    for (const auto& bus : _sensor_ring->getSensorBuses()) {
+      success &= bus->getInterface()->configure();
+    }
+
+    if (success) {
+      _phase = Phase::configure_devices;
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to configure at least one interface after reset.");
+      _phase = Phase::shutdown;
+    }
     break;
   }
 

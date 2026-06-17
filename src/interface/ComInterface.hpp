@@ -108,8 +108,14 @@ public:
    */
   bool hasError() const;
 
+  /**
+   * @brief Perform any necessary configuration after opening the interface or boards.
+   */
+  virtual bool configure();
+
 protected:
-  using LockGuard = std::lock_guard<std::mutex>;
+  using Mutex     = std::mutex;
+  using LockGuard = std::lock_guard<Mutex>;
 
   virtual bool listener() = 0;
 
@@ -128,7 +134,7 @@ protected:
 
   std::atomic<bool> _shut_down_listener;
 
-  std::mutex _mutex;
+  Mutex _mutex;
 
   ComInterfaceID _id;
 

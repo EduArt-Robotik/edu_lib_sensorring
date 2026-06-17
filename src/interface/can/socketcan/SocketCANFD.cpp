@@ -33,9 +33,8 @@ constexpr int TX_BACKPRESSURE_MAX_RETRIES     = 20;
 } // namespace
 
 SocketCANFD::SocketCANFD(std::string interface_name)
-    : ComInterface({ InterfaceType::SocketCan, interface_name })
+    : CanInterface({ InterfaceType::SocketCan, interface_name })
     , _soc(0)
-    , _enable_brs(false)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
       ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
@@ -53,9 +52,8 @@ SocketCANFD::SocketCANFD(std::string interface_name)
 }
 
 SocketCANFD::SocketCANFD(const SocketCanParams& params)
-    : ComInterface({ InterfaceType::SocketCan, params.name })
+    : CanInterface({ InterfaceType::SocketCan, params.name }, params)
     , _soc(0)
-    , _enable_brs(params.enable_brs)
     , _assembler(sensorring::transport::can::CanCodec::MAX_PAYLOAD_PER_FRAME)
     , _reassembler([this](const sensorring::transport::TransportFrame& frame) {
       ComEndpoint ep{ static_cast<Direction>(frame.direction), frame.boardAddress, frame.deviceId };
@@ -179,7 +177,7 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
       canfd_frame frame{};
       frame.can_id = static_cast<canid_t>(can_id);
       frame.len    = static_cast<__u8>(padded_len);
-      frame.flags  = _enable_brs ? CANFD_BRS : 0;
+      frame.flags  = _params.send_with_brs ? CANFD_BRS : 0;
       std::copy_n(data.begin(), data.size(), frame.data);
       // bytes data.size()..padded_len-1 stay zeroed from canfd_frame{}.
       if (!writeWithBackpressure(&frame, sizeof(canfd_frame))) {

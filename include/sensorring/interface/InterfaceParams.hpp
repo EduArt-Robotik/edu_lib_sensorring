@@ -36,31 +36,54 @@ protected:
 };
 
 /**
+ * @struct CanParams
+ * @brief Shared parameters for a CAN interfaces.
+ */
+struct SENSORRING_EXPORT CanParams : InterfaceParams {
+  /// Enable CAN FD bit rate switching for the data phase when the host sends messages to the sensor boards.
+  /// The host must support TDC (transmitter delay compensation) for this to work reliably.
+  /// Receiving messages with BRS enabled works regardless of TDC support.
+  bool send_with_brs = false;
+
+  /// Enable CAN FD bit rate switching for the data phase when the sensor boards send messages to the host.
+  bool respond_with_brs = false;
+
+  /// Data bitrate in bits per second in the range [1000000, 8000000]. Only relevant if one of the brs settings is true. Default 0 uses the same bitrate for arbitration and data phase (1 Mbps).
+  unsigned int data_bitrate = 0;
+
+  /// Data sample point in the range [0, 1]. Optional parameter for fine-tuning. Default 0 uses the CAN controller's default sample point.
+  float data_sample_point = 0.0f;
+
+  CanParams() = default;
+  explicit CanParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : InterfaceParams(std::move(interface_name))
+      , send_with_brs(send_with_brs)
+
+      , respond_with_brs(respond_with_brs)
+      , data_bitrate(data_bitrate)
+      , data_sample_point(data_sample_point) {}
+};
+
+/**
  * @struct SocketCanParams
  * @brief Configuration parameters for a Linux SocketCAN interface.
  */
-struct SENSORRING_EXPORT SocketCanParams : InterfaceParams {
-  /// Enable CAN FD bit rate switching for the data phase.
-  bool enable_brs = false;
+struct SENSORRING_EXPORT SocketCanParams : CanParams {
 
-  SocketCanParams() = default;
-  explicit SocketCanParams(std::string interface_name, bool enable_brs = false)
-      : InterfaceParams(std::move(interface_name))
-      , enable_brs(enable_brs) {}
+  //SocketCanParams() = default;
+  explicit SocketCanParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : CanParams(std::move(interface_name), send_with_brs, respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
 /**
  * @struct UsbTingoParams
  * @brief Configuration parameters for a USBtingo CAN adapter.
  */
-struct SENSORRING_EXPORT UsbTingoParams : InterfaceParams {
-  /// Enable CAN FD bit rate switching for the data phase.
-  bool enable_brs = false;
+struct SENSORRING_EXPORT UsbTingoParams : CanParams {
 
-  UsbTingoParams() = default;
-  explicit UsbTingoParams(std::string serial, bool enable_brs = false)
-      : InterfaceParams(std::move(serial))
-      , enable_brs(enable_brs) {}
+  //UsbTingoParams() = default;
+  explicit UsbTingoParams(std::string interface_name, bool send_with_brs = false, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+      : CanParams(std::move(interface_name), send_with_brs, respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
 } // namespace com

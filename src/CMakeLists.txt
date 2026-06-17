@@ -29,17 +29,18 @@ set(SENSORRING_INTERFACE_SOURCES
   interface/ComInterface.cpp
   interface/ComManager.cpp
   interface/ComEndpoint.cpp
+  interface/can/CanInterface.cpp
 )
 
 if(SENSORRING_USE_SOCKETCAN)
   list(APPEND SENSORRING_INTERFACE_SOURCES
-    interface/can/SocketCANFD.cpp
+    interface/can/socketcan/SocketCANFD.cpp
   )
 endif()
 
 if(SENSORRING_USE_USBTINGO)
   list(APPEND SENSORRING_INTERFACE_SOURCES
-    interface/can/USBtingo.cpp
+    interface/can/usbtingo/USBtingo.cpp
   )
 endif()
 

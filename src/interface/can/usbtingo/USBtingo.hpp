@@ -9,8 +9,7 @@
 #include <usbtingo/device/Device.hpp>
 #include <vector>
 
-#include "interface/ComInterface.hpp"
-#include "sensorring/interface/InterfaceParams.hpp"
+#include "interface/can/CanInterface.hpp"
 
 namespace eduart {
 
@@ -24,7 +23,7 @@ namespace com {
  * @author Hannes Duske
  * @date 29.01.2025
  */
-class USBtingo : public ComInterface {
+class USBtingo : public CanInterface {
 public:
   /**
    * Constructor
@@ -79,7 +78,6 @@ private:
   bool listener() override;
 
   std::string _serial_str;
-  bool _enable_brs;
   std::unique_ptr<usbtingo::device::Device> _dev;
   sensorring::transport::MessageAssembler _assembler;
   sensorring::transport::MessageReassembler _reassembler;

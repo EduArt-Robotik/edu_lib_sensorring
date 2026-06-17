@@ -3,11 +3,11 @@
 #include "sensorring/logger/Logger.hpp"
 
 #ifdef USE_SOCKETCAN
-#include "can/SocketCANFD.hpp"
+#include "can/socketcan/SocketCANFD.hpp"
 #endif
 
 #ifdef USE_USBTINGO
-#include "can/USBtingo.hpp"
+#include "can/usbtingo/USBtingo.hpp"
 #endif
 
 #include <algorithm>
