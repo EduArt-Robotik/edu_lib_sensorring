@@ -321,7 +321,7 @@ void MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::pre_loop_init: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting tick-based measurement loop.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting measurement loop.");
     _tick_count     = 0;
     _next_tick_time = std::chrono::steady_clock::now();
 
