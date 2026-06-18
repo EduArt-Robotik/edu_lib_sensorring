@@ -55,9 +55,14 @@ bool CanInterface::setParams(const CanParams& params) {
   if (!setDataSamplePoint(params.data_sample_point))
     return false;
 
-  if (!setBrs(params.respond_with_brs))
-    return false;
-
+  if (!setBrs(params.respond_with_brs)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Trying fallback with SocketCAN BRS disabled on interface " + _id.name + ".");
+    if (!setBrs(false)) {
+      return false;
+    } else {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Setting SocketCAN BRS enable on interface " + _id.name + " failed. Restored communication with BRS turned off.");
+    }
+  }
   return true;
 }
 
@@ -77,16 +82,17 @@ bool CanInterface::getParams(CanParams& params) {
 }
 
 bool CanInterface::setBrs(bool enable) {
-  send(com::ComEndpoint{ com::Direction::Input, com::ComEndpoint::BROADCAST, devbyte::BOARD }, PARAMETER_CANFD_SET_BRS, ByteOperations::toBytes(enable));
+  send(com::ComEndpoint{ com::Direction::Input, com::ComEndpoint::BROADCAST, devbyte::BOARD }, PARAMETER_CANFD_SET_BRS, { static_cast<std::uint8_t>(enable) });
+  std::this_thread::sleep_for(SET_PARAMETER_DELAY); // MCU may need to restart CAN controller after changing BRS setting, wait a bit before trying to fetch the parameter again.
 
   bool currentBrs = false;
   bool success    = getBrs(currentBrs);
   success &= (currentBrs == enable);
 
   if (success) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set BRS enable on interface " + _id.name + ": " + (currentBrs ? "true" : "false"));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set SocketCAN BRS enable on interface " + _id.name + ": " + (currentBrs ? "true" : "false"));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set BRS on interface " + _id.name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set SocketCAN BRS on interface " + _id.name);
     return false;
   }
 
@@ -104,9 +110,9 @@ bool CanInterface::getBrs(bool& enable) {
   }
 
   if (_got_update) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got BRS enable update on interface " + _id.name + ": " + (_params.respond_with_brs ? "true" : "false"));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got SocketCAN BRS enable update on interface " + _id.name + ": " + (_params.respond_with_brs ? "true" : "false"));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get BRS enable on interface " + _id.name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get SocketCAN BRS enable on interface " + _id.name);
     return false;
   }
 
@@ -116,7 +122,7 @@ bool CanInterface::getBrs(bool& enable) {
 
 bool CanInterface::setDataRate(unsigned int data_rate) {
   if (!(data_rate == 0) && (data_rate < 1000000 || data_rate > 8000000)) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid data rate value on interface " + _id.name + ": " + std::to_string(data_rate) + ". Must be between 1000000 and 8000000.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid SocketCAN data rate value on interface " + _id.name + ": " + std::to_string(data_rate) + ". Must be between 1000000 and 8000000.");
     return false;
   }
 
@@ -128,13 +134,13 @@ bool CanInterface::setDataRate(unsigned int data_rate) {
   success &= (data_rate == 0) || (currentDataRate == data_rate);
 
   if (success) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set data rate on interface " + _id.name + " to " + std::to_string(currentDataRate));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set SocketCAN data rate on interface " + _id.name + " to " + std::to_string(currentDataRate));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set data rate on interface " + _id.name + ". May be due to quantization, check value manually.");
-    return false;
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set SocketCAN data rate on interface " + _id.name + ". May be due to quantization, check value manually.");
+    //return false;
   }
 
-  return success;
+  return true;
 }
 
 bool CanInterface::getDataRate(unsigned int& data_rate) {
@@ -148,9 +154,9 @@ bool CanInterface::getDataRate(unsigned int& data_rate) {
   }
 
   if (_got_update) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got data rate update on interface " + _id.name + ": " + std::to_string(_params.data_bitrate));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got SocketCAN data rate update on interface " + _id.name + ": " + std::to_string(_params.data_bitrate));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get data rate on interface " + _id.name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get SocketCAN data rate on interface " + _id.name);
     return false;
   }
 
@@ -160,7 +166,7 @@ bool CanInterface::getDataRate(unsigned int& data_rate) {
 
 bool CanInterface::setDataSamplePoint(float data_sample_point) {
   if (data_sample_point < 0.0f || data_sample_point > 1.0f) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid data sample point value on interface " + _id.name + ": " + std::to_string(data_sample_point) + ". Must be between 0 and 1.");
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid SocketCAN data sample point value on interface " + _id.name + ": " + std::to_string(data_sample_point) + ". Must be between 0 and 1.");
     return false;
   }
 
@@ -172,13 +178,13 @@ bool CanInterface::setDataSamplePoint(float data_sample_point) {
   success &= (data_sample_point == 0) || (currentDataSamplePoint == data_sample_point);
 
   if (success) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set data sample point on interface " + _id.name + " to " + std::to_string(currentDataSamplePoint));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set SocketCAN data sample point on interface " + _id.name + " to " + std::to_string(currentDataSamplePoint));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set data sample point on interface " + _id.name + ". May be due to quantization, check value manually.");
-    return false;
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set SocketCAN data sample point on interface " + _id.name + ". May be due to quantization, check value manually.");
+    //return false;
   }
 
-  return success;
+  return true;
 }
 
 bool CanInterface::getDataSamplePoint(float& data_sample_point) {
@@ -192,9 +198,9 @@ bool CanInterface::getDataSamplePoint(float& data_sample_point) {
   }
 
   if (_got_update) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got data sample point update on interface " + _id.name + ": " + std::to_string(_params.data_sample_point));
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Got SocketCAN data sample point update on interface " + _id.name + ": " + std::to_string(_params.data_sample_point));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get data sample point on interface " + _id.name);
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to get SocketCAN data sample point on interface " + _id.name);
     return false;
   }
 

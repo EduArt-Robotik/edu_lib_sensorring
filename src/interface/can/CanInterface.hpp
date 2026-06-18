@@ -49,7 +49,7 @@ protected:
   CanParams _params;
 
 private:
-  static constexpr std::uint8_t FIRST_BOARD_ADDRESS                = 0;
+  static constexpr std::uint8_t FIRST_BOARD_ADDRESS                = 1;
   static constexpr std::chrono::milliseconds SET_PARAMETER_DELAY   = 10ms;
   static constexpr std::chrono::milliseconds GET_PARAMETER_SLEEP   = 10ms;
   static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
