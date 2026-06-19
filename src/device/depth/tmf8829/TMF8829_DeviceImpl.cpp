@@ -105,10 +105,12 @@ bool TMF8829_DeviceImpl::setIterationsSetting(std::uint16_t k_iterations) {
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations));
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Warning, "Failed to set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations) + ". May be due to quantization, check returned value manually.");
+    // return false;
   }
 
-  return success;
+  return true;
 }
 
 bool TMF8829_DeviceImpl::getIterationsSetting(std::uint16_t& k_iterations) {

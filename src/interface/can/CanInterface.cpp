@@ -136,8 +136,10 @@ bool CanInterface::setDataRate(unsigned int data_rate) {
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set SocketCAN data rate on interface " + _id.name + " to " + std::to_string(currentDataRate));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set SocketCAN data rate on interface " + _id.name + ". May be due to quantization, check value manually.");
-    //return false;
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Warning,
+        "Failed to set SocketCAN data rate on interface " + _id.name + " to " + std::to_string(data_rate) + ". Actual value is " + std::to_string(currentDataRate) + ". May be due to quantization, check returned value manually.");
+    // return false;
   }
 
   return true;
@@ -180,8 +182,10 @@ bool CanInterface::setDataSamplePoint(float data_sample_point) {
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set SocketCAN data sample point on interface " + _id.name + " to " + std::to_string(currentDataSamplePoint));
   } else {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Failed to set SocketCAN data sample point on interface " + _id.name + ". May be due to quantization, check value manually.");
-    //return false;
+    logger::Logger::getInstance()->log(
+        logger::LogVerbosity::Warning, "Failed to set SocketCAN data sample point on interface " + _id.name + " to " + std::to_string(data_sample_point) + ". Actual value is " + std::to_string(currentDataSamplePoint)
+                                           + ". May be due to quantization, check returned value manually.");
+    // return false;
   }
 
   return true;
