@@ -87,6 +87,7 @@ else:
 #include "sensorring/manager/MeasurementManager.hpp"
 #include "sensorring/device/Device.hpp"
 #include "sensorring/device/Sensor.hpp"
+#include "sensorring/device/depth/DepthSensorConfig.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/thermal/ThermalSensor.hpp"
 #include "sensorring/device/light/Light.hpp"
@@ -185,6 +186,16 @@ typedef ::int64_t int64_t;
     }
 }
 %template (VectorDataArray) std::array<double, 3>;
+
+// Type mappings for Vector3
+%typemap(out) double & {
+    $result = PyFloat_FromDouble(*$1);
+}
+
+%typemap(out) const double & {
+    $result = PyFloat_FromDouble(*$1);
+}
+
 %include "sensorring/math/Vector3.hpp"
 
 
@@ -305,10 +316,15 @@ typedef ::int64_t int64_t;
 // Device: action queue is internal, not for Python users
 %ignore eduart::sensorring::device::Device::enqueueAction;
 %ignore eduart::sensorring::device::Device::drainActions;
-%import "sensorring/device/Device.hpp"
-%import "sensorring/device/Sensor.hpp"
+%include "sensorring/device/Device.hpp"
+
+%ignore eduart::sensorring::device::Sensor::beginMeasurementWait;
+%ignore eduart::sensorring::device::Sensor::beginDataAvailableWait;
+%include "sensorring/device/Sensor.hpp"
 
 // --- DepthSensor ---
+%include "sensorring/device/depth/DepthSensorConfig.hpp"
+
 %ignore eduart::sensorring::device::DepthSensor::subscribe;     // Manual GIL wrapper below
 %ignore eduart::sensorring::device::DepthSensor::publishMeasurement;
 %ignore eduart::sensorring::device::DepthSensor::_depth_publisher;
@@ -330,6 +346,9 @@ typedef ::int64_t int64_t;
 %ignore eduart::sensorring::device::Group::end;
 %ignore eduart::sensorring::device::Group::iterator;
 %ignore eduart::sensorring::device::Group::const_iterator;
+
+%ignore eduart::sensorring::device::Group::operator++;
+%ignore eduart::sensorring::device::Group::operator[];
 %include "sensorring/device/types/Group.hpp"
 
 %template(DepthSensorGroup) eduart::sensorring::device::Group<eduart::sensorring::device::DepthSensor>;
