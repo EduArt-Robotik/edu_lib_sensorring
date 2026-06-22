@@ -11,7 +11,7 @@ namespace sensorring {
 
 namespace device {
 
-DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y)
+DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y)
     : Sensor(id, interface, target, enable)
     , _config(config)
     , _fov_x_deg(fov_x_deg)

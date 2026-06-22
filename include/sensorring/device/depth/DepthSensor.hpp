@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "sensorring/device/Sensor.hpp"
+#include "sensorring/device/depth/DepthSensorConfig.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -38,17 +39,6 @@ public:
   /// Measurement type produced by this sensor category.
   using MeasurementType = measurement::DepthMeasurement;
 
-  struct SENSORRING_EXPORT Config {
-    /// Invert x LUT to match sensor coordinate system
-    bool invert_x_lut = false;
-
-    /// Invert y LUT to match sensor coordinate system
-    bool invert_y_lut = false;
-
-    /// Apply correction factor to convert from direct distance (hypotenuse) to perpendicular distance if the sensor does not report perpendicular distance directly.
-    bool reports_perpendicular_distance = true;
-  };
-
   /**
    * @brief Construct a DepthSensor with Device params, field-of-view and pixel resolution.
    * @param[in] id        Device identifier.
@@ -61,7 +51,7 @@ public:
    * @param[in] res_x     Horizontal resolution in pixels (columns).
    * @param[in] res_y     Vertical resolution in pixels (rows).
    */
-  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, Config config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
 
   /// @brief Virtual destructor.
   virtual ~DepthSensor() = default;
@@ -117,7 +107,7 @@ protected:
    */
   void processRawMeasurement(measurement::PointCloud& pcl);
 
-  Config _config;
+  DepthSensorConfig _config;
   double _fov_x_deg;
   double _fov_y_deg;
   unsigned int _resolution_x;
