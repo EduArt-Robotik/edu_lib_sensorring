@@ -66,7 +66,7 @@ struct SENSORRING_EXPORT CanParams : InterfaceParams {
   bool send_with_brs() const { return _send_with_brs; }
 
   CanParams() = default;
-  explicit CanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+  CanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
       : InterfaceParams(std::move(interface_name))
       , respond_with_brs(respond_with_brs)
       , data_bitrate(data_bitrate)
@@ -85,8 +85,8 @@ private:
  */
 struct SENSORRING_EXPORT SocketCanParams : CanParams {
 
-  // SocketCanParams() = default;
-  explicit SocketCanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+  SocketCanParams() = default;
+  SocketCanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
       : CanParams(std::move(interface_name), respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
@@ -96,8 +96,8 @@ struct SENSORRING_EXPORT SocketCanParams : CanParams {
  */
 struct SENSORRING_EXPORT UsbTingoParams : CanParams {
 
-  // UsbTingoParams() = default;
-  explicit UsbTingoParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
+  UsbTingoParams() = default;
+  UsbTingoParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
       : CanParams(std::move(interface_name), respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
