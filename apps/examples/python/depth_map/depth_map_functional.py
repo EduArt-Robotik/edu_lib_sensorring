@@ -51,7 +51,7 @@ def print_depth_map(meas, reset_cursor):
   for row in range(meas.resolution_y):
     for col in range(meas.resolution_x):
       idx = row * meas.resolution_x + col
-      print(depth_to_color(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
+      print(depth_to_color(meas.point_cloud.data[idx].point.z(), MIN_DIST, MAX_DIST) + "██", end="")
     print("\033[0m")
 
   print("", end="", flush=True)
@@ -69,11 +69,8 @@ def main():
 
   params = sensorring.ManagerParams()
 
-  can_interface = sensorring.SocketCanParams()
-  can_interface.name = CAN_INTERFACE_NAME
-
-  usbtingo_interface = sensorring.UsbTingoParams()
-  usbtingo_interface.name = USBTINGO_INTERFACE_NAME
+  can_interface = sensorring.SocketCanParams(CAN_INTERFACE_NAME)
+  usbtingo_interface = sensorring.UsbTingoParams(USBTINGO_INTERFACE_NAME)
 
   try:
     # Subscribe to the log messages
@@ -93,10 +90,8 @@ def main():
 
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.VL53L8CX_Params())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.VL53L8CX_Params())
 
     # Create the MeasurementManager directly from the factory
     manager = sensorring.MeasurementManager(params, factory)

@@ -49,7 +49,7 @@ def print_depth_map(meas, reset_cursor):
   for row in range(meas.resolution_y):
     for col in range(meas.resolution_x):
       idx = row * meas.resolution_x + col
-      print(depth_to_color(meas.point_cloud.data[idx].raw_distance, MIN_DIST, MAX_DIST) + "██", end="")
+      print(depth_to_color(meas.point_cloud.data[idx].point.z(), MIN_DIST, MAX_DIST) + "██", end="")
     print("\033[0m")
 
   print("", end="", flush=True)

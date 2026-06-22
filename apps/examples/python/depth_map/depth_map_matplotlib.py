@@ -83,11 +83,8 @@ def main():
 
   params = sensorring.ManagerParams()
 
-  can_interface = sensorring.SocketCanParams()
-  can_interface.name = CAN_INTERFACE_NAME
-
-  usbtingo_interface = sensorring.UsbTingoParams()
-  usbtingo_interface.name = USBTINGO_INTERFACE_NAME
+  can_interface = sensorring.SocketCanParams(CAN_INTERFACE_NAME)
+  usbtingo_interface = sensorring.UsbTingoParams(USBTINGO_INTERFACE_NAME)
 
   try:
     # Subscribe to the log messages
