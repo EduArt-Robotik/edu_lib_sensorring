@@ -43,8 +43,6 @@
         "Debug"
       ],
       "cacheVariables": {
-        "SENSORRING_BUILD_TESTS": "ON",
-        "SENSORRING_BUILD_HARDWARE_TESTS": "ON",
         "SENSORRING_BUILD_PYTHON_BINDINGS": "ON",
         "SENSORRING_BUILD_DOCUMENTATION": "ON"
       }
@@ -57,8 +55,6 @@
         "Release"
       ],
       "cacheVariables": {
-        "SENSORRING_BUILD_TESTS": "ON",
-        "SENSORRING_BUILD_HARDWARE_TESTS": "ON",
         "SENSORRING_BUILD_PYTHON_BINDINGS": "ON",
         "SENSORRING_BUILD_DOCUMENTATION": "ON"
       }
@@ -94,6 +90,14 @@
     {
       "name": "Release",
       "configurePreset": "Release"
+    },
+    {
+      "name": "ReleaseDocs",
+      "configurePreset": "ReleaseDocs"
+    },
+    {
+      "name": "ReleasePython",
+      "configurePreset": "ReleasePython"
     },
     {
       "name": "DebugClean",
