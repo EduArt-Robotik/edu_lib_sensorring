@@ -3,9 +3,13 @@
 #include <iomanip>
 #include <sstream>
 
+#include "sensorring_transport/ByteOperations.hpp"
+
 namespace eduart {
 
 namespace sensorring {
+
+using eduart::sensorring::transport::ByteOperations;
 
 std::string Version::toString() const {
   std::ostringstream oss;
@@ -29,10 +33,6 @@ bool Version::operator<(const Version& other) const noexcept {
   return patch < other.patch;
 }
 
-CommitHash CommitHash::fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept {
-  return CommitHash{ (static_cast<std::uint32_t>(a) << 24) | (static_cast<std::uint32_t>(b) << 16) | (static_cast<std::uint32_t>(c) << 8) | (static_cast<std::uint32_t>(d)) };
-}
-
 std::string CommitHash::toString() const {
   std::ostringstream oss;
   oss << std::hex << std::setfill('0') << std::setw(8) << static_cast<int>(hash);
@@ -47,6 +47,12 @@ bool CommitHash::operator==(const CommitHash& other) const noexcept {
   return hash == other.hash;
 }
 
+bool CommitHash::operator=(const std::uint32_t& other) noexcept {
+  hash = other;
+  return true;
+}
+
+  
 namespace board {
 
 std::string toString(ConnectionState state) {
@@ -94,8 +100,8 @@ EnumerationInformation EnumerationInformation::fromBuffer(const std::vector<uint
     info.idx            = static_cast<unsigned int>(buffer[0]);
     info.type           = static_cast<SensorBoardType>(buffer[1]);
     info.version        = Version{ buffer[2], buffer[3], buffer[4] };
-    info.hash           = CommitHash::fromBits(buffer[5], buffer[6], buffer[7], buffer[8]);
-    info.device_options = static_cast<std::uint16_t>((static_cast<std::uint16_t>(buffer[9]) << 8) | static_cast<std::uint16_t>(buffer[10]));
+    info.hash           = ByteOperations::readUint32(buffer, 5);
+    info.device_options = ByteOperations::readUint16(buffer, 9);
 
     for (int i = 0; i < 16; i++) {
       auto device_type = static_cast<device::DeviceType>(i);

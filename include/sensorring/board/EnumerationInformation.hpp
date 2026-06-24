@@ -72,16 +72,6 @@ struct SENSORRING_EXPORT CommitHash {
   std::uint32_t hash = 0;
 
   /**
-   * @brief Build a CommitHash from four bytes (e.g. from enumeration response).
-   * @param[in] a First byte.
-   * @param[in] b Second byte.
-   * @param[in] c Third byte.
-   * @param[in] d Fourth byte.
-   * @return CommitHash with hash = (a<<24)|(b<<16)|(c<<8)|d.
-   */
-  static CommitHash fromBits(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) noexcept;
-
-  /**
    * @brief Format hash as hex string.
    * @return Hex representation of hash.
    */
@@ -101,6 +91,13 @@ struct SENSORRING_EXPORT CommitHash {
    * @return true if equal.
    */
   bool operator==(const CommitHash& other) const noexcept;
+
+  /**
+   * @brief Assign commit hash from a 32-bit integer.
+   * @param[in] other 32-bit integer representing the commit hash.
+   * @return true if equal.
+   */
+  bool operator=(const std::uint32_t& other) noexcept;
 };
 
 namespace board {
