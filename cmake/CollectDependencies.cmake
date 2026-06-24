@@ -50,7 +50,7 @@ if(SENSORRING_USE_USBTINGO)
   find_package(usbtingo QUIET)
 
   if(usbtingo_FOUND)
-    message(STATUS "Dependency libusbtingo is installed")
+    message(STATUS "Dependency libusbtingo is installed at ${usbtingo_DIR}")
     set(SENSORRING_USBTINGO_INSTALLED ON)
   else()
     message(STATUS "Dependency libusbtingo was not found, fetching it from GitHub...")
