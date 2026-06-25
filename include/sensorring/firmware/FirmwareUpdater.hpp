@@ -29,9 +29,9 @@ namespace firmware_update {
  */
 struct SENSORRING_EXPORT UpdateConfig {
   std::chrono::milliseconds can_timeout{ 500 };                         ///< Maximum time to wait for a CAN response before declaring a timeout.
-  std::chrono::milliseconds bootloader_start_ack_timeout{ 1200 };       ///< Maximum time to wait for the bootloader-start acknowledgement after a reset.
-  std::chrono::milliseconds settle_delay_after_flash{ 500 };            ///< Delay inserted after the last flash packet to let the board settle before verification.
-  std::chrono::milliseconds bootloader_detect_retry_delay{ 200 };       ///< Pause between consecutive bootloader-detection attempts.
+  std::chrono::milliseconds bootloader_start_ack_timeout{ 1000 };       ///< Maximum time to wait for the bootloader-start acknowledgement after a reset.
+  std::chrono::milliseconds settle_delay_after_flash{ 2000 };           ///< Delay inserted after the last flash packet to let the board settle before verification.
+  std::chrono::milliseconds bootloader_detect_retry_delay{ 500 };       ///< Pause between consecutive bootloader-detection attempts.
   unsigned int bootloader_detect_retries{ 5 };                          ///< Number of bootloader-detection attempts before giving up.
   unsigned int no_progress_cycles_before_done{ 3 };                     ///< Number of consecutive cycles without progress that signal a completed flash operation.
 };
@@ -91,12 +91,19 @@ public:
    */
   std::optional<std::uint8_t> detectBootloaderNode(const com::ComInterfaceID& interface) const;
 
+  /**
+   * @brief Detects whether any board on the ring is currently in bootloader mode, with retries.
+   * @param interface Communication interface to scan.
+   * @param retries   Number of detection attempts.
+   * @param retry_delay Delay between detection attempts.
+   * @return The CAN node ID of the board in bootloader mode, or @c std::nullopt if none was found.
+   */
+  std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const com::ComInterfaceID& interface);
+
 private:
   UpdateConfig _config;
 
   bool flashSingleBoardImpl(const com::ComInterfaceID& interface, std::uint8_t node_id, const std::string& hex_file_path, const std::string& display_node_label, LogCallback log_callback) const;
-  std::size_t countAppBoards(const com::ComInterfaceID& interface) const;
-  bool enterBootloaderOnBoard(const com::ComInterfaceID& interface, std::size_t board_index, LogCallback log_callback) const;
 };
 
 } // namespace firmware_update

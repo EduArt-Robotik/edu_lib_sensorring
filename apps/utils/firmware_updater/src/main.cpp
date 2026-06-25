@@ -71,59 +71,6 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
   return false;
 }
 
-bool enterBootloaderOnBoard(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int board_index) {
-  SensorRingFactory factory(ValidationMode::Relaxed);
-  switch (interface.type) {
-  case com::InterfaceType::SocketCan:
-    factory.addInterface(com::SocketCanParams{ interface.name });
-    break;
-  case com::InterfaceType::UsbTingo:
-    factory.addInterface(com::UsbTingoParams{ interface.name });
-    break;
-  default:
-    std::cerr << "Unsupported interface type.\n";
-    return false;
-  }
-
-  const auto enumeration  = factory.enumerate();
-  std::size_t board_count = 0U;
-  for (const auto& [iface, boards] : enumeration) {
-    (void)iface;
-    board_count += boards.size();
-  }
-
-  if (board_index >= board_count) {
-    std::cerr << "Requested board index " << board_index << " is out of range for current board set.\n";
-    return false;
-  }
-
-  std::cout << "Discovered " << board_count << " board(s) on " << interface.type << " " << interface.name << ".\n";
-  if (board_count == 0U) {
-    return false;
-  }
-
-  const bool ok = updater.enterSingleBoardBootloader(interface, board_index);
-  if (!ok) {
-    std::cerr << "Failed to enter bootloader mode on board " << board_index << " on " << interface.type << " " << interface.name << ".\n";
-    return false;
-  }
-
-  std::cout << "Board " << board_index << " switched to bootloader mode on " << interface.type << " " << interface.name << ".\n";
-  return true;
-}
-
-std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const firmware_update::FirmwareUpdater& updater, const com::ComInterfaceID& interface, unsigned int retries, std::chrono::milliseconds retry_delay) {
-  for (unsigned int attempt = 0; attempt < retries; ++attempt) {
-    const auto node_id = updater.detectBootloaderNode(interface);
-    if (node_id.has_value()) {
-      return node_id;
-    }
-    std::this_thread::sleep_for(retry_delay);
-  }
-
-  return std::nullopt;
-}
-
 } // namespace
 
 int main(int argc, char* argv[]) {
@@ -188,8 +135,6 @@ int main(int argc, char* argv[]) {
     }
     interface.name = interface_name;
 
-    constexpr unsigned int bootloader_detect_retries = 10U;
-    const auto bootloader_detect_retry_delay         = std::chrono::milliseconds(200);
     firmware_update::FirmwareUpdater updater;
     const auto log_callback = [](const std::string& msg) {
       std::cout << msg << '\n';
@@ -201,7 +146,7 @@ int main(int argc, char* argv[]) {
         printUsage(argv[0]);
         return EXIT_FAILURE;
       }
-      return enterBootloaderOnBoard(updater, interface, *board_index) ? EXIT_SUCCESS : EXIT_FAILURE;
+      return updater.enterSingleBoardBootloader(interface, *board_index, log_callback) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     if (mode == Mode::FlashDetectedBootloader) {
@@ -216,7 +161,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      const auto node_id = detectBootloaderNodeWithRetries(updater, interface, bootloader_detect_retries, bootloader_detect_retry_delay);
+      const auto node_id = updater.detectBootloaderNodeWithRetries(interface);
       if (!node_id.has_value()) {
         std::cerr << "No board detected in bootloader mode on " << interface.type << " " << interface.name << ".\n";
         return EXIT_FAILURE;
@@ -238,11 +183,11 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      if (!enterBootloaderOnBoard(updater, interface, *board_index)) {
+      if (!updater.enterSingleBoardBootloader(interface, *board_index, log_callback)) {
         return EXIT_FAILURE;
       }
 
-      const auto node_id = detectBootloaderNodeWithRetries(updater, interface, bootloader_detect_retries, bootloader_detect_retry_delay);
+      const auto node_id = updater.detectBootloaderNodeWithRetries( interface);
       if (!node_id.has_value()) {
         std::cerr << "Board entered bootloader mode, but no bootloader node could be detected.\n";
         return EXIT_FAILURE;
@@ -254,7 +199,7 @@ int main(int argc, char* argv[]) {
 
     if (mode == Mode::AutoAll) {
       if (firmware_path.empty()) {
-        std::cerr << "Mode 'auto-all' requires -f <firmware.hex>.\n";
+        std::cerr << "Mode 'auto' requires -f <firmware.hex>.\n";
         printUsage(argv[0]);
         return EXIT_FAILURE;
       }
