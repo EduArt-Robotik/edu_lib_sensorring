@@ -34,7 +34,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
       devices.push_back(std::make_unique<device::TMF8829_Device>(device::TMF8829_Params{}, interface, idx));
       break;
     default:
-      // Unknown or unsupported device type – ignore for now.
+      // Unknown or unsupported device type
       break;
     }
     if (devices.size() > size_before && params.board_type != SensorBoardType::Undefined) {

@@ -84,7 +84,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   TMF8829_Device& dev = *ctx.device;
 
   // -------------------------------------------------------------------------
-  SECTION("Resolution modes – all modes can be set and read back") {
+  SECTION("Resolution modes - all modes can be set and read back") {
     // clang-format off
     const ResolutionMode modes[] = {
       ResolutionMode::Res8x8,
@@ -112,7 +112,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("Iteration setting – values can be set and read back") {
+  SECTION("Iteration setting - values can be set and read back") {
     static constexpr std::uint16_t DEFAULT_ITERATIONS = 586;
     const std::uint16_t iterations[]                  = { 50, 200, 600, 800, 1000, 1500, 2000 };
 
@@ -131,7 +131,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("full_noise flag – set true then false") {
+  SECTION("full_noise flag - set true then false") {
     REQUIRE(dev.setResultFullNoise(true));
     bool value = false;
     REQUIRE(dev.getResultFullNoise(value));
@@ -143,7 +143,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("xtalk flag – set true then false") {
+  SECTION("xtalk flag - set true then false") {
     REQUIRE(dev.setResultXtalk(true));
     bool value = false;
     REQUIRE(dev.getResultXtalk(value));
@@ -155,7 +155,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("noise_strength flag – set true then false") {
+  SECTION("noise_strength flag - set true then false") {
     REQUIRE(dev.setResultNoiseStrength(true));
     bool value = false;
     REQUIRE(dev.getResultNoiseStrength(value));
@@ -167,7 +167,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("signal_strength flag – set true then false") {
+  SECTION("signal_strength flag - set true then false") {
     REQUIRE(dev.setResultSignalStrength(true));
     bool value = false;
     REQUIRE(dev.getResultSignalStrength(value));
@@ -179,7 +179,7 @@ TEST_CASE("TMF8829 hardware parameter get/set round-trip", "[TMF8829Hardware]") 
   }
 
   // -------------------------------------------------------------------------
-  SECTION("nr_of_peaks – all valid values 0..4") {
+  SECTION("nr_of_peaks - all valid values 0..4") {
     for (std::uint8_t peaks = 0; peaks <= 4; ++peaks) {
       REQUIRE(dev.setResultNrOfPeaks(peaks));
       std::uint8_t readback = 255u;

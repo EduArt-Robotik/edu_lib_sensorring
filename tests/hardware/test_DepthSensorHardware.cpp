@@ -66,7 +66,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
     manager.stopMeasuring();
 
     if (count == 0) {
-      // No measurements received – likely no active ToF on this interface.
+      // No measurements received - likely no active ToF on this interface.
       return TestResult::NotAvailable;
     }
 

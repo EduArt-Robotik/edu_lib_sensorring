@@ -22,15 +22,15 @@ enum class Mode {
 void printUsage(const char* executable) {
   std::cerr << "Usage: " << executable << " -m <enter|flash|enter-flash|auto-all> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
             << "Modes:\n"
-            << "  enter        : switch one app board to bootloader mode (requires -n)\n"
+            << "  enter        : switch one board to bootloader mode (requires -n)\n"
             << "  flash        : detect one board already in bootloader mode and flash it (requires -f)\n"
-            << "  enter-flash  : switch one app board to bootloader mode and flash it directly (requires -n and -f)\n"
-            << "  auto-all     : automatically update all boards on one interface (requires -f)\n"
+            << "  enter-flash  : switch one board to bootloader mode and flash it directly (requires -n and -f)\n"
+            << "  auto         : automatically update all boards on one interface (requires -f)\n"
             << "Examples:\n"
             << "  " << executable << " -m enter -t socketcan -i can0 -n 0\n"
             << "  " << executable << " -m flash -t socketcan -i can0 -f ./firmware.hex\n"
             << "  " << executable << " -m enter-flash -t socketcan -i can0 -n 1 -f ./firmware.hex\n"
-            << "  " << executable << " -m auto-all -t socketcan -i can0 -f ./firmware.hex\n";
+            << "  " << executable << " -m auto -t socketcan -i can0 -f ./firmware.hex\n";
 }
 
 bool parseMode(const std::string& input, Mode& mode) {
@@ -49,7 +49,7 @@ bool parseMode(const std::string& input, Mode& mode) {
     return true;
   }
 
-  if (input == "auto-all") {
+  if (input == "auto") {
     mode = Mode::AutoAll;
     return true;
   }

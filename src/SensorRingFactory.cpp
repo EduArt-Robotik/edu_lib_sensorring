@@ -162,7 +162,7 @@ void SensorRingFactory::reset() {
 
 std::unique_ptr<SensorRing> SensorRingFactory::build() {
   const auto mode = _mode;
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::build() – starting.");
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::build() - starting.");
 
   const bool strict = (mode == ValidationMode::Strict);
 
@@ -174,7 +174,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
     try {
       auto* iface = openInterface(*iface_cfg.params);
       if (!iface) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Could not open interface " + iface_cfg.params->name + " – skipping.");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Could not open interface " + iface_cfg.params->name + " - skipping.");
         continue;
       }
       auto id = iface->getID();
@@ -188,7 +188,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
             logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none.");
             return nullptr;
           }
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none – skipping interface (relaxed mode).");
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Expected " + std::to_string(iface_cfg.expected_boards.size()) + " board(s) on " + id.name + " but found none - skipping interface (relaxed mode).");
         }
         continue;
       }
@@ -211,7 +211,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
         if (strict) {
           return nullptr;
         }
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "One or more boards on " + id.name + " have incompatible firmware – skipping interface (relaxed mode).");
+        logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "One or more boards on " + id.name + " have incompatible firmware - skipping interface (relaxed mode).");
         continue;
       }
 
@@ -327,7 +327,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
           if (enum_infos.size() != iface_cfg.expected_boards.size()) {
             logger::Logger::getInstance()->log(
                 logger::LogVerbosity::Warning,
-                "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + " – searching for compatible boards (relaxed mode).");
+                "Board count mismatch on " + id.name + ": expected " + std::to_string(iface_cfg.expected_boards.size()) + ", found " + std::to_string(enum_infos.size()) + " - searching for compatible boards (relaxed mode).");
           }
 
           std::vector<bool> claimed(enum_infos.size(), false);
@@ -417,7 +417,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
             }
 
             if (!matched) {
-              logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "No compatible board found for expectation " + std::to_string(exp_i) + " on " + id.name + " – skipping (relaxed mode).");
+              logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "No compatible board found for expectation " + std::to_string(exp_i) + " on " + id.name + " - skipping (relaxed mode).");
 
               board::EnumerationInformation unconnected;
               unconnected.idx          = static_cast<unsigned int>(exp_i);
@@ -444,7 +444,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
         bus_vec.push_back(std::make_unique<SensorBus>(id, std::move(board_vec)));
       }
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while opening interface " + iface_cfg.params->name + " – skipping.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while opening interface " + iface_cfg.params->name + " - skipping.");
       continue;
     }
   }
@@ -476,7 +476,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
 }
 
 SensorRingFactory::EnumerationMap SensorRingFactory::enumerate() {
-  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::enumerate() – scanning interfaces.");
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::enumerate() - scanning interfaces.");
 
   EnumerationMap result;
 
@@ -496,7 +496,7 @@ SensorRingFactory::EnumerationMap SensorRingFactory::enumerate() {
 
       result[id] = std::move(enum_infos);
     } catch (const std::exception& e) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while enumerating interface " + iface_cfg.params->name + " – skipping.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while enumerating interface " + iface_cfg.params->name + " - skipping.");
     }
   }
 
