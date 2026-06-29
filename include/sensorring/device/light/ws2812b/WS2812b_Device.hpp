@@ -47,7 +47,7 @@ public:
    * @brief Get the parameters used to configure this device.
    * @return Reference to the internal WS2812b parameter struct.
    */
-  const WS2812b_Params& getParams() const { return _params; }
+  const WS2812b_Params& getParams() const override { return _params; }
 
   // --- Light interface overrides ---
 

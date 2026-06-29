@@ -8,6 +8,7 @@
 
 using eduart::sensorring::device::DepthSensor;
 using eduart::sensorring::device::DepthSensorConfig;
+using eduart::sensorring::device::DepthSensorParams;
 using eduart::sensorring::measurement::PointCloud;
 
 static constexpr double fov_x              = 45.0;
@@ -41,8 +42,10 @@ NullComInterface& getNullInterface() {
 
 class MockDepthSensor : public DepthSensor {
 public:
-  MockDepthSensor(DepthSensorConfig config = {}, double fov_x = 45.0, double fov_y = 45.0, unsigned int res_x = 8, unsigned int res_y = 8)
-      : DepthSensor(eduart::sensorring::device::DeviceID({ eduart::sensorring::device::DeviceType::VL53L8CX, 0 }), &getNullInterface(), eduart::sensorring::com::ComEndpoint{}, true, config, fov_x, fov_y, res_x, res_y) {}
+  MockDepthSensor(DepthSensorConfig config = { 45.0, 45.0, 8, 8 })
+      : DepthSensor(eduart::sensorring::device::DeviceID({ eduart::sensorring::device::DeviceType::VL53L8CX, 0 }), &getNullInterface(), eduart::sensorring::com::ComEndpoint{}, true, config) {}
+
+  const DepthSensorParams& getParams() const override { return _params; }
 
   void publishMeasurement() override {}
 
@@ -57,15 +60,18 @@ public:
   void toPointCloud(const std::vector<double>& lut_x, const std::vector<double>& lut_y, PointCloud& pcl) {
     _lut_x        = lut_x;
     _lut_y        = lut_y;
-    _resolution_x = static_cast<unsigned int>(lut_x.size());
-    _resolution_y = static_cast<unsigned int>(lut_y.size());
+    _config.res_x = static_cast<unsigned int>(lut_x.size());
+    _config.res_y = static_cast<unsigned int>(lut_y.size());
     processRawMeasurement(pcl);
   }
+
+private:
+  DepthSensorParams _params;
 };
 
 TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
 
-  MockDepthSensor m({}, fov_x, fov_y, resolution_x, resolution_y);
+  MockDepthSensor m({ fov_x, fov_y, resolution_x, resolution_y });
 
   SECTION("DepthSensor lookup table creation") {
     REQUIRE(m.lutX().size() == resolution_x);
@@ -131,8 +137,12 @@ TEST_CASE("DepthSensor Config invert_x_lut", "[DepthSensor]") {
   static constexpr unsigned int resolution_y = 8;
 
   DepthSensorConfig config;
+  config.fov_x_deg    = fov_x;
+  config.fov_y_deg    = fov_y;
+  config.res_x        = resolution_x;
+  config.res_y        = resolution_y;
   config.invert_x_lut = true;
-  MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+  MockDepthSensor m(config);
 
   SECTION("Inverted X LUT values are negated compared to default") {
     REQUIRE(m.lutX().size() == resolution_x);
@@ -148,7 +158,11 @@ TEST_CASE("DepthSensor Config invert_x_lut", "[DepthSensor]") {
   SECTION("Inverted X LUT affects point cloud X coordinates") {
     DepthSensorConfig cfg;
     cfg.invert_x_lut = false;
-    MockDepthSensor default_sensor(cfg, fov_x, fov_y, resolution_x, resolution_y);
+    cfg.fov_x_deg    = fov_x;
+    cfg.fov_y_deg    = fov_y;
+    cfg.res_x        = resolution_x;
+    cfg.res_y        = resolution_y;
+    MockDepthSensor default_sensor(cfg);
 
     // The inverted sensor's X LUT values should be negated
     for (unsigned int i = 0; i < resolution_x; ++i) {
@@ -166,7 +180,11 @@ TEST_CASE("DepthSensor Config invert_y_lut", "[DepthSensor]") {
 
   DepthSensorConfig config;
   config.invert_y_lut = true;
-  MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+  config.fov_x_deg    = fov_x;
+  config.fov_y_deg    = fov_y;
+  config.res_x        = resolution_x;
+  config.res_y        = resolution_y;
+  MockDepthSensor m(config);
 
   SECTION("Inverted Y LUT values are negated compared to default") {
     REQUIRE(m.lutY().size() == resolution_y);
@@ -182,7 +200,11 @@ TEST_CASE("DepthSensor Config invert_y_lut", "[DepthSensor]") {
   SECTION("Inverted Y LUT affects point cloud Y coordinates") {
     DepthSensorConfig cfg;
     cfg.invert_y_lut = false;
-    MockDepthSensor default_sensor(cfg, fov_x, fov_y, resolution_x, resolution_y);
+    cfg.fov_x_deg    = fov_x;
+    cfg.fov_y_deg    = fov_y;
+    cfg.res_x        = resolution_x;
+    cfg.res_y        = resolution_y;
+    MockDepthSensor default_sensor(cfg);
 
     // The inverted sensor's Y LUT values should be negated
     for (unsigned int j = 0; j < resolution_y; ++j) {
@@ -201,14 +223,22 @@ TEST_CASE("DepthSensor Config reports_perpendicular_distance", "[DepthSensor]") 
   SECTION("Default config (perpendicular distance) does not create Z LUT") {
     DepthSensorConfig config;
     config.reports_perpendicular_distance = true;
-    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+    config.fov_x_deg                      = fov_x;
+    config.fov_y_deg                      = fov_y;
+    config.res_x                          = resolution_x;
+    config.res_y                          = resolution_y;
+    MockDepthSensor m(config);
     REQUIRE(m.lutZ().empty());
   }
 
   SECTION("Non-perpendicular distance creates Z LUT with correction factors") {
     DepthSensorConfig config;
     config.reports_perpendicular_distance = false;
-    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+    config.fov_x_deg                      = fov_x;
+    config.fov_y_deg                      = fov_y;
+    config.res_x                          = resolution_x;
+    config.res_y                          = resolution_y;
+    MockDepthSensor m(config);
 
     REQUIRE(m.lutZ().size() == resolution_x * resolution_y);
 
@@ -230,7 +260,11 @@ TEST_CASE("DepthSensor Config reports_perpendicular_distance", "[DepthSensor]") 
   SECTION("Non-perpendicular distance corrects point cloud Z values") {
     DepthSensorConfig config;
     config.reports_perpendicular_distance = false;
-    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+    config.fov_x_deg                      = fov_x;
+    config.fov_y_deg                      = fov_y;
+    config.res_x                          = resolution_x;
+    config.res_y                          = resolution_y;
+    MockDepthSensor m(config);
 
     PointCloud pcl;
     pcl.data.resize(resolution_x * resolution_y);
@@ -259,7 +293,11 @@ TEST_CASE("DepthSensor Config reports_perpendicular_distance", "[DepthSensor]") 
   SECTION("Perpendicular distance does not correct point cloud Z values") {
     DepthSensorConfig config;
     config.reports_perpendicular_distance = true;
-    MockDepthSensor m(config, fov_x, fov_y, resolution_x, resolution_y);
+    config.fov_x_deg                      = fov_x;
+    config.fov_y_deg                      = fov_y;
+    config.res_x                          = resolution_x;
+    config.res_y                          = resolution_y;
+    MockDepthSensor m(config);
 
     PointCloud pcl;
     pcl.data.resize(resolution_x * resolution_y);

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "sensorring/device/types/DeviceParams.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -22,7 +22,10 @@ namespace device {
  * @struct DepthSensorParams
  * @brief Parameter structure of the DepthSensor.
  */
-struct SENSORRING_EXPORT DepthSensorParams : public DeviceParams {};
+struct SENSORRING_EXPORT DepthSensorParams : public DeviceParams {
+  /// Destructor
+  virtual ~DepthSensorParams() = default;
+};
 
 } // namespace device
 

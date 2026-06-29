@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "sensorring/device/types/DeviceParams.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -23,6 +23,9 @@ namespace device {
  * @brief Parameter structure of the Light.
  */
 struct SENSORRING_EXPORT LightParams : public DeviceParams {
+  /// Destructor
+  virtual ~LightParams() = default;
+
   /// Orientation of the sensor board. Used to to mirror the light animations.
   Orientation orientation = Orientation::None;
 };

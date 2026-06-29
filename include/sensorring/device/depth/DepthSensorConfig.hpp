@@ -17,7 +17,20 @@ namespace sensorring {
 
 namespace device {
 
+// ToDo: May be combined with the DepthSensorParams.
 struct SENSORRING_EXPORT DepthSensorConfig {
+  /// Horizontal field of view in degrees.
+  double fov_x_deg = 0.0;
+
+  /// Vertical field of view in degrees.
+  double fov_y_deg = 0.0;
+
+  /// Horizontal resolution in pixels (columns).
+  unsigned int res_x = 0;
+
+  /// Vertical resolution in pixels (rows).
+  unsigned int res_y = 0;
+
   /// Invert x LUT to match sensor coordinate system
   bool invert_x_lut = false;
 

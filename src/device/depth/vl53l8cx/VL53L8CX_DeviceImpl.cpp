@@ -58,8 +58,8 @@ measurement::DepthMeasurement VL53L8CX_DeviceImpl::processMeasurement(const std:
   result.header.orientation = global_pose.orientation;
   result.header.frame_id    = data[0];
   result.nr_valid_points    = data[1];
-  result.resolution_x       = _parent._resolution_x;
-  result.resolution_y       = _parent._resolution_y;
+  result.resolution_x       = _parent._config.res_x;
+  result.resolution_y       = _parent._config.res_y;
 
   result.point_cloud.data.resize(RESOLUTION);
 

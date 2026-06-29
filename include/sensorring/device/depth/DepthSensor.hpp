@@ -14,6 +14,7 @@
 
 #include "sensorring/device/Sensor.hpp"
 #include "sensorring/device/depth/DepthSensorConfig.hpp"
+#include "sensorring/device/depth/DepthSensorParams.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -46,15 +47,14 @@ public:
    * @param[in] target    Communication endpoint this device listens to.
    * @param[in] enable    Whether the device starts enabled.
    * @param[in] config    Configuration options for the depth sensor.
-   * @param[in] fov_x_deg Horizontal field of view in degrees.
-   * @param[in] fov_y_deg Vertical field of view in degrees.
-   * @param[in] res_x     Horizontal resolution in pixels (columns).
-   * @param[in] res_y     Vertical resolution in pixels (rows).
    */
-  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config, double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y);
+  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config);
 
-  /// @brief Virtual destructor.
-  virtual ~DepthSensor() = default;
+  /**
+   * @brief Get the current DepthSensor parameters.
+   * @return current DepthSensor parameters.
+   */
+  virtual const DepthSensorParams& getParams() const = 0;
 
   /**
    * @brief Get the most recent measurement.
@@ -88,15 +88,12 @@ protected:
 
   /**
    * @brief Create lookup tables for x and y angles based on FOV and resolution.
-   * @param[in] fov_x Horizontal field of view in degrees.
-   * @param[in] fov_y Vertical field of view in degrees.
-   * @param[in] res_x Horizontal resolution (number of columns).
-   * @param[in] res_y Vertical resolution (number of rows).
+   * @param[in] config   Depth sensor configuration containing FOV and resolution.
    * @param[out] lut_x Output vector for horizontal angle lookup table. Output length is res_x.
    * @param[out] lut_y Output vector for vertical angle lookup table. Output length is res_y.
    * @param[out] lut_z Output vector for depth lookup table. Output length is res_x * res_y.
    */
-  virtual void createLookupTable(double fov_x_deg, double fov_y_deg, unsigned int res_x, unsigned int res_y, std::vector<double>& lut_x, std::vector<double>& lut_y, std::vector<double>& lut_z);
+  virtual void createLookupTable(DepthSensorConfig config, std::vector<double>& lut_x, std::vector<double>& lut_y, std::vector<double>& lut_z);
 
   /**
    * @brief Calculate the x,y,z coordinates from the raw distance measurements.
@@ -108,10 +105,6 @@ protected:
   void processRawMeasurement(measurement::PointCloud& pcl);
 
   DepthSensorConfig _config;
-  double _fov_x_deg;
-  double _fov_y_deg;
-  unsigned int _resolution_x;
-  unsigned int _resolution_y;
   std::vector<double> _lut_x;
   std::vector<double> _lut_y;
   std::vector<double> _lut_z;

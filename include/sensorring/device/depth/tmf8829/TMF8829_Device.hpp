@@ -42,6 +42,7 @@ public:
    * @param[in] idx       Index of the sensor on the bus.
    */
   TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx);
+  
   /// Destructor
   ~TMF8829_Device();
 
@@ -49,7 +50,7 @@ public:
    * @brief Get the sensor parameters used to configure this device.
    * @return Reference to the internal TMF8829 parameter struct.
    */
-  const TMF8829_Params& getParams() const;
+  const TMF8829_Params& getParams() const override;
 
   /**
    * @brief Set the resolution mode of the sensor.

@@ -13,6 +13,7 @@
 
 #include "sensorring/device/Device.hpp"
 #include "sensorring/device/light/LightMode.hpp"
+#include "sensorring/device/light/LightParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -43,6 +44,12 @@ public:
 
   /// @brief Virtual destructor.
   ~Light() override = default;
+
+  /**
+   * @brief Get the current light parameters.
+   * @return Current Light parameters.
+   */
+  virtual const LightParams& getParams() const = 0;
 
   /**
    * @brief Set the light mode and color.

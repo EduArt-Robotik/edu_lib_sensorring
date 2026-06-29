@@ -15,9 +15,21 @@ namespace sensorring {
 
 namespace device {
 
+static DepthSensorConfig getTMF8829Config(device::ResolutionMode mode) {
+  DepthSensorConfig c;
+  c.fov_x_deg                      = tmf8829::FOV_X_DEG;
+  c.fov_y_deg                      = tmf8829::FOV_Y_DEG;
+  c.res_x                          = getXResolution(mode);
+  c.res_y                          = getYResolution(mode);
+  c.invert_x_lut                   = true;
+  c.invert_y_lut                   = false;
+  c.reports_perpendicular_distance = false;
+  return c;
+};
+
 // clang-format off
 TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : DepthSensor( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable, { true, false, false }, tmf8829::FOV_X_DEG, tmf8829::FOV_Y_DEG, getXResolution(params.resolution_mode), getYResolution(params.resolution_mode))
+    : DepthSensor( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable, getTMF8829Config(params.resolution_mode))
     , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
   configure();
 }

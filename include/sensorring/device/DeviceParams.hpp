@@ -33,6 +33,8 @@ enum class Orientation {
  * @brief Base parameter structure of a device. A device is one sensor or actuator on a sensor board.
  */
 struct SENSORRING_EXPORT DeviceParams {
+  virtual ~DeviceParams() = default;
+
   /// Device identifier (type, name, index).
   DeviceID id;
 

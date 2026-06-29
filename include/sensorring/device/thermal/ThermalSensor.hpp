@@ -12,6 +12,7 @@
 #include <functional>
 
 #include "sensorring/device/Sensor.hpp"
+#include "sensorring/device/thermal/ThermalSensorParams.hpp"
 #include "sensorring/measurement/ThermalMeasurement.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
@@ -48,6 +49,12 @@ public:
 
   /// @brief Virtual destructor.
   ~ThermalSensor() override = default;
+
+  /**
+   * @brief Get the current ThermalSensor parameters.
+   * @return Current ThermalSensor parameters.
+   */
+  virtual const ThermalSensorParams& getParams() const = 0;
 
   /**
    * @brief Get the most recent measurement.

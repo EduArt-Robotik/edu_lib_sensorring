@@ -49,7 +49,7 @@ public:
    * @brief Get the sensor parameters used to configure this device.
    * @return Reference to the internal HTPA32 parameter struct.
    */
-  const HTPA32_Params& getParams() const;
+  const HTPA32_Params& getParams() const override;
 
   /**
    * @brief Request the EEPROM content asynchronously.
@@ -62,14 +62,14 @@ public:
    * @brief Stop any ongoing thermal calibration sequence.
    * @return true on success.
    */
-  bool stopCalibration();
+  bool stopCalibration() override;
 
   /**
    * @brief Start a thermal calibration over a sliding window of frames.
    * @param[in] window Number of frames to average for calibration.
    * @return true on success.
    */
-  bool startCalibration(unsigned int window);
+  bool startCalibration(unsigned int window) override;
 
   /**
    * @brief Request thermal measurements asynchronously on a set of devices.

@@ -49,7 +49,7 @@ public:
    * @brief Get the sensor parameters used to configure this device.
    * @return Reference to the internal VL53L8CX parameter struct.
    */
-  const VL53L8CX_Params& getParams() const;
+  const VL53L8CX_Params& getParams() const override;
 
   /**
    * @brief Request Time-of-Flight measurements asynchronously on a set of devices.

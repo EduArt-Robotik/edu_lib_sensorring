@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "sensorring/device/types/DeviceParams.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -23,6 +23,8 @@ namespace device {
  * @brief Parameter structure of the ThermalSensorParams.
  */
 struct SENSORRING_EXPORT ThermalSensorParams : public DeviceParams {
+  /// Destructor
+  virtual ~ThermalSensorParams() = default;
 
   /// Minimal temperature in degree celsius used for color mapping of the thermal images. Only used when auto_min_max is set to false.
   double t_min_deg_c = 20;
