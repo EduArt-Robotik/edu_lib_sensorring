@@ -12,8 +12,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "sensorring/device/depth/DepthSensorParams.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
-#include "sensorring/device/types/DeviceParams.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
 namespace eduart {
@@ -69,7 +69,7 @@ SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, ResolutionMode mode
  * @struct TMF8829_Params
  * @brief Parameter structure of the TMF8829 sensor of a sensor board.
  */
-struct SENSORRING_EXPORT TMF8829_Params : public DeviceParams {
+struct SENSORRING_EXPORT TMF8829_Params : public DepthSensorParams {
   /// Default constructor; sets the maximum measurement rate to 30 Hz.
   TMF8829_Params() { max_rate_hz = 30.0; }
 
