@@ -228,8 +228,8 @@ private:
   /// Get the current (last) board expectation, or nullptr if none exists.
   BoardExpectation* currentBoardExpectation();
 
-  /// Helper: Device expectation logic implementation
-  // template <typename Params> void expectDeviceImpl(device::DeviceType type, Params params);
+  /// Device expectation logic implementation
+  template <typename Params> void expectDeviceImpl(device::DeviceType type, Params params);
 
   std::vector<InterfaceConfig> _interfaces;
   device::DeviceParamsMap _default_device_params;

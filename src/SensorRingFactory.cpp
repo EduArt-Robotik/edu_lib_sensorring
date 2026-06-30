@@ -13,18 +13,6 @@ namespace eduart {
 namespace sensorring {
 
 namespace {
-/// Helper: Device expectation logic
-// template <typename Params> void SensorRingFactory::expectDeviceImpl(device::DeviceType type, Params params) {
-//   auto* board = currentBoardExpectation();
-//   if (!board) {
-//     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-//     return;
-//   }
-
-//   board->has_explicit_devices = true;
-//   board->device_expectations.push_back({ type, std::make_unique<Params>(std::move(params)) });
-// }
-
 /// Helper: obtain the ComInterface* from an InterfaceParams via ComManager.
 com::ComInterface* openInterface(const com::InterfaceParams& params) {
   if (auto* p = dynamic_cast<const com::SocketCanParams*>(&params)) {
@@ -78,83 +66,33 @@ SensorRingFactory::BoardExpectation* SensorRingFactory::currentBoardExpectation(
 }
 
 void SensorRingFactory::expectDevice(device::VL53L8CX_Params params) {
-  auto p = std::make_unique<device::VL53L8CX_Params>(std::move(params));
-
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::VL53L8CX, std::move(p) });
+  expectDeviceImpl<device::VL53L8CX_Params>(device::DeviceType::VL53L8CX, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::TMF8829_Params params) {
-  auto p = std::make_unique<device::TMF8829_Params>(std::move(params));
-
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::TMF8829, std::move(p) });
+  expectDeviceImpl<device::TMF8829_Params>(device::DeviceType::TMF8829, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::HTPA32_Params params) {
-  auto p      = std::make_unique<device::HTPA32_Params>(std::move(params));
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::HTPA32, std::move(p) });
+  expectDeviceImpl<device::HTPA32_Params>(device::DeviceType::HTPA32, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::WS2812b_Params params) {
-  auto p      = std::make_unique<device::WS2812b_Params>(std::move(params));
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::WS2812b, std::move(p) });
+  expectDeviceImpl<device::WS2812b_Params>(device::DeviceType::WS2812b, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::DepthSensorParams params) {
-  auto p      = std::make_unique<device::DepthSensorParams>(std::move(params));
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::AnyDepth, std::move(p) });
+  expectDeviceImpl<device::DepthSensorParams>(device::DeviceType::AnyDepth, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::ThermalSensorParams params) {
-  auto p      = std::make_unique<device::ThermalSensorParams>(std::move(params));
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::AnyThermal, std::move(p) });
+  expectDeviceImpl<device::ThermalSensorParams>(device::DeviceType::AnyThermal, std::move(params));
 }
 
 void SensorRingFactory::expectDevice(device::LightParams params) {
-  auto p      = std::make_unique<device::LightParams>(std::move(params));
-  auto* board = currentBoardExpectation();
-  if (!board) {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
-    return;
-  }
-  board->has_explicit_devices = true;
-  board->device_expectations.push_back({ device::DeviceType::AnyLight, std::move(p) });
+  expectDeviceImpl<device::LightParams>(device::DeviceType::AnyLight, std::move(params));
 }
+
 
 // ── Default device parameters ──
 
@@ -301,8 +239,8 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
               device::DeviceParamsMap params_map;
               std::vector<device::DeviceType> configured_devs;
               for (const auto& de : expectation.device_expectations) {
-                
-                auto matched_type = de.type;
+
+                auto matched_type        = de.type;
                 const auto original_type = de.type;
                 if (device::isCategory(de.type)) {
                   // If device is a category take the first compatible device on the board
@@ -408,7 +346,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
                 std::vector<device::DeviceType> configured_devs;
                 for (const auto& de : expectation.device_expectations) {
 
-                  auto matched_type = de.type;
+                  auto matched_type        = de.type;
                   const auto original_type = de.type;
                   if (device::isCategory(de.type)) {
                     // If device is a category take the first compatible device on the board
@@ -583,6 +521,18 @@ device::DeviceParamsMap SensorRingFactory::buildDefaultParamsMap(const std::vect
     }
   }
   return params_map;
+}
+
+/// Device expectation logic
+template <typename Params> void SensorRingFactory::expectDeviceImpl(device::DeviceType type, Params params) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+
+  board->has_explicit_devices = true;
+  board->device_expectations.push_back({ type, std::make_unique<Params>(std::move(params)) });
 }
 
 } // namespace sensorring
