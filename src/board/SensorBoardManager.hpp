@@ -12,16 +12,13 @@
 #include <memory>
 #include <string_view>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 #include "sensorring/board/EnumerationInformation.hpp"
+#include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/board/SensorBoardType.hpp"
 #include "sensorring/device/Device.hpp"
-#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
-#include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
-#include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
-#include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/math/Pose.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
@@ -37,8 +34,8 @@ using device::DeviceID;
 using device::DeviceType;
 using math::Pose;
 
-struct SensorBoardParams;
-class SensorBoard;
+// struct SensorBoardParams;
+// class SensorBoard;
 
 /**
  * @struct BoardDeviceInfo
@@ -95,12 +92,6 @@ public:
     };
   }
 
-  /// Map of device parameters indexed by device type.
-  using DeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
-
-  /// Container for device parameters keyed by device type.
-  using DeviceParamsMap = std::unordered_map<DeviceType, DeviceParamsVariant>;
-
   /**
    * @brief Create a basic SensorBoard from enumeration information.
    * @param[in] enum_info Enumeration result for this board.
@@ -120,7 +111,7 @@ public:
    * @param[in] device_params_map Map from DeviceType to params; only these device types are created.
    * @return Unique pointer to the created SensorBoard.
    */
-  static std::unique_ptr<SensorBoard> createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx, const DeviceParamsMap& device_params_map);
+  static std::unique_ptr<SensorBoard> createSensorBoard(EnumerationInformation enum_info, const SensorBoardParams& params, com::ComInterfaceID interface, unsigned int idx, const device::DeviceParamsMap& device_params_map);
 
 private:
   static inline const std::unordered_map<SensorBoardType, SensorBoardInfo> sensorBoardDatabase = {

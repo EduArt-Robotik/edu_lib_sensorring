@@ -23,8 +23,15 @@ namespace device {
  * @brief Parameter structure of the Time-of-Flight sensor of a sensor board.
  */
 struct SENSORRING_EXPORT VL53L8CX_Params : public DepthSensorParams {
+
   /// @brief Default constructor; sets the maximum measurement rate to 15 Hz.
   VL53L8CX_Params() { max_rate_hz = 15.0; }
+
+  /// @brief Initializes the VL53L8CX_Params from a DepthSensorParams instance.
+  VL53L8CX_Params(const DepthSensorParams& params)
+      : DepthSensorParams{ params } {
+    max_rate_hz = 15.0;
+  };
 };
 
 } // namespace device

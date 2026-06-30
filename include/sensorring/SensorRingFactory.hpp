@@ -13,17 +13,19 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
-#include "sensorring/device/AnyDeviceParams.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/depth/DepthSensorParams.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
+#include "sensorring/device/light/LightParams.hpp"
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
+#include "sensorring/device/thermal/ThermalSensorParams.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
 #include "sensorring/interface/ComInterfaceID.hpp"
 #include "sensorring/interface/InterfaceParams.hpp"
@@ -119,7 +121,7 @@ public:
    *
    * @param[in] params Board-level parameters (type, name, pose, etc.).
    */
-  void expectBoard(board::SensorBoardParams params);
+  void expectBoard(board::SensorBoardParams params = {});
 
   // ── Device expectations (applied to the last expectBoard) ──
 
@@ -145,9 +147,9 @@ public:
    * a device of the given category exists. Default params (or hardware defaults)
    * will be applied to whatever concrete device is discovered.
    */
-  void expectDevice(device::AnyDepthSensor_Params params);
-  void expectDevice(device::AnyThermalSensor_Params params);
-  void expectDevice(device::AnyLight_Params params);
+  void expectDevice(device::DepthSensorParams params);
+  void expectDevice(device::ThermalSensorParams params);
+  void expectDevice(device::LightParams params);
 
   // ── Default device parameters ──
 
@@ -203,13 +205,9 @@ public:
   void reset();
 
 private:
-  /// Concrete device params variant (internal only).
-  using ConcreteDeviceParamsVariant = std::variant<device::VL53L8CX_Params, device::HTPA32_Params, device::WS2812b_Params, device::TMF8829_Params>;
-  using ConcreteDeviceParamsMap     = std::unordered_map<device::DeviceType, ConcreteDeviceParamsVariant>;
-
   struct DeviceExpectation {
-    device::DeviceType type;
-    std::optional<ConcreteDeviceParamsVariant> params; ///< nullopt = use defaults or category match.
+    device::DeviceType type = device::DeviceType::Undefined;
+    std::shared_ptr<device::DeviceParams> params = nullptr; ///< nullptr = use defaults or category match.
   };
 
   struct BoardExpectation {
@@ -225,13 +223,16 @@ private:
   };
 
   /// Build a ConcreteDeviceParamsMap for the given device types, applying user defaults where available.
-  ConcreteDeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
+  device::DeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
 
   /// Get the current (last) board expectation, or nullptr if none exists.
   BoardExpectation* currentBoardExpectation();
 
+  /// Helper: Device expectation logic implementation
+  // template <typename Params> void expectDeviceImpl(device::DeviceType type, Params params);
+
   std::vector<InterfaceConfig> _interfaces;
-  ConcreteDeviceParamsMap _default_device_params;
+  device::DeviceParamsMap _default_device_params;
   EnumerationMap _enumeration_results;
   ValidationMode _mode;
 };

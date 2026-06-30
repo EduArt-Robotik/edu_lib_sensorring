@@ -22,7 +22,15 @@ namespace device {
  * @struct WS2812b_Params
  * @brief Parameter structure of the WS2812b LEDs.
  */
-struct SENSORRING_EXPORT WS2812b_Params : public LightParams {};
+struct SENSORRING_EXPORT WS2812b_Params : public LightParams {
+
+  /// @brief Default constructor.
+  WS2812b_Params() = default;
+
+  /// @brief Initializes the WS2812b_Params from a LightParams instance.
+   WS2812b_Params(const LightParams& params)
+      : LightParams{ params } {};
+};
 
 } // namespace device
 

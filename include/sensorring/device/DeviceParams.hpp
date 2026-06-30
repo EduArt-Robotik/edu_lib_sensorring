@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include <memory>
+#include <unordered_map>
+
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 
@@ -45,6 +48,9 @@ struct SENSORRING_EXPORT DeviceParams {
   /// Used by the scheduler to compute per-group divisors.
   double max_rate_hz = 15.0;
 };
+
+/// Container for device parameters keyed by device type.
+using DeviceParamsMap = std::unordered_map<DeviceType, std::shared_ptr<DeviceParams> >;
 
 } // namespace device
 

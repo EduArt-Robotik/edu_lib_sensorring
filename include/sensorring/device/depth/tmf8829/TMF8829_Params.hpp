@@ -70,8 +70,15 @@ SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, ResolutionMode mode
  * @brief Parameter structure of the TMF8829 sensor of a sensor board.
  */
 struct SENSORRING_EXPORT TMF8829_Params : public DepthSensorParams {
-  /// Default constructor; sets the maximum measurement rate to 30 Hz.
+
+  /// @brief Default constructor; sets the maximum measurement rate to 30 Hz.
   TMF8829_Params() { max_rate_hz = 30.0; }
+
+  /// @brief Initializes the TMF8829_Params from a DepthSensorParams instance.
+  TMF8829_Params(const DepthSensorParams& params)
+      : DepthSensorParams{ params } {
+    max_rate_hz = 30.0;
+  };
 
   /// Resolution mode of the sensor. See TMF8829 datasheet for details on the different modes.
   ResolutionMode resolution_mode = ResolutionMode::Res8x8;
