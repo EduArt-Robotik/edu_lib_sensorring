@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <mutex>
 
@@ -19,6 +20,8 @@
 #include "sensorring/math/Pose.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
+
+using namespace std::chrono_literals;
 
 namespace eduart {
 
@@ -70,10 +73,10 @@ public:
   std::vector<device::Device*> getDevices() const;
 
   /**
-   * @brief Return the board's pose in the ring coordinate frame.
-   * @return Const reference to the board pose.
+   * @brief Re-apply runtime configuration after a board reset.
+   * @return true on success.
    */
-  const math::Pose& getPose() const;
+  bool configure();
 
 private:
   using Mutex      = std::mutex;
@@ -89,16 +92,32 @@ private:
    */
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data);
 
+  /**
+   * @brief Set the board's orientation.
+   * @param[in] orientation Orientation to set.
+   * @return Return true if setting the orientation was successful.
+   */
+  bool setOrientation(Orientation orientation);
+
+  /**
+   * @brief Get the board's orientation.
+   * @param[out] orientation Reference to store the current orientation.
+   * @return Return true if reading the current orientation was successful.
+   */
+  bool getOrientation(Orientation& orientation);
+
+  static constexpr std::chrono::milliseconds GET_PARAMETER_SLEEP   = 10ms;
+  static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
+
   unsigned int _idx;
-  com::ComInterface* _interface;
-  const SensorBoardParams _params;
-  math::Pose _pose;
+  SensorBoardParams _params;
+
   board::EnumerationInformation _enum_info;
-
-  mutable RecursiveMutex _com_mutex;
-
   std::vector<std::unique_ptr<device::Device> > _device_vec;
 
+  std::atomic<bool> _got_update;
+  com::ComInterface* _interface;
+  mutable RecursiveMutex _com_mutex;
   subscription::Subscription _com_subscription;
 };
 

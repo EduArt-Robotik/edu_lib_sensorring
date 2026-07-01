@@ -286,8 +286,12 @@ void MeasurementManagerImpl::runPhase() {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Configuring devices after reset");
 
     success = true;
-    for (auto* dev : _sensor_ring->getDevices()) {
-      success &= dev->configure();
+    for (auto bus : _sensor_ring->getSensorBuses()) {
+      for (auto board : bus->getSensorBoards()) {
+        success &= board->configure();
+        if (!success)
+          break;
+      }
     }
 
     if (success) {

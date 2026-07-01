@@ -53,6 +53,7 @@ set(SENSORRING_LOGGER_SOURCES
 set(SENSORRING_BOARD_SOURCES
   board/SensorBoard.cpp
   board/SensorBoardType.cpp
+  board/SensorBoardParams.cpp
   board/SensorBoardCommands.cpp
   board/SensorBoardManager.cpp
   board/BoardEnumerator.cpp

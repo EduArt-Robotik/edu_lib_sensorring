@@ -77,7 +77,7 @@ bool TMF8829_DeviceImpl::getResolutionMode(ResolutionMode& mode) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -120,7 +120,7 @@ bool TMF8829_DeviceImpl::getIterationsSetting(std::uint16_t& k_iterations) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -226,7 +226,7 @@ bool TMF8829_DeviceImpl::getResultFullNoise(bool& full_noise) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -270,7 +270,7 @@ bool TMF8829_DeviceImpl::getResultXtalk(bool& xtalk) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -314,7 +314,7 @@ bool TMF8829_DeviceImpl::getResultNoiseStrength(bool& noise_strength) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -359,7 +359,7 @@ bool TMF8829_DeviceImpl::getResultSignalStrength(bool& signal_strength) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {
@@ -403,7 +403,7 @@ bool TMF8829_DeviceImpl::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
   auto now = std::chrono::steady_clock::now();
 
   while (!_got_update && std::chrono::steady_clock::now() - now < GET_PARAMETER_TIMEOUT) {
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(GET_PARAMETER_SLEEP);
   }
 
   if (_got_update) {

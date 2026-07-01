@@ -72,6 +72,7 @@ private:
    */
   bool isParamCombinationValid(const TMF8829_Params& params) const;
 
+  static constexpr std::chrono::milliseconds GET_PARAMETER_SLEEP   = 10ms;
   static constexpr std::chrono::milliseconds GET_PARAMETER_TIMEOUT = 100ms;
 
   std::atomic<bool> _got_update;

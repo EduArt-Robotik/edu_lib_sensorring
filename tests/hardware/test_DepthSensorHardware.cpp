@@ -4,8 +4,8 @@
 #include <thread>
 
 #include "sensorring/SensorRingFactory.hpp"
-#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
+#include "sensorring/device/depth/DepthSensorParams.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/interface/InterfaceParams.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
@@ -41,7 +41,7 @@ TestResult run_single_interface_test(const std::string& interface_name, Interfac
       factory.addInterface(UsbTingoParams{ interface_name });
     }
     factory.expectBoard({});
-    factory.expectDevice(eduart::sensorring::device::AnyDepthSensor_Params());
+    factory.expectDevice(eduart::sensorring::device::DepthSensorParams());
 
     MeasurementManager manager(params, factory);
 
