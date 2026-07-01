@@ -35,6 +35,8 @@ namespace eduart {
 
 namespace sensorring {
 
+class SensorRingFactoryImpl;
+
 /**
  * @enum ValidationMode
  * @brief Controls how build() handles mismatches between expectations and discovered hardware.
@@ -86,6 +88,7 @@ public:
    *            mismatched boards are skipped instead of aborting.
    */
   explicit SensorRingFactory(ValidationMode mode = ValidationMode::Relaxed);
+  ~SensorRingFactory();
 
   // ── Interface configuration ──
 
@@ -164,6 +167,9 @@ public:
   void setDefaultDeviceParams(device::TMF8829_Params params);
   void setDefaultDeviceParams(device::HTPA32_Params params);
   void setDefaultDeviceParams(device::WS2812b_Params params);
+  void setDefaultDeviceParams(device::DepthSensorParams params);
+  void setDefaultDeviceParams(device::ThermalSensorParams params);
+  void setDefaultDeviceParams(device::LightParams params);
 
   // ── Build ──
 
@@ -205,44 +211,7 @@ public:
   void reset();
 
 private:
-  struct DeviceExpectation {
-    device::DeviceType type                      = device::DeviceType::Undefined;
-    std::shared_ptr<device::DeviceParams> params = nullptr; ///< nullptr = use defaults or category match.
-  };
-
-  struct BoardExpectation {
-    board::SensorBoardParams params;
-    std::vector<DeviceExpectation> device_expectations;
-    bool has_explicit_devices = false;
-  };
-
-  struct InterfaceConfig {
-    std::unique_ptr<com::InterfaceParams> params;
-    std::vector<BoardExpectation> expected_boards;
-    bool has_expectations = false;
-  };
-
-  struct ResolvedDeviceConfig {
-    device::DeviceParamsMap params_map;
-    std::vector<device::DeviceType> configured_devs;
-  };
-
-  /// Build a ConcreteDeviceParamsMap for the given device types, applying user defaults where available.
-  device::DeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
-
-  /// Resolve expected devices against available board devices and parameters.
-  ResolvedDeviceConfig resolveDeviceExpectations(const std::vector<DeviceExpectation>& device_expectations, const std::vector<device::DeviceType>& available_devices) const;
-
-  /// Get the current (last) board expectation, or nullptr if none exists.
-  BoardExpectation* currentBoardExpectation();
-
-  /// Device expectation logic implementation
-  template <typename Params> void expectDeviceImpl(device::DeviceType type, Params params);
-
-  std::vector<InterfaceConfig> _interfaces;
-  device::DeviceParamsMap _default_device_params;
-  EnumerationMap _enumeration_results;
-  ValidationMode _mode;
+  std::unique_ptr<SensorRingFactoryImpl> _impl;
 };
 
 } // namespace sensorring

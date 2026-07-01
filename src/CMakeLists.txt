@@ -16,6 +16,7 @@ set(SENSORRING_CORE_SOURCES
   SensorBus.cpp
   SensorRing.cpp
   SensorRingFactory.cpp
+  factory/SensorRingFactoryImpl.cpp
 )
 
 set(SENSORRING_MANAGER_SOURCES
