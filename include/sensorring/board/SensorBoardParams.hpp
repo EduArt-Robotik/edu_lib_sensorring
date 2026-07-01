@@ -24,10 +24,25 @@ namespace board {
  * @brief Possible orientations of a sensor board. Used to rotate/mirror light animations and thermal images.
  */
 enum class Orientation {
-  Left,  ///< Board is mounted on the left side; animations are mirrored horizontally.
-  Right, ///< Board is mounted on the right side; animations are used as-is.
-  None   ///< No specific orientation; default behaviour applies.
+  None, ///< No specific orientation; default behaviour applies.
+  Left, ///< Board is mounted on the left side; animations are mirrored horizontally.
+  Right ///< Board is mounted on the right side; animations are used as-is.
 };
+
+/**
+ * @brief Function to convert the Orientation enum class members to string
+ * @param[in] mode to be converted to a string
+ * @return Name of the orientation written out as string
+ */
+SENSORRING_EXPORT std::string toString(Orientation mode) noexcept;
+
+/**
+ * @brief  Output stream operator for the Orientation enum class members
+ * @param[in] os output stream to write to
+ * @param[in] mode to be printed as stream
+ * @return Stream with the orientation name written out
+ */
+SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, Orientation mode) noexcept;
 
 /**
  * @struct SensorBoardParams
