@@ -100,10 +100,10 @@ def main():
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.HTPA32_Params())
+    factory.expectDevice(sensorring.ThermalSensorParams())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.HTPA32_Params())
+    factory.expectDevice(sensorring.ThermalSensorParams())
 
     # Create the MeasurementManager directly from the factory
     manager = sensorring.MeasurementManager(params, factory)

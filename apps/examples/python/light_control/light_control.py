@@ -60,12 +60,12 @@ def main():
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.VL53L8CX_Params())
-    factory.expectDevice(sensorring.WS2812b_Params())
+    factory.expectDevice(sensorring.DepthSensorParams())
+    factory.expectDevice(sensorring.LightParams())
     factory.addInterface(usbtingo_interface)
     factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.VL53L8CX_Params())
-    factory.expectDevice(sensorring.WS2812b_Params())
+    factory.expectDevice(sensorring.DepthSensorParams())
+    factory.expectDevice(sensorring.LightParams())
 
     # Create the MeasurementManager directly from the factory
     manager = sensorring.MeasurementManager(params, factory)

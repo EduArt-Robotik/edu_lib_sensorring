@@ -68,7 +68,7 @@ else:
 #include "sensorring/interface/InterfaceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
 #include "sensorring/device/types/DeviceID.hpp"
-#include "sensorring/device/types/DeviceParams.hpp"
+#include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/board/SensorBoardType.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
@@ -283,8 +283,8 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/types/DeviceID.hpp"
 
 
-%rename (Orientation_None) eduart::sensorring::device::Orientation::None;
-%include "sensorring/device/types/DeviceParams.hpp"
+%rename (Orientation_None) eduart::sensorring::board::Orientation::None;
+%include "sensorring/device/DeviceParams.hpp"
 
 %include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 

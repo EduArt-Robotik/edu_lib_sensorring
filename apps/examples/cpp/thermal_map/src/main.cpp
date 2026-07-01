@@ -77,10 +77,10 @@ int main(int, char*[]) {
     SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.expectBoard({});
-    factory.expectDevice(device::HTPA32_Params{});
+    factory.expectDevice(device::ThermalSensorParams{});
     factory.addInterface(usbtingo_interface);
     factory.expectBoard({});
-    factory.expectDevice(device::HTPA32_Params{});
+    factory.expectDevice(device::ThermalSensorParams{});
 
     // Create the MeasurementManager directly from the factory
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);

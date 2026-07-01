@@ -9,11 +9,9 @@
 
 #include <chrono>
 #include <cmath>
-#include <iomanip>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/device/depth/DepthSensor.hpp>
-#include <sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp>
 #include <sensorring/device/light/Light.hpp>
 #include <sensorring/interface/InterfaceParams.hpp>
 #include <sensorring/logger/Logger.hpp>
@@ -24,7 +22,7 @@ using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
-static constexpr std::string_view CAN_INTERFACE_NAME = "can0";
+static constexpr std::string_view CAN_INTERFACE_NAME = "eduart-can0";
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 static constexpr std::string_view USBTINGO_INTERFACE_NAME = "0";
@@ -60,12 +58,11 @@ int main(int, char*[]) {
     SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.expectBoard({});
-    factory.expectDevice(device::VL53L8CX_Params{});
-    factory.expectDevice(device::WS2812b_Params{});
-    factory.addInterface(usbtingo_interface);
+    factory.expectDevice(device::DepthSensorParams{});
+    factory.expectDevice(device::LightParams{});
     factory.expectBoard({});
-    factory.expectDevice(device::VL53L8CX_Params{});
-    factory.expectDevice(device::WS2812b_Params{});
+    factory.expectDevice(device::DepthSensorParams{});
+    factory.expectDevice(device::LightParams{});
 
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
