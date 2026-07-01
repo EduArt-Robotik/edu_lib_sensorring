@@ -15,11 +15,10 @@
 #include <optional>
 #include <vector>
 
+#include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
-#include "sensorring/math/Math.hpp"
 #include "sensorring/math/Pose.hpp"
-#include "sensorring/math/Vector3.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
 #include "sensorring/subscription/Subscription.hpp"
 
@@ -79,12 +78,12 @@ public:
 
   /**
    * @brief Return the full device identifier (type + index).
-   */ 
+   */
   DeviceID getDeviceID() const;
 
   /**
    * @brief Return the zero-based hardware board index on its bus (used for CAN addressing and protocol bitmasks).
-   */ 
+   */
   unsigned int getHwIdx() const;
 
   /**
@@ -95,7 +94,7 @@ public:
 
   /**
    * @brief Return whether this device is currently enabled.
-   */ 
+   */
   bool getEnable() const;
 
   /**
@@ -111,10 +110,16 @@ public:
   void setEnable(bool enable);
 
   /**
-   * @brief Set the non-owning pointer to the board's pose.
-   * @param[in] board_pose Pointer to the board's pose.
+   * @brief Initialize board-level context pointer (non-owning).
+   * @param[in] board_params Pointer to board params.
    */
-  void setBoardPose(const math::Pose* board_pose);
+  void setBoardContext(const board::SensorBoardParams* board_params);
+
+  /**
+   * @brief Return the board-level context pointer (non-owning).
+   * @return Pointer to board params.
+   */
+  const board::SensorBoardParams* getBoardContext() const;
 
   /**
    * @brief Store a pose offset relative to the board centre.
@@ -147,7 +152,7 @@ protected:
 
   com::ComInterface* _interface;
 
-  const math::Pose* _board_pose = nullptr;
+  const board::SensorBoardParams* _board_params = nullptr;
   math::Pose _offset;
 
   subscription::Subscription _com_subscription;

@@ -69,8 +69,12 @@ bool Device::configure() {
   return true;
 }
 
-void Device::setBoardPose(const math::Pose* board_pose) {
-  _board_pose = board_pose;
+void Device::setBoardContext(const board::SensorBoardParams* board_params) {
+  _board_params = board_params;
+}
+
+const board::SensorBoardParams* Device::getBoardContext() const {
+  return _board_params;
 }
 
 void Device::setPoseOffset(const math::Pose& offset) {
@@ -82,8 +86,9 @@ math::Pose Device::getPoseOffset() const {
 }
 
 math::Pose Device::getGlobalPose() const {
-  if (_board_pose) {
-    return *_board_pose + _offset;
+  if (_board_params) {
+    const math::Pose board_pose{ _board_params->translation, _board_params->rotation };
+    return board_pose + _offset;
   }
   return _offset;
 }

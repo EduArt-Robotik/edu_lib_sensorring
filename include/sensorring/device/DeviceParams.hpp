@@ -22,16 +22,6 @@ namespace sensorring {
 namespace device {
 
 /**
- * @enum Orientation
- * @brief Possible orientations of a sensor board. Used to rotate/mirror light animations and thermal images.
- */
-enum class Orientation {
-  Left,  ///< Board is mounted on the left side; animations are mirrored horizontally.
-  Right, ///< Board is mounted on the right side; animations are used as-is.
-  None   ///< No specific orientation; default behaviour applies.
-};
-
-/**
  * @struct DeviceParams
  * @brief Base parameter structure of a device. A device is one sensor or actuator on a sensor board.
  */

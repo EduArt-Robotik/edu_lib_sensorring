@@ -25,9 +25,6 @@ namespace device {
 struct SENSORRING_EXPORT LightParams : public DeviceParams {
   /// Destructor
   virtual ~LightParams() = default;
-
-  /// Orientation of the sensor board. Used to to mirror the light animations.
-  Orientation orientation = Orientation::None;
 };
 
 } // namespace device

@@ -34,9 +34,6 @@ struct SENSORRING_EXPORT ThermalSensorParams : public DeviceParams {
 
   /// Enable automatic color scaling of the thermal images using the coldest and the hottest temperature in each image.
   bool auto_min_max = true;
-
-  /// Orientation of the sensor board. Used to flip the image upside down.
-  Orientation orientation = Orientation::None;
 };
 
 } // namespace device

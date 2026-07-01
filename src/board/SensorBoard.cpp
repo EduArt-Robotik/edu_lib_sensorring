@@ -22,7 +22,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
     , _enum_info()
     , _device_vec(std::move(devices)) {
   for (auto& device : _device_vec) {
-    device->setBoardPose(&_pose);
+    device->setBoardContext(&_params);
   }
 
   _com_subscription = _interface->subscribe(

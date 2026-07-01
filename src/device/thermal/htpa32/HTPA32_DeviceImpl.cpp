@@ -5,6 +5,7 @@
 #include <sensorring_transport/Protocol.hpp>
 
 #include "interface/ComInterface.hpp"
+#include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/thermal/htpa32/HTPA32_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
@@ -279,7 +280,8 @@ measurement::FalseColorImage HTPA32_DeviceImpl::convertToFalseColorImage(const m
 }
 
 void HTPA32_DeviceImpl::rotateLeftImage(measurement::GrayscaleImage& image) const {
-  if (_params.orientation == device::Orientation::Left) {
+  const auto* board_params = _parent.getBoardContext();
+  if (board_params && board_params->orientation == board::Orientation::Left) {
     std::reverse(image.data.begin(), image.data.end());
   }
 }

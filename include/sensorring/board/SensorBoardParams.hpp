@@ -20,12 +20,25 @@ namespace sensorring {
 namespace board {
 
 /**
+ * @enum Orientation
+ * @brief Possible orientations of a sensor board. Used to rotate/mirror light animations and thermal images.
+ */
+enum class Orientation {
+  Left,  ///< Board is mounted on the left side; animations are mirrored horizontally.
+  Right, ///< Board is mounted on the right side; animations are used as-is.
+  None   ///< No specific orientation; default behaviour applies.
+};
+
+/**
  * @struct SensorBoardParams
  * @brief Parameter structure of a sensor board. A sensor board is one circuit board.
  */
 struct SENSORRING_EXPORT SensorBoardParams {
   /// Hardware board type. When set to Undefined, the board is created with all supported device types (backward compatibility).
   SensorBoardType board_type = SensorBoardType::Undefined;
+
+  /// Board orientation used by devices that require orientation-dependent processing.
+  Orientation orientation = Orientation::None;
 
   /// Rotation part of the sensors pose. The rotation is applied in the order Roll(x) - Pitch(y) - Yaw(z). Values: Euler angles in degrees
   math::Vector3 rotation = { 0, 0, 0 };
