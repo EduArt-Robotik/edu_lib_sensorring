@@ -93,7 +93,6 @@ void SensorRingFactory::expectDevice(device::LightParams params) {
   expectDeviceImpl<device::LightParams>(device::DeviceType::AnyLight, std::move(params));
 }
 
-
 // ── Default device parameters ──
 
 void SensorRingFactory::setDefaultDeviceParams(device::VL53L8CX_Params params) {
@@ -236,34 +235,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
 
             if (expectation.has_explicit_devices) {
 
-              device::DeviceParamsMap params_map;
-              std::vector<device::DeviceType> configured_devs;
-              for (const auto& de : expectation.device_expectations) {
-
-                auto matched_type        = de.type;
-                const auto original_type = de.type;
-                if (device::isCategory(de.type)) {
-                  // If device is a category take the first compatible device on the board
-                  for (auto actual_dt : enum_info.devices) {
-                    if (device::deviceMatchesExpected(actual_dt, de.type)) {
-                      matched_type = actual_dt;
-                      break;
-                    }
-                  }
-                } else {
-                  matched_type = de.type;
-                }
-
-                if (de.params) {
-                  params_map[matched_type] = de.params;
-                } else {
-                  auto resolved = buildDefaultParamsMap({ matched_type });
-                  if (auto it = resolved.find(original_type); it != resolved.end()) {
-                    params_map[matched_type] = it->second;
-                  }
-                }
-                configured_devs.push_back(matched_type);
-              }
+              auto [params_map, configured_devs] = resolveDeviceExpectations(expectation.device_expectations, enum_info.devices);
 
               for (const auto& [required_type, _] : params_map) {
                 if (std::find(enum_info.devices.begin(), enum_info.devices.end(), required_type) == enum_info.devices.end()) {
@@ -342,34 +314,7 @@ std::unique_ptr<SensorRing> SensorRingFactory::build() {
               }
 
               if (expectation.has_explicit_devices) {
-                device::DeviceParamsMap params_map;
-                std::vector<device::DeviceType> configured_devs;
-                for (const auto& de : expectation.device_expectations) {
-
-                  auto matched_type        = de.type;
-                  const auto original_type = de.type;
-                  if (device::isCategory(de.type)) {
-                    // If device is a category take the first compatible device on the board
-                    for (auto actual_dt : enum_info.devices) {
-                      if (device::deviceMatchesExpected(actual_dt, de.type)) {
-                        matched_type = actual_dt;
-                        break;
-                      }
-                    }
-                  } else {
-                    matched_type = de.type;
-                  }
-
-                  if (de.params) {
-                    params_map[matched_type] = de.params;
-                  } else {
-                    auto resolved = buildDefaultParamsMap({ matched_type });
-                    if (auto it = resolved.find(original_type); it != resolved.end()) { // If type was a category, look up the original type for consitency
-                      params_map[matched_type] = it->second;
-                    }
-                  }
-                  configured_devs.push_back(matched_type);
-                }
+                auto [params_map, configured_devs] = resolveDeviceExpectations(expectation.device_expectations, enum_info.devices);
 
                 enum_info.config_state       = board::ConfigurationState::Configured;
                 enum_info.configured_devices = std::move(configured_devs);
@@ -521,6 +466,39 @@ device::DeviceParamsMap SensorRingFactory::buildDefaultParamsMap(const std::vect
     }
   }
   return params_map;
+}
+
+SensorRingFactory::ResolvedDeviceConfig SensorRingFactory::resolveDeviceExpectations(const std::vector<DeviceExpectation>& device_expectations, const std::vector<device::DeviceType>& available_devices) const {
+  device::DeviceParamsMap params_map;
+  std::vector<device::DeviceType> configured_devs;
+
+  for (const auto& de : device_expectations) {
+    auto matched_type        = de.type;
+    const auto original_type = de.type;
+    if (device::isCategory(de.type)) {
+      // If device is a category take the first compatible device on the board
+      for (auto actual_dt : available_devices) {
+        if (device::deviceMatchesExpected(actual_dt, de.type)) {
+          matched_type = actual_dt;
+          break;
+        }
+      }
+    } else {
+      matched_type = de.type;
+    }
+
+    if (de.params) {
+      params_map[matched_type] = de.params;
+    } else {
+      auto resolved = buildDefaultParamsMap({ matched_type });
+      if (auto it = resolved.find(original_type); it != resolved.end()) {
+        params_map[matched_type] = it->second;
+      }
+    }
+    configured_devs.push_back(matched_type);
+  }
+
+  return { std::move(params_map), std::move(configured_devs) };
 }
 
 /// Device expectation logic

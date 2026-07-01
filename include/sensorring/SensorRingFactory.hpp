@@ -206,7 +206,7 @@ public:
 
 private:
   struct DeviceExpectation {
-    device::DeviceType type = device::DeviceType::Undefined;
+    device::DeviceType type                      = device::DeviceType::Undefined;
     std::shared_ptr<device::DeviceParams> params = nullptr; ///< nullptr = use defaults or category match.
   };
 
@@ -222,8 +222,16 @@ private:
     bool has_expectations = false;
   };
 
+  struct ResolvedDeviceConfig {
+    device::DeviceParamsMap params_map;
+    std::vector<device::DeviceType> configured_devs;
+  };
+
   /// Build a ConcreteDeviceParamsMap for the given device types, applying user defaults where available.
   device::DeviceParamsMap buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const;
+
+  /// Resolve expected devices against available board devices and parameters.
+  ResolvedDeviceConfig resolveDeviceExpectations(const std::vector<DeviceExpectation>& device_expectations, const std::vector<device::DeviceType>& available_devices) const;
 
   /// Get the current (last) board expectation, or nullptr if none exists.
   BoardExpectation* currentBoardExpectation();
