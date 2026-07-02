@@ -33,7 +33,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
   },
       { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
 
-  configure();
+  //configure();
 }
 
 SensorBoard::~SensorBoard() {
@@ -78,10 +78,6 @@ bool SensorBoard::configure() {
 }
 
 bool SensorBoard::setOrientation(Orientation orientation) {
-  if (orientation == Orientation::None) {
-    return false;
-  }
-
   bool success = _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_idx + 1), devbyte::BOARD }, PARAMETER_SET_ORIENTATION, { static_cast<std::uint8_t>(orientation) });
 
   Orientation current_orientation;
