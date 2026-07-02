@@ -305,10 +305,14 @@ void MeasurementManagerImpl::runPhase() {
 
   case Phase::get_eeprom: {
     if (!_htpa32_devices.empty()) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
+      std::once_flag log_once_flag;
       const auto timeout_ms = _params.timeout;
       for (auto* device : _htpa32_devices) {
         if (device->getEnable()) {
+          std::call_once(log_once_flag, [&]() {
+            // Only log this message if there is actually an active HTPA32
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
+          });
           auto fut = device->getEepromAsync(timeout_ms);
           success &= fut.get();
         }
