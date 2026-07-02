@@ -92,15 +92,16 @@ bool TMF8829_DeviceImpl::getResolutionMode(ResolutionMode& mode) {
 }
 
 bool TMF8829_DeviceImpl::setIterationsSetting(std::uint16_t k_iterations) {
-  bool success = k_iterations > 0;
-
-  if (success) {
-    success &= _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, PARAMETER_CONFIG_SET_ITERATIONS, transport::ByteOperations::toBytes(k_iterations));
-
-    std::uint16_t current_iterations;
-    success &= getIterationsSetting(current_iterations);
-    success &= (current_iterations == k_iterations);
+  if (!(k_iterations > 0)) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Requested to set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations) + ". Valid values are [1, 65535].");
+    return false;
   }
+
+  bool success = _parent._interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_parent._hw_idx + 1), devbyte::TMF8829 }, PARAMETER_CONFIG_SET_ITERATIONS, transport::ByteOperations::toBytes(k_iterations));
+
+  std::uint16_t current_iterations;
+  success &= getIterationsSetting(current_iterations);
+  success &= (current_iterations == k_iterations);
 
   if (success) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set TMF8829 iterations on board " + std::to_string(_parent.getDeviceID().index) + " to " + std::to_string(k_iterations));
