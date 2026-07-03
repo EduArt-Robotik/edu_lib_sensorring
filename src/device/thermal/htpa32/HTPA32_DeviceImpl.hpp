@@ -38,6 +38,7 @@ public:
 
   const HTPA32_Params& getParams() const;
 
+  bool configure();
   std::future<bool> getEepromAsync(std::chrono::milliseconds timeout);
   bool stopCalibration();
   bool startCalibration(unsigned int window);
@@ -65,6 +66,7 @@ private:
 
   std::atomic<bool> _read_eeprom{ false };
   std::atomic<bool> _got_eeprom{ false };
+  bool _eeprom_configured                 = false;
   bool _got_calibration                   = false;
   bool _calibration_active                = false;
   double _calibration_average             = 0.0;

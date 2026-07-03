@@ -78,7 +78,6 @@ private:
     sync_lights,
     configure_interfaces,
     configure_devices,
-    get_eeprom,
     pre_loop_init,
     tick,
     error_handler_measurement,

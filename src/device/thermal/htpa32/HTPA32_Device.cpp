@@ -27,6 +27,13 @@ const HTPA32_Params& HTPA32_Device::getParams() const {
   return _impl->getParams();
 }
 
+bool HTPA32_Device::configure() {
+  if (!getEnable()) {
+    return true;
+  }
+  return _impl->configure();
+}
+
 bool HTPA32_Device::stopCalibration() {
   return _impl->stopCalibration();
 }

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 
 #include "sensorring/device/thermal/ThermalSensorParams.hpp"
@@ -31,7 +32,9 @@ struct SENSORRING_EXPORT HTPA32_Params : public ThermalSensorParams {
 
   /// @brief Initializes the HTPA32_Params from a ThermalSensorParams instance.
   HTPA32_Params(const ThermalSensorParams& params)
-      : ThermalSensorParams{ params } { max_rate_hz = 5.0; };
+      : ThermalSensorParams{ params } {
+    max_rate_hz = 5.0;
+  };
 
   /// Save the thermal sensors eeprom content to a local file to only require a transfer once.
   bool use_eeprom_file = false;
@@ -44,6 +47,9 @@ struct SENSORRING_EXPORT HTPA32_Params : public ThermalSensorParams {
 
   /// Directory of the calibration data file.  The user requires read and write access to this directory.
   std::string calibration_dir = "";
+
+  /// Timeout for EEPROM read operations during configure.
+  std::chrono::milliseconds eeprom_timeout = std::chrono::milliseconds(5000);
 };
 
 } // namespace device

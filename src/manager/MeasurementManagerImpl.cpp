@@ -308,34 +308,9 @@ void MeasurementManagerImpl::runPhase() {
     }
 
     if (success) {
-      _phase = Phase::get_eeprom;
-    } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to configure at least one device after reset.");
-      _phase = Phase::shutdown;
-    }
-    break;
-  }
-
-  case Phase::get_eeprom: {
-    if (!_htpa32_devices.empty()) {
-      std::once_flag log_once_flag;
-      const auto timeout_ms = _params.timeout;
-      for (auto* device : _htpa32_devices) {
-        if (device->getEnable()) {
-          std::call_once(log_once_flag, [&]() {
-            // Only log this message if there is actually an active HTPA32
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Reading EEPROM from thermal sensors");
-          });
-          auto fut = device->getEepromAsync(timeout_ms);
-          success &= fut.get();
-        }
-      }
-    }
-
-    if (success) {
       _phase = Phase::pre_loop_init;
     } else {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to read EEPROM values from at least one sensor. Check configuration and restart.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to configure at least one device after reset.");
       _phase = Phase::shutdown;
     }
     break;

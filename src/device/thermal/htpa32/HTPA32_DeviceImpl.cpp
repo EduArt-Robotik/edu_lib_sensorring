@@ -58,6 +58,24 @@ const HTPA32_Params& HTPA32_DeviceImpl::getParams() const {
   return _params;
 }
 
+bool HTPA32_DeviceImpl::configure() {
+  if (_eeprom_configured) {
+    return true;
+  }
+
+  if (_got_eeprom) {
+    _eeprom_configured = true;
+    return true;
+  }
+
+  auto fut           = getEepromAsync(_params.eeprom_timeout);
+  const bool success = fut.get();
+  if (success) {
+    _eeprom_configured = true;
+  }
+  return success;
+}
+
 bool HTPA32_DeviceImpl::stopCalibration() {
   if (!_calibration_active) {
     return false;

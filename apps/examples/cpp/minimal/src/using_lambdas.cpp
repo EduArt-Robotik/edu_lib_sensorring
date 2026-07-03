@@ -23,7 +23,7 @@ using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
 // Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
-static constexpr std::string_view CAN_INTERFACE_NAME = "can0";
+static constexpr std::string_view CAN_INTERFACE_NAME = "eduart-can0";
 
 // Default USBtingo interface (cross-platform, uses the first available USBtingo device)
 static constexpr std::string_view USBTINGO_INTERFACE_NAME = "0";

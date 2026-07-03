@@ -52,6 +52,12 @@ public:
   const HTPA32_Params& getParams() const override;
 
   /**
+   * @brief Configure the device. Reads the EEPROM once on first call.
+   * @return true on success.
+   */
+  bool configure() override;
+
+  /**
    * @brief Request the EEPROM content asynchronously.
    * @param[in] timeout Maximum time to wait for completion.
    * @return Future resolving to true on success.
