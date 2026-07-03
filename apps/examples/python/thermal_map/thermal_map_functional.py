@@ -58,7 +58,6 @@ def main():
   reset_cursor = [False]
 
   params = sensorring.ManagerParams()
-  params.frequency_thermal_hz = 5.0
 
   can_interface = sensorring.SocketCanParams()
   can_interface.name = CAN_INTERFACE_NAME

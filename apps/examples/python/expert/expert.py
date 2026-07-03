@@ -65,8 +65,10 @@ def main():
 
     # Board 0: Front-left, rotated 45 deg around Z.
     vl53_params = sensorring.VL53L8CX_Params()
+    vl53_params.max_rate_hz = 10.0  # Cap ToF rate to 10 Hz
     htpa_params = sensorring.HTPA32_Params()
     htpa_params.auto_min_max = True
+    htpa_params.max_rate_hz = 4.0   # Cap thermal rate to 4 Hz
     ws_params = sensorring.WS2812b_Params()
 
     board_0 = sensorring.SensorBoardParams()
@@ -108,8 +110,6 @@ def main():
     #    The unique_ptr<SensorRing> constructor is C++ only.
     # =========================================================================
     params = sensorring.ManagerParams()
-    params.frequency_tof_hz = 10.0      # Cap ToF rate to 10 Hz
-    params.frequency_thermal_hz = 4.0   # Cap thermal rate to 4 Hz
     params.repair_errors = True
 
     manager = sensorring.MeasurementManager(params, factory)

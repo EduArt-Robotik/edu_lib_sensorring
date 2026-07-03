@@ -51,34 +51,21 @@ struct SensorGroupSchedule {
 /**
  * @brief Compute the base tick rate using the fastest sensor group as reference.
  *
- * The fastest group's target rate (after user caps) becomes the base tick rate.
+ * The fastest group's max_rate_hz becomes the base tick rate.
  * All other groups get integer divisors rounded from base / target.
  *
  * @param[in,out] groups  Groups with max_rate_hz filled in. Divisor and effective_rate_hz are computed.
- * @param[in] cap_tof_hz  User-configured cap for depth sensors (0 = no cap).
- * @param[in] cap_thermal_hz User-configured cap for thermal sensors (0 = no cap).
  * @return Base tick rate in Hz (tenths precision).
  */
-inline double computeScheduleFastest(std::vector<SensorGroupSchedule>& groups, double cap_tof_hz, double cap_thermal_hz) {
+inline double computeScheduleFastest(std::vector<SensorGroupSchedule>& groups) {
   if (groups.empty()) {
     return 0.0;
   }
 
-  auto targetRate = [&](const SensorGroupSchedule& g) -> double {
-    double rate = g.max_rate_hz;
-    if (g.type == device::DeviceType::VL53L8CX && cap_tof_hz > 0.0) {
-      rate = std::min(rate, cap_tof_hz);
-    }
-    if (g.type == device::DeviceType::HTPA32 && cap_thermal_hz > 0.0) {
-      rate = std::min(rate, cap_thermal_hz);
-    }
-    return rate;
-  };
-
-  // Find the fastest target rate — this becomes the base tick rate.
+  // Find the fastest max_rate — this becomes the base tick rate.
   double base_rate = 0.0;
   for (auto& g : groups) {
-    base_rate = std::max(base_rate, targetRate(g));
+    base_rate = std::max(base_rate, g.max_rate_hz);
   }
 
   if (base_rate <= 0.0) {
@@ -90,11 +77,10 @@ inline double computeScheduleFastest(std::vector<SensorGroupSchedule>& groups, d
 
   // Compute integer divisors.
   for (auto& g : groups) {
-    double target = targetRate(g);
-    if (target <= 0.0) {
+    if (g.max_rate_hz <= 0.0) {
       g.divisor = 1;
     } else {
-      double raw_divisor = base_rate / target;
+      double raw_divisor = base_rate / g.max_rate_hz;
       g.divisor          = std::max(1u, static_cast<unsigned int>(std::round(raw_divisor)));
     }
     g.effective_rate_hz = base_rate / static_cast<double>(g.divisor);
@@ -112,34 +98,20 @@ inline double computeScheduleFastest(std::vector<SensorGroupSchedule>& groups, d
  * rate — these are the only values that can produce zero error for a group.
  *
  * @param[in,out] groups  Groups with max_rate_hz filled in. Divisor and effective_rate_hz are computed.
- * @param[in] cap_tof_hz  User-configured cap for depth sensors (0 = no cap).
- * @param[in] cap_thermal_hz User-configured cap for thermal sensors (0 = no cap).
  * @param[in] max_tick_hz Maximum allowable base tick rate (default 100 Hz).
  * @return Base tick rate in Hz (tenths precision).
  */
-inline double computeScheduleCommonMultiple(std::vector<SensorGroupSchedule>& groups, double cap_tof_hz, double cap_thermal_hz, double max_tick_hz = 100.0) {
+inline double computeScheduleCommonMultiple(std::vector<SensorGroupSchedule>& groups, double max_tick_hz = 100.0) {
   if (groups.empty()) {
     return 0.0;
   }
 
-  auto targetRate = [&](const SensorGroupSchedule& g) -> double {
-    double rate = g.max_rate_hz;
-    if (g.type == device::DeviceType::VL53L8CX && cap_tof_hz > 0.0) {
-      rate = std::min(rate, cap_tof_hz);
-    }
-    if (g.type == device::DeviceType::HTPA32 && cap_thermal_hz > 0.0) {
-      rate = std::min(rate, cap_thermal_hz);
-    }
-    return rate;
-  };
-
-  // Collect target rates for all groups.
+  // Collect max rates for all groups.
   std::vector<double> targets;
   targets.reserve(groups.size());
   for (auto& g : groups) {
-    double t = targetRate(g);
-    if (t > 0.0) {
-      targets.push_back(t);
+    if (g.max_rate_hz > 0.0) {
+      targets.push_back(g.max_rate_hz);
     }
   }
 
@@ -192,11 +164,10 @@ inline double computeScheduleCommonMultiple(std::vector<SensorGroupSchedule>& gr
 
   // Assign divisors using the best base rate.
   for (std::size_t i = 0; i < groups.size(); ++i) {
-    double target = targetRate(groups[i]);
-    if (target <= 0.0) {
+    if (groups[i].max_rate_hz <= 0.0) {
       groups[i].divisor = 1;
     } else {
-      groups[i].divisor = std::max(1u, static_cast<unsigned int>(std::round(best_rate / target)));
+      groups[i].divisor = std::max(1u, static_cast<unsigned int>(std::round(best_rate / groups[i].max_rate_hz)));
     }
     groups[i].effective_rate_hz = best_rate / static_cast<double>(groups[i].divisor);
   }

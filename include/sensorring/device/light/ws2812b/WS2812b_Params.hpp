@@ -25,11 +25,11 @@ namespace device {
 struct SENSORRING_EXPORT WS2812b_Params : public LightParams {
 
   /// @brief Default constructor.
-  WS2812b_Params() = default;
+  WS2812b_Params() { max_rate_hz = 10.0; }
 
   /// @brief Initializes the WS2812b_Params from a LightParams instance.
    WS2812b_Params(const LightParams& params)
-      : LightParams{ params } {};
+      : LightParams{ params } { max_rate_hz = 10.0; };
 };
 
 } // namespace device

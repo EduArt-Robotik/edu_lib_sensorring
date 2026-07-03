@@ -86,6 +86,8 @@ private:
     shutdown
   };
 
+  static constexpr double FALLBACK_LOOP_RATE_HZ = 10.0;
+
   void runPhase();
   void runWorker() noexcept;
 

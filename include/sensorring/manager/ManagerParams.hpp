@@ -30,14 +30,6 @@ struct ManagerParams {
   /// If set to true error handling is enabled to try to repair communication and timing errors.
   /// When set to false the MeasurementManager instantly shuts down when an error is detected.
   bool repair_errors = true;
-
-  /// Target frequency cap for depth sensors (Hz, tenths precision).
-  /// 0.0 = run each group at its hardware max rate.
-  double frequency_tof_hz = 0.0;
-
-  /// Target frequency cap for thermal sensors (Hz, tenths precision).
-  /// 0.0 = run each group at its hardware max rate.
-  double frequency_thermal_hz = 6.0;
 };
 
 } // namespace manager

@@ -119,8 +119,6 @@ They are passed as constructor argument and cannot be changed after instantiatio
 |:----------|:------------|
 | `timeout` | Duration after which the manager shuts down automatically |
 | `repair_errors` | Attempt automatic error recovery |
-| `frequency_tof_hz` | Target frequency for ToF measurements |
-| `frequency_thermal_hz` | Target frequency for thermal measurements |
 
 <div class="section_buttons"> 
 

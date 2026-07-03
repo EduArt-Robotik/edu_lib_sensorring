@@ -121,13 +121,26 @@ void MeasurementManagerImpl::buildSchedule() {
     _schedule.push_back(group);
   }
 
-  _base_rate_hz = computeScheduleFastest(_schedule, _params.frequency_tof_hz, _params.frequency_thermal_hz);
-  //_base_rate_hz = computeScheduleCommonMultiple(_schedule, _params.frequency_tof_hz, _params.frequency_thermal_hz);
+  if (!_lights.empty()) {
+    SensorGroupSchedule group;
+    group.type        = device::DeviceType::WS2812b;
+    group.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _lights) {
+      if (dev->getEnable()) {
+        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      }
+    }
+    _schedule.push_back(group);
+  }
+
+  _base_rate_hz = computeScheduleFastest(_schedule);
+  //_base_rate_hz = computeScheduleCommonMultiple(_schedule);
 
   if (_base_rate_hz > 0.0) {
     _tick_period = std::chrono::duration<double>(1.0 / _base_rate_hz);
   } else {
-    _tick_period = std::chrono::duration<double>(0.1); // 10 Hz fallback.
+    _base_rate_hz = FALLBACK_LOOP_RATE_HZ;
+    _tick_period  = std::chrono::duration<double>(1.0 / FALLBACK_LOOP_RATE_HZ);
   }
 
   logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Scheduler: base rate = " + std::to_string(_base_rate_hz) + " Hz, tick period = " + std::to_string(_tick_period.count() * 1000.0) + " ms");

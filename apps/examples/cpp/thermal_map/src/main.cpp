@@ -59,7 +59,6 @@ int main(int, char*[]) {
   std::atomic<bool> got_first_measurement = false;
 
   manager::ManagerParams params;
-  params.frequency_thermal_hz = 5.0;
 
   com::SocketCanParams can_interface{ std::string(CAN_INTERFACE_NAME) };
   com::UsbTingoParams usbtingo_interface{ std::string(USBTINGO_INTERFACE_NAME) };

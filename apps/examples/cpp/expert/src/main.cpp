@@ -125,9 +125,7 @@ int main(int, char*[]) {
     }
 
     manager::ManagerParams params;
-    params.frequency_tof_hz     = 10.0; // Cap ToF rate to 10 Hz
-    params.frequency_thermal_hz = 4.0;  // Cap thermal rate to 4 Hz
-    params.repair_errors        = true;
+    params.repair_errors = true;
 
     // Expert-user constructor: takes ownership of the pre-built SensorRing.
     manager::MeasurementManager manager(params, std::move(sensor_ring));

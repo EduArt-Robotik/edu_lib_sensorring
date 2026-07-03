@@ -4,6 +4,7 @@
  * @file   main.cpp
  * @author EduArt Robotik GmbH
  * @brief  This example demonstrates how to control WS2812b LEDs with a smooth color cycling animation using the Light interface.
+ *         It runs in actuator-only mode without requiring any sensors to drive the manager loop.
  * @date 2025-11-18
  */
 
@@ -11,7 +12,6 @@
 #include <cmath>
 #include <iostream>
 #include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/device/depth/DepthSensor.hpp>
 #include <sensorring/device/light/Light.hpp>
 #include <sensorring/interface/InterfaceParams.hpp>
 #include <sensorring/logger/Logger.hpp>
@@ -58,20 +58,16 @@ int main(int, char*[]) {
     SensorRingFactory factory;
     factory.addInterface(can_interface);
     factory.expectBoard({});
-    factory.expectDevice(device::DepthSensorParams{});
     factory.expectDevice(device::LightParams{});
     factory.expectBoard({});
-    factory.expectDevice(device::DepthSensorParams{});
     factory.expectDevice(device::LightParams{});
 
     auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
 
-    // Subscribe to depth sensors for rate tracking
-    std::atomic<bool> got_first       = false;
-    std::atomic<unsigned int> counter = 0;
-    auto tof_sub                      = manager->depthSensors().subscribeAll([&got_first, &counter](const std::vector<measurement::DepthMeasurement>&) {
-      got_first = true;
-      counter++;
+    // Subscribe to state changes to know when the manager is ready
+    std::atomic<bool> is_running = false;
+    auto state_sub               = manager->subscribeToStateChanges([&is_running](const manager::ManagerState state) {
+      is_running = (state == manager::ManagerState::Running);
     });
 
     // Get a handle to the lights
@@ -80,15 +76,16 @@ int main(int, char*[]) {
     // Start the measurements
     manager->startMeasuring();
 
-    while (!got_first && manager->isMeasuring()) {
+    while (!is_running && manager->isMeasuring()) {
     }
 
     if (manager->isMeasuring()) {
       std::cout << std::endl << "Sensorring successfully initialized." << std::endl;
       std::cout << std::endl << "Start printing animation frames:" << std::endl;
 
-      float phase     = 0.0f;
-      auto last_print = std::chrono::steady_clock::now();
+      float phase              = 0.0f;
+      auto last_print          = std::chrono::steady_clock::now();
+      unsigned int frame_count = 0;
       while (manager->isMeasuring()) {
         // Advance phase and compute smooth RGB values from three sine waves.
         phase += STEP;
@@ -111,14 +108,15 @@ int main(int, char*[]) {
           lights[i].setLight(device::LightMode::FixedColor, red, green, blue);
         }
 
+        frame_count++;
         if (std::chrono::steady_clock::now() - last_print > 1s) {
-          std::cout << "Current frame: " << counter.load() << "\r" << std::flush;
+          std::cout << "Current frame: " << frame_count << "\r" << std::flush;
           last_print = std::chrono::steady_clock::now();
         }
         std::this_thread::sleep_for(100ms);
       }
 
-      tof_sub.cancel();
+      state_sub.cancel();
 
       // Stop the measurements
       manager->stopMeasuring();
