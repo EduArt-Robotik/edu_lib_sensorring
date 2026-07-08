@@ -1,6 +1,7 @@
 #include "sensorring/device/depth/DepthSensor.hpp"
 
 #include <cmath>
+#include <limits>
 
 #include "sensorring/logger/Logger.hpp"
 #include "sensorring/math/Math.hpp"
@@ -108,11 +109,12 @@ void DepthSensor::processRawMeasurement(measurement::PointCloud& pcl) {
           { x, y, z }
         };
       } else {
+        const auto& nan = std::numeric_limits<double>::quiet_NaN();
         pcl.data[i].point = math::Vector3{
-          { 0.0, 0.0, 0.0 }
+          { nan, nan, nan }
         };
-        pcl.data[i].raw_distance = -1.0;
-        pcl.data[i].sigma        = -1.0;
+        pcl.data[i].raw_distance = nan;
+        pcl.data[i].sigma        = nan;
       }
 
       i++;

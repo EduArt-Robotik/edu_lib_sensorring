@@ -112,11 +112,11 @@ TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
     REQUIRE(pcl.data[1].raw_distance == Catch::Approx(2.0));
     REQUIRE(pcl.data[1].sigma == Catch::Approx(0.0));
 
-    REQUIRE(pcl.data[2].point.x() == Catch::Approx(0.0));
-    REQUIRE(pcl.data[2].point.y() == Catch::Approx(0.0));
-    REQUIRE(pcl.data[2].point.z() == Catch::Approx(0.0));
-    REQUIRE(pcl.data[2].raw_distance == Catch::Approx(-1.0));
-    REQUIRE(pcl.data[2].sigma == Catch::Approx(-1.0));
+    REQUIRE(std::isnan(pcl.data[2].point.x()));
+    REQUIRE(std::isnan(pcl.data[2].point.y()));
+    REQUIRE(std::isnan(pcl.data[2].point.z()));
+    REQUIRE(std::isnan(pcl.data[2].raw_distance));
+    REQUIRE(std::isnan(pcl.data[2].sigma));
 
     REQUIRE(pcl.data[3].point.x() == Catch::Approx(3.0));
     REQUIRE(pcl.data[3].point.y() == Catch::Approx(6.0));
