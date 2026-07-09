@@ -43,7 +43,7 @@ NullComInterface& getNullInterface() {
 class MockDepthSensor : public DepthSensor {
 public:
   MockDepthSensor(DepthSensorConfig config = { 45.0, 45.0, 8, 8 })
-      : DepthSensor(eduart::sensorring::device::DeviceID({ eduart::sensorring::device::DeviceType::VL53L8CX, 0 }), &getNullInterface(), eduart::sensorring::com::ComEndpoint{}, true, config) {}
+  : DepthSensor(eduart::sensorring::device::DeviceID({ eduart::sensorring::device::DeviceType::VL53L8CX, 0 }), &getNullInterface(), eduart::sensorring::com::ComEndpoint{}, config) {}
 
   const DepthSensorParams& getParams() const override { return _params; }
 

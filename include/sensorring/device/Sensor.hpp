@@ -33,13 +33,12 @@ namespace device {
 class SENSORRING_EXPORT Sensor : public Device {
 public:
   /**
-   * @brief Construct the sensor with identity, communication link and enable flag.
+   * @brief Construct the sensor with identity and communication link.
    * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
    * @param[in] target    Communication endpoint this device listens to.
-   * @param[in] enable    Whether the device starts enabled.
    */
-  Sensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  Sensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target);
 
   ~Sensor() override;
 

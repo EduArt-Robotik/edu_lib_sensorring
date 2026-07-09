@@ -29,7 +29,7 @@ static DepthSensorConfig getTMF8829Config(device::ResolutionMode mode) {
 
 // clang-format off
 TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : DepthSensor( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, params.enable, getTMF8829Config(params.resolution_mode))
+  : DepthSensor( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, getTMF8829Config(params.resolution_mode))
     , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
    //configure();
 }
@@ -107,10 +107,6 @@ bool TMF8829_Device::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
 }
 
 bool TMF8829_Device::configure() {
-  if (!getEnable()) {
-    return true;
-  }
-
   if (!setResolutionMode(getParams().resolution_mode)) {
     return false;
   }
@@ -144,7 +140,7 @@ std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8
     std::vector<std::future<bool> > futures;
 
     for (auto* dev : devices) {
-      if (dev != nullptr && dev->getEnable()) {
+      if (dev != nullptr) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
@@ -187,10 +183,6 @@ std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8
 
 std::future<bool> TMF8829_Device::fetchMeasurementAsync(std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable()) {
-      return false;
-    }
-
     clearDataFlag();
     auto fut = beginMeasurementWait();
 

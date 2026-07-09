@@ -12,8 +12,8 @@ namespace sensorring {
 
 namespace device {
 
-DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config)
-    : Sensor(id, interface, target, enable)
+DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, DepthSensorConfig config)
+  : Sensor(id, interface, target)
     , _config(config) {
 
   createLookupTable(config, _lut_x, _lut_y, _lut_z);
@@ -132,8 +132,6 @@ const measurement::DepthMeasurement& DepthSensor::getLatestMeasurement() const {
 }
 
 void DepthSensor::publishMeasurement() {
-  if (!getEnable())
-    return;
   _latest_measurement.header.timestamp = std::chrono::system_clock::now();
   _depth_publisher.publish(_latest_measurement);
 }

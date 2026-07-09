@@ -29,7 +29,7 @@ static constexpr DepthSensorConfig getVL53L8CXConfig() {
 
 // clang-format off
 VL53L8CX_Device::VL53L8CX_Device(VL53L8CX_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : DepthSensor( DeviceID({ DeviceType::VL53L8CX, idx}), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, params.enable, getVL53L8CXConfig()),
+  : DepthSensor( DeviceID({ DeviceType::VL53L8CX, idx}), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::VL53L8CX }, getVL53L8CXConfig()),
     _impl(std::make_unique<VL53L8CX_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 // clang-format on
@@ -56,7 +56,7 @@ std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL5
     std::vector<std::future<bool> > futures;
 
     for (auto* dev : devices) {
-      if (dev != nullptr && dev->getEnable()) {
+      if (dev != nullptr) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
@@ -99,10 +99,6 @@ std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL5
 
 std::future<bool> VL53L8CX_Device::fetchMeasurementAsync(std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable()) {
-      return false;
-    }
-
     clearDataFlag();
     auto fut = beginMeasurementWait();
 

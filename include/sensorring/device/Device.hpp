@@ -42,13 +42,12 @@ namespace device {
 class SENSORRING_EXPORT Device {
 public:
   /**
-   * @brief Construct the device with identity, communication link and enable flag.
+   * @brief Construct the device with identity and communication link.
    * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
    * @param[in] target    Communication endpoint this device listens to.
-   * @param[in] enable    Whether the device starts enabled.
    */
-  Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target);
 
   virtual ~Device();
 
@@ -93,21 +92,10 @@ public:
   void setDeviceIndex(unsigned int index);
 
   /**
-   * @brief Return whether this device is currently enabled.
-   */
-  bool getEnable() const;
-
-  /**
    * @brief Apply post-reset runtime configuration for this device.
    * @return true on success.
    */
   virtual bool configure();
-
-  /**
-   * @brief Enable or disable this device.
-   * @param[in] enable @c true to enable, @c false to disable.
-   */
-  void setEnable(bool enable);
 
   /**
    * @brief Initialize board-level context pointer (non-owning).
@@ -148,7 +136,6 @@ protected:
 
   DeviceID _id;
   unsigned int _hw_idx;
-  bool _enable;
 
   com::ComInterface* _interface;
 

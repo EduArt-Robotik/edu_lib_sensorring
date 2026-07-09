@@ -45,10 +45,9 @@ public:
    * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
    * @param[in] target    Communication endpoint this device listens to.
-   * @param[in] enable    Whether the device starts enabled.
    * @param[in] config    Configuration options for the depth sensor.
    */
-  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable, DepthSensorConfig config);
+  DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, DepthSensorConfig config);
 
   /**
    * @brief Get the current DepthSensor parameters.

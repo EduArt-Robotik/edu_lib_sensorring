@@ -8,8 +8,8 @@ namespace sensorring {
 
 namespace device {
 
-ThermalSensor::ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable)
-    : Sensor(id, interface, target, enable) {
+ThermalSensor::ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target)
+  : Sensor(id, interface, target) {
 }
 
 const measurement::ThermalMeasurement& ThermalSensor::getLatestMeasurement() const {
@@ -17,8 +17,6 @@ const measurement::ThermalMeasurement& ThermalSensor::getLatestMeasurement() con
 }
 
 void ThermalSensor::publishMeasurement() {
-  if (!getEnable())
-    return;
   _latest_measurement.header.timestamp = std::chrono::system_clock::now();
   _thermal_publisher.publish(_latest_measurement);
 }

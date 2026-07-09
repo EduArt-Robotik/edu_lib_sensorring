@@ -6,8 +6,8 @@ namespace sensorring {
 
 namespace device {
 
-Light::Light(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable)
-    : Device(id, interface, target, enable) {
+Light::Light(DeviceID id, com::ComInterface* interface, com::ComEndpoint target)
+    : Device(id, interface, target) {
 }
 
 } // namespace device

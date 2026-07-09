@@ -43,9 +43,8 @@ public:
    * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
    * @param[in] target    Communication endpoint this device listens to.
-   * @param[in] enable    Whether the device starts enabled.
    */
-  ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target);
 
   /// @brief Virtual destructor.
   ~ThermalSensor() override = default;

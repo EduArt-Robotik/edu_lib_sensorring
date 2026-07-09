@@ -26,7 +26,7 @@ namespace device {
  * @class Light
  * @brief Base class for light/LED actuator devices.
  *
- * Inherits from Device (identity, enable, pose, action queue).
+ * Inherits from Device (identity, pose, action queue).
  * Users call setLight() to update the desired state. The concrete implementation
  * enqueues a self-contained CAN command into the action queue, which the
  * state machine drains and executes during the device_actions cycle.
@@ -38,9 +38,8 @@ public:
    * @param[in] id        Device identifier.
    * @param[in] interface Communication interface.
    * @param[in] target    Communication endpoint this device listens to.
-   * @param[in] enable    Whether the device starts enabled.
    */
-  Light(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable);
+  Light(DeviceID id, com::ComInterface* interface, com::ComEndpoint target);
 
   /// @brief Virtual destructor.
   ~Light() override = default;

@@ -8,10 +8,9 @@ namespace sensorring {
 
 namespace device {
 
-Device::Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, bool enable)
+Device::Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target)
     : _id(id)
     , _hw_idx(id.getIndex())
-    , _enable(enable)
     , _interface(interface) {
   _com_subscription = _interface->subscribe(
       [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<uint8_t>& data) {
@@ -55,14 +54,6 @@ unsigned int Device::getHwIdx() const {
 
 void Device::setDeviceIndex(unsigned int index) {
   _id.index = index;
-}
-
-void Device::setEnable(bool enable) {
-  _enable = enable;
-}
-
-bool Device::getEnable() const {
-  return _enable;
 }
 
 bool Device::configure() {

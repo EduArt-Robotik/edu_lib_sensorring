@@ -66,6 +66,9 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
     }
 
     const auto* dev_params        = it->second.get();
+    if (dev_params == nullptr || !dev_params->enable) {
+      continue;
+    }
     const std::size_t size_before = devices.size();
 
     switch (device_type) {

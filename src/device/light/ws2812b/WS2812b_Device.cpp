@@ -14,7 +14,7 @@ namespace sensorring {
 namespace device {
 
 WS2812b_Device::WS2812b_Device(WS2812b_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : Light(DeviceID({ DeviceType::WS2812b, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::WS2812B }, params.enable)
+  : Light(DeviceID({ DeviceType::WS2812b, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::WS2812B })
     , _params(std::move(params)) {
 }
 
@@ -29,9 +29,6 @@ void WS2812b_Device::setLight(LightMode mode, std::uint8_t r, std::uint8_t g, st
 }
 
 bool WS2812b_Device::configure() {
-  if (!getEnable()) {
-    return true;
-  }
   // Broadcast OFF to all boards (turns off non-managed boards too)
   setAllLights(LightMode::Off, 0, 0, 0);
   return true;

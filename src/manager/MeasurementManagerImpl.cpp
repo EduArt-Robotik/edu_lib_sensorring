@@ -82,16 +82,14 @@ ManagerParams MeasurementManagerImpl::getParams() const noexcept {
 void MeasurementManagerImpl::buildSchedule() {
   _schedule.clear();
 
-  // Build one group per device type that has enabled sensors.
+  // Build one group per configured device type.
   if (!_vl53l8cx_devices.empty()) {
     SensorGroupSchedule group;
     group.type = device::DeviceType::VL53L8CX;
     // Group max rate is limited by the slowest sensor in the group.
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _vl53l8cx_devices) {
-      if (dev->getEnable()) {
-        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
-      }
+      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
     }
     _schedule.push_back(group);
   }
@@ -102,9 +100,7 @@ void MeasurementManagerImpl::buildSchedule() {
     // Group max rate is limited by the slowest sensor in the group.
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _tmf8829_devices) {
-      if (dev->getEnable()) {
-        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
-      }
+      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
     }
     _schedule.push_back(group);
   }
@@ -114,9 +110,7 @@ void MeasurementManagerImpl::buildSchedule() {
     group.type        = device::DeviceType::HTPA32;
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _htpa32_devices) {
-      if (dev->getEnable()) {
-        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
-      }
+      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
     }
     _schedule.push_back(group);
   }
@@ -126,9 +120,7 @@ void MeasurementManagerImpl::buildSchedule() {
     group.type        = device::DeviceType::WS2812b;
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _lights) {
-      if (dev->getEnable()) {
-        group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
-      }
+      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
     }
     _schedule.push_back(group);
   }
@@ -541,8 +533,6 @@ bool MeasurementManagerImpl::fetchPendingData() {
 
     if (group.type == device::DeviceType::VL53L8CX) {
       for (auto* dev : _vl53l8cx_devices) {
-        if (!dev->getEnable())
-          continue;
         auto fut = dev->fetchMeasurementAsync(_params.timeout);
         if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
           return false;
@@ -554,8 +544,6 @@ bool MeasurementManagerImpl::fetchPendingData() {
 
     if (group.type == device::DeviceType::TMF8829) {
       for (auto* dev : _tmf8829_devices) {
-        if (!dev->getEnable())
-          continue;
         auto fut = dev->fetchMeasurementAsync(_params.timeout);
         if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
           return false;
@@ -567,8 +555,6 @@ bool MeasurementManagerImpl::fetchPendingData() {
 
     if (group.type == device::DeviceType::HTPA32) {
       for (auto* dev : _htpa32_devices) {
-        if (!dev->getEnable())
-          continue;
         auto fut = dev->fetchMeasurementAsync(_params.timeout);
         if (fut.wait_for(_params.timeout) != std::future_status::ready || !fut.get()) {
           return false;

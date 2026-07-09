@@ -16,7 +16,7 @@ namespace sensorring {
 namespace device {
 
 HTPA32_Device::HTPA32_Device(HTPA32_Params params, com::ComInterfaceID interface, unsigned int idx)
-    : ThermalSensor(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 }, params.enable)
+  : ThermalSensor(DeviceID({ DeviceType::HTPA32, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::HTPA32 })
     , _impl(std::make_unique<HTPA32_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
 }
 
@@ -28,9 +28,6 @@ const HTPA32_Params& HTPA32_Device::getParams() const {
 }
 
 bool HTPA32_Device::configure() {
-  if (!getEnable()) {
-    return true;
-  }
   return _impl->configure();
 }
 
@@ -63,7 +60,7 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA3
     std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
 
     for (auto* dev : devices) {
-      if (dev != nullptr && dev->getEnable()) {
+      if (dev != nullptr) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
@@ -93,10 +90,6 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA3
 
 std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::milliseconds /*timeout*/) {
   return std::async(std::launch::async, [this]() {
-    if (!getEnable()) {
-      return false;
-    }
-
     _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
 
     return true;
@@ -105,10 +98,6 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::millisecon
 
 std::future<bool> HTPA32_Device::fetchMeasurementAsync(std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [this, timeout]() {
-    if (!getEnable()) {
-      return false;
-    }
-
     clearDataFlag();
     auto fut = beginMeasurementWait();
 
