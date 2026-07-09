@@ -42,13 +42,21 @@ namespace manager {
  * @class MeasurementManagerImpl
  * @brief Implementation of MeasurementManager with tick-based scheduler.
  *
- * The scheduler runs at a fixed base rate. Each sensor group has an integer
- * divisor determining how often it fires. Within each tick:
- *   1. Wait for pending data from previous requests (self-regulating).
- *   2. Request new measurements for groups due this tick.
- *   3. Fetch data from groups that have pending results.
- *   4. Execute device actions (actuators).
- *   5. Sleep until next tick boundary.
+ * The scheduler is driven by a non-blocking state machine. Each call to
+ * runPhase() advances the machine by at most one step and returns immediately
+ * if the current phase is waiting for I/O or a timer.  This lets the same
+ * implementation serve two modes of operation:
+ *   - Threaded mode: runWorker() calls runPhase() in a tight loop; a brief
+ *     yield prevents busy-spinning during wait phases.
+ *   - Spin mode: the caller drives the loop by calling measureSome() at its
+ *     own rate (e.g. from a ROS spin callback).
+ *
+ * The tick pipeline is split into five non-blocking sub-phases:
+ *   1. tick_wait_pending  — poll data-available futures from previous tick.
+ *   2. tick_request       — fire measurement requests + launch fetch futures.
+ *   3. tick_fetch_wait    — poll fetch futures; publish when all done.
+ *   4. tick_actions       — execute actuator actions; advance tick counter.
+ *   5. tick_sleep         — poll tick boundary; advance when elapsed.
  */
 class MeasurementManagerImpl {
 public:
@@ -73,26 +81,44 @@ public:
 
 private:
   enum class Phase {
+    // Initialization sequence
     init,
     reset_sensors,
+    reset_sensors_wait,       ///< Non-blocking delay after hardware reset (2 s).
     sync_lights,
     configure_interfaces,
     configure_devices,
     pre_loop_init,
-    tick,
-    error_handler_measurement,
-    error_handler_communication,
+
+    // Tick-based measurement loop (each sub-phase returns immediately when waiting)
+    tick_wait_pending,        ///< Poll data-available futures from previous tick.
+    tick_request,             ///< Fire measurement requests; launch fetch futures.
+    tick_fetch_wait,          ///< Poll fetch futures; publish measurements when done.
+    tick_actions,             ///< Execute actuator actions; advance tick counter.
+    tick_sleep,               ///< Non-blocking wait until next tick boundary.
+
+    // Measurement error recovery
+    error_meas_enter,         ///< Log and notify; decide whether to attempt repair.
+    error_meas_retry,         ///< Reset sensor state and fire a fresh request.
+    error_meas_wait,          ///< Poll data-available futures during recovery.
+
+    // Communication error recovery
+    error_comm_enter,         ///< Log and notify; check for interface errors.
+    error_comm_repair,        ///< Call repairInterface() for all faulty buses.
+    error_comm_wait,          ///< Non-blocking inter-attempt delay (250 ms).
+
     shutdown
   };
 
   static constexpr double FALLBACK_LOOP_RATE_HZ = 10.0;
 
-  void runPhase();
+  /// Advance the state machine by one step. Returns true if the phase made
+  /// progress (transitioned), false if it is still waiting (caller may yield).
+  bool runPhase();
   void runWorker() noexcept;
 
   // Tick sub-steps
-  bool waitForPendingData();
-  bool fetchPendingData();
+  void launchFetchFutures();
   void requestMeasurements();
   void executeDeviceActions();
 
@@ -118,6 +144,20 @@ private:
   // Pending futures for data-available signals (one per ToF family).
   std::future<bool> _vl53_data_available_future;
   std::future<bool> _tmf_data_available_future;
+
+  // Fetch futures launched in tick_request, polled in tick_fetch_wait.
+  std::vector<std::future<bool>> _vl53_fetch_futures;
+  std::vector<std::future<bool>> _tmf_fetch_futures;
+  std::vector<std::future<bool>> _htpa_fetch_futures;
+
+  // Tracks which measurement types need publishing after fetch completes.
+  bool _depth_publish_needed;
+  bool _thermal_publish_needed;
+
+  // Deadline used by non-blocking wait phases (_phase_deadline) and error recovery.
+  std::chrono::time_point<std::chrono::steady_clock> _phase_deadline;
+  unsigned int _error_attempts;
+  bool _repair_success;
 
   std::atomic<bool> _is_running;
   std::thread _worker_thread;
