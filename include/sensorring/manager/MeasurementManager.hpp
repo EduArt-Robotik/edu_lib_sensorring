@@ -100,19 +100,21 @@ public:
   ManagerParams getParams() const noexcept;
 
   /**
-   * @brief Return a typed group of all devices matching the given interface.
-   * @tparam T Device interface type (DepthSensor, ThermalSensor, Light).
-   * @return Group<T> wrapping matching device pointers.
+   * @brief Return all depth sensors.
+   * @return Group of depth sensors.
    */
-  template <typename T> device::Group<T> devices() const noexcept;
-
-  /// Convenience: return all depth sensors.
   device::Group<device::DepthSensor> depthSensors() const noexcept;
 
-  /// Convenience: return all thermal sensors.
+    /**
+   * @brief Return all thermal sensors.
+   * @return Group of thermal sensors.
+   */
   device::Group<device::ThermalSensor> thermalSensors() const noexcept;
 
-  /// Convenience: return all lights.
+  /**
+   * @brief Return all lights.
+   * @return Group of lights.
+   */
   device::Group<device::Light> lights() const noexcept;
 
   /// Access the underlying sensor ring

@@ -25,12 +25,10 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _tick_period(0.0)
     , _next_tick_time(std::chrono::steady_clock::now())
     , _tick_count(0)
-    , _is_running(false)
-    , _depth_publish_needed(false)
-    , _thermal_publish_needed(false)
     , _phase_deadline(std::chrono::steady_clock::now())
     , _error_attempts(0)
-    , _repair_success(false) {
+    , _repair_success(false)
+    , _is_running(false) {
 
   if (!_sensor_ring) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "MeasurementManager got passed an invalid SensorRing.");
@@ -85,53 +83,196 @@ ManagerParams MeasurementManagerImpl::getParams() const noexcept {
 */
 
 void MeasurementManagerImpl::buildSchedule() {
-  _schedule.clear();
+  class FunctionMeasurementGroupExecutor final : public MeasurementGroupExecutor {
+  public:
+    using RequestFn = std::function<std::future<bool>(std::chrono::milliseconds)>;
+    using FetchFn   = std::function<void(std::chrono::milliseconds, std::vector<std::future<bool>>&)>;
 
-  // Build one group per configured device type.
-  if (!_vl53l8cx_devices.empty()) {
-    SensorGroupSchedule group;
-    group.type = device::DeviceType::VL53L8CX;
-    // Group max rate is limited by the slowest sensor in the group.
-    group.max_rate_hz = std::numeric_limits<double>::max();
-    for (auto* dev : _vl53l8cx_devices) {
-      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+    FunctionMeasurementGroupExecutor(SensorGroupSchedule schedule, PublishTarget publish_target, bool wait_for_request_ready, RequestFn request_fn, FetchFn fetch_fn)
+        : _schedule(std::move(schedule))
+        , _publish_target(publish_target)
+        , _wait_for_request_ready(wait_for_request_ready)
+        , _request_fn(std::move(request_fn))
+        , _fetch_fn(std::move(fetch_fn)) {
     }
-    _schedule.push_back(group);
+
+    SensorGroupSchedule& schedule() noexcept override {
+      return _schedule;
+    }
+
+    const SensorGroupSchedule& schedule() const noexcept override {
+      return _schedule;
+    }
+
+    PublishTarget getPublishTarget() const noexcept override {
+      return _publish_target;
+    }
+
+    void clearCycleState() override {
+      _schedule.has_pending_request = false;
+      _schedule.has_fetch_ready     = false;
+      _fetch_futures.clear();
+    }
+
+    bool requestMeasurement(std::chrono::milliseconds timeout) override {
+      if (!_request_fn) {
+        return false;
+      }
+
+      _request_future = _request_fn(timeout);
+      return true;
+    }
+
+    AsyncPollResult pollRequestReady(std::chrono::time_point<std::chrono::steady_clock> deadline) override {
+      if (!_wait_for_request_ready) {
+        return AsyncPollResult::Ready;
+      }
+
+      if (!_request_future.valid()) {
+        return AsyncPollResult::Failed;
+      }
+
+      if (_request_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+        if (std::chrono::steady_clock::now() > deadline) {
+          return AsyncPollResult::TimedOut;
+        }
+        return AsyncPollResult::Waiting;
+      }
+
+      return _request_future.get() ? AsyncPollResult::Ready : AsyncPollResult::Failed;
+    }
+
+    void launchFetch(std::chrono::milliseconds timeout) override {
+      if (_fetch_fn) {
+        _fetch_fn(timeout, _fetch_futures);
+      }
+    }
+
+    AsyncPollResult pollFetchReady(std::chrono::time_point<std::chrono::steady_clock> deadline) override {
+      for (auto& fut : _fetch_futures) {
+        if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+          if (std::chrono::steady_clock::now() > deadline) {
+            return AsyncPollResult::TimedOut;
+          }
+          return AsyncPollResult::Waiting;
+        }
+      }
+
+      return AsyncPollResult::Ready;
+    }
+
+    bool hasFetchWork() const noexcept override {
+      return !_fetch_futures.empty();
+    }
+
+    bool collectFetchResults() override {
+      bool success = true;
+      for (auto& fut : _fetch_futures) {
+        success &= fut.get();
+      }
+      _fetch_futures.clear();
+      return success;
+    }
+
+  private:
+    SensorGroupSchedule _schedule;
+    PublishTarget _publish_target;
+    bool _wait_for_request_ready;
+
+    RequestFn _request_fn;
+    FetchFn _fetch_fn;
+
+    std::future<bool> _request_future;
+    std::vector<std::future<bool>> _fetch_futures;
+  };
+
+  _group_executors.clear();
+
+  // Build one executor group per configured device type.
+  if (!_vl53l8cx_devices.empty()) {
+    SensorGroupSchedule schedule;
+    schedule.type        = device::DeviceType::VL53L8CX;
+    schedule.max_rate_hz = std::numeric_limits<double>::max();
+    for (auto* dev : _vl53l8cx_devices) {
+      schedule.max_rate_hz = std::min(schedule.max_rate_hz, dev->getParams().max_rate_hz);
+    }
+
+    auto request_fn = [this](std::chrono::milliseconds timeout) {
+      return device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, timeout);
+    };
+    auto fetch_fn = [this](std::chrono::milliseconds timeout, std::vector<std::future<bool>>& out_futures) {
+      for (auto* dev : _vl53l8cx_devices) {
+        out_futures.push_back(dev->fetchMeasurementAsync(timeout));
+      }
+    };
+
+    _group_executors.push_back(std::make_unique<FunctionMeasurementGroupExecutor>(schedule, PublishTarget::Depth, true, std::move(request_fn), std::move(fetch_fn)));
   }
 
   if (!_tmf8829_devices.empty()) {
-    SensorGroupSchedule group;
-    group.type = device::DeviceType::TMF8829;
-    // Group max rate is limited by the slowest sensor in the group.
-    group.max_rate_hz = std::numeric_limits<double>::max();
+    SensorGroupSchedule schedule;
+    schedule.type        = device::DeviceType::TMF8829;
+    schedule.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _tmf8829_devices) {
-      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      schedule.max_rate_hz = std::min(schedule.max_rate_hz, dev->getParams().max_rate_hz);
     }
-    _schedule.push_back(group);
+
+    auto request_fn = [this](std::chrono::milliseconds timeout) {
+      return device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, timeout);
+    };
+    auto fetch_fn = [this](std::chrono::milliseconds timeout, std::vector<std::future<bool>>& out_futures) {
+      for (auto* dev : _tmf8829_devices) {
+        out_futures.push_back(dev->fetchMeasurementAsync(timeout));
+      }
+    };
+
+    _group_executors.push_back(std::make_unique<FunctionMeasurementGroupExecutor>(schedule, PublishTarget::Depth, true, std::move(request_fn), std::move(fetch_fn)));
   }
 
   if (!_htpa32_devices.empty()) {
-    SensorGroupSchedule group;
-    group.type        = device::DeviceType::HTPA32;
-    group.max_rate_hz = std::numeric_limits<double>::max();
+    SensorGroupSchedule schedule;
+    schedule.type        = device::DeviceType::HTPA32;
+    schedule.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _htpa32_devices) {
-      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      schedule.max_rate_hz = std::min(schedule.max_rate_hz, dev->getParams().max_rate_hz);
     }
-    _schedule.push_back(group);
+
+    auto request_fn = [this](std::chrono::milliseconds timeout) {
+      return device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, timeout);
+    };
+    auto fetch_fn = [this](std::chrono::milliseconds timeout, std::vector<std::future<bool>>& out_futures) {
+      for (auto* dev : _htpa32_devices) {
+        out_futures.push_back(dev->fetchMeasurementAsync(timeout));
+      }
+    };
+
+    _group_executors.push_back(std::make_unique<FunctionMeasurementGroupExecutor>(schedule, PublishTarget::Thermal, false, std::move(request_fn), std::move(fetch_fn)));
   }
 
   if (!_lights.empty()) {
-    SensorGroupSchedule group;
-    group.type        = device::DeviceType::WS2812b;
-    group.max_rate_hz = std::numeric_limits<double>::max();
+    SensorGroupSchedule schedule;
+    schedule.type        = device::DeviceType::WS2812b;
+    schedule.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _lights) {
-      group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      schedule.max_rate_hz = std::min(schedule.max_rate_hz, dev->getParams().max_rate_hz);
     }
-    _schedule.push_back(group);
+
+    _group_executors.push_back(std::make_unique<FunctionMeasurementGroupExecutor>(schedule, PublishTarget::None, false, nullptr, nullptr));
   }
 
-  _base_rate_hz = computeScheduleFastest(_schedule);
-  //_base_rate_hz = computeScheduleCommonMultiple(_schedule);
+  std::vector<SensorGroupSchedule> schedule;
+  schedule.reserve(_group_executors.size());
+  for (const auto& group : _group_executors) {
+    schedule.push_back(group->schedule());
+  }
+
+  _base_rate_hz = computeScheduleFastest(schedule);
+  //_base_rate_hz = computeScheduleCommonMultiple(schedule);
+
+  for (std::size_t i = 0; i < _group_executors.size(); ++i) {
+    _group_executors[i]->schedule().divisor           = schedule[i].divisor;
+    _group_executors[i]->schedule().effective_rate_hz = schedule[i].effective_rate_hz;
+  }
 
   if (_base_rate_hz > 0.0) {
     _tick_period = std::chrono::duration<double>(1.0 / _base_rate_hz);
@@ -141,13 +282,14 @@ void MeasurementManagerImpl::buildSchedule() {
   }
 
   logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Scheduler: base rate = " + std::to_string(_base_rate_hz) + " Hz, tick period = " + std::to_string(_tick_period.count() * 1000.0) + " ms");
-  for (const auto& g : _schedule) {
+  for (const auto& group : _group_executors) {
+    const auto& g = group->schedule();
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "  Group " + device::toString(g.type) + ": divisor = " + std::to_string(g.divisor) + ", effective rate = " + std::to_string(g.effective_rate_hz) + " Hz");
   }
 }
 
-bool MeasurementManagerImpl::isGroupDue(const SensorGroupSchedule& group) const {
-  return (_tick_count % group.divisor) == 0;
+bool MeasurementManagerImpl::isGroupDue(const MeasurementGroupExecutor& group) const {
+  return (_tick_count % group.schedule().divisor) == 0;
 }
 
 /* =======================================================================================
@@ -248,13 +390,93 @@ void MeasurementManagerImpl::runWorker() noexcept {
   }
 }
 
-bool MeasurementManagerImpl::runPhase() {
+void MeasurementManagerImpl::clearScheduleFlags() {
+  for (auto& group : _group_executors) {
+    group->clearCycleState();
+  }
+}
+
+void MeasurementManagerImpl::resetTickTiming() {
+  _tick_count     = 0;
+  _next_tick_time = std::chrono::steady_clock::now();
+}
+
+void MeasurementManagerImpl::prepareTickWaitPending() {
+  _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
+  _phase          = Phase::tick_wait_pending;
+}
+
+void MeasurementManagerImpl::resumeMeasurementLoop(bool notify_running) {
+  resetTickTiming();
+  clearScheduleFlags();
+  if (notify_running) {
+    notifyState(ManagerState::Running);
+  }
+  prepareTickWaitPending();
+}
+
+MeasurementManagerImpl::AsyncPollResult MeasurementManagerImpl::pollPendingRequests() {
+  for (auto& group : _group_executors) {
+    if (!group->schedule().has_pending_request) {
+      continue;
+    }
+
+    const auto result = group->pollRequestReady(_phase_deadline);
+    if (result == AsyncPollResult::Waiting || result == AsyncPollResult::TimedOut || result == AsyncPollResult::Failed) {
+      return result;
+    }
+
+    group->schedule().has_fetch_ready     = true;
+    group->schedule().has_pending_request = false;
+  }
+
+  return AsyncPollResult::Ready;
+}
+
+MeasurementManagerImpl::AsyncPollResult MeasurementManagerImpl::pollFetchReady() {
+  for (auto& group : _group_executors) {
+    const auto result = group->pollFetchReady(_phase_deadline);
+    if (result == AsyncPollResult::Waiting || result == AsyncPollResult::TimedOut || result == AsyncPollResult::Failed) {
+      return result;
+    }
+  }
+
+  return AsyncPollResult::Ready;
+}
+
+bool MeasurementManagerImpl::collectAndPublishFetchedMeasurements() {
+  bool success = true;
+
+  bool depth_publish_needed   = false;
+  bool thermal_publish_needed = false;
+  for (auto& group : _group_executors) {
+    if (group->hasFetchWork()) {
+      if (group->getPublishTarget() == PublishTarget::Depth) {
+        depth_publish_needed = true;
+      } else if (group->getPublishTarget() == PublishTarget::Thermal) {
+        thermal_publish_needed = true;
+      }
+    }
+
+    success &= group->collectFetchResults();
+  }
+
+  if (depth_publish_needed) {
+    publishDepthMeasurements();
+  }
+  if (thermal_publish_needed) {
+    publishThermalMeasurements();
+  }
+
+  for (auto& group : _group_executors) {
+    group->schedule().has_fetch_ready = false;
+  }
+
+  return success;
+}
+
+bool MeasurementManagerImpl::handleInitializationPhase() {
   switch (_phase) {
-
-    /* =============================================
-      Initialization sequence
-    ============================================= */
-
   case Phase::init: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Initializing MeasurementManager scheduler");
     _phase = Phase::reset_sensors;
@@ -324,66 +546,31 @@ bool MeasurementManagerImpl::runPhase() {
 
   case Phase::pre_loop_init: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Starting measurement loop.");
-    _tick_count     = 0;
-    _next_tick_time = std::chrono::steady_clock::now();
-
-    for (auto& g : _schedule) {
-      g.has_pending_request = false;
-      g.has_fetch_ready     = false;
-    }
-
-    notifyState(ManagerState::Running);
-    _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-    _phase          = Phase::tick_wait_pending;
+    resumeMeasurementLoop(true);
     return true;
   }
 
-    /* =============================================
-      Tick-based measurement loop
-    ============================================= */
+  default:
+    return false;
+  }
+}
 
+bool MeasurementManagerImpl::handleTickPhase() {
+  switch (_phase) {
   case Phase::tick_wait_pending: {
-    // Non-blocking poll: check data-available futures from previous tick's requests.
-    // Groups without a pending request are skipped. HTPA32 is fire-and-forget
-    // so it passes through immediately; its wait happens implicitly during fetch.
-    for (auto& group : _schedule) {
-      if (!group.has_pending_request) {
-        continue;
-      }
-
-      if (group.type == device::DeviceType::VL53L8CX && _vl53_data_available_future.valid()) {
-        if (_vl53_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for VL53L8CX data-available signal.");
-            _phase = Phase::error_meas_enter;
-          }
-          return false;
-        }
-        if (!_vl53_data_available_future.get()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "VL53L8CX data-available signal reported failure.");
-          _phase = Phase::error_meas_enter;
-          return false;
-        }
-      }
-
-      if (group.type == device::DeviceType::TMF8829 && _tmf_data_available_future.valid()) {
-        if (_tmf_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for TMF8829 data-available signal.");
-            _phase = Phase::error_meas_enter;
-          }
-          return false;
-        }
-        if (!_tmf_data_available_future.get()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 data-available signal reported failure.");
-          _phase = Phase::error_meas_enter;
-          return false;
-        }
-      }
-
-      // Data is confirmed available — promote this group to fetch-ready.
-      group.has_fetch_ready     = true;
-      group.has_pending_request = false;
+    const auto pending_result = pollPendingRequests();
+    if (pending_result == AsyncPollResult::Waiting) {
+      return false;
+    }
+    if (pending_result == AsyncPollResult::TimedOut) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for pending data-available signal.");
+      _phase = Phase::error_meas_enter;
+      return false;
+    }
+    if (pending_result == AsyncPollResult::Failed) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Data-available signal reported failure.");
+      _phase = Phase::error_meas_enter;
+      return false;
     }
 
     // All pending groups are ready — advance.
@@ -405,75 +592,27 @@ bool MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::tick_fetch_wait: {
-    // Non-blocking poll: check all fetch futures in order.
-    // Return early (false) if any future is not yet ready.
-    for (auto& fut : _vl53_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-        if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching VL53L8CX measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
-          _phase = Phase::error_meas_enter;
-        }
-        return false;
-      }
+    const auto fetch_result = pollFetchReady();
+    if (fetch_result == AsyncPollResult::Waiting) {
+      return false;
     }
-    for (auto& fut : _tmf_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-        if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching TMF8829 measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
-          _phase = Phase::error_meas_enter;
-        }
-        return false;
-      }
+    if (fetch_result == AsyncPollResult::TimedOut) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching measurement data.");
+      clearScheduleFlags();
+      _phase = Phase::error_meas_enter;
+      return false;
     }
-    for (auto& fut : _htpa_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-        if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching HTPA32 measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
-          _phase = Phase::error_meas_enter;
-        }
-        return false;
-      }
-    }
-
-    // All futures ready — collect results.
-    bool success = true;
-    for (auto& fut : _vl53_fetch_futures)
-      success &= fut.get();
-    for (auto& fut : _tmf_fetch_futures)
-      success &= fut.get();
-    for (auto& fut : _htpa_fetch_futures)
-      success &= fut.get();
-
-    _vl53_fetch_futures.clear();
-    _tmf_fetch_futures.clear();
-    _htpa_fetch_futures.clear();
-
-    if (!success) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Fetching measurement data failed.");
+    if (fetch_result == AsyncPollResult::Failed) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Fetching measurement data failed while polling futures.");
       _phase = Phase::error_meas_enter;
       return true;
     }
 
-    // Publish measurements and clear fetch-ready flags.
-    if (_depth_publish_needed) {
-      publishDepthMeasurements();
-      _depth_publish_needed = false;
-    }
-    if (_thermal_publish_needed) {
-      publishThermalMeasurements();
-      _thermal_publish_needed = false;
-    }
-    for (auto& g : _schedule) {
-      g.has_fetch_ready = false;
+    const bool success = collectAndPublishFetchedMeasurements();
+    if (!success) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Fetching measurement data failed.");
+      _phase = Phase::error_meas_enter;
+      return true;
     }
 
     _phase = Phase::tick_actions;
@@ -496,15 +635,17 @@ bool MeasurementManagerImpl::runPhase() {
     }
 
     // Set the data-wait deadline for the upcoming tick_wait_pending phase.
-    _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-    _phase          = Phase::tick_wait_pending;
+    prepareTickWaitPending();
     return true;
   }
 
-    /* =============================================
-      Measurement error recovery
-    ============================================= */
+  default:
+    return false;
+  }
+}
 
+bool MeasurementManagerImpl::handleMeasurementErrorPhase() {
+  switch (_phase) {
   case Phase::error_meas_enter: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Measurement error handler called.");
     notifyState(ManagerState::Error);
@@ -533,10 +674,7 @@ bool MeasurementManagerImpl::runPhase() {
       dev->resetSensorState();
     for (auto* dev : _thermal_sensors)
       dev->resetSensorState();
-    for (auto& g : _schedule) {
-      g.has_pending_request = false;
-      g.has_fetch_ready     = false;
-    }
+    clearScheduleFlags();
 
     _tick_count = 0;
     requestMeasurements();
@@ -548,59 +686,28 @@ bool MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::error_meas_wait: {
-    // Non-blocking poll — same pattern as tick_wait_pending.
-    for (auto& group : _schedule) {
-      if (!group.has_pending_request) {
-        continue;
-      }
-
-      if (group.type == device::DeviceType::VL53L8CX && _vl53_data_available_future.valid()) {
-        if (_vl53_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            _phase = Phase::error_meas_retry;
-          }
-          return false;
-        }
-        if (!_vl53_data_available_future.get()) {
-          _phase = Phase::error_meas_retry;
-          return false;
-        }
-      }
-
-      if (group.type == device::DeviceType::TMF8829 && _tmf_data_available_future.valid()) {
-        if (_tmf_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            _phase = Phase::error_meas_retry;
-          }
-          return false;
-        }
-        if (!_tmf_data_available_future.get()) {
-          _phase = Phase::error_meas_retry;
-          return false;
-        }
-      }
-
-      group.has_pending_request = false;
+    const auto pending_result = pollPendingRequests();
+    if (pending_result == AsyncPollResult::Waiting) {
+      return false;
+    }
+    if (pending_result == AsyncPollResult::TimedOut || pending_result == AsyncPollResult::Failed) {
+      _phase = Phase::error_meas_retry;
+      return false;
     }
 
     // All pending futures resolved — restart succeeded.
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Measurement restart succeeded after " + std::to_string(_error_attempts) + " attempt(s).");
-    _tick_count     = 0;
-    _next_tick_time = std::chrono::steady_clock::now();
-    for (auto& g : _schedule) {
-      g.has_pending_request = false;
-      g.has_fetch_ready     = false;
-    }
-    notifyState(ManagerState::Running);
-    _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-    _phase          = Phase::tick_wait_pending;
+    resumeMeasurementLoop(true);
     return true;
   }
 
-    /* =============================================
-      Communication error recovery
-    ============================================= */
+  default:
+    return false;
+  }
+}
 
+bool MeasurementManagerImpl::handleCommunicationErrorPhase() {
+  switch (_phase) {
   case Phase::error_comm_enter: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Communication error handler called.");
     notifyState(ManagerState::Error);
@@ -619,15 +726,7 @@ bool MeasurementManagerImpl::runPhase() {
     if (!has_error) {
       // No interface error found — nothing to repair; resume the measurement loop.
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "No communication error found on any interface. Resuming.");
-      _tick_count     = 0;
-      _next_tick_time = std::chrono::steady_clock::now();
-      for (auto& g : _schedule) {
-        g.has_pending_request = false;
-        g.has_fetch_ready     = false;
-      }
-      notifyState(ManagerState::Running);
-      _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-      _phase          = Phase::tick_wait_pending;
+      resumeMeasurementLoop(true);
       return true;
     }
 
@@ -671,31 +770,44 @@ bool MeasurementManagerImpl::runPhase() {
 
     if (_repair_success) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Communication repair succeeded after " + std::to_string(_error_attempts) + " attempt(s).");
-      _tick_count     = 0;
-      _next_tick_time = std::chrono::steady_clock::now();
-      for (auto& g : _schedule) {
-        g.has_pending_request = false;
-        g.has_fetch_ready     = false;
-      }
-      notifyState(ManagerState::Running);
-      _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-      _phase          = Phase::tick_wait_pending;
+      resumeMeasurementLoop(true);
     } else {
       _phase = Phase::error_comm_repair;
     }
     return true;
   }
 
-    /* =============================================
-      Shutdown
-    ============================================= */
+  default:
+    return false;
+  }
+}
 
-  case Phase::shutdown: {
-    logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down scheduler.");
-    notifyState(ManagerState::Shutdown);
-    _is_running = false;
+bool MeasurementManagerImpl::handleShutdownPhase() {
+  if (_phase != Phase::shutdown) {
+    return false;
+  }
+
+  logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Shutting down scheduler.");
+  notifyState(ManagerState::Shutdown);
+  _is_running = false;
+  return true;
+}
+
+bool MeasurementManagerImpl::runPhase() {
+  if (handleInitializationPhase()) {
     return true;
   }
+  if (handleTickPhase()) {
+    return true;
+  }
+  if (handleMeasurementErrorPhase()) {
+    return true;
+  }
+  if (handleCommunicationErrorPhase()) {
+    return true;
+  }
+  if (handleShutdownPhase()) {
+    return true;
   }
 
   return true;
@@ -709,69 +821,24 @@ bool MeasurementManagerImpl::runPhase() {
 void MeasurementManagerImpl::launchFetchFutures() {
   // Launch async fetch for every group that was promoted to fetch-ready.
   // Futures are stored and polled non-blocking in tick_fetch_wait.
-  _depth_publish_needed   = false;
-  _thermal_publish_needed = false;
-
-  for (auto& group : _schedule) {
-    if (!group.has_fetch_ready) {
+  for (auto& group : _group_executors) {
+    if (!group->schedule().has_fetch_ready) {
       continue;
     }
 
-    if (group.type == device::DeviceType::VL53L8CX) {
-      for (auto* dev : _vl53l8cx_devices) {
-        _vl53_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
-      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
-      _depth_publish_needed = true;
-    }
-
-    if (group.type == device::DeviceType::TMF8829) {
-      for (auto* dev : _tmf8829_devices) {
-        _tmf_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
-      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
-      _depth_publish_needed = true;
-    }
-
-    if (group.type == device::DeviceType::HTPA32) {
-      for (auto* dev : _htpa32_devices) {
-        _htpa_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
-      _thermal_publish_needed = true;
-    }
+    group->launchFetch(_params.timeout);
   }
 }
 
 void MeasurementManagerImpl::requestMeasurements() {
-  for (auto& group : _schedule) {
-    if (!isGroupDue(group)) {
+  for (auto& group : _group_executors) {
+    if (!isGroupDue(*group)) {
       continue;
     }
 
-    if (group.type == device::DeviceType::VL53L8CX) {
-      if (!_vl53l8cx_devices.empty()) {
-        // Launch request — the async thread sends the broadcast and waits for
-        // data-available. The future is consumed in the next tick's waitForPendingData().
-        _vl53_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-        group.has_pending_request   = true;
-      }
-    }
-
-    if (group.type == device::DeviceType::TMF8829) {
-      if (!_tmf8829_devices.empty()) {
-        // Launch request — the async thread sends the broadcast and waits for
-        // data-available. The future is consumed in the next tick's waitForPendingData().
-        _tmf_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
-        group.has_pending_request  = true;
-      }
-    }
-
-    if (group.type == device::DeviceType::HTPA32) {
-      if (!_htpa32_devices.empty()) {
-        // Fire-and-forget broadcast request.
-        device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
-        group.has_pending_request = true;
-      }
+    if (group->requestMeasurement(_params.timeout)) {
+      group->schedule().has_pending_request = true;
+      group->schedule().has_fetch_ready     = false;
     }
   }
 }

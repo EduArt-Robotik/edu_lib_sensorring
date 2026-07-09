@@ -110,12 +110,50 @@ private:
     shutdown
   };
 
+  enum class PublishTarget {
+    None,
+    Depth,
+    Thermal,
+  };
+
+  enum class AsyncPollResult {
+    Waiting,
+    Ready,
+    TimedOut,
+    Failed,
+  };
+
+  class MeasurementGroupExecutor {
+  public:
+    virtual ~MeasurementGroupExecutor() = default;
+
+    virtual SensorGroupSchedule& schedule() noexcept                                 = 0;
+    virtual const SensorGroupSchedule& schedule() const noexcept                     = 0;
+    virtual PublishTarget getPublishTarget() const noexcept                          = 0;
+
+    virtual void clearCycleState()                                                   = 0;
+    virtual bool requestMeasurement(std::chrono::milliseconds timeout)               = 0;
+    virtual AsyncPollResult pollRequestReady(std::chrono::time_point<std::chrono::steady_clock> deadline) = 0;
+
+    virtual void launchFetch(std::chrono::milliseconds timeout)                      = 0;
+    virtual AsyncPollResult pollFetchReady(std::chrono::time_point<std::chrono::steady_clock> deadline)    = 0;
+    virtual bool hasFetchWork() const noexcept                                       = 0;
+    virtual bool collectFetchResults()                                               = 0;
+  };
+
   static constexpr double FALLBACK_LOOP_RATE_HZ = 10.0;
 
   /// Advance the state machine by one step. Returns true if the phase made
   /// progress (transitioned), false if it is still waiting (caller may yield).
   bool runPhase();
   void runWorker() noexcept;
+
+  // Phase handler groups used by runPhase() to keep state transitions readable.
+  bool handleInitializationPhase();
+  bool handleTickPhase();
+  bool handleMeasurementErrorPhase();
+  bool handleCommunicationErrorPhase();
+  bool handleShutdownPhase();
 
   // Tick sub-steps
   void launchFetchFutures();
@@ -126,8 +164,18 @@ private:
   void publishThermalMeasurements();
   void notifyState(const ManagerState state);
 
+  // Common scheduler state helpers reused across init and recovery paths.
+  void clearScheduleFlags();
+  void resetTickTiming();
+  void prepareTickWaitPending();
+  void resumeMeasurementLoop(bool notify_running);
+
+  AsyncPollResult pollPendingRequests();
+  AsyncPollResult pollFetchReady();
+  bool collectAndPublishFetchedMeasurements();
+
   void buildSchedule();
-  bool isGroupDue(const SensorGroupSchedule& group) const;
+  bool isGroupDue(const MeasurementGroupExecutor& group) const;
 
   const ManagerParams _params;
   std::atomic<ManagerState> _manager_state;
@@ -139,20 +187,7 @@ private:
   std::chrono::duration<double> _tick_period;
   std::chrono::time_point<std::chrono::steady_clock> _next_tick_time;
   unsigned long _tick_count;
-  std::vector<SensorGroupSchedule> _schedule;
-
-  // Pending futures for data-available signals (one per ToF family).
-  std::future<bool> _vl53_data_available_future;
-  std::future<bool> _tmf_data_available_future;
-
-  // Fetch futures launched in tick_request, polled in tick_fetch_wait.
-  std::vector<std::future<bool>> _vl53_fetch_futures;
-  std::vector<std::future<bool>> _tmf_fetch_futures;
-  std::vector<std::future<bool>> _htpa_fetch_futures;
-
-  // Tracks which measurement types need publishing after fetch completes.
-  bool _depth_publish_needed;
-  bool _thermal_publish_needed;
+  std::vector<std::unique_ptr<MeasurementGroupExecutor>> _group_executors;
 
   // Deadline used by non-blocking wait phases (_phase_deadline) and error recovery.
   std::chrono::time_point<std::chrono::steady_clock> _phase_deadline;
