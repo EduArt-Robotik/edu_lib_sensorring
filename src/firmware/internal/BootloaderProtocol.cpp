@@ -1,8 +1,7 @@
 #include "BootloaderProtocol.hpp"
 
-#include <stdexcept>
-
 #include <sensorring_transport/Protocol.hpp>
+#include <stdexcept>
 
 #include "sensorring/interface/ComEndpoint.hpp"
 
@@ -14,7 +13,7 @@ namespace internal {
 namespace {
 using namespace eduart::sensorring::transport::protocol;
 
-constexpr std::size_t BOOT_MSG_SIZE = std::tuple_size<franklyboot::msg::MsgRaw>::value;
+constexpr std::size_t BOOT_MSG_SIZE      = std::tuple_size<franklyboot::msg::MsgRaw>::value;
 constexpr std::size_t MAX_MSGS_PER_FRAME = 7U;
 } // namespace
 
@@ -24,7 +23,7 @@ BootloaderProtocol::BootloaderProtocol(com::ComInterface& interface, std::chrono
     , _subscription(_interface.subscribe(
           [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<std::uint8_t>& data) {
             onMessage(source, command, data);
-          },
+},
           { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::BROADCAST, devbyte::BOARD } })) {
 }
 
@@ -43,7 +42,7 @@ void BootloaderProtocol::sendRequests(const std::vector<franklyboot::msg::Msg>& 
   std::vector<std::uint8_t> payload;
   payload.reserve(msgs.size() * BOOT_MSG_SIZE);
   for (const auto& msg : msgs) {
-  const auto raw = franklyboot::msg::convertMsgToBytes(msg);
+    const auto raw = franklyboot::msg::convertMsgToBytes(msg);
     payload.insert(payload.end(), raw.begin(), raw.end());
   }
 

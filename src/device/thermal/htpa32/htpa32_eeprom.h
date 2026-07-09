@@ -1,7 +1,6 @@
 #ifndef HTPA32_EEPROM_H
 #define HTPA32_EEPROM_H
 
-#include <stdint.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -9,11 +8,10 @@
 extern "C" {
 #endif
 
-#define HTPA32_EEPROM_VERSION   1
-#define HTPA32_EEPROM_SERIALIZED_SIZE  7289u
+#define HTPA32_EEPROM_VERSION         1
+#define HTPA32_EEPROM_SERIALIZED_SIZE 7289u
 
-typedef struct
-{
+typedef struct {
   float pixc_min;
   float pixc_max;
 
@@ -72,7 +70,7 @@ typedef struct
  *  @param[in]  Buffer size for safety
  *  @return     Number of bytes written. Returns 0 if the buffer is too small.
  **/
-size_t htpa32_serialize(const htpa32_eeprom_t *src, uint8_t *buffer, size_t buffer_size);
+size_t htpa32_serialize(const htpa32_eeprom_t* src, uint8_t* buffer, size_t buffer_size);
 
 /**
  *  Deserialize the eeprom struct from buffer.
@@ -81,7 +79,7 @@ size_t htpa32_serialize(const htpa32_eeprom_t *src, uint8_t *buffer, size_t buff
  *  @param[in]  Buffer size for safety
  *  @return     Returns 0 on success. Returns -1 if the buffer is too small.
  **/
-int htpa32_deserialize(htpa32_eeprom_t *dst, const uint8_t *buffer, size_t buffer_size);
+int htpa32_deserialize(htpa32_eeprom_t* dst, const uint8_t* buffer, size_t buffer_size);
 
 #ifdef __cplusplus
 }

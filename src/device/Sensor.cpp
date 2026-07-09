@@ -7,7 +7,7 @@ namespace sensorring {
 namespace device {
 
 Sensor::Sensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target)
-  : Device(id, interface, target)
+    : Device(id, interface, target)
     , _state(DeviceState::Undefined) {
 }
 

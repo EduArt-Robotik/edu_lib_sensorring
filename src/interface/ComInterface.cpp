@@ -103,7 +103,6 @@ bool ComInterface::configure() {
   return true;
 }
 
-
 } // namespace com
 
 } // namespace sensorring

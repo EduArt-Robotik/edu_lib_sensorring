@@ -65,7 +65,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
       continue; // Only create devices that are in the params map
     }
 
-    const auto* dev_params        = it->second.get();
+    const auto* dev_params = it->second.get();
     if (dev_params == nullptr || !dev_params->enable) {
       continue;
     }
@@ -88,7 +88,7 @@ std::unique_ptr<SensorBoard> SensorBoardManager::createSensorBoard(EnumerationIn
       // Unknown or unsupported device type
       break;
     }
-    
+
     if (devices.size() > size_before && params.board_type != SensorBoardType::Undefined) {
       devices.back()->setPoseOffset(getDevicePoseOffset(params.board_type, devices.back()->getDeviceID()));
     } else {

@@ -17,7 +17,7 @@ BootloaderActivator::BootloaderActivator(com::ComInterface& interface, std::chro
     , _subscription(_interface.subscribe(
           [this](const com::ComEndpoint& source, std::uint8_t command, const std::vector<std::uint8_t>& data) {
             onMessage(source, command, data);
-          },
+},
           { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } })) {
 }
 

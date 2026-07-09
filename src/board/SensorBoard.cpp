@@ -33,7 +33,7 @@ SensorBoard::SensorBoard(SensorBoardParams params, com::ComInterfaceID interface
   },
       { com::ComEndpoint{ com::Direction::Output, com::ComEndpoint::ANY_BOARD, devbyte::BOARD } });
 
-  //configure();
+  // configure();
 }
 
 SensorBoard::~SensorBoard() {

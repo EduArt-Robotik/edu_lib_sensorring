@@ -52,7 +52,6 @@ bool CommitHash::operator=(const std::uint32_t& other) noexcept {
   return true;
 }
 
-  
 namespace board {
 
 std::string toString(ConnectionState state) {

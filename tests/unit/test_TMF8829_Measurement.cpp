@@ -1,5 +1,4 @@
 #include <catch2/catch_all.hpp>
-
 #include <cstdint>
 #include <vector>
 
@@ -100,10 +99,10 @@ TEST_CASE("TMF8829 fromBuffer decodes double-frame row interleaving", "[TMF8829]
   REQUIRE(measurement.point_cloud.data.size() == resolution_x * resolution_y);
   REQUIRE(measurement.nr_valid_points == resolution_x * resolution_y);
 
-  const std::size_t idx_row0_col0  = 0u;
-  const std::size_t idx_row1_col0  = resolution_x;
-  const std::size_t idx_row2_col5  = 2u * resolution_x + 5u;
-  const std::size_t idx_row3_col5  = 3u * resolution_x + 5u;
+  const std::size_t idx_row0_col0   = 0u;
+  const std::size_t idx_row1_col0   = resolution_x;
+  const std::size_t idx_row2_col5   = 2u * resolution_x + 5u;
+  const std::size_t idx_row3_col5   = 3u * resolution_x + 5u;
   const std::size_t idx_row31_col31 = 31u * resolution_x + 31u;
 
   REQUIRE(measurement.point_cloud.data[idx_row0_col0].raw_distance == Catch::Approx(toMeters(1000u)));

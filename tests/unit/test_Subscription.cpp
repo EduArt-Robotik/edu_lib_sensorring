@@ -4,8 +4,8 @@
 
 #include "sensorring/subscription/Subscription.hpp"
 
-using eduart::sensorring::subscription::Subscription;
 using eduart::sensorring::subscription::SubscriberToken;
+using eduart::sensorring::subscription::Subscription;
 
 TEST_CASE("Subscription default construction", "[Subscription]") {
   Subscription sub;
@@ -16,7 +16,9 @@ TEST_CASE("Subscription constructed with token and cancel callable", "[Subscript
   bool cancelled = false;
   auto token     = SubscriberToken::getNextToken();
 
-  Subscription sub(token, [&cancelled]() { cancelled = true; });
+  Subscription sub(token, [&cancelled]() {
+    cancelled = true;
+  });
   REQUIRE(sub.isActive());
   REQUIRE(sub.token() == token);
 
@@ -38,7 +40,9 @@ TEST_CASE("Subscription constructed with token and cancel callable", "[Subscript
 TEST_CASE("Subscription RAII: destructor auto-cancels", "[Subscription]") {
   bool cancelled = false;
   {
-    Subscription sub(SubscriberToken::getNextToken(), [&cancelled]() { cancelled = true; });
+    Subscription sub(SubscriberToken::getNextToken(), [&cancelled]() {
+      cancelled = true;
+    });
     REQUIRE(sub.isActive());
   }
   REQUIRE(cancelled);
@@ -48,7 +52,9 @@ TEST_CASE("Subscription is move-only", "[Subscription]") {
   bool cancelled = false;
   auto token     = SubscriberToken::getNextToken();
 
-  Subscription original(token, [&cancelled]() { cancelled = true; });
+  Subscription original(token, [&cancelled]() {
+    cancelled = true;
+  });
 
   SECTION("move constructor transfers ownership") {
     Subscription moved(std::move(original));
@@ -59,7 +65,9 @@ TEST_CASE("Subscription is move-only", "[Subscription]") {
 
   SECTION("move assignment transfers ownership and cancels previous") {
     bool prev_cancelled = false;
-    Subscription prev(SubscriberToken::getNextToken(), [&prev_cancelled]() { prev_cancelled = true; });
+    Subscription prev(SubscriberToken::getNextToken(), [&prev_cancelled]() {
+      prev_cancelled = true;
+    });
 
     prev = std::move(original);
     REQUIRE(prev_cancelled);

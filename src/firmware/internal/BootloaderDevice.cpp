@@ -14,9 +14,9 @@ namespace internal {
 
 namespace {
 
-using RequestType = franklyboot::msg::RequestType;
-using ResultType  = franklyboot::msg::ResultType;
-using Msg         = franklyboot::msg::Msg;
+using RequestType                                 = franklyboot::msg::RequestType;
+using ResultType                                  = franklyboot::msg::ResultType;
+using Msg                                         = franklyboot::msg::Msg;
 constexpr std::size_t MAX_BOOT_COMMANDS_PER_FRAME = 7U;
 
 void logMessage(const LogCallback& log_callback, const std::string& msg) {
@@ -98,9 +98,9 @@ void BootloaderDevice::flashHex(const std::string& hex_path, const LogCallback& 
   }
 
   exec(RequestType::REQ_FLASH_WRITE_APP_CRC, app_crc, true);
-  
+
   // Fire and forget request to start the application
-  //exec(RequestType::REQ_START_APP, 0U, true);
+  // exec(RequestType::REQ_START_APP, 0U, true);
   _protocol.sendRequestNoWait(Msg(RequestType::REQ_START_APP, ResultType::RES_NONE, 0U));
 
   logMessage(log_callback, "Flashed " + nodeLabel() + " successfully.");

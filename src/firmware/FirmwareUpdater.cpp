@@ -25,7 +25,7 @@ using Msg         = franklyboot::msg::Msg;
 
 void logMessage(const LogCallback& log_callback, const std::string& msg) {
   if (log_callback) {
-    try{
+    try {
       log_callback(msg);
     } catch (...) {
       // Ignore exceptions from the callback.
@@ -102,7 +102,7 @@ bool FirmwareUpdater::flashSingleBoardImpl(const com::ComInterfaceID& interface,
 
 bool FirmwareUpdater::flashAllBoardsSequential(const com::ComInterfaceID& interface, const std::string& hex_file_path, LogCallback log_callback) const {
   std::size_t flashed_boards = 0U;
-  unsigned int flashed_nodes     = 0U;
+  unsigned int flashed_nodes = 0U;
 
   std::size_t last_known_count = countBoards(interface);
 

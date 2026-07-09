@@ -13,7 +13,7 @@ namespace sensorring {
 namespace device {
 
 DepthSensor::DepthSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target, DepthSensorConfig config)
-  : Sensor(id, interface, target)
+    : Sensor(id, interface, target)
     , _config(config) {
 
   createLookupTable(config, _lut_x, _lut_y, _lut_z);
@@ -109,7 +109,7 @@ void DepthSensor::processRawMeasurement(measurement::PointCloud& pcl) {
           { x, y, z }
         };
       } else {
-        const auto& nan = std::numeric_limits<double>::quiet_NaN();
+        const auto& nan   = std::numeric_limits<double>::quiet_NaN();
         pcl.data[i].point = math::Vector3{
           { nan, nan, nan }
         };

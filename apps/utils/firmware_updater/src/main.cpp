@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      const auto node_id = updater.detectBootloaderNodeWithRetries( interface);
+      const auto node_id = updater.detectBootloaderNodeWithRetries(interface);
       if (!node_id.has_value()) {
         std::cerr << "Board entered bootloader mode, but no bootloader node could be detected.\n";
         return EXIT_FAILURE;

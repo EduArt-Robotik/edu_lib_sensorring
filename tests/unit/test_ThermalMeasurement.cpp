@@ -60,9 +60,7 @@ TEST_CASE("TemperatureImage::toFalseColor returns RGB data", "[TemperatureImage]
 
   auto fc = img.toFalseColor(20.0, 40.0);
 
-  bool different = (fc.data[0][0] != fc.data[1][0]) ||
-                   (fc.data[0][1] != fc.data[1][1]) ||
-                   (fc.data[0][2] != fc.data[1][2]);
+  bool different = (fc.data[0][0] != fc.data[1][0]) || (fc.data[0][1] != fc.data[1][1]) || (fc.data[0][2] != fc.data[1][2]);
   REQUIRE(different);
 }
 
@@ -74,8 +72,6 @@ TEST_CASE("TemperatureImage::toFalseColor auto range", "[TemperatureImage]") {
 
   auto fc = img.toFalseColor();
 
-  bool different = (fc.data[0][0] != fc.data[1][0]) ||
-                   (fc.data[0][1] != fc.data[1][1]) ||
-                   (fc.data[0][2] != fc.data[1][2]);
+  bool different = (fc.data[0][0] != fc.data[1][0]) || (fc.data[0][1] != fc.data[1][1]) || (fc.data[0][2] != fc.data[1][2]);
   REQUIRE(different);
 }

@@ -9,7 +9,7 @@ namespace sensorring {
 namespace device {
 
 ThermalSensor::ThermalSensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint target)
-  : Sensor(id, interface, target) {
+    : Sensor(id, interface, target) {
 }
 
 const measurement::ThermalMeasurement& ThermalSensor::getLatestMeasurement() const {
