@@ -39,6 +39,10 @@ void SensorRingFactory::expectDevice(device::WS2812b_Params params) {
   _impl->expectDevice(std::move(params));
 }
 
+void SensorRingFactory::expectDevice(device::DeviceType type) {
+  _impl->expectDevice(type);
+}
+
 void SensorRingFactory::expectDevice(device::DepthSensorParams params) {
   _impl->expectDevice(std::move(params));
 }

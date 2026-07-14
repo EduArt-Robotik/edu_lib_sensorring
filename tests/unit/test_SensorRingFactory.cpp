@@ -282,6 +282,48 @@ TEST_CASE("resolveDeviceExpectations - category default params take precedence o
   REQUIRE(p->max_rate_hz == 9.0);
 }
 
+TEST_CASE("resolveDeviceExpectations - paramless concrete expectations use concrete defaults", "[SensorRingFactory][resolveDeviceExpectations]") {
+  SensorRingFactoryImpl factory;
+
+  dt::VL53L8CX_Params concrete_default;
+  concrete_default.max_rate_hz = 18.0;
+  factory.setDefaultDeviceParams(concrete_default);
+
+  const std::vector<DeviceExpectation> expectations{ Access::makeExactExpectation(dt::DeviceType::VL53L8CX) };
+  const std::vector<dt::DeviceType> available{ dt::DeviceType::VL53L8CX };
+
+  const auto result = Access::resolveDeviceExpectations(factory, expectations, available);
+
+  REQUIRE(result.configured_devs.size() == 1);
+  REQUIRE(result.configured_devs[0] == dt::DeviceType::VL53L8CX);
+  REQUIRE(result.params_map.count(dt::DeviceType::VL53L8CX) == 1);
+
+  const auto* p = dynamic_cast<const dt::VL53L8CX_Params*>(result.params_map.at(dt::DeviceType::VL53L8CX).get());
+  REQUIRE(p != nullptr);
+  REQUIRE(p->max_rate_hz == 18.0);
+}
+
+TEST_CASE("resolveDeviceExpectations - paramless category expectations use category defaults", "[SensorRingFactory][resolveDeviceExpectations]") {
+  SensorRingFactoryImpl factory;
+
+  dt::DepthSensorParams category_default;
+  category_default.max_rate_hz = 11.0;
+  factory.setDefaultDeviceParams(category_default);
+
+  const std::vector<DeviceExpectation> expectations{ Access::makeExactExpectation(dt::DeviceType::AnyDepth) };
+  const std::vector<dt::DeviceType> available{ dt::DeviceType::TMF8829 };
+
+  const auto result = Access::resolveDeviceExpectations(factory, expectations, available);
+
+  REQUIRE(result.configured_devs.size() == 1);
+  REQUIRE(result.configured_devs[0] == dt::DeviceType::TMF8829);
+  REQUIRE(result.params_map.count(dt::DeviceType::TMF8829) == 1);
+
+  const auto* p = dynamic_cast<const dt::DepthSensorParams*>(result.params_map.at(dt::DeviceType::TMF8829).get());
+  REQUIRE(p != nullptr);
+  REQUIRE(p->max_rate_hz == 11.0);
+}
+
 TEST_CASE("resolveDeviceExpectations - category expectations fall back to concrete defaults when no category default exists", "[SensorRingFactory][resolveDeviceExpectations]") {
   SensorRingFactoryImpl factory;
 

@@ -72,6 +72,10 @@ void SensorRingFactoryImpl::expectDevice(device::WS2812b_Params params) {
   expectDeviceImpl<device::WS2812b_Params>(device::DeviceType::WS2812b, std::move(params));
 }
 
+void SensorRingFactoryImpl::expectDevice(device::DeviceType type) {
+  expectDeviceByType(type);
+}
+
 void SensorRingFactoryImpl::expectDevice(device::DepthSensorParams params) {
   expectDeviceImpl<device::DepthSensorParams>(device::DeviceType::AnyDepth, std::move(params));
 }
@@ -117,6 +121,30 @@ void SensorRingFactoryImpl::setDefaultDeviceParams(device::ThermalSensorParams p
 void SensorRingFactoryImpl::setDefaultDeviceParams(device::LightParams params) {
   auto p                                               = std::make_unique<device::LightParams>(std::move(params));
   _default_device_params[device::DeviceType::AnyLight] = std::move(p);
+}
+
+void SensorRingFactoryImpl::expectDeviceByType(device::DeviceType type) {
+  auto* board = currentBoardExpectation();
+  if (!board) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called before expectBoard.");
+    return;
+  }
+
+  switch (type) {
+  case device::DeviceType::VL53L8CX:
+  case device::DeviceType::TMF8829:
+  case device::DeviceType::HTPA32:
+  case device::DeviceType::WS2812b:
+  case device::DeviceType::AnyDepth:
+  case device::DeviceType::AnyThermal:
+  case device::DeviceType::AnyLight:
+    board->has_explicit_devices = true;
+    board->device_expectations.push_back({ type, nullptr });
+    return;
+  default:
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "SensorRingFactory::expectDevice called with unsupported device type.");
+    return;
+  }
 }
 
 void SensorRingFactoryImpl::reset() {

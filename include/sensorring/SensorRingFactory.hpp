@@ -129,6 +129,18 @@ public:
   // ── Device expectations (applied to the last expectBoard) ──
 
   /**
+   * @brief Declare an expected device type without overriding default parameters.
+   *
+   * Use this when you want to restrict which devices are instantiated on a
+   * board while still letting setDefaultDeviceParams() supply the effective
+   * configuration for the matched concrete device.
+   *
+   * Supported values are concrete device types (e.g. VL53L8CX) and category
+   * wildcards (AnyDepth, AnyThermal, AnyLight).
+   */
+  void expectDevice(device::DeviceType type);
+
+  /**
    * @brief Declare an expected device on the most recently added board.
    *
    * Only the device types declared via expectDevice() are instantiated for

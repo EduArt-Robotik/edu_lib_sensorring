@@ -67,6 +67,7 @@ public:
   void expectDevice(device::TMF8829_Params params);
   void expectDevice(device::HTPA32_Params params);
   void expectDevice(device::WS2812b_Params params);
+  void expectDevice(device::DeviceType type);
   void expectDevice(device::DepthSensorParams params);
   void expectDevice(device::ThermalSensorParams params);
   void expectDevice(device::LightParams params);
@@ -109,6 +110,7 @@ private:
       std::vector<std::unique_ptr<board::SensorBoard> >& board_vec, std::optional<std::size_t> strict_board_index = std::nullopt) const;
 
   BoardExpectation* currentBoardExpectation();
+  void expectDeviceByType(device::DeviceType type);
 
   template <typename Params> void expectDeviceImpl(device::DeviceType type, Params params) {
     auto* board = currentBoardExpectation();
