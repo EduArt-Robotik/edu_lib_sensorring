@@ -1,1 +1,2 @@
+add_subdirectory(discovery_tool)
 add_subdirectory(firmware_updater)
