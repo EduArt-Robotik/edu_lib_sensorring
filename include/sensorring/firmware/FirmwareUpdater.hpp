@@ -28,12 +28,12 @@ namespace firmware_update {
  * @brief  Timing and retry parameters that control the firmware-update procedure.
  */
 struct SENSORRING_EXPORT UpdateConfig {
-  std::chrono::milliseconds can_timeout{ 500 };                         ///< Maximum time to wait for a CAN response before declaring a timeout.
-  std::chrono::milliseconds bootloader_start_ack_timeout{ 1000 };       ///< Maximum time to wait for the bootloader-start acknowledgement after a reset.
-  std::chrono::milliseconds settle_delay_after_flash{ 2000 };           ///< Delay inserted after the last flash packet to let the board settle before verification.
-  std::chrono::milliseconds bootloader_detect_retry_delay{ 500 };       ///< Pause between consecutive bootloader-detection attempts.
-  unsigned int bootloader_detect_retries{ 5 };                          ///< Number of bootloader-detection attempts before giving up.
-  unsigned int no_progress_cycles_before_done{ 3 };                     ///< Number of consecutive cycles without progress that signal a completed flash operation.
+  std::chrono::milliseconds can_timeout{ 500 };                   ///< Maximum time to wait for a CAN response before declaring a timeout.
+  std::chrono::milliseconds bootloader_start_ack_timeout{ 1000 }; ///< Maximum time to wait for the bootloader-start acknowledgement after a reset.
+  std::chrono::milliseconds settle_delay_after_flash{ 2000 };     ///< Delay inserted after the last flash packet to let the board settle before verification.
+  std::chrono::milliseconds bootloader_detect_retry_delay{ 500 }; ///< Pause between consecutive bootloader-detection attempts.
+  unsigned int bootloader_detect_retries{ 5 };                    ///< Number of bootloader-detection attempts before giving up.
+  unsigned int no_progress_cycles_before_done{ 3 };               ///< Number of consecutive cycles without progress that signal a completed flash operation.
 };
 
 /// @brief Callback invoked by the updater to emit human-readable log messages.

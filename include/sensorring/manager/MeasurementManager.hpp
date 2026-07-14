@@ -106,13 +106,22 @@ public:
    */
   template <typename T> device::Group<T> devices() const noexcept;
 
-  /// Convenience: return all depth sensors.
+  /**
+   * @brief Return all depth sensors.
+   * @return Group of depth sensors.
+   */
   device::Group<device::DepthSensor> depthSensors() const noexcept;
 
-  /// Convenience: return all thermal sensors.
+   /**
+   * @brief Return all thermal sensors.
+   * @return Group of thermal sensors.
+   */
   device::Group<device::ThermalSensor> thermalSensors() const noexcept;
 
-  /// Convenience: return all lights.
+  /**
+   * @brief Return all lights.
+   * @return Group of lights.
+   */
   device::Group<device::Light> lights() const noexcept;
 
   /// Access the underlying sensor ring

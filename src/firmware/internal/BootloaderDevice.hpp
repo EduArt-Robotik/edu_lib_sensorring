@@ -1,15 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include <francor/franklyboot/msg.h>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <francor/franklyboot/msg.h>
+#include "sensorring/firmware/FirmwareUpdater.hpp"
 
 #include "BootloaderProtocol.hpp"
 #include "FlashLayout.hpp"
-#include "sensorring/firmware/FirmwareUpdater.hpp"
 
 namespace eduart {
 namespace sensorring {

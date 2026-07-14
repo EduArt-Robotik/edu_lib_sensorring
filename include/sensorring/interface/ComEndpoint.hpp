@@ -41,7 +41,7 @@ struct SENSORRING_EXPORT ComEndpoint {
 
   /// @brief Equality comparison for ComEndpoint (compares direction, board address, and device ID).
   bool operator==(const ComEndpoint& other) const;
-  
+
   /// @brief Inequality comparison for ComEndpoint.
   bool operator!=(const ComEndpoint& other) const;
 

@@ -84,28 +84,28 @@ private:
     // Initialization sequence
     init,
     reset_sensors,
-    reset_sensors_wait,       ///< Non-blocking delay after hardware reset (2 s).
+    reset_sensors_wait, ///< Non-blocking delay after hardware reset (2 s).
     sync_lights,
     configure_interfaces,
     configure_devices,
     pre_loop_init,
 
     // Tick-based measurement loop (each sub-phase returns immediately when waiting)
-    tick_wait_pending,        ///< Poll data-available futures from previous tick.
-    tick_request,             ///< Fire measurement requests; launch fetch futures.
-    tick_fetch_wait,          ///< Poll fetch futures; publish measurements when done.
-    tick_actions,             ///< Execute actuator actions; advance tick counter.
-    tick_sleep,               ///< Non-blocking wait until next tick boundary.
+    tick_wait_pending, ///< Poll data-available futures from previous tick.
+    tick_request,      ///< Fire measurement requests; launch fetch futures.
+    tick_fetch_wait,   ///< Poll fetch futures; publish measurements when done.
+    tick_actions,      ///< Execute actuator actions; advance tick counter.
+    tick_sleep,        ///< Non-blocking wait until next tick boundary.
 
     // Measurement error recovery
-    error_meas_enter,         ///< Log and notify; decide whether to attempt repair.
-    error_meas_retry,         ///< Reset sensor state and fire a fresh request.
-    error_meas_wait,          ///< Poll data-available futures during recovery.
+    error_meas_enter, ///< Log and notify; decide whether to attempt repair.
+    error_meas_retry, ///< Reset sensor state and fire a fresh request.
+    error_meas_wait,  ///< Poll data-available futures during recovery.
 
     // Communication error recovery
-    error_comm_enter,         ///< Log and notify; check for interface errors.
-    error_comm_repair,        ///< Call repairInterface() for all faulty buses.
-    error_comm_wait,          ///< Non-blocking inter-attempt delay (250 ms).
+    error_comm_enter,  ///< Log and notify; check for interface errors.
+    error_comm_repair, ///< Call repairInterface() for all faulty buses.
+    error_comm_wait,   ///< Non-blocking inter-attempt delay (250 ms).
 
     shutdown
   };

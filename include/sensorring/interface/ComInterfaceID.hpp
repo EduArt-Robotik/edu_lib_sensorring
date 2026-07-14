@@ -25,9 +25,9 @@ namespace com {
  * @brief Type of the communication interface.
  */
 enum class InterfaceType {
-  Undefined,  ///< Type not yet assigned.
-  SocketCan,  ///< Linux SocketCAN interface (e.g. can0).
-  UsbTingo    ///< USBtingo CAN adapter.
+  Undefined, ///< Type not yet assigned.
+  SocketCan, ///< Linux SocketCAN interface (e.g. can0).
+  UsbTingo   ///< USBtingo CAN adapter.
 };
 
 /**

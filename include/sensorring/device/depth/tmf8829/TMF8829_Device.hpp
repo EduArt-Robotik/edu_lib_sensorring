@@ -42,7 +42,7 @@ public:
    * @param[in] idx       Index of the sensor on the bus.
    */
   TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx);
-  
+
   /// Destructor
   ~TMF8829_Device();
 

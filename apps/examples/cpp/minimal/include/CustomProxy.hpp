@@ -57,17 +57,13 @@ public:
    * @brief Callback method for a complete depth frame
    * @param measurements Vector of depth measurements (one per sensor)
    */
-  void onDepthFrame(const std::vector<measurement::DepthMeasurement>&) {
-    vl53l8cx_rate.tick(_depth_sensor_count);
-  }
+  void onDepthFrame(const std::vector<measurement::DepthMeasurement>&) { vl53l8cx_rate.tick(_depth_sensor_count); }
 
   /**
    * @brief Callback method for a complete thermal frame
    * @param measurements Vector of thermal measurements (one per sensor)
    */
-  void onThermalFrame(const std::vector<measurement::ThermalMeasurement>&) {
-    htpa32_rate.tick(_thermal_sensor_count);
-  }
+  void onThermalFrame(const std::vector<measurement::ThermalMeasurement>&) { htpa32_rate.tick(_thermal_sensor_count); }
 
 public:
   Rate vl53l8cx_rate;
@@ -75,7 +71,7 @@ public:
 
 private:
   std::vector<subscription::Subscription> _subscriptions;
-  unsigned int _depth_sensor_count = 0;
+  unsigned int _depth_sensor_count   = 0;
   unsigned int _thermal_sensor_count = 0;
 };
 

@@ -28,8 +28,10 @@ struct SENSORRING_EXPORT WS2812b_Params : public LightParams {
   WS2812b_Params() { max_rate_hz = 10.0; }
 
   /// @brief Initializes the WS2812b_Params from a LightParams instance.
-   WS2812b_Params(const LightParams& params)
-      : LightParams{ params } { max_rate_hz = 10.0; };
+  WS2812b_Params(const LightParams& params)
+      : LightParams{ params } {
+    max_rate_hz = 10.0;
+  };
 };
 
 } // namespace device

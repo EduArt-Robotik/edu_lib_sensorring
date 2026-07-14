@@ -1,9 +1,8 @@
 #include "sensorring/board/EnumerationInformation.hpp"
 
 #include <iomanip>
+#include <sensorring_transport/ByteOperations.hpp>
 #include <sstream>
-
-#include "sensorring_transport/ByteOperations.hpp"
 
 namespace eduart {
 

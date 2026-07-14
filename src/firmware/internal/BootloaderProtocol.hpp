@@ -4,11 +4,10 @@
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
+#include <francor/franklyboot/msg.h>
 #include <mutex>
 #include <optional>
 #include <vector>
-
-#include <francor/franklyboot/msg.h>
 
 #include "interface/ComInterface.hpp"
 

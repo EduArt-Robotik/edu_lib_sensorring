@@ -69,7 +69,7 @@ struct SENSORRING_EXPORT PointCloud {
    */
   static PointCloud transform(const PointCloud& cloud, const math::Vector3 translation, const math::Vector3 rotation);
 
-    /**
+  /**
    * @brief Transforms a point cloud using a rotation matrix and a translation vector.
    * @param[in] cloud The point cloud to transform.
    * @param[in] translation The translation vector.

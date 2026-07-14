@@ -14,7 +14,7 @@ namespace tmf8829 {
 static constexpr std::uint8_t RESULT_FRAME_PRE_HEADER_SIZE = 5u;
 static constexpr std::uint8_t RESULT_FRAME_HEADER_SIZE     = 16u;
 static constexpr std::uint8_t RESULT_FRAME_FOOTER_SIZE     = 12u;
-static constexpr std::size_t MAX_RESULT_FRAME_SIZE  = 8192;
+static constexpr std::size_t MAX_RESULT_FRAME_SIZE         = 8192;
 
 // TMF8829 result frame constants
 static constexpr std::uint16_t RESULT_FRAME_EOF_MARKER          = 0xE0F7; // End-of-frame marker
@@ -32,8 +32,8 @@ static constexpr double DISTANCE_FIXED_POINT_FACTOR = 0.25l; // Each unit in the
 static constexpr double FOV_X_DEG = 67.9;
 static constexpr double FOV_Y_DEG = 52.8;
 
-static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 48, 48};
-static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 32, 32};
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 48, 48 };
+static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y_RES_MODE[] = { 8, 8, 8, 16, 16, 32, 32, 32, 32 };
 
 static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_X_FP_MODE[] = { 8, 8, 16, 32, 32, 48 };
 static constexpr std::uint8_t LOOKUP_TABLE_RESOLUTION_Y_FP_MODE[] = { 8, 8, 16, 32, 32, 32 };
