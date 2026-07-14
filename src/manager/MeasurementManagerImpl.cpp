@@ -1,6 +1,5 @@
 #include "manager/MeasurementManagerImpl.hpp"
 
-#include "board/SensorBoardCommands.hpp"
 #include "interface/ComInterface.hpp"
 #include "sensorring/SensorBus.hpp"
 #include "sensorring/board/SensorBoard.hpp"
@@ -263,7 +262,7 @@ bool MeasurementManagerImpl::runPhase() {
 
   case Phase::reset_sensors: {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Info, "Resetting all connected sensors");
-    board::resetBoards();
+    board::SensorBoard::resetBoards();
     _phase_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
     _phase          = Phase::reset_sensors_wait;
     return true;

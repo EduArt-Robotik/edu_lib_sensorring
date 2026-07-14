@@ -115,6 +115,21 @@ bool SensorBoard::getOrientation(Orientation& orientation) {
   return true;
 }
 
+bool SensorBoard::resetBoards() {
+  bool success = true;
+  for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
+    success &= iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::RESET, {});
+  }
+  return success;
+}
+
+void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
+  auto* iface = com::ComManager::getInstance()->getInterface(interface);
+  if (iface) {
+    iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {});
+  }
+}
+
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
 
   switch (command) {

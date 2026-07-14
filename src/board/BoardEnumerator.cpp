@@ -2,9 +2,9 @@
 
 #include <sensorring_transport/Protocol.hpp>
 
-using namespace eduart::sensorring::transport::protocol;
+#include "sensorring/board/SensorBoard.hpp"
 
-#include "board/SensorBoardCommands.hpp"
+using namespace eduart::sensorring::transport::protocol;
 
 namespace eduart {
 
@@ -27,7 +27,7 @@ BoardEnumerator::~BoardEnumerator() {
 }
 
 void BoardEnumerator::startEnumeration() {
-  cmdEnumerateBoards(_interface->getID());
+  SensorBoard::cmdEnumerateBoards(_interface->getID());
 }
 
 std::vector<EnumerationInformation> BoardEnumerator::getResult() {
