@@ -140,6 +140,7 @@ private:
   std::chrono::time_point<std::chrono::steady_clock> _next_tick_time;
   unsigned long _tick_count;
   std::vector<SensorGroupSchedule> _schedule;
+  std::atomic<bool> _is_running;
 
   // Pending futures for data-available signals (one per ToF family).
   std::future<bool> _vl53_data_available_future;
@@ -159,7 +160,6 @@ private:
   unsigned int _error_attempts;
   bool _repair_success;
 
-  std::atomic<bool> _is_running;
   std::thread _worker_thread;
 
   subscription::Publisher<const ManagerState> _state_publisher;
