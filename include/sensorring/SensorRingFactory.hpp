@@ -169,10 +169,22 @@ public:
   // ── Default device parameters ──
 
   /**
-   * @brief Set default params applied to every device of the given type that
-   *        has no explicit params from expectDevice().
+   * @brief Set default params applied to discovered devices that have no
+   *        explicit params from expectDevice().
    *
-   * May be called multiple times for different device types. Each call
+   * Params are looked up in the following priority order for each discovered
+   * concrete device type (e.g. VL53L8CX):
+   *  1. **Concrete default** - a matching `setDefaultDeviceParams(VL53L8CX_Params)` call.
+   *  2. **Category default** - a matching `setDefaultDeviceParams(DepthSensorParams)` call
+   *     whose category covers the concrete type (e.g. AnyDepth covers VL53L8CX / TMF8829).
+   *  3. **Hard-coded defaults** - zero-initialised params for the concrete type.
+   *
+   * This applies to all three build paths: auto-discovery, configured boards without
+   * explicit device expectations, and as a fallback inside resolveDeviceExpectations
+   * when a wildcard expectation has no inline params.
+   *
+   * Concrete params always override category params. Category params always override
+   * hard-coded defaults. May be called multiple times for different types. Each call
    * replaces any previously set default for that type.
    */
   void setDefaultDeviceParams(device::VL53L8CX_Params params);

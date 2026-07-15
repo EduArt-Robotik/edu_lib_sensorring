@@ -508,23 +508,32 @@ device::DeviceParamsMap SensorRingFactoryImpl::buildDefaultParamsMap(const std::
   for (const auto& dev_type : devices) {
     auto def_it = _default_device_params.find(dev_type);
     if (def_it != _default_device_params.end()) {
+      // 1. Concrete params take priority
       params_map[dev_type] = def_it->second;
     } else {
-      switch (dev_type) {
-      case device::DeviceType::VL53L8CX:
-        params_map[dev_type] = std::make_shared<device::VL53L8CX_Params>();
-        break;
-      case device::DeviceType::HTPA32:
-        params_map[dev_type] = std::make_shared<device::HTPA32_Params>();
-        break;
-      case device::DeviceType::WS2812b:
-        params_map[dev_type] = std::make_shared<device::WS2812b_Params>();
-        break;
-      case device::DeviceType::TMF8829:
-        params_map[dev_type] = std::make_shared<device::TMF8829_Params>();
-        break;
-      default:
-        break;
+      // 2. Fall back to category params (e.g. AnyDepth covers VL53L8CX / TMF8829)
+      auto cat_it = std::find_if(_default_device_params.begin(), _default_device_params.end(),
+          [&dev_type](const auto& kv) { return device::isCategory(kv.first) && device::deviceMatchesExpected(dev_type, kv.first); });
+      if (cat_it != _default_device_params.end()) {
+        params_map[dev_type] = cat_it->second;
+      } else {
+        // 3. Hard-coded defaults
+        switch (dev_type) {
+        case device::DeviceType::VL53L8CX:
+          params_map[dev_type] = std::make_shared<device::VL53L8CX_Params>();
+          break;
+        case device::DeviceType::HTPA32:
+          params_map[dev_type] = std::make_shared<device::HTPA32_Params>();
+          break;
+        case device::DeviceType::WS2812b:
+          params_map[dev_type] = std::make_shared<device::WS2812b_Params>();
+          break;
+        case device::DeviceType::TMF8829:
+          params_map[dev_type] = std::make_shared<device::TMF8829_Params>();
+          break;
+        default:
+          break;
+        }
       }
     }
   }
