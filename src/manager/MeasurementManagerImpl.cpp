@@ -213,6 +213,7 @@ bool MeasurementManagerImpl::startMeasuring() noexcept {
 bool MeasurementManagerImpl::stopMeasuring() noexcept {
   if (_is_running) {
     _is_running = false;
+    _worker_wait_cv.notify_all();
     notifyState(ManagerState::Shutdown);
   }
 
@@ -237,13 +238,57 @@ void MeasurementManagerImpl::runWorker() noexcept {
   while (_is_running) {
     try {
       if (!runPhase()) {
-        // Phase is waiting for I/O or a timer — yield to avoid busy-spinning.
-        std::this_thread::yield();
+        const auto wait_duration = computeWorkerIdleWait();
+        if (wait_duration <= std::chrono::steady_clock::duration::zero()) {
+          std::this_thread::yield();
+          continue;
+        }
+
+        std::unique_lock<std::mutex> lock(_worker_wait_mutex);
+        _worker_wait_cv.wait_for(lock, wait_duration, [this]() {
+          return !_is_running.load();
+        });
       }
     } catch (const std::exception& e) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Caught exception in scheduler: " + std::string(e.what()));
       _phase = Phase::error_comm_enter;
     }
+  }
+}
+
+std::chrono::steady_clock::duration MeasurementManagerImpl::computeWorkerIdleWait() const noexcept {
+  using clock = std::chrono::steady_clock;
+
+  static constexpr auto kMinPollWait    = std::chrono::milliseconds(1);
+  static constexpr auto kMaxTimerWait   = std::chrono::milliseconds(10);
+  static constexpr auto kImmediateRetry = clock::duration::zero();
+
+  const auto now = clock::now();
+
+  auto clampTimerWait = [&](const clock::time_point deadline) -> clock::duration {
+    if (deadline <= now) {
+      return kImmediateRetry;
+    }
+    const auto remaining = deadline - now;
+    return std::min(remaining, std::chrono::duration_cast<clock::duration>(kMaxTimerWait));
+  };
+
+  switch (_phase) {
+  case Phase::reset_sensors_wait:
+  case Phase::error_comm_wait:
+    return clampTimerWait(_phase_deadline);
+
+  case Phase::tick_sleep:
+    return clampTimerWait(_next_tick_time);
+
+  case Phase::tick_wait_pending:
+  case Phase::tick_fetch_wait:
+  case Phase::error_meas_wait:
+    // Futures may complete at any time; keep polls frequent but do not spin.
+    return std::chrono::duration_cast<clock::duration>(kMinPollWait);
+
+  default:
+    return kImmediateRetry;
   }
 }
 

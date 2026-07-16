@@ -11,9 +11,11 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -115,6 +117,7 @@ private:
   /// Advance the state machine by one step. Returns true if the phase made
   /// progress (transitioned), false if it is still waiting (caller may yield).
   bool runPhase();
+  std::chrono::steady_clock::duration computeWorkerIdleWait() const noexcept;
   void runWorker() noexcept;
 
   // Tick sub-steps
@@ -147,9 +150,9 @@ private:
   std::future<bool> _tmf_data_available_future;
 
   // Fetch futures launched in tick_request, polled in tick_fetch_wait.
-  std::vector<std::future<bool>> _vl53_fetch_futures;
-  std::vector<std::future<bool>> _tmf_fetch_futures;
-  std::vector<std::future<bool>> _htpa_fetch_futures;
+  std::vector<std::future<bool> > _vl53_fetch_futures;
+  std::vector<std::future<bool> > _tmf_fetch_futures;
+  std::vector<std::future<bool> > _htpa_fetch_futures;
 
   // Tracks which measurement types need publishing after fetch completes.
   bool _depth_publish_needed;
@@ -161,6 +164,8 @@ private:
   bool _repair_success;
 
   std::thread _worker_thread;
+  mutable std::mutex _worker_wait_mutex;
+  std::condition_variable _worker_wait_cv;
 
   subscription::Publisher<const ManagerState> _state_publisher;
 

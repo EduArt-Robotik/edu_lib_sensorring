@@ -512,8 +512,9 @@ device::DeviceParamsMap SensorRingFactoryImpl::buildDefaultParamsMap(const std::
       params_map[dev_type] = def_it->second;
     } else {
       // 2. Fall back to category params (e.g. AnyDepth covers VL53L8CX / TMF8829)
-      auto cat_it = std::find_if(_default_device_params.begin(), _default_device_params.end(),
-          [&dev_type](const auto& kv) { return device::isCategory(kv.first) && device::deviceMatchesExpected(dev_type, kv.first); });
+      auto cat_it = std::find_if(_default_device_params.begin(), _default_device_params.end(), [&dev_type](const auto& kv) {
+        return device::isCategory(kv.first) && device::deviceMatchesExpected(dev_type, kv.first);
+      });
       if (cat_it != _default_device_params.end()) {
         params_map[dev_type] = cat_it->second;
       } else {

@@ -112,7 +112,7 @@ public:
    */
   device::Group<device::DepthSensor> depthSensors() const noexcept;
 
-   /**
+  /**
    * @brief Return all thermal sensors.
    * @return Group of thermal sensors.
    */
