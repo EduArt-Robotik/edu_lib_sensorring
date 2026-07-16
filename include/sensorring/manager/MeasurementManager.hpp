@@ -85,7 +85,7 @@ public:
    * @param[in] callback Invoked with the updated ManagerState.
    * @return RAII Subscription that auto-cancels on destruction.
    */
-  subscription::Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
+  subscription::Subscription subscribeToStateChanges(std::function<void(ManagerState state)> callback);
 
   /**
    * @brief Return the current health state of the state machine worker.

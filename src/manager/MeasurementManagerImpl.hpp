@@ -70,7 +70,7 @@ public:
   bool stopMeasuring() noexcept;
   bool isMeasuring() noexcept;
 
-  subscription::Subscription subscribeToStateChanges(std::function<void(const ManagerState state)> callback);
+  subscription::Subscription subscribeToStateChanges(std::function<void(ManagerState state)> callback);
 
   ManagerState getManagerState() const noexcept;
   ManagerParams getParams() const noexcept;
@@ -127,7 +127,7 @@ private:
 
   void publishDepthMeasurements();
   void publishThermalMeasurements();
-  void notifyState(const ManagerState state);
+  void notifyState(ManagerState state);
 
   void buildSchedule();
   bool isGroupDue(const SensorGroupSchedule& group) const;

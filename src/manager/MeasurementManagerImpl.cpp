@@ -154,7 +154,7 @@ bool MeasurementManagerImpl::isGroupDue(const SensorGroupSchedule& group) const 
 ==========================================================================================
 */
 
-subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+subscription::Subscription MeasurementManagerImpl::subscribeToStateChanges(std::function<void(ManagerState state)> callback) {
   return _state_publisher.subscribe(std::move(callback));
 }
 
@@ -170,7 +170,7 @@ void MeasurementManagerImpl::publishThermalMeasurements() {
   }
 }
 
-void MeasurementManagerImpl::notifyState(const ManagerState state) {
+void MeasurementManagerImpl::notifyState(ManagerState state) {
   _state_publisher.publish(state);
 }
 

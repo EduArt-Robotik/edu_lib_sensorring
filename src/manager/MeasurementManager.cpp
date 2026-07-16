@@ -27,7 +27,7 @@ ManagerState MeasurementManager::getManagerState() const noexcept {
   return _mm_impl->getManagerState();
 }
 
-subscription::Subscription MeasurementManager::subscribeToStateChanges(std::function<void(const ManagerState state)> callback) {
+subscription::Subscription MeasurementManager::subscribeToStateChanges(std::function<void(ManagerState state)> callback) {
   return _mm_impl->subscribeToStateChanges(std::move(callback));
 }
 
