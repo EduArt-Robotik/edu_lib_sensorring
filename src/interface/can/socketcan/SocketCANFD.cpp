@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <exception>
 #include <fcntl.h>
 #include <net/if.h>
@@ -206,40 +207,56 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
 bool SocketCANFD::listener() {
   _shut_down_listener = false;
 
-  canfd_frame frame_rd;
-  int recvbytes = 0;
-
-  timeval timeout = { 0, 100 };
-  fd_set readSet;
-
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Starting can listener on interface " + _id.name);
 
   _listener_is_running = true;
   while (!_shut_down_listener) {
+    fd_set readSet;
     FD_ZERO(&readSet);
+    FD_SET(_soc, &readSet);
 
-    {
-      LockGuard guard(_mutex);
-      FD_SET(_soc, &readSet);
-      if (select((_soc + 1), &readSet, NULL, NULL, &timeout) >= 0) {
-        if (FD_ISSET(_soc, &readSet)) {
-          recvbytes = read(_soc, &frame_rd, sizeof(canfd_frame));
-          if (recvbytes && frame_rd.len >= HEADER_SIZE) {
-            std::uint8_t sysId = (frame_rd.can_id >> 8) & 0x07;
-            if (sysId == sensorring::transport::can::CanCodec::SYSID_SENSOR_RING) {
-              auto transportFrame = sensorring::transport::can::CanCodec::decode(frame_rd.can_id, frame_rd.data, frame_rd.len);
-              _reassembler.processFrame(transportFrame);
-            }
-          }
-        }
-      }
+    // Wake every 10 ms to check for shutdown.
+    timeval timeout{ 0, 10000 };
+    int ret = select(_soc + 1, &readSet, nullptr, nullptr, &timeout);
+
+    if (ret < 0) {
+      if (errno == EINTR)
+        continue;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "SocketCan interface " + _id.name + " select() failed: " + std::string(std::strerror(errno)));
+      break;
     }
 
-    std::this_thread::sleep_for(std::chrono::microseconds(1));
+    if (ret == 0) {
+      // Timeout; check shutdown flag.
+      continue;
+    }
+
+    canfd_frame frame;
+    ssize_t recvbytes = read(_soc, &frame, sizeof(frame));
+
+    if (recvbytes < 0) {
+      if (errno == EINTR)
+        continue;
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "read() failed: " + std::string(std::strerror(errno)));
+      break;
+    }
+
+    if (recvbytes != sizeof(frame)) {
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Unexpected CAN FD frame size: " + std::to_string(recvbytes));
+      continue;
+    }
+
+    if (frame.len < HEADER_SIZE)
+      continue;
+    std::uint8_t sysId = (frame.can_id >> 8) & 0x07;
+    if (sysId != sensorring::transport::can::CanCodec::SYSID_SENSOR_RING)
+      continue;
+    auto transportFrame = sensorring::transport::can::CanCodec::decode(frame.can_id, frame.data, frame.len);
+    _reassembler.processFrame(transportFrame);
   }
+  _listener_is_running = false;
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Stopping can listener on interface " + _id.name);
 
-  _listener_is_running = false;
   return true;
 }
 
