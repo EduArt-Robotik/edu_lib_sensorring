@@ -125,7 +125,7 @@ Use the following commands to build the library.
       <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
       <tr><td>SENSORRING_USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
       <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
-      <tr><td>CMAKE_INSTALL_PREFIX</td><td>C:\Program Files</td><td>Install path prefix, prepended onto install directories</td></tr>
+      <tr><td>CMAKE_INSTALL_PREFIX</td><td>C:\\Program Files</td><td>Install path prefix, prepended onto install directories</td></tr>
     </table>
 
 </div>

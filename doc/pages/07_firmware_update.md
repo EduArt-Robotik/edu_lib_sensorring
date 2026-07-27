@@ -13,7 +13,7 @@ After every reset the bootloader starts first and then decides where to continue
 | No application present | Stay in bootloader mode |
 | Application checksum invalid | Stay in bootloader mode |
 | Software request from the main firmware to enter bootloader mode | Stay in bootloader mode |
-| Reset recovery pattern triggered | Stay in bootloader mode (see [Section 4](#autotoc_md_4-recovery-force-bootloader-with-3-reset-pattern)) |
+| Reset recovery pattern triggered | Stay in bootloader mode (see [Section 4](#sec_force_bootloader)) |
 
 > ℹ️ A board in bootloader mode keeps its downstream power supply (`VEXT`) disabled to isolate the rest of the ring during an update.
 
@@ -32,7 +32,7 @@ firmware_updater -m <mode> -t <socketcan|usbtingo> -i <interface-name> [-n <boar
 
 | Argument | Description |
 |:---------|:------------|
-| `-m` | Update mode, see [Section 2.2](#autotoc_md_22-update-modes) |
+| `-m` | Update mode, see [Section 2.2](#sec_update_modes) |
 | `-t` | Communication interface type (`socketcan` or `usbtingo`) |
 | `-i` | Interface name (e.g. `can0` for SocketCAN or `0` for USBtingo) |
 | `-n` | Zero-based index of the target board on the ring |
@@ -40,7 +40,7 @@ firmware_updater -m <mode> -t <socketcan|usbtingo> -i <interface-name> [-n <boar
 
 > ℹ️ Flashing requires a SocketCAN interface. The `usbtingo` transport can be used to send a board into bootloader mode but the actual flashing step is currently SocketCAN only.
 
-### 2.2 Update Modes
+### 2.2 Update Modes{#sec_update_modes}
 
 The `-m` argument selects one of four modes. Each mode operates on a single, explicitly addressed board, or on the entire interface at once:
 
@@ -86,7 +86,7 @@ The typical update flow on a healthy ring looks like this:
 3. Use the single-board modes (`enter`, `flash`, `enter-flash`) when targeting an individual board or when recovering from a failed run.
 4. After the tool reports success, power-cycle the ring and verify that every board comes back up in application mode.
 
-## 4. Recovery: Force Bootloader with 3-Reset Pattern
+## 4. Recovery: Force Bootloader with 3-Reset Pattern {#sec_force_bootloader}
 
 If a board becomes unresponsive and the normal modes no longer reach it, the bootloader can be forced into bootloader mode entirely from the board side, without any bus communication:
 

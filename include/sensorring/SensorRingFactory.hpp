@@ -10,7 +10,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -137,6 +136,8 @@ public:
    *
    * Supported values are concrete device types (e.g. VL53L8CX) and category
    * wildcards (AnyDepth, AnyThermal, AnyLight).
+   *
+   * @param type Device type to expect on the most recently added board.
    */
   void expectDevice(device::DeviceType type);
 
@@ -149,10 +150,24 @@ public:
    *
    * Must be called after expectBoard(). Multiple expectDevice() calls
    * accumulate devices for the same board.
+   *
+   * @param params Configuration for a concrete device type.
    */
   void expectDevice(device::VL53L8CX_Params params);
+
+  /**
+   * @copydoc expectDevice(device::VL53L8CX_Params)
+   */
   void expectDevice(device::TMF8829_Params params);
+
+  /**
+   * @copydoc expectDevice(device::VL53L8CX_Params)
+   */
   void expectDevice(device::HTPA32_Params params);
+
+  /**
+   * @copydoc expectDevice(device::VL53L8CX_Params)
+   */
   void expectDevice(device::WS2812b_Params params);
 
   /**
@@ -161,38 +176,74 @@ public:
    * Use these when you don't care which specific sensor is present, only that
    * a device of the given category exists. Default params (or hardware defaults)
    * will be applied to whatever concrete device is discovered.
+   *
+   * @param params Configuration for a generic device of that category.
    */
   void expectDevice(device::DepthSensorParams params);
+
+  /**
+   * @copydoc expectDevice(device::DepthSensorParams)
+   */
   void expectDevice(device::ThermalSensorParams params);
+
+  /**
+   * @copydoc expectDevice(device::DepthSensorParams)
+   */
   void expectDevice(device::LightParams params);
 
   // ── Default device parameters ──
 
   /**
-   * @brief Set default params applied to discovered devices that have no
-   *        explicit params from expectDevice().
+   * @brief Set default params applied to a specific discovered device type that
+   *        has no explicit params from expectDevice().
    *
-   * Params are looked up in the following priority order for each discovered
-   * concrete device type (e.g. VL53L8CX):
-   *  1. **Concrete default** - a matching `setDefaultDeviceParams(VL53L8CX_Params)` call.
-   *  2. **Category default** - a matching `setDefaultDeviceParams(DepthSensorParams)` call
-   *     whose category covers the concrete type (e.g. AnyDepth covers VL53L8CX / TMF8829).
-   *  3. **Hard-coded defaults** - zero-initialised params for the concrete type.
+   * Sets a **Concrete default** (Priority 1). These take precedence over any
+   * category-level defaults or hard-coded zero-initialised defaults.
    *
-   * This applies to all three build paths: auto-discovery, configured boards without
-   * explicit device expectations, and as a fallback inside resolveDeviceExpectations
-   * when a wildcard expectation has no inline params.
+   * This applies across all build paths (auto-discovery, configured boards without
+   * explicit device expectations, and wildcard resolution fallbacks). Each call
+   * replaces any previously set default for this specific type.
    *
-   * Concrete params always override category params. Category params always override
-   * hard-coded defaults. May be called multiple times for different types. Each call
-   * replaces any previously set default for that type.
+   * @param params Default configuration applied to the concrete device type.
    */
   void setDefaultDeviceParams(device::VL53L8CX_Params params);
+
+  /**
+   * @copydoc setDefaultDeviceParams(device::VL53L8CX_Params)
+   */
   void setDefaultDeviceParams(device::TMF8829_Params params);
+
+  /**
+   * @copydoc setDefaultDeviceParams(device::VL53L8CX_Params)
+   */
   void setDefaultDeviceParams(device::HTPA32_Params params);
+
+  /**
+   * @copydoc setDefaultDeviceParams(device::VL53L8CX_Params)
+   */
   void setDefaultDeviceParams(device::WS2812b_Params params);
+
+  /**
+   * @brief Set default params applied to an entire category of discovered devices.
+   *
+   * Sets a **Category default** (Priority 2). Applied when a discovered device of
+   * this category has no concrete default explicitly set.
+   *
+   * Concrete params always override category params. Category params always override
+   * hard-coded defaults. Each call replaces any previously set default for this category.
+   *
+   * @param params Default configuration applied to any generic device.
+   */
   void setDefaultDeviceParams(device::DepthSensorParams params);
+
+  /**
+   * @copydoc setDefaultDeviceParams(device::DepthSensorParams)
+   */
   void setDefaultDeviceParams(device::ThermalSensorParams params);
+
+  /**
+   * @copydoc setDefaultDeviceParams(device::DepthSensorParams)
+   */
   void setDefaultDeviceParams(device::LightParams params);
 
   // ── Build ──

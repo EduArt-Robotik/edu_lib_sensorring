@@ -60,7 +60,7 @@ private:
   /**
    * @brief Construct from numeric value.
    */
-  SubscriberToken(TokenType value) noexcept : _value(value) {};
+  SubscriberToken(TokenType value) noexcept : _value(value){};
 
   TokenType _value;
 };
@@ -75,7 +75,6 @@ private:
 namespace std {
 
 /**
- * @struct std::hash<SubscriberToken>
  * @brief Hash specialization for SubscriberToken to enable use in unordered containers.
  */
 template <> struct hash<eduart::sensorring::subscription::SubscriberToken> {

@@ -29,7 +29,7 @@ namespace sensorring {
 
 namespace manager {
 
-// Forward declaration of implementation class
+/// Forward declaration of implementation class
 class SENSORRING_EXPORT MeasurementManagerImpl;
 
 /**
@@ -105,7 +105,7 @@ public:
    */
   device::Group<device::DepthSensor> depthSensors() const noexcept;
 
-    /**
+  /**
    * @brief Return all thermal sensors.
    * @return Group of thermal sensors.
    */

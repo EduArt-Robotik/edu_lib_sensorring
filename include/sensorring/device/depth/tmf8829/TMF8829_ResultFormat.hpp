@@ -25,11 +25,20 @@ namespace device {
  * @brief Specifies which values are included in the TMF8829 measurement
  */
 struct SENSORRING_EXPORT TMF8829_ResultFormat {
-  bool full_noise          = false; ///< If true, the noise_strength value is no longer divided by the number of bins
-  bool xtalk               = false; ///< If true, the xtalk value is included in the measurement; See TMF8829 datasheet for details
-  bool noise_strength      = false; ///< If true, the noise_strength value is included in the measurement; See TMF8829 datasheet for details
-  bool signal_strength     = false; ///< If true, the signal_strength value is included in the measurement; See TMF8829 datasheet for details
-  std::uint8_t nr_of_peaks = 1;     ///< If non zero this is the maximum number of reported peaks per depth pixel. Valid values are 0, 1, 2, 3, 4.
+  /// @brief  If true, the noise_strength value is no longer divided by the number of bins
+  bool full_noise = false;
+
+  /// @brief  If true, the xtalk value is included in the measurement; See TMF8829 datasheet for details
+  bool xtalk = false;
+
+  /// @brief  If true, the noise_strength value is included in the measurement; See TMF8829 datasheet for details
+  bool noise_strength = false;
+
+  /// @brief  If true, the signal_strength value is included in the measurement; See TMF8829 datasheet for details
+  bool signal_strength = false;
+
+  /// @brief  If non zero this is the maximum number of reported peaks per depth pixel. Valid values are 0, 1, 2, 3, 4.
+  std::uint8_t nr_of_peaks = 1;
 
   /**
    * @brief Calculate the size of a single point in the point cloud based on which values are included in the measurement

@@ -17,7 +17,10 @@ namespace sensorring {
 
 namespace device {
 
-// ToDo: May be combined with the DepthSensorParams.
+/**
+ * @brief Configuration structure for 3D depth sensors.
+ * @todo  May be combined with the DepthSensorParams.
+ */
 struct SENSORRING_EXPORT DepthSensorConfig {
   /// Horizontal field of view in degrees.
   double fov_x_deg = 0.0;

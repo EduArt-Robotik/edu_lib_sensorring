@@ -7,7 +7,7 @@
 TEST_CASE("SocketCan Interface Test", "[SocketCan]") {
   SECTION("Set and get parameters") {
 
-    // ToDO: Implement test
+    // ToDo: Implement test
 
     REQUIRE(false);
   }

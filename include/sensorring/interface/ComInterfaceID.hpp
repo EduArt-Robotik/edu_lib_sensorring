@@ -80,7 +80,6 @@ inline bool ComInterfaceID::operator!=(const ComInterfaceID& other) const {
 namespace std {
 
 /**
- * @struct std::hash<ComInterfaceID>
  * @brief Hash specialization for ComInterfaceID to enable use in unordered containers.
  */
 template <> struct hash<eduart::sensorring::com::ComInterfaceID> {

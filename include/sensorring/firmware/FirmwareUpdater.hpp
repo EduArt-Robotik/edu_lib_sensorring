@@ -92,10 +92,8 @@ public:
   std::optional<std::uint8_t> detectBootloaderNode(const com::ComInterfaceID& interface) const;
 
   /**
-   * @brief Detects whether any board on the ring is currently in bootloader mode, with retries.
+   * @brief Detects whether any board on the ring is currently in bootloader mode, with retries. Number of retries and delay between retries are configurable via @ref UpdateConfig.
    * @param interface Communication interface to scan.
-   * @param retries   Number of detection attempts.
-   * @param retry_delay Delay between detection attempts.
    * @return The CAN node ID of the board in bootloader mode, or @c std::nullopt if none was found.
    */
   std::optional<std::uint8_t> detectBootloaderNodeWithRetries(const com::ComInterfaceID& interface);

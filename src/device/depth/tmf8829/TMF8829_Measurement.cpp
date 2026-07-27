@@ -17,37 +17,6 @@ namespace sensorring {
 
 namespace device {
 
-//
-// Note: This is how to get 3D points from the TMF8829 according to the reference driver. This implementation currently returns garbage data, either the implementation is not correct yet or its used wrong.
-// Either way, currently the own implementation in the DepthSensor is used for 3D point calculation.
-//
-// /**
-//  * @brief Calculate x, y, z coordinates from tmf8829 point data according to the tmf8829 python driver implementation
-//  * @param[in] x Column index of the point in the tmf8829 frame
-//  * @param[in] y Row index of the point in the tmf8829 frame
-//  * @param[in] x_res Total number of columns in the tmf8829 frame
-//  * @param[in] y_res Total number of rows in the tmf8829 frame
-//  * @param[in,out] distance Raw distance value of the point in mm, will be modified by the correction factor
-//  * @return Vector3 containing the x, y, z coordinates of the point
-//  */
-// math::Vector3 calculateXYZ(unsigned int x, unsigned int y, unsigned int x_res, unsigned int y_res, double& distance) {
-
-//   // Calculate correction factors according to the tmf8829 python driver
-//   // ToDo: Replace by LUT, update LUT on every resolution change
-//   const double x_corr = (x - ((x_res / 2.0) + 0.5)) / (x_res * 3.0 / 2.0);
-//   const double y_corr = (y - ((y_res / 2.0) + 0.5)) / y_res;
-//   const double z_corr = std::sqrt(1 + x_corr * x_corr + y_corr * y_corr);
-
-//   distance /= z_corr;
-
-//   math::Vector3 point;
-//   point.x() = distance * x_corr;
-//   point.y() = distance * y_corr;
-//   point.z() = distance;
-
-//   return point;
-// }
-
 TMF8829_Measurement TMF8829_Measurement::fromBuffer(const std::vector<std::uint8_t>& buffer) {
   static constexpr double MM_TO_M = 0.001;
 

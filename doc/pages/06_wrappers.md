@@ -89,6 +89,6 @@ In addition to the sensor messages the pose of each sensor is published as a sta
 
 | Read Previous | Read Next |
 |:--|--:|
-| [Examples](05_examples.md) | [Bootloader and Firmware Update](firmware_update.md) |
+| [Examples](05_examples.md) | [Bootloader and Firmware Update](07_firmware_update.md) |
 
 </div>
