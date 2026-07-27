@@ -75,7 +75,6 @@ else:
 #include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
-#include "sensorring/device/AnyDeviceParams.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/measurement/Header.hpp"
 #include "sensorring/device/types/DeviceState.hpp"
@@ -88,8 +87,11 @@ else:
 #include "sensorring/device/Device.hpp"
 #include "sensorring/device/Sensor.hpp"
 #include "sensorring/device/depth/DepthSensorConfig.hpp"
+#include "sensorring/device/depth/DepthSensorParams.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
+#include "sensorring/device/thermal/ThermalSensorParams.hpp"
 #include "sensorring/device/thermal/ThermalSensor.hpp"
+#include "sensorring/device/light/LightParams.hpp"
 #include "sensorring/device/light/Light.hpp"
 #include "sensorring/device/types/Group.hpp"
 #include "sensorring/measurement/DepthMeasurement.hpp"
@@ -225,6 +227,7 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/light/LightMode.hpp"
 
 
+%rename (InterfaceTypeToString) eduart::sensorring::com::toString(InterfaceType);
 %include "sensorring/interface/ComInterfaceID.hpp"
 
 
@@ -286,26 +289,35 @@ typedef ::int64_t int64_t;
 %rename (Orientation_None) eduart::sensorring::board::Orientation::None;
 %include "sensorring/device/DeviceParams.hpp"
 
+
+%include "sensorring/device/light/LightParams.hpp"
+
+
 %include "sensorring/device/light/ws2812b/WS2812b_Params.hpp"
 
 
-%include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
+%include "sensorring/device/thermal/ThermalSensorParams.hpp"
 
 
 %include "sensorring/device/thermal/htpa32/HTPA32_Params.hpp"
+
+
+%include "sensorring/device/depth/DepthSensorParams.hpp"
+
+
+%include "sensorring/device/depth/vl53l8cx/VL53L8CX_Params.hpp"
 
 
 %rename (ResolutionModeToString) eduart::sensorring::device::toString(ResolutionMode);
 %include "sensorring/device/depth/tmf8829/TMF8829_ResultFormat.hpp"
 %include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
 
-%include "sensorring/device/AnyDeviceParams.hpp"
-
 
 %rename (SensorBoardTypeToString) eduart::sensorring::board::toString(SensorBoardType);
 %include "sensorring/board/SensorBoardType.hpp"
 
 
+%rename (OrientationToString) eduart::sensorring::board::toString(Orientation mode);
 %include "sensorring/board/SensorBoardParams.hpp"
 
 
