@@ -451,37 +451,37 @@ bool MeasurementManagerImpl::runPhase() {
   case Phase::tick_fetch_wait: {
     // Non-blocking poll: check all fetch futures in order.
     // Return early (false) if any future is not yet ready.
-    for (auto& fut : _vl53_fetch_futures) {
+    for (auto& fut : _vl53l8cx_fetch_futures) {
       if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
         if (std::chrono::steady_clock::now() > _phase_deadline) {
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching VL53L8CX measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
+          _vl53l8cx_fetch_futures.clear();
+          _tmf8829_fetch_futures.clear();
+          _htpa32_fetch_futures.clear();
           _phase = Phase::error_meas_enter;
         }
         return false;
       }
     }
-    for (auto& fut : _tmf_fetch_futures) {
+    for (auto& fut : _tmf8829_fetch_futures) {
       if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
         if (std::chrono::steady_clock::now() > _phase_deadline) {
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching TMF8829 measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
+          _vl53l8cx_fetch_futures.clear();
+          _tmf8829_fetch_futures.clear();
+          _htpa32_fetch_futures.clear();
           _phase = Phase::error_meas_enter;
         }
         return false;
       }
     }
-    for (auto& fut : _htpa_fetch_futures) {
+    for (auto& fut : _htpa32_fetch_futures) {
       if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
         if (std::chrono::steady_clock::now() > _phase_deadline) {
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching HTPA32 measurement data.");
-          _vl53_fetch_futures.clear();
-          _tmf_fetch_futures.clear();
-          _htpa_fetch_futures.clear();
+          _vl53l8cx_fetch_futures.clear();
+          _tmf8829_fetch_futures.clear();
+          _htpa32_fetch_futures.clear();
           _phase = Phase::error_meas_enter;
         }
         return false;
@@ -490,16 +490,16 @@ bool MeasurementManagerImpl::runPhase() {
 
     // All futures ready — collect results.
     bool success = true;
-    for (auto& fut : _vl53_fetch_futures)
+    for (auto& fut : _vl53l8cx_fetch_futures)
       success &= fut.get();
-    for (auto& fut : _tmf_fetch_futures)
+    for (auto& fut : _tmf8829_fetch_futures)
       success &= fut.get();
-    for (auto& fut : _htpa_fetch_futures)
+    for (auto& fut : _htpa32_fetch_futures)
       success &= fut.get();
 
-    _vl53_fetch_futures.clear();
-    _tmf_fetch_futures.clear();
-    _htpa_fetch_futures.clear();
+    _vl53l8cx_fetch_futures.clear();
+    _tmf8829_fetch_futures.clear();
+    _htpa32_fetch_futures.clear();
 
     if (!success) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Fetching measurement data failed.");
@@ -763,7 +763,7 @@ void MeasurementManagerImpl::launchFetchFutures() {
 
     if (group.type == device::DeviceType::VL53L8CX) {
       for (auto* dev : _vl53l8cx_devices) {
-        _vl53_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
+        _vl53l8cx_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
       }
       // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
       _depth_publish_needed = true;
@@ -771,7 +771,7 @@ void MeasurementManagerImpl::launchFetchFutures() {
 
     if (group.type == device::DeviceType::TMF8829) {
       for (auto* dev : _tmf8829_devices) {
-        _tmf_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
+        _tmf8829_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
       }
       // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
       _depth_publish_needed = true;
@@ -779,7 +779,7 @@ void MeasurementManagerImpl::launchFetchFutures() {
 
     if (group.type == device::DeviceType::HTPA32) {
       for (auto* dev : _htpa32_devices) {
-        _htpa_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
+        _htpa32_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
       }
       _thermal_publish_needed = true;
     }

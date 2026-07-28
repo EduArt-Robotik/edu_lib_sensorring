@@ -150,9 +150,9 @@ private:
   std::future<bool> _tmf_data_available_future;
 
   // Fetch futures launched in tick_request, polled in tick_fetch_wait.
-  std::vector<std::future<bool> > _vl53_fetch_futures;
-  std::vector<std::future<bool> > _tmf_fetch_futures;
-  std::vector<std::future<bool> > _htpa_fetch_futures;
+  std::vector<std::future<bool> > _vl53l8cx_fetch_futures;
+  std::vector<std::future<bool> > _tmf8829_fetch_futures;
+  std::vector<std::future<bool> > _htpa32_fetch_futures;
 
   // Tracks which measurement types need publishing after fetch completes.
   bool _depth_publish_needed;
