@@ -29,7 +29,8 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
     , _thermal_publish_needed(false)
     , _phase_deadline(std::chrono::steady_clock::now())
     , _error_attempts(0)
-    , _repair_success(false) {
+    , _repair_success(false)
+    , _action_queue(std::make_unique<ActionQueue>()) {
 
   if (!_sensor_ring) {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "MeasurementManager got passed an invalid SensorRing.");
@@ -63,6 +64,12 @@ MeasurementManagerImpl::MeasurementManagerImpl(ManagerParams params, std::unique
       _tmf8829_devices.push_back(tmf);
     if (auto* ht = dynamic_cast<device::HTPA32_Device*>(dev))
       _htpa32_devices.push_back(ht);
+  }
+
+  // Populate action queues for managed operation.
+  ActionQueue::setGlobalQueue(_action_queue.get());
+  for (auto* dev : _sensor_ring->getDevices()) {
+    dev->setQueue(_action_queue.get());
   }
 
   buildSchedule();
@@ -821,15 +828,7 @@ void MeasurementManagerImpl::requestMeasurements() {
 }
 
 void MeasurementManagerImpl::executeDeviceActions() {
-  for (auto* dev : _sensor_ring->getDevices()) {
-    for (auto& action : dev->drainActions()) {
-      try {
-        action();
-      } catch (const std::exception& e) {
-        logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Exception in device action: " + std::string(e.what()));
-      }
-    }
-  }
+  _action_queue->processAll();
 }
 
 /* =======================================================================================

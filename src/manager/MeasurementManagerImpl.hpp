@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "sensorring/SensorRing.hpp"
+#include "sensorring/device/action/ActionQueue.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Device.hpp"
@@ -178,6 +179,9 @@ private:
   std::vector<device::VL53L8CX_Device*> _vl53l8cx_devices;
   std::vector<device::TMF8829_Device*> _tmf8829_devices;
   std::vector<device::HTPA32_Device*> _htpa32_devices;
+
+  // Centrally managed action queue
+  std::unique_ptr<ActionQueue> _action_queue;
 };
 
 } // namespace manager

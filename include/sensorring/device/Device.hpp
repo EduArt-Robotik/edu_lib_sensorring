@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "sensorring/board/SensorBoardParams.hpp"
+#include "sensorring/device/action/ActionDispatcher.hpp"
 #include "sensorring/device/types/DeviceID.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/math/Pose.hpp"
@@ -39,7 +40,7 @@ namespace device {
  * Provides identity, communication, state tracking, pose handling and the
  * action queue used by the state machine.
  */
-class SENSORRING_EXPORT Device {
+class SENSORRING_EXPORT Device : public ActionDispatcher {
 public:
   /**
    * @brief Construct the device with identity and communication link.
@@ -50,30 +51,6 @@ public:
   Device(DeviceID id, com::ComInterface* interface, com::ComEndpoint target);
 
   virtual ~Device();
-
-  /**
-   * @brief Enqueue a self-contained action to be executed by the state machine.
-   * @param[in] action Callable executed once during the next device_actions slot.
-   *                   Should be non-blocking and exception-safe.
-   */
-  void enqueueAction(std::function<void()> action);
-
-  /**
-   * @brief Set a single replaceable action (latest-wins semantics).
-   *
-   * Unlike enqueueAction(), repeated calls overwrite the previous action so that
-   * at most one instance is executed per drain cycle. Use this for high-frequency
-   * actuator commands (e.g. lights) where only the most recent state matters.
-   *
-   * @param[in] action Callable executed once during the next device_actions slot.
-   */
-  void setReplacableAction(std::function<void()> action);
-
-  /**
-   * @brief Atomically drain and return all pending actions.
-   * @return Vector of actions to execute. Empty if no actions were pending.
-   */
-  std::vector<std::function<void()> > drainActions();
 
   /**
    * @brief Return the full device identifier (type + index).
