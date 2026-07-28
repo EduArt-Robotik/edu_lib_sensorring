@@ -124,7 +124,6 @@ private:
   // Tick sub-steps
   void launchFetchFutures();
   void requestMeasurements();
-  void executeDeviceActions();
 
   void publishDepthMeasurements();
   void publishThermalMeasurements();

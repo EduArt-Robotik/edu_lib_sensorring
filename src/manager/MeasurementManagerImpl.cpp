@@ -126,7 +126,9 @@ void MeasurementManagerImpl::buildSchedule() {
     _schedule.push_back(group);
   }
 
-  if (!_lights.empty()) {
+  if (_schedule.empty() && !_lights.empty()) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "No sensors found in the SensorRing. Only lights will be scheduled.");
+
     SensorGroupSchedule group;
     group.type        = device::DeviceType::WS2812b;
     group.max_rate_hz = std::numeric_limits<double>::max();
@@ -532,7 +534,7 @@ bool MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::tick_actions: {
-    executeDeviceActions();
+    _action_queue->processAll();
 
     _tick_count++;
     _next_tick_time += std::chrono::duration_cast<std::chrono::steady_clock::duration>(_tick_period);
@@ -825,10 +827,6 @@ void MeasurementManagerImpl::requestMeasurements() {
       }
     }
   }
-}
-
-void MeasurementManagerImpl::executeDeviceActions() {
-  _action_queue->processAll();
 }
 
 /* =======================================================================================
