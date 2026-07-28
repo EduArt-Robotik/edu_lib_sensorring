@@ -87,6 +87,9 @@ public:
   /// Whether the group is empty.
   bool empty() const { return _devices.empty(); }
 
+  /// Get the underlying vector of device pointers.
+  std::vector<T*> get() const { return _devices; }
+
   /// Begin iterator (mutable).
   iterator begin() { return iterator(_devices.begin()); }
   /// Past-the-end iterator (mutable).
