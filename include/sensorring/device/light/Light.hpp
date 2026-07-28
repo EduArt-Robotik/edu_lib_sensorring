@@ -58,6 +58,19 @@ public:
    * @param[in] b    Blue channel (0-255).
    */
   virtual void setLight(LightMode mode, std::uint8_t r = 0, std::uint8_t g = 0, std::uint8_t b = 0) = 0;
+
+  /**
+   * @brief Broadcast a mode+color command to ALL WS2812b devices on ALL interfaces.
+   *
+   * Useful for turning off all lights (including unconfigured boards).
+   * @param[in] devices  Vector of WS2812b devices to apply the command to.
+   * @param[in] mode  Light mode to apply.
+   * @param[in] red   Red channel value.
+   * @param[in] green Green channel value.
+   * @param[in] blue  Blue channel value.
+   * @return true on success.
+   */
+  static void setAllLights(const std::vector<Light*>& devices, LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
 };
 
 } // namespace device

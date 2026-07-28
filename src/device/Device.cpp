@@ -23,27 +23,6 @@ Device::~Device() {
   // _com_subscription auto-cancels via RAII.
 }
 
-void Device::enqueueAction(std::function<void()> action) {
-  std::lock_guard<std::mutex> lock(_action_mutex);
-  _pending_actions.push_back(std::move(action));
-}
-
-void Device::setReplacableAction(std::function<void()> action) {
-  std::lock_guard<std::mutex> lock(_action_mutex);
-  _replaceable_action = std::move(action);
-}
-
-std::vector<std::function<void()> > Device::drainActions() {
-  std::lock_guard<std::mutex> lock(_action_mutex);
-  std::vector<std::function<void()> > actions;
-  actions.swap(_pending_actions);
-  if (_replaceable_action) {
-    actions.push_back(std::move(*_replaceable_action));
-    _replaceable_action.reset();
-  }
-  return actions;
-}
-
 DeviceID Device::getDeviceID() const {
   return _id;
 }

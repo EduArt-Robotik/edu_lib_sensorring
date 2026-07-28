@@ -131,7 +131,6 @@ void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source,
 
 std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
-    (void)timeout;
     struct InterfaceGroup {
       std::vector<TMF8829_Device*> devices;
       unsigned int active_sensors = 0;

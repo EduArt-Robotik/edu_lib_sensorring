@@ -61,22 +61,9 @@ public:
   void setLight(LightMode mode, std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 
   /**
-   * @brief Broadcast a mode+color command to ALL WS2812b devices on ALL interfaces.
-   *
-   * Useful for turning off all lights (including unconfigured boards).
-   * @param[in] mode  Light mode to apply.
-   * @param[in] red   Red channel value.
-   * @param[in] green Green channel value.
-   * @param[in] blue  Blue channel value.
-   * @return true on success.
-   */
-  static bool setAllLights(LightMode mode, std::uint8_t red, std::uint8_t green, std::uint8_t blue);
-
-  /**
    * @brief Synchronize pending light updates on all WS2812b devices.
-   * @return true on success.
    */
-  static bool syncLight();
+  static void syncLight();
 
 private:
   /**
@@ -87,6 +74,13 @@ private:
   void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) override;
 
   const WS2812b_Params _params;
+
+  struct Setting {
+    LightMode mode     = LightMode::Off;
+    std::uint8_t red   = 0;
+    std::uint8_t green = 0;
+    std::uint8_t blue  = 0;
+  } _last_setting;
 };
 
 } // namespace device

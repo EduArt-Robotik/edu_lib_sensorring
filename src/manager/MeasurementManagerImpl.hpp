@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "sensorring/SensorRing.hpp"
+#include "sensorring/device/action/ActionQueue.hpp"
 #include "sensorring/device/depth/DepthSensor.hpp"
 #include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
 #include "sensorring/device/depth/vl53l8cx/VL53L8CX_Device.hpp"
@@ -150,9 +151,9 @@ private:
   std::future<bool> _tmf_data_available_future;
 
   // Fetch futures launched in tick_request, polled in tick_fetch_wait.
-  std::vector<std::future<bool> > _vl53_fetch_futures;
-  std::vector<std::future<bool> > _tmf_fetch_futures;
-  std::vector<std::future<bool> > _htpa_fetch_futures;
+  std::vector<std::future<bool> > _vl53l8cx_fetch_futures;
+  std::vector<std::future<bool> > _tmf8829_fetch_futures;
+  std::vector<std::future<bool> > _htpa32_fetch_futures;
 
   // Tracks which measurement types need publishing after fetch completes.
   bool _depth_publish_needed;
@@ -178,6 +179,9 @@ private:
   std::vector<device::VL53L8CX_Device*> _vl53l8cx_devices;
   std::vector<device::TMF8829_Device*> _tmf8829_devices;
   std::vector<device::HTPA32_Device*> _htpa32_devices;
+
+  // Centrally managed action queue
+  std::unique_ptr<ActionQueue> _action_queue;
 };
 
 } // namespace manager
