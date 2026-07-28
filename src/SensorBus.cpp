@@ -38,7 +38,7 @@ unsigned int SensorBus::getSensorCount() const {
   return static_cast<unsigned int>(_board_vec.size());
 }
 
-std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout) {
+std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, unsigned int timeout_ms) {
   auto* iface = com::ComManager::getInstance()->getInterface(interface);
   if (!iface) {
     return {};
@@ -46,7 +46,7 @@ std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com:
 
   board::BoardEnumerator enumerator(iface);
   enumerator.startEnumeration();
-  std::this_thread::sleep_for(timeout);
+  std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
   return enumerator.getResult();
 }
 

@@ -78,12 +78,16 @@ else:
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/measurement/Header.hpp"
 #include "sensorring/device/types/DeviceState.hpp"
+#include "sensorring/SensorBus.hpp"
 #include "sensorring/SensorRing.hpp"
 #include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/board/EnumerationInformation.hpp"
 #include "sensorring/manager/ManagerParams.hpp"
 #include "sensorring/manager/ManagerState.hpp"
 #include "sensorring/manager/MeasurementManager.hpp"
+#include "sensorring/device/action/Command.hpp"
+#include "sensorring/device/action/ActionQueue.hpp"
+#include "sensorring/device/action/ActionDispatcher.hpp"
 #include "sensorring/device/Device.hpp"
 #include "sensorring/device/Sensor.hpp"
 #include "sensorring/device/depth/DepthSensorConfig.hpp"
@@ -326,8 +330,9 @@ typedef ::int64_t int64_t;
  */
 
 // Device: action queue is internal, not for Python users
-%ignore eduart::sensorring::device::Device::enqueueAction;
-%ignore eduart::sensorring::device::Device::drainActions;
+%import "sensorring/device/action/Command.hpp"
+%import "sensorring/device/action/ActionQueue.hpp"
+%include "sensorring/device/action/ActionDispatcher.hpp"
 %include "sensorring/device/Device.hpp"
 
 %ignore eduart::sensorring::device::Sensor::beginMeasurementWait;
@@ -349,7 +354,30 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/thermal/ThermalSensor.hpp"
 
 // --- Light ---
+%template(LightVector) std::vector<eduart::sensorring::device::Light*>;
 %include "sensorring/device/light/Light.hpp"
+
+// Dynamic casting helpers of the device types
+
+%inline %{
+
+#define DEFINE_DEVICE_CAST(Type)                     \
+inline Type* as##Type(Device* d) {                   \
+    return dynamic_cast<Type*>(d);                   \
+}
+
+namespace eduart::sensorring::device {
+
+DEFINE_DEVICE_CAST(DepthSensor)
+DEFINE_DEVICE_CAST(ThermalSensor)
+DEFINE_DEVICE_CAST(Light)
+//DEFINE_DEVICE_CAST(VL53L8CX_Device)
+//DEFINE_DEVICE_CAST(TMF8829_Device)
+//DEFINE_DEVICE_CAST(HTPA32_Device)
+
+} // namespace eduart::sensorring::device
+#undef DEFINE_DEVICE_CAST
+%}
 
 // --- Group<T> ---
 %ignore eduart::sensorring::device::Group::subscribe;     // Manual GIL wrapper below
@@ -431,6 +459,15 @@ typedef ::int64_t int64_t;
 
 
 /****
+ * SensorRing
+ */
+%ignore eduart::sensorring::SensorRing::SensorRing;
+%template(DeviceVector) std::vector<eduart::sensorring::device::Device*>;
+%import "sensorring/SensorBus.hpp"
+%include "sensorring/SensorRing.hpp"
+
+
+/****
  * SensorRingFactory
  */
 
@@ -440,8 +477,6 @@ typedef ::int64_t int64_t;
 %ignore eduart::sensorring::SensorRingFactory::build;
 %ignore eduart::sensorring::SensorRingFactory::enumerate;
 %ignore eduart::sensorring::SensorRingFactory::getLatestEnumerationResult;
-
-%import "sensorring/SensorRing.hpp"
 %include "sensorring/SensorRingFactory.hpp"
 
 // Factory returning raw pointer from unique_ptr (ownership transferred to Python)

@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -25,8 +24,6 @@ namespace sensorring {
 namespace com {
 class ComInterface;
 }
-
-using namespace std::chrono_literals;
 
 /**
  * @class SensorBus
@@ -62,10 +59,10 @@ public:
   /**
    * @brief Enumerate boards on an interface.
    * @param[in] interface Communication interface ID to enumerate.
-   * @param[in] timeout Time to wait for responses before returning.
+   * @param[in] timeout_ms Time to wait for responses before returning in milliseconds.
    * @return Vector of enumeration info. May be empty if none or on error.
    */
-  static std::vector<board::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface, std::chrono::milliseconds timeout = 250ms);
+  static std::vector<board::EnumerationInformation> queryConnectedDevices(com::ComInterfaceID interface, unsigned int timeout_ms = 250);
 
 private:
   com::ComInterface* _interface;

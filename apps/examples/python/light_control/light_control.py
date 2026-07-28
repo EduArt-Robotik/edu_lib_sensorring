@@ -40,8 +40,6 @@ def main():
   print("================================")
   print()
 
-  params = sensorring.ManagerParams()
-
   can_interface = sensorring.SocketCanParams()
   can_interface.name = CAN_INTERFACE_NAME
 
@@ -59,62 +57,43 @@ def main():
     # Create SensorRing via factory auto-discovery
     factory = sensorring.SensorRingFactory()
     factory.addInterface(can_interface)
-    factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.DepthSensorParams())
-    factory.expectDevice(sensorring.LightParams())
     factory.addInterface(usbtingo_interface)
-    factory.expectBoard(sensorring.SensorBoardParams())
-    factory.expectDevice(sensorring.DepthSensorParams())
-    factory.expectDevice(sensorring.LightParams())
 
-    # Create the MeasurementManager directly from the factory
-    manager = sensorring.MeasurementManager(params, factory)
+    # Build the sensor ring directly
+    ring = factory.build()
 
-    # Subscribe to depth sensors for rate tracking
-    got_first = [False]
-    counter = [0]
-    def on_depth_frame(measurements):
-      got_first[0] = True
-      counter[0] += 1
+    lights = []
+    for dev in ring.getDevices():
+      light = sensorring.asLight(dev)
+      if light is not None:
+        lights.append(light)
 
-    depth_sub = manager.depthSensors().subscribeAll(on_depth_frame)
+    if not lights:
+      print("No lights found in the SensorRing. Exiting.")
+      return
 
-    # Get a handle to the lights
-    lights = manager.lights()
+    print("\nSensorring successfully initialized.")
+    print("\nStart printing animation frames:")
 
-    # Start the measurements
-    manager.startMeasuring()
+    phase = 0.0
+    counter = 0
+    last_print = time.time()
+    while True:
+      # Advance phase and compute smooth RGB values from three sine waves.
+      phase += STEP
+      red = int(to_channel(phase) * BRIGHTNESS)
+      green = int(to_channel(phase + OFFSET_G) * BRIGHTNESS)
+      blue = int(to_channel(phase + OFFSET_B) * BRIGHTNESS)
 
-    while not got_first[0] and manager.isMeasuring():
-      time.sleep(0.1)
+      # Update the light color via the Light interface (applied in next state-machine cycle)
+      sensorring.Light.setAllLights(lights, sensorring.LightMode_FixedColor, red, green, blue)
 
-    if manager.isMeasuring():
-      print("\nSensorring successfully initialized.")
-      print("\nStart printing animation frames:")
-
-      phase = 0.0
-      last_print = time.time()
-      while manager.isMeasuring():
-        # Advance phase and compute smooth RGB values from three sine waves.
-        phase += STEP
-        red = int(to_channel(phase) * BRIGHTNESS)
-        green = int(to_channel(phase + OFFSET_G) * BRIGHTNESS)
-        blue = int(to_channel(phase + OFFSET_B) * BRIGHTNESS)
-
-        # Update the light color via the Light interface (applied in next state-machine cycle)
-        for i in range(len(lights)):
-          lights[i].setLight(sensorring.LightMode_FixedColor, red, green, blue)
-
-        now = time.time()
-        if now - last_print > 1.0:
-          print(f"Current frame: {counter[0]}\r", end="", flush=True)
-          last_print = now
-        time.sleep(0.05)
-
-      depth_sub.cancel()
-
-      # Stop the measurements
-      manager.stopMeasuring()
+      now = time.time()
+      if now - last_print > 1.0:
+        print(f"Current frame: {counter}\r", end="", flush=True)
+        counter += 1
+        last_print = now
+      time.sleep(0.05)
 
   except Exception as e:
     print(f"Caught: {e}")

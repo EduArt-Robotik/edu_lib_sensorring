@@ -15,8 +15,8 @@
 #include <sensorring/device/light/Light.hpp>
 #include <sensorring/interface/InterfaceParams.hpp>
 #include <sensorring/logger/Logger.hpp>
-#include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
+#include <vector>
 
 using namespace eduart::sensorring;
 using namespace std::chrono_literals;
@@ -40,8 +40,6 @@ int main(int, char*[]) {
   std::cout << "================================" << std::endl;
   std::cout << std::endl;
 
-  manager::ManagerParams params;
-
   com::SocketCanParams can_interface{ std::string(CAN_INTERFACE_NAME) };
   com::UsbTingoParams usbtingo_interface{ std::string(USBTINGO_INTERFACE_NAME) };
 
@@ -57,70 +55,55 @@ int main(int, char*[]) {
     // Create SensorRing via factory auto-discovery
     SensorRingFactory factory;
     factory.addInterface(can_interface);
-    factory.expectBoard({});
-    factory.expectDevice(device::LightParams{});
-    factory.expectBoard({});
-    factory.expectDevice(device::LightParams{});
+    factory.addInterface(usbtingo_interface);
 
-    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
-
-    // Subscribe to state changes to know when the manager is ready
-    std::atomic<bool> is_running = false;
-    auto state_sub               = manager->subscribeToStateChanges([&is_running](const manager::ManagerState state) {
-      is_running = (state == manager::ManagerState::Running);
-    });
-
-    // Get a handle to the lights
-    auto lights = manager->lights();
-
-    // Start the measurements
-    manager->startMeasuring();
-
-    while (!is_running && manager->isMeasuring()) {
+    auto ring = factory.build();
+   
+    std::vector<device::Light*> lights;
+    for (auto* dev : ring->getDevices()) {
+      if (auto* lt = dynamic_cast<device::Light*>(dev))
+        lights.push_back(lt);
+    }
+    
+    if(lights.empty()) {
+      std::cout << "No lights found in the SensorRing. Exiting." << std::endl;
+      return 1;
     }
 
-    if (manager->isMeasuring()) {
-      std::cout << std::endl << "Sensorring successfully initialized." << std::endl;
-      std::cout << std::endl << "Start printing animation frames:" << std::endl;
+    std::cout << std::endl << "Start printing animation frames:" << std::endl;
 
-      float phase              = 0.0f;
-      auto last_print          = std::chrono::steady_clock::now();
-      unsigned int frame_count = 0;
-      while (manager->isMeasuring()) {
-        // Advance phase and compute smooth RGB values from three sine waves.
-        phase += STEP;
-        auto to_channel = [](float value) {
-          const float v = 0.5f * (std::sin(value) + 1.0f); // map [-1,1] -> [0,1]
-          int c         = static_cast<int>(v * 255.0f + 0.5f);
-          if (c < 0)
-            c = 0;
-          if (c > 255)
-            c = 255;
-          return static_cast<std::uint8_t>(c);
-        };
+    float phase              = 0.0f;
+    auto last_print          = std::chrono::steady_clock::now();
+    unsigned int frame_count = 0;
 
-        const auto red   = to_channel(phase) * BRIGHTNESS;
-        const auto green = to_channel(phase + OFFSET_G) * BRIGHTNESS;
-        const auto blue  = to_channel(phase + OFFSET_B) * BRIGHTNESS;
+    while (true) {
+      // Advance phase and compute smooth RGB values from three sine waves.
+      phase += STEP;
+      auto to_channel = [](float value) {
+        const float v = 0.5f * (std::sin(value) + 1.0f); // map [-1,1] -> [0,1]
+        int c         = static_cast<int>(v * 255.0f + 0.5f);
+        if (c < 0)
+          c = 0;
+        if (c > 255)
+          c = 255;
+        return static_cast<std::uint8_t>(c);
+      };
 
-        // Update the light color via the Light interface (applied in next state-machine cycle)
-        for (std::size_t i = 0; i < lights.size(); ++i) {
-          lights[i].setLight(device::LightMode::FixedColor, red, green, blue);
-        }
+      const auto red   = to_channel(phase) * BRIGHTNESS;
+      const auto green = to_channel(phase + OFFSET_G) * BRIGHTNESS;
+      const auto blue  = to_channel(phase + OFFSET_B) * BRIGHTNESS;
 
-        frame_count++;
-        if (std::chrono::steady_clock::now() - last_print > 1s) {
-          std::cout << "Current frame: " << frame_count << "\r" << std::flush;
-          last_print = std::chrono::steady_clock::now();
-        }
-        std::this_thread::sleep_for(100ms);
+      // Update the light color via the Light interface (applied in next state-machine cycle)
+      device::Light::setAllLights(lights, device::LightMode::FixedColor, red, green, blue);
+
+      frame_count++;
+      if (std::chrono::steady_clock::now() - last_print > 1s) {
+        std::cout << "Current frame: " << frame_count << "\r" << std::flush;
+        last_print = std::chrono::steady_clock::now();
       }
-
-      state_sub.cancel();
-
-      // Stop the measurements
-      manager->stopMeasuring();
+      std::this_thread::sleep_for(100ms);
     }
+
   } catch (const std::exception& e) {
     std::cout << "Caught: " << e.what() << std::endl;
   }
