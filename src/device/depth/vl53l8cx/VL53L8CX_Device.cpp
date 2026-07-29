@@ -47,7 +47,6 @@ void VL53L8CX_Device::comCallback([[maybe_unused]] const com::ComEndpoint source
 
 std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL53L8CX_Device*>& devices, std::chrono::milliseconds timeout) {
   return std::async(std::launch::async, [devices, timeout]() {
-    (void)timeout;
     struct InterfaceGroup {
       std::vector<VL53L8CX_Device*> devices;
       unsigned int active_sensors = 0;
@@ -83,9 +82,12 @@ std::future<bool> VL53L8CX_Device::requestMeasurementAsync(const std::vector<VL5
       iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::VL53L8CX }, MEASUREMENT_REQUEST, tx_buf);
     }
 
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     for (auto& fut : futures) {
       try {
-        if (!fut.get()) {
+        if (fut.wait_until(deadline) != std::future_status::ready) {
+          return false;
+        } else if (!fut.get()) {
           return false;
         }
       } catch (const std::future_error&) {

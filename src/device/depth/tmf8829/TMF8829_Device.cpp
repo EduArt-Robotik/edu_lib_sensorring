@@ -166,9 +166,12 @@ std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8
       iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::TMF8829 }, MEASUREMENT_REQUEST, tx_buf);
     }
 
+    auto deadline = std::chrono::steady_clock::now() + timeout;
     for (auto& fut : futures) {
       try {
-        if (!fut.get()) {
+        if (fut.wait_until(deadline) != std::future_status::ready) {
+          return false;
+        } else if (!fut.get()) {
           return false;
         }
       } catch (const std::future_error&) {
