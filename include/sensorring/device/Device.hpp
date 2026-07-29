@@ -105,10 +105,6 @@ public:
   math::Pose getGlobalPose() const;
 
 protected:
-  std::mutex _action_mutex;
-  std::vector<std::function<void()> > _pending_actions;
-  std::optional<std::function<void()> > _replaceable_action;
-
   virtual void comCallback(const com::ComEndpoint source, std::uint8_t command, const std::vector<std::uint8_t>& data) = 0;
 
   DeviceID _id;
