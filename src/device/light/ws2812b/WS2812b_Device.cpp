@@ -25,7 +25,7 @@ bool WS2812b_Device::configure() {
 }
 
 void WS2812b_Device::setLight(LightMode mode, std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-  _last_setting  = {mode, r, g, b};
+  _last_setting = { mode, r, g, b };
 
   auto* iface     = _interface;
   auto board_addr = static_cast<std::uint8_t>(_hw_idx + 1);

@@ -58,14 +58,14 @@ int main(int, char*[]) {
     factory.addInterface(usbtingo_interface);
 
     auto ring = factory.build();
-   
+
     std::vector<device::Light*> lights;
     for (auto* dev : ring->getDevices()) {
       if (auto* lt = dynamic_cast<device::Light*>(dev))
         lights.push_back(lt);
     }
-    
-    if(lights.empty()) {
+
+    if (lights.empty()) {
       std::cout << "No lights found in the SensorRing. Exiting." << std::endl;
       return 1;
     }

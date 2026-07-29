@@ -60,7 +60,7 @@ private:
   /**
    * @brief Construct from numeric value.
    */
-  SubscriberToken(TokenType value) noexcept : _value(value){};
+  SubscriberToken(TokenType value) noexcept : _value(value) {};
 
   TokenType _value;
 };
