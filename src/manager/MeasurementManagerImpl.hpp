@@ -145,9 +145,10 @@ private:
   std::vector<SensorGroupSchedule> _schedule;
   std::atomic<bool> _is_running;
 
-  // Pending futures for data-available signals (one per ToF family).
+  // Pending futures for data-available signals.
   std::future<bool> _vl53_data_available_future;
   std::future<bool> _tmf_data_available_future;
+  std::future<bool> _htpa_data_available_future;
 
   // Fetch futures launched in tick_request, polled in tick_fetch_wait.
   std::vector<std::future<bool> > _vl53l8cx_fetch_futures;

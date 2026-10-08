@@ -51,19 +51,21 @@ std::future<bool> HTPA32_Device::getEepromAsync(std::chrono::milliseconds timeou
   return _impl->getEepromAsync(timeout);
 }
 
-std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds /*timeout*/) {
-  return std::async(std::launch::async, [devices]() {
+std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [devices, timeout]() {
     struct InterfaceGroup {
       std::vector<HTPA32_Device*> devices;
       unsigned int active_sensors = 0;
     };
     std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
+    std::vector<std::future<bool> > futures;
 
     for (auto* dev : devices) {
       if (dev != nullptr) {
         auto* iface = dev->_interface;
         auto& group = groups[iface];
         group.devices.push_back(dev);
+        futures.emplace_back(dev->beginDataAvailableWait());
         group.active_sensors |= (1u << dev->getHwIdx());
       }
     }
@@ -83,16 +85,34 @@ std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA3
       iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, MEASUREMENT_REQUEST, tx_buf);
     }
 
-    // Fire-and-forget: success means the request was issued for all enabled devices.
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    for (auto& fut : futures) {
+      try {
+        if (fut.wait_until(deadline) != std::future_status::ready || !fut.get()) {
+          return false;
+        }
+      } catch (const std::future_error&) {
+        return false;
+      }
+    }
+
     return true;
   });
 }
 
-std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::milliseconds /*timeout*/) {
-  return std::async(std::launch::async, [this]() {
+std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::milliseconds timeout) {
+  return std::async(std::launch::async, [this, timeout]() {
+    auto fut = beginDataAvailableWait();
     _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
 
-    return true;
+    try {
+      if (fut.wait_for(timeout) != std::future_status::ready) {
+        return false;
+      }
+      return fut.get();
+    } catch (const std::future_error&) {
+      return false;
+    }
   });
 }
 

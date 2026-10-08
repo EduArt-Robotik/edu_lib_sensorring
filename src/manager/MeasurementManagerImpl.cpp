@@ -397,8 +397,7 @@ bool MeasurementManagerImpl::runPhase() {
 
   case Phase::tick_wait_pending: {
     // Non-blocking poll: check data-available futures from previous tick's requests.
-    // Groups without a pending request are skipped. HTPA32 is fire-and-forget
-    // so it passes through immediately; its wait happens implicitly during fetch.
+    // Groups without a pending request are skipped.
     for (auto& group : _schedule) {
       if (!group.has_pending_request) {
         continue;
@@ -429,6 +428,21 @@ bool MeasurementManagerImpl::runPhase() {
         }
         if (!_tmf_data_available_future.get()) {
           logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 data-available signal reported failure.");
+          _phase = Phase::error_meas_enter;
+          return false;
+        }
+      }
+
+      if (group.type == device::DeviceType::HTPA32 && _htpa_data_available_future.valid()) {
+        if (_htpa_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+          if (std::chrono::steady_clock::now() > _phase_deadline) {
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for HTPA32 data-available signal.");
+            _phase = Phase::error_meas_enter;
+          }
+          return false;
+        }
+        if (!_htpa_data_available_future.get()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "HTPA32 data-available signal reported failure.");
           _phase = Phase::error_meas_enter;
           return false;
         }
@@ -633,6 +647,19 @@ bool MeasurementManagerImpl::runPhase() {
         }
       }
 
+      if (group.type == device::DeviceType::HTPA32 && _htpa_data_available_future.valid()) {
+        if (_htpa_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+          if (std::chrono::steady_clock::now() > _phase_deadline) {
+            _phase = Phase::error_meas_retry;
+          }
+          return false;
+        }
+        if (!_htpa_data_available_future.get()) {
+          _phase = Phase::error_meas_retry;
+          return false;
+        }
+      }
+
       group.has_pending_request = false;
     }
 
@@ -821,8 +848,8 @@ void MeasurementManagerImpl::requestMeasurements() {
 
     if (group.type == device::DeviceType::HTPA32) {
       if (!_htpa32_devices.empty()) {
-        // Fire-and-forget broadcast request.
-        device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
+        // Wait for each HTPA32 device to report acquisition complete.
+        _htpa_data_available_future = device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
         group.has_pending_request = true;
       }
     }

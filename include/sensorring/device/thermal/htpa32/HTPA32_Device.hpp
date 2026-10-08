@@ -80,18 +80,20 @@ public:
   /**
    * @brief Request thermal measurements asynchronously on a set of devices.
    *
-   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
+   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface
+   * and waits until every requested device reports a completed measurement.
    * @param[in] devices Vector of devices to trigger.
-   * @param[in] timeout Maximum time to wait (fire-and-forget; timeout is unused).
-   * @return Future resolving to true when the request has been sent.
+   * @param[in] timeout Maximum time to wait for measurement-ready responses.
+   * @return Future resolving to true when every requested device is ready.
    */
   static std::future<bool> requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
   /**
    * @brief Request a thermal measurement asynchronously from this single device.
    *
-   * Sends a direct MEASUREMENT_REQUEST to this board. Fire-and-forget.
-   * @param[in] timeout Maximum time to wait (unused; returns immediately).
-   * @return Future resolving to true when the request has been sent.
+   * Sends a direct MEASUREMENT_REQUEST to this board and waits for the
+   * measurement-ready response.
+   * @param[in] timeout Maximum time to wait for the measurement-ready response.
+   * @return Future resolving to true when the device is ready.
    */
   std::future<bool> requestMeasurementAsync(std::chrono::milliseconds timeout);
   /**

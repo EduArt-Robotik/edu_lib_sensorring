@@ -102,6 +102,10 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
   std::lock_guard<std::mutex> lock(_parent._state_mutex);
 
   switch (command) {
+  case MEASUREMENT_RESPONSE:
+    _parent.setDataAvailableReady(true);
+    return;
+
   case EEPROM_TRANSMISSION_RESPONSE: {
     // Complete eeprom data delivered by reassembly layer.
     if (_read_eeprom && data.size() >= htpa32::HTPA32_Eeprom::SERIALIZED_SIZE) {
