@@ -11,9 +11,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <future>
 #include <vector>
 
 #include "sensorring/device/DeviceType.hpp"
+#include "sensorring/device/Sensor.hpp"
 
 namespace eduart {
 
@@ -25,8 +28,8 @@ namespace manager {
  * @struct SensorGroupSchedule
  * @brief Scheduling parameters for one group of sensors (same DeviceType).
  *
- * All sensors of the same type fire together (global shutter per group).
- * The divisor determines how many base ticks pass between measurements.
+ * Sensors of the same type share a rate group. The divisor determines how
+ * many base ticks pass between measurements.
  */
 struct SensorGroupSchedule {
   /// Device type this group represents.
@@ -40,6 +43,10 @@ struct SensorGroupSchedule {
 
   /// Effective rate after divisor is applied: base_rate / divisor.
   double effective_rate_hz = 0.0;
+
+  std::uint8_t measurement_sequence = 0;
+  std::vector<device::Sensor*> sensors;
+  std::vector<std::future<bool> > measurement_futures;
 
   /// A measurement has been requested and data is expected (waiting for completion).
   bool has_pending_request = false;

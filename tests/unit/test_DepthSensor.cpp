@@ -1,5 +1,6 @@
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <chrono>
 #include <cmath>
 
 #include "interface/ComInterface.hpp"
@@ -50,6 +51,15 @@ public:
   void publishMeasurement() override {}
 
   void comCallback(const eduart::sensorring::com::ComEndpoint, std::uint8_t, const std::vector<std::uint8_t>&) override {}
+  bool sendMeasurementRequest(std::uint8_t sequence_number) override {
+    last_measurement_sequence = sequence_number;
+    measurement_requests++;
+    return true;
+  }
+  bool sendMeasurementTransmissionRequest() override {
+    transmission_requests++;
+    return true;
+  }
 
   const std::vector<double>& lutX() const { return _lut_x; }
   const std::vector<double>& lutY() const { return _lut_y; }
@@ -67,7 +77,29 @@ public:
 
 private:
   DepthSensorParams _params;
+
+public:
+  std::uint8_t last_measurement_sequence = 0;
+  unsigned int measurement_requests      = 0;
+  unsigned int transmission_requests     = 0;
 };
+
+TEST_CASE("Sensor measure and fetch share common completion handling", "[Sensor]") {
+  MockDepthSensor sensor;
+
+  auto measurement = sensor.measure(37);
+  REQUIRE(sensor.measurement_requests == 1);
+  REQUIRE(sensor.last_measurement_sequence == 37);
+  REQUIRE(measurement.wait_for(std::chrono::seconds(0)) == std::future_status::timeout);
+  sensor.setDataAvailableReady(true);
+  REQUIRE(measurement.get());
+
+  auto fetched = sensor.fetch();
+  REQUIRE(sensor.transmission_requests == 1);
+  REQUIRE(fetched.wait_for(std::chrono::seconds(0)) == std::future_status::timeout);
+  sensor.setMeasurementReady(true);
+  REQUIRE(fetched.get());
+}
 
 TEST_CASE("DepthSensor point cloud operations", "[DepthSensor]") {
 

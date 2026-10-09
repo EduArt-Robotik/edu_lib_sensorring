@@ -101,8 +101,9 @@ void MeasurementManagerImpl::buildSchedule() {
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _vl53l8cx_devices) {
       group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      group.sensors.push_back(dev); // Adding sensor to the group
     }
-    _schedule.push_back(group);
+    _schedule.push_back(std::move(group));
   }
 
   if (!_tmf8829_devices.empty()) {
@@ -112,8 +113,9 @@ void MeasurementManagerImpl::buildSchedule() {
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _tmf8829_devices) {
       group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      group.sensors.push_back(dev);
     }
-    _schedule.push_back(group);
+    _schedule.push_back(std::move(group));
   }
 
   if (!_htpa32_devices.empty()) {
@@ -122,8 +124,9 @@ void MeasurementManagerImpl::buildSchedule() {
     group.max_rate_hz = std::numeric_limits<double>::max();
     for (auto* dev : _htpa32_devices) {
       group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
+      group.sensors.push_back(dev);
     }
-    _schedule.push_back(group);
+    _schedule.push_back(std::move(group));
   }
 
   if (_schedule.empty() && !_lights.empty()) {
@@ -135,7 +138,7 @@ void MeasurementManagerImpl::buildSchedule() {
     for (auto* dev : _lights) {
       group.max_rate_hz = std::min(group.max_rate_hz, dev->getParams().max_rate_hz);
     }
-    _schedule.push_back(group);
+    _schedule.push_back(std::move(group));
   }
 
   _base_rate_hz = computeScheduleFastest(_schedule);
@@ -396,64 +399,38 @@ bool MeasurementManagerImpl::runPhase() {
     ============================================= */
 
   case Phase::tick_wait_pending: {
-    // Non-blocking poll: check data-available futures from previous tick's requests.
-    // Groups without a pending request are skipped.
+    // Non-blocking poll: check pending measurements only when their group is due.
+    // Slower groups keep acquiring across intervening ticks.
     for (auto& group : _schedule) {
-      if (!group.has_pending_request) {
+      if (!group.has_pending_request || !isGroupDue(group)) {
         continue;
       }
 
-      if (group.type == device::DeviceType::VL53L8CX && _vl53_data_available_future.valid()) {
-        if (_vl53_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+      for (auto& future : group.measurement_futures) {
+        if (!future.valid()) {
+          continue;
+        }
+        if (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
           if (std::chrono::steady_clock::now() > _phase_deadline) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for VL53L8CX data-available signal.");
+            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for " + device::toString(group.type) + " measurement completion.");
             _phase = Phase::error_meas_enter;
           }
           return false;
         }
-        if (!_vl53_data_available_future.get()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "VL53L8CX data-available signal reported failure.");
+        if (!future.get()) {
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, device::toString(group.type) + " measurement request failed.");
           _phase = Phase::error_meas_enter;
           return false;
         }
       }
-
-      if (group.type == device::DeviceType::TMF8829 && _tmf_data_available_future.valid()) {
-        if (_tmf_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for TMF8829 data-available signal.");
-            _phase = Phase::error_meas_enter;
-          }
-          return false;
-        }
-        if (!_tmf_data_available_future.get()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "TMF8829 data-available signal reported failure.");
-          _phase = Phase::error_meas_enter;
-          return false;
-        }
-      }
-
-      if (group.type == device::DeviceType::HTPA32 && _htpa_data_available_future.valid()) {
-        if (_htpa_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout waiting for HTPA32 data-available signal.");
-            _phase = Phase::error_meas_enter;
-          }
-          return false;
-        }
-        if (!_htpa_data_available_future.get()) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "HTPA32 data-available signal reported failure.");
-          _phase = Phase::error_meas_enter;
-          return false;
-        }
-      }
+      group.measurement_futures.clear();
 
       // Data is confirmed available — promote this group to fetch-ready.
       group.has_fetch_ready     = true;
       group.has_pending_request = false;
     }
 
-    // All pending groups are ready — advance.
+    // All pending groups due this tick are ready — advance.
     _phase = Phase::tick_request;
     return true;
   }
@@ -463,82 +440,67 @@ bool MeasurementManagerImpl::runPhase() {
     // starts its next cycle while we are transferring the previous cycle's data.
     requestMeasurements();
 
-    // Launch fetch operations for groups that were promoted to fetch-ready above.
-    launchFetchFutures();
+    prepareFetchSensors();
+    if (_fetch_sensors.empty()) {
+      for (auto& group : _schedule) {
+        group.has_fetch_ready = false;
+      }
+      _phase = Phase::tick_actions;
+      return true;
+    }
 
-    _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
-    _phase          = Phase::tick_fetch_wait;
+    launchFetchBatch();
+    _phase = Phase::tick_fetch_wait;
     return true;
   }
 
   case Phase::tick_fetch_wait: {
-    // Non-blocking poll: check all fetch futures in order.
-    // Return early (false) if any future is not yet ready.
-    for (auto& fut : _vl53l8cx_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+    for (auto& future : _fetch_futures) {
+      if (future.valid() && future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
         if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching VL53L8CX measurement data.");
-          _vl53l8cx_fetch_futures.clear();
-          _tmf8829_fetch_futures.clear();
-          _htpa32_fetch_futures.clear();
-          _phase = Phase::error_meas_enter;
-        }
-        return false;
-      }
-    }
-    for (auto& fut : _tmf8829_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-        if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching TMF8829 measurement data.");
-          _vl53l8cx_fetch_futures.clear();
-          _tmf8829_fetch_futures.clear();
-          _htpa32_fetch_futures.clear();
-          _phase = Phase::error_meas_enter;
-        }
-        return false;
-      }
-    }
-    for (auto& fut : _htpa32_fetch_futures) {
-      if (fut.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-        if (std::chrono::steady_clock::now() > _phase_deadline) {
-          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching HTPA32 measurement data.");
-          _vl53l8cx_fetch_futures.clear();
-          _tmf8829_fetch_futures.clear();
-          _htpa32_fetch_futures.clear();
+          logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Timeout fetching measurement data.");
+          _fetch_futures.clear();
+          _fetch_sensors.clear();
           _phase = Phase::error_meas_enter;
         }
         return false;
       }
     }
 
-    // All futures ready — collect results.
     bool success = true;
-    for (auto& fut : _vl53l8cx_fetch_futures)
-      success &= fut.get();
-    for (auto& fut : _tmf8829_fetch_futures)
-      success &= fut.get();
-    for (auto& fut : _htpa32_fetch_futures)
-      success &= fut.get();
-
-    _vl53l8cx_fetch_futures.clear();
-    _tmf8829_fetch_futures.clear();
-    _htpa32_fetch_futures.clear();
+    for (auto& future : _fetch_futures) {
+      if (future.valid()) {
+        success &= future.get();
+      }
+    }
+    _fetch_futures.clear();
 
     if (!success) {
       logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Fetching measurement data failed.");
+      _fetch_sensors.clear();
       _phase = Phase::error_meas_enter;
       return true;
     }
 
-    // Publish measurements and clear fetch-ready flags.
-    if (_depth_publish_needed) {
+    _fetch_index = _fetch_batch_end;
+    if (_fetch_index == _tof_fetch_count && _depth_publish_needed) {
       publishDepthMeasurements();
       _depth_publish_needed = false;
     }
+
+    if (_fetch_index < _fetch_sensors.size()) {
+      launchFetchBatch();
+      return true;
+    }
+
     if (_thermal_publish_needed) {
       publishThermalMeasurements();
       _thermal_publish_needed = false;
     }
+
+    _fetch_sensors.clear();
+    _fetch_index     = 0;
+    _tof_fetch_count = 0;
     for (auto& g : _schedule) {
       g.has_fetch_ready = false;
     }
@@ -615,50 +577,27 @@ bool MeasurementManagerImpl::runPhase() {
   }
 
   case Phase::error_meas_wait: {
-    // Non-blocking poll — same pattern as tick_wait_pending.
     for (auto& group : _schedule) {
       if (!group.has_pending_request) {
         continue;
       }
 
-      if (group.type == device::DeviceType::VL53L8CX && _vl53_data_available_future.valid()) {
-        if (_vl53_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+      for (auto& future : group.measurement_futures) {
+        if (!future.valid()) {
+          continue;
+        }
+        if (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
           if (std::chrono::steady_clock::now() > _phase_deadline) {
             _phase = Phase::error_meas_retry;
           }
           return false;
         }
-        if (!_vl53_data_available_future.get()) {
+        if (!future.get()) {
           _phase = Phase::error_meas_retry;
           return false;
         }
       }
-
-      if (group.type == device::DeviceType::TMF8829 && _tmf_data_available_future.valid()) {
-        if (_tmf_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            _phase = Phase::error_meas_retry;
-          }
-          return false;
-        }
-        if (!_tmf_data_available_future.get()) {
-          _phase = Phase::error_meas_retry;
-          return false;
-        }
-      }
-
-      if (group.type == device::DeviceType::HTPA32 && _htpa_data_available_future.valid()) {
-        if (_htpa_data_available_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-          if (std::chrono::steady_clock::now() > _phase_deadline) {
-            _phase = Phase::error_meas_retry;
-          }
-          return false;
-        }
-        if (!_htpa_data_available_future.get()) {
-          _phase = Phase::error_meas_retry;
-          return false;
-        }
-      }
+      group.measurement_futures.clear();
 
       group.has_pending_request = false;
     }
@@ -786,9 +725,10 @@ bool MeasurementManagerImpl::runPhase() {
 ==========================================================================================
 */
 
-void MeasurementManagerImpl::launchFetchFutures() {
-  // Launch async fetch for every group that was promoted to fetch-ready.
-  // Futures are stored and polled non-blocking in tick_fetch_wait.
+void MeasurementManagerImpl::prepareFetchSensors() {
+  _fetch_sensors.clear();
+  _fetch_index            = 0;
+  _tof_fetch_count        = 0;
   _depth_publish_needed   = false;
   _thermal_publish_needed = false;
 
@@ -796,63 +736,42 @@ void MeasurementManagerImpl::launchFetchFutures() {
     if (!group.has_fetch_ready) {
       continue;
     }
-
-    if (group.type == device::DeviceType::VL53L8CX) {
-      for (auto* dev : _vl53l8cx_devices) {
-        _vl53l8cx_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
-      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
+    if (group.type == device::DeviceType::VL53L8CX || group.type == device::DeviceType::TMF8829) {
       _depth_publish_needed = true;
     }
-
-    if (group.type == device::DeviceType::TMF8829) {
-      for (auto* dev : _tmf8829_devices) {
-        _tmf8829_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
-      // ToDo: May trigger twice with mixed tmf8829 and vl53l8cx groups, needs testing
-      _depth_publish_needed = true;
-    }
-
     if (group.type == device::DeviceType::HTPA32) {
-      for (auto* dev : _htpa32_devices) {
-        _htpa32_fetch_futures.push_back(dev->fetchMeasurementAsync(_params.timeout));
-      }
+      _tof_fetch_count        = _fetch_sensors.size();
       _thermal_publish_needed = true;
     }
+    _fetch_sensors.insert(_fetch_sensors.end(), group.sensors.begin(), group.sensors.end());
   }
+
+  if (!_thermal_publish_needed) {
+    _tof_fetch_count = _fetch_sensors.size();
+  }
+}
+
+void MeasurementManagerImpl::launchFetchBatch() {
+  _fetch_futures.clear();
+  _fetch_batch_end = (_fetch_index < _tof_fetch_count) ? _tof_fetch_count : _fetch_sensors.size();
+  for (std::size_t i = _fetch_index; i < _fetch_batch_end; ++i) {
+    _fetch_futures.emplace_back(_fetch_sensors[i]->fetch());
+  }
+  _phase_deadline = std::chrono::steady_clock::now() + _params.timeout;
 }
 
 void MeasurementManagerImpl::requestMeasurements() {
   for (auto& group : _schedule) {
-    if (!isGroupDue(group)) {
+    if (!isGroupDue(group) || group.sensors.empty()) {
       continue;
     }
 
-    if (group.type == device::DeviceType::VL53L8CX) {
-      if (!_vl53l8cx_devices.empty()) {
-        // Launch request — the async thread sends the broadcast and waits for
-        // data-available. The future is consumed in the next tick's waitForPendingData().
-        _vl53_data_available_future = device::VL53L8CX_Device::requestMeasurementAsync(_vl53l8cx_devices, _params.timeout);
-        group.has_pending_request   = true;
-      }
+    group.measurement_futures.clear();
+    const auto sequence = group.measurement_sequence++;
+    for (auto* sensor : group.sensors) {
+      group.measurement_futures.emplace_back(sensor->measure(sequence));
     }
-
-    if (group.type == device::DeviceType::TMF8829) {
-      if (!_tmf8829_devices.empty()) {
-        // Launch request — the async thread sends the broadcast and waits for
-        // data-available. The future is consumed in the next tick's waitForPendingData().
-        _tmf_data_available_future = device::TMF8829_Device::requestMeasurementAsync(_tmf8829_devices, _params.timeout);
-        group.has_pending_request  = true;
-      }
-    }
-
-    if (group.type == device::DeviceType::HTPA32) {
-      if (!_htpa32_devices.empty()) {
-        // Wait for each HTPA32 device to report acquisition complete.
-        _htpa_data_available_future = device::HTPA32_Device::requestMeasurementAsync(_htpa32_devices, _params.timeout);
-        group.has_pending_request = true;
-      }
-    }
+    group.has_pending_request = true;
   }
 }
 

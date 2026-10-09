@@ -1,7 +1,6 @@
 #include "sensorring/device/thermal/htpa32/HTPA32_Device.hpp"
 
 #include <sensorring_transport/Protocol.hpp>
-#include <unordered_map>
 
 #include "device/thermal/htpa32/HTPA32_DeviceImpl.hpp"
 #include "interface/ComManager.hpp"
@@ -51,84 +50,12 @@ std::future<bool> HTPA32_Device::getEepromAsync(std::chrono::milliseconds timeou
   return _impl->getEepromAsync(timeout);
 }
 
-std::future<bool> HTPA32_Device::requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [devices, timeout]() {
-    struct InterfaceGroup {
-      std::vector<HTPA32_Device*> devices;
-      unsigned int active_sensors = 0;
-    };
-    std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
-    std::vector<std::future<bool> > futures;
-
-    for (auto* dev : devices) {
-      if (dev != nullptr) {
-        auto* iface = dev->_interface;
-        auto& group = groups[iface];
-        group.devices.push_back(dev);
-        futures.emplace_back(dev->beginDataAvailableWait());
-        group.active_sensors |= (1u << dev->getHwIdx());
-      }
-    }
-
-    if (groups.empty()) {
-      return false;
-    }
-
-    for (auto& [iface, group] : groups) {
-      if (group.devices.empty()) {
-        continue;
-      }
-      unsigned int active_sensors = group.active_sensors;
-      uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
-      uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
-      std::vector<uint8_t> tx_buf{ sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::HTPA32 }, MEASUREMENT_REQUEST, tx_buf);
-    }
-
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    for (auto& fut : futures) {
-      try {
-        if (fut.wait_until(deadline) != std::future_status::ready || !fut.get()) {
-          return false;
-        }
-      } catch (const std::future_error&) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+bool HTPA32_Device::sendMeasurementRequest(std::uint8_t) {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
 }
 
-std::future<bool> HTPA32_Device::requestMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    auto fut = beginDataAvailableWait();
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_REQUEST, {});
-
-    try {
-      if (fut.wait_for(timeout) != std::future_status::ready) {
-        return false;
-      }
-      return fut.get();
-    } catch (const std::future_error&) {
-      return false;
-    }
-  });
-}
-
-std::future<bool> HTPA32_Device::fetchMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    clearDataFlag();
-    auto fut = beginMeasurementWait();
-
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
-
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    if (fut.wait_until(deadline) != std::future_status::ready) {
-      return false;
-    }
-    return fut.get();
-  });
+bool HTPA32_Device::sendMeasurementTransmissionRequest() {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::HTPA32 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
 }
 
 } // namespace device

@@ -129,73 +129,12 @@ void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source,
   _impl->comCallback(source, command, data);
 }
 
-std::future<bool> TMF8829_Device::requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [devices, timeout]() {
-    struct InterfaceGroup {
-      std::vector<TMF8829_Device*> devices;
-      unsigned int active_sensors = 0;
-    };
-    std::unordered_map<com::ComInterface*, InterfaceGroup> groups;
-    std::vector<std::future<bool> > futures;
-
-    for (auto* dev : devices) {
-      if (dev != nullptr) {
-        auto* iface = dev->_interface;
-        auto& group = groups[iface];
-        group.devices.push_back(dev);
-        futures.emplace_back(dev->beginDataAvailableWait());
-        group.active_sensors |= (1u << dev->getHwIdx());
-      }
-    }
-
-    if (groups.empty()) {
-      return false;
-    }
-
-    static std::atomic<std::uint8_t> request_count{ 0 };
-    std::uint8_t count = request_count.fetch_add(1, std::memory_order_relaxed);
-
-    for (auto& [iface, group] : groups) {
-      if (group.devices.empty()) {
-        continue;
-      }
-      unsigned int active_sensors = group.active_sensors;
-      uint8_t sensor_select_high  = static_cast<uint8_t>((active_sensors >> 8) & 0xFF);
-      uint8_t sensor_select_low   = static_cast<uint8_t>((active_sensors >> 0) & 0xFF);
-      std::vector<uint8_t> tx_buf{ count, sensor_select_high, sensor_select_low };
-      iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::TMF8829 }, MEASUREMENT_REQUEST, tx_buf);
-    }
-
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    for (auto& fut : futures) {
-      try {
-        if (fut.wait_until(deadline) != std::future_status::ready) {
-          return false;
-        } else if (!fut.get()) {
-          return false;
-        }
-      } catch (const std::future_error&) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+bool TMF8829_Device::sendMeasurementRequest(std::uint8_t sequence_number) {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_REQUEST, { sequence_number });
 }
 
-std::future<bool> TMF8829_Device::fetchMeasurementAsync(std::chrono::milliseconds timeout) {
-  return std::async(std::launch::async, [this, timeout]() {
-    clearDataFlag();
-    auto fut = beginMeasurementWait();
-
-    _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
-
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
-    if (fut.wait_until(deadline) != std::future_status::ready) {
-      return false;
-    }
-    return fut.get();
-  });
+bool TMF8829_Device::sendMeasurementTransmissionRequest() {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
 }
 
 } // namespace device

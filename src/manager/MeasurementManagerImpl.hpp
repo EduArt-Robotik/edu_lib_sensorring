@@ -55,9 +55,9 @@ namespace manager {
  *     own rate (e.g. from a ROS spin callback).
  *
  * The tick pipeline is split into five non-blocking sub-phases:
- *   1. tick_wait_pending  — poll data-available futures from previous tick.
- *   2. tick_request       — fire measurement requests + launch fetch futures.
- *   3. tick_fetch_wait    — poll fetch futures; publish when all done.
+ *   1. tick_wait_pending  — poll device measurement-completion futures.
+ *   2. tick_request       — trigger due devices + start the first ready fetch.
+ *   3. tick_fetch_wait    — poll one fetch at a time; publish ToF before thermal.
  *   4. tick_actions       — execute actuator actions; advance tick counter.
  *   5. tick_sleep         — poll tick boundary; advance when elapsed.
  */
@@ -94,9 +94,9 @@ private:
     pre_loop_init,
 
     // Tick-based measurement loop (each sub-phase returns immediately when waiting)
-    tick_wait_pending, ///< Poll data-available futures from previous tick.
-    tick_request,      ///< Fire measurement requests; launch fetch futures.
-    tick_fetch_wait,   ///< Poll fetch futures; publish measurements when done.
+    tick_wait_pending, ///< Poll device measurement-completion futures.
+    tick_request,      ///< Trigger due devices and start the first ready fetch.
+    tick_fetch_wait,   ///< Poll one fetch at a time; publish ToF before thermal.
     tick_actions,      ///< Execute actuator actions; advance tick counter.
     tick_sleep,        ///< Non-blocking wait until next tick boundary.
 
@@ -122,7 +122,8 @@ private:
   void runWorker() noexcept;
 
   // Tick sub-steps
-  void launchFetchFutures();
+  void prepareFetchSensors();
+  void launchFetchBatch();
   void requestMeasurements();
 
   void publishDepthMeasurements();
@@ -145,15 +146,12 @@ private:
   std::vector<SensorGroupSchedule> _schedule;
   std::atomic<bool> _is_running;
 
-  // Pending futures for data-available signals.
-  std::future<bool> _vl53_data_available_future;
-  std::future<bool> _tmf_data_available_future;
-  std::future<bool> _htpa_data_available_future;
-
-  // Fetch futures launched in tick_request, polled in tick_fetch_wait.
-  std::vector<std::future<bool> > _vl53l8cx_fetch_futures;
-  std::vector<std::future<bool> > _tmf8829_fetch_futures;
-  std::vector<std::future<bool> > _htpa32_fetch_futures;
+  // Ordered per-device readout cursor.
+  std::vector<device::Sensor*> _fetch_sensors;
+  std::vector<std::future<bool> > _fetch_futures;
+  std::size_t _fetch_index     = 0;
+  std::size_t _fetch_batch_end = 0;
+  std::size_t _tof_fetch_count = 0;
 
   // Tracks which measurement types need publishing after fetch completes.
   bool _depth_publish_needed;

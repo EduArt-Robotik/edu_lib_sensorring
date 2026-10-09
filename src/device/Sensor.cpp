@@ -13,6 +13,23 @@ Sensor::Sensor(DeviceID id, com::ComInterface* interface, com::ComEndpoint targe
 
 Sensor::~Sensor() = default;
 
+std::future<bool> Sensor::measure(std::uint8_t sequence_number) {
+  auto future = beginDataAvailableWait();
+  if (!sendMeasurementRequest(sequence_number)) {
+    setDataAvailableReady(false);
+  }
+  return future;
+}
+
+std::future<bool> Sensor::fetch() {
+  clearDataFlag();
+  auto future = beginMeasurementWait();
+  if (!sendMeasurementTransmissionRequest()) {
+    setMeasurementReady(false);
+  }
+  return future;
+}
+
 std::future<bool> Sensor::beginMeasurementWait() {
   std::lock_guard<std::mutex> lock(_promise_mutex);
 

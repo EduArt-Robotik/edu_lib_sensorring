@@ -77,34 +77,9 @@ public:
    */
   bool startCalibration(unsigned int window) override;
 
-  /**
-   * @brief Request thermal measurements asynchronously on a set of devices.
-   *
-   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface
-   * and waits until every requested device reports a completed measurement.
-   * @param[in] devices Vector of devices to trigger.
-   * @param[in] timeout Maximum time to wait for measurement-ready responses.
-   * @return Future resolving to true when every requested device is ready.
-   */
-  static std::future<bool> requestMeasurementAsync(const std::vector<HTPA32_Device*>& devices, std::chrono::milliseconds timeout);
-  /**
-   * @brief Request a thermal measurement asynchronously from this single device.
-   *
-   * Sends a direct MEASUREMENT_REQUEST to this board and waits for the
-   * measurement-ready response.
-   * @param[in] timeout Maximum time to wait for the measurement-ready response.
-   * @return Future resolving to true when the device is ready.
-   */
-  std::future<bool> requestMeasurementAsync(std::chrono::milliseconds timeout);
-  /**
-   * @brief Fetch the thermal measurement asynchronously from this device.
-   *
-   * Sends a direct MEASUREMENT_TRANSMISSION_REQUEST to this single device and waits
-   * for the response. Must be called sequentially, one device at a time.
-   * @param[in] timeout Maximum time to wait for data transmission.
-   * @return Future resolving to true when the measurement data has been received.
-   */
-  std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
+protected:
+  bool sendMeasurementRequest(std::uint8_t sequence_number) override;
+  bool sendMeasurementTransmissionRequest() override;
 
 private:
   /**

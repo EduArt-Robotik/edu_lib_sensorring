@@ -43,6 +43,8 @@ public:
   ~Sensor() override;
 
   // -- state / measurement synchronisation --
+  std::future<bool> measure(std::uint8_t sequence_number);
+  std::future<bool> fetch();
 
   /**
    * @brief Begin an asynchronous wait for the next measurement trigger.
@@ -75,6 +77,9 @@ public:
   void clearDataFlag();
 
 protected:
+  virtual bool sendMeasurementRequest(std::uint8_t sequence_number) = 0;
+  virtual bool sendMeasurementTransmissionRequest()                 = 0;
+
   virtual void onResetSensorState() {}
   virtual void onClearDataFlag() {}
 

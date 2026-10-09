@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include <chrono>
-#include <future>
 #include <memory>
 #include <vector>
 
@@ -170,24 +168,9 @@ public:
    */
   bool configure() override;
 
-  /**
-   * @brief Request Time-of-Flight measurements asynchronously on a set of devices.
-   *
-   * Sends a single broadcast MEASUREMENT_REQUEST per communication interface.
-   * @param[in] devices Vector of devices to trigger.
-   * @param[in] timeout Maximum time to wait for all devices to acknowledge readiness.
-   * @return Future resolving to true when all requests succeed.
-   */
-  static std::future<bool> requestMeasurementAsync(const std::vector<TMF8829_Device*>& devices, std::chrono::milliseconds timeout);
-  /**
-   * @brief Fetch the Time-of-Flight measurement asynchronously from this device.
-   *
-   * Sends a direct MEASUREMENT_TRANSMISSION_REQUEST to this single device and waits
-   * for the response. Must be called sequentially, one device at a time.
-   * @param[in] timeout Maximum time to wait for data transmission.
-   * @return Future resolving to true when the measurement data has been received.
-   */
-  std::future<bool> fetchMeasurementAsync(std::chrono::milliseconds timeout);
+protected:
+  bool sendMeasurementRequest(std::uint8_t sequence_number) override;
+  bool sendMeasurementTransmissionRequest() override;
 
 private:
   /**
