@@ -195,6 +195,6 @@ log_sub = sensorring.Logger.getInstance().subscribe(
 
 | Read Previous | Read Next |
 |:--|--:|
-| [Software](03_software.md) | [Wrappers](06_wrappers.md) |
+| [Configuration Parameters](04_parameters.md) | [Wrappers](06_wrappers.md) |
 
 </div>

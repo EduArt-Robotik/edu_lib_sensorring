@@ -998,6 +998,7 @@ WARN_LOGFILE           =
 INPUT                  = pages/01_hardware.md \
                          pages/02_installation.md \
                          pages/03_software.md \
+                         pages/04_parameters.md \
                          pages/05_examples.md \
                          pages/06_wrappers.md \
                          pages/07_firmware_update.md \

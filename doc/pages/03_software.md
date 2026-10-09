@@ -11,7 +11,8 @@ The public interface has **two measurement related components**:
   Clients subscribe to measurements via typed device interfaces (`depthSensors()`, `thermalSensors()`, `lights()`) and to state changes via `subscribeToStateChanges()`. Each call returns a `Subscription` object — the callback stays active for as long as the `Subscription` is alive.
 
 - The **ManagerParams**<br>
-  This is the parameter set that configures the system. The ManagerParams are a cascaded structure, that represents the topology of the system as shown in the diagram below..
+  This parameter set controls the runtime behavior of the `MeasurementManager`.
+  See [Configuration Parameters](04_parameters.md) for its fields and defaults.
 
 ### 1.2 Logger Interface
 
@@ -110,20 +111,17 @@ std::cout << factory.printTopology();
 
 The `EnumerationMap` returned by `enumerate()` or `getLatestEnumerationResult()` maps each `ComInterfaceID` to a vector of `EnumerationInformation` structs that report board type, connection state, configuration state and available device types.
 
-## 4. Input Parameters
+## 4. Configuration Parameters
 
-The `ManagerParams` configure the runtime behaviour of the `MeasurementManager`.
-They are passed as constructor argument and cannot be changed after instantiation.
-
-| Parameter | Description |
-|:----------|:------------|
-| `timeout` | Duration after which the manager shuts down automatically |
-| `repair_errors` | Attempt automatic error recovery |
+The library exposes parameter structures for the measurement manager,
+communication interfaces, boards, and devices. See the
+[Configuration Parameters](04_parameters.md) page for their fields, defaults,
+and how to apply them.
 
 <div class="section_buttons"> 
 
 | Read Previous | Read Next |
 |:--|--:|
-| [Installation](02_installation.md) | [Examples](05_examples.md) |
+| [Installation](02_installation.md) | [Configuration Parameters](04_parameters.md) |
 
 </div>
