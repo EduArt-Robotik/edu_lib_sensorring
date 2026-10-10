@@ -22,7 +22,9 @@ After every reset the bootloader starts first and then decides where to continue
 ## 2. The `firmware_updater` Tool
 
 All update operations are handled by the command line tool `firmware_updater`.
-It is built alongside the library (with `SENSORRING_BUILD_FIRMWARE_UPDATE=ON`) and lives in `apps/utils/firmware_updater`.
+The tool lives in `apps/utils/firmware_updater`. Build it with both
+`SENSORRING_BUILD_FIRMWARE_UPDATE=ON` (to build the firmware update library) and
+`SENSORRING_BUILD_UTILS=ON` (to build the command-line utilities).
 
 ### 2.1 Command Syntax
 

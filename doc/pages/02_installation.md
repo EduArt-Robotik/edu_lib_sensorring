@@ -22,7 +22,7 @@ add_library(sensorring::sensorring ALIAS sensorring)
 Here is an absolute minimum example of a `CMakeLists.txt` that includes the Sensor Ring library.
 
 ```cmake
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.24)
 project(minimal_example)
 
 include(FetchContent)
@@ -49,17 +49,19 @@ You can then simply include the Sensor Ring headers into your C++ program and co
 ```cpp
 // Example of a C++ program using the library
 
-#include <sensorring/MeasurementManager.hpp>
+#include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/interface/InterfaceParams.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 
-using namespace eduart;
+using namespace eduart::sensorring;
 
 int main(int, char*[]) {
-
+  com::UsbTingoParams interface{ "0" };
+  SensorRingFactory factory;
+  factory.addInterface(interface);
   manager::ManagerParams params;
 
-  // Populate the parameters
-
-  auto manager = std::make_unique<manager::MeasurementManager>(params);
+  manager::MeasurementManager manager(params, factory);
 
   // Do something useful here
 
@@ -93,10 +95,12 @@ Use the following commands to build the library.
 
     <table>
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
-      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
-      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
-      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
+      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
+      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
+      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
       <tr><td>SENSORRING_USE_SOCKETCAN</td><td>ON</td><td>Compile with support for Linux SocketCAN</td></tr>
       <tr><td>SENSORRING_USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
       <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
@@ -119,10 +123,12 @@ Use the following commands to build the library.
 
     <table>
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
-      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>ON</td><td>Build the documentation</td></tr>
-      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>ON</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>ON</td><td>Build python bindings</td></tr>
-      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>ON</td><td>Build as shared library</td></tr>
+      <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
+      <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
+      <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
+      <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
       <tr><td>SENSORRING_USE_USBTINGO</td><td>ON</td><td>Compile with support for the USBtingo USB adapter</td></tr>
       <tr><td>CMAKE_BUILD_TYPE</td><td>Release</td><td>Choose the type of build (Debug/Release/RelWithDebInfo)</td></tr>
       <tr><td>CMAKE_INSTALL_PREFIX</td><td>C:\\Program Files</td><td>Install path prefix, prepended onto install directories</td></tr>

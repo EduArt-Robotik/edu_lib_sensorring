@@ -24,15 +24,17 @@ In addition to the measurement related interface the library provides a **logger
 
 ## 2. Topology of the System
 
-The EduArt Sensor Ring is a system that collects and combines measurements from multiple individual sensors.
-The individual sensors are daisy chained together in series and share a communication interface and a power supply.
-The chain of sensor is terminated by a master device at one end e.g. a Raspberry Pi or a CAN to USB converter.
-It is possible to use multiple communication interfaces to distribute the sensor data and enable the use of more sensors simultaneously.
-The following class diagram illustrates the topology and the reflection of the hardware layers in the library.
+The EduArt Sensor Ring collects measurements from sensor boards connected
+through one or more communication interfaces. The library represents this
+topology with the following components:
 
-<div style="text-align:center">
-<img src="../images/class_diagram_simple.webp" width="900" onerror="this.onerror=null; this.src='class_diagram_simple.webp';">
-</div>
+- A `SensorRingFactory` discovers boards on configured interfaces and builds
+  the ring.
+- A `SensorRing` contains one `SensorBus` for each communication interface.
+- Each `SensorBus` contains the `SensorBoard` instances on that interface;
+  each board owns its configured devices.
+- A `MeasurementManager` operates on the ring and provides typed device groups
+  and state-change subscriptions to applications.
 
 ## 3. Sensor Ring Factory
 
@@ -49,9 +51,12 @@ The minimal workflow is:
 4. Call `build()` to enumerate hardware and construct the `SensorRing`
 
 ```cpp
-SensorRingFactory factory;
+using namespace eduart::sensorring;
+
+com::UsbTingoParams interface{ "0" };
+SensorRingFactory factory(ValidationMode::Relaxed);
 factory.addInterface(interface);
-auto sensor_ring = factory.build(ValidationMode::Relaxed);
+auto sensor_ring = factory.build();
 ```
 
 The returned `SensorRing` is passed to the `MeasurementManager` as before:
@@ -63,7 +68,9 @@ auto manager = std::make_unique<manager::MeasurementManager>(params, std::move(s
 
 ### 3.2 Validation Modes
 
-The `build()` method accepts a `ValidationMode` that controls how expectations are matched against discovered hardware.
+The validation mode is selected when constructing `SensorRingFactory` (it
+defaults to `ValidationMode::Relaxed`). `build()` uses that mode to match
+expectations against discovered hardware.
 
 | Mode | Behaviour |
 |:-----|:----------|
@@ -78,26 +85,39 @@ In relaxed mode the factory finds compatible boards regardless of their position
 **Auto-discovery** (no expectations): every board found on the bus is used with default configuration.
 
 ```cpp
-factory.addInterface(interface);
-auto sensor_ring = factory.build(ValidationMode::Relaxed);
+auto sensor_ring = factory.build();
 ```
 
-**Board type constraint**: only boards of the specified type are accepted.
+**Board type constraint**: declare the expected board type, then declare the
+devices to instantiate on it.
 
 ```cpp
-factory.expectBoard({ device::SensorBoardType::Headlight });
+using namespace eduart::sensorring;
+
+board::SensorBoardParams board_params;
+board_params.board_type = board::SensorBoardType::Headlight;
+factory.expectBoard(board_params);
+factory.expectDevice(device::HTPA32_Params{});
 ```
 
-**Explicit device params**: only the specified device types are instantiated on the matched board.
+**Explicit device params**: pass device parameters after `expectBoard()`. Only
+the declared device types are instantiated on that board.
 
 ```cpp
-factory.expectBoard({}, { device::HTPA32_Params{} });
+using namespace eduart::sensorring;
+
+factory.expectBoard({});
+factory.expectDevice(device::HTPA32_Params{});
 ```
 
 **Default device params**: applied to every device of that type when no explicit params are given.
 
 ```cpp
-factory.setDefaultDeviceParams(device::VL53L8CX_Params{ .resolution = 4 });
+using namespace eduart::sensorring;
+
+device::VL53L8CX_Params tof_params;
+tof_params.max_rate_hz = 10.0;
+factory.setDefaultDeviceParams(tof_params);
 ```
 
 ### 3.4 Enumeration and Topology

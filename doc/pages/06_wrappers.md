@@ -1,6 +1,9 @@
 # Wrappers for Other Frameworks
 
-In addition the the examples, the Sensor Ring library has provides for [ROS](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and [ROS2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) which make the integration of the EduArt Sensor Ring in existing projects easy.
+In addition to the examples, the Sensor Ring library provides wrappers for
+[ROS](https://github.com/EduArt-Robotik/edu_sensorring_ros1) and
+[ROS2](https://github.com/EduArt-Robotik/edu_sensorring_ros2) to make it easy to
+integrate the EduArt Sensor Ring into existing projects.
  
 ## 1. ROS Wrapper <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1"><img src="https://img.shields.io/badge/ROS1-22314E?logo=ros&logoColor=white" alt="ROS"></a>
 
@@ -31,14 +34,17 @@ In addition the pose of each sensor is published as a static transformation.
     docker compose build
     docker compose up -d
     ```
-    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2/blob/master/docker/launch_content/sensorring_params.yaml">Docker parameter file</a> and have to be adjusted to match the actual sensor configuration.
+    > ℹ️ The parameters of the Sensor Ring are defined in the <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros1/blob/master/docker/launch_content/sensorring_params.yaml">Docker parameter file</a> and have to be adjusted to match the actual sensor configuration.
 
   </div>
 </div>
 
 ## 2. ROS2 Wrapper <a href="https://github.com/EduArt-Robotik/edu_sensorring_ros2"><img src="https://img.shields.io/badge/ROS2-22314E?logo=ros&logoColor=white" alt="ROS2"></a>
 
-The Ros2 wrapper publishes the Time of Flight Sensor measurements as [PointCloud2](https://docs.ros2.org/foxy/api/sensor_msgs/msg/PointCloud.html) message and the thermal measurements as [Image](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html) message.
+The ROS2 wrapper publishes the Time of Flight sensor measurements as
+[PointCloud2](https://docs.ros2.org/foxy/api/sensor_msgs/msg/PointCloud2.html)
+messages and the thermal measurements as
+[Image](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html) messages.
 In addition to the sensor messages the pose of each sensor is published as a static transformation.
 
 > ℹ️ Using the ROS2 Wrapper does not require you to install the Sensor Ring Library manually. The ROS2 build will automatically fetch the library if it is not detected by CMake.

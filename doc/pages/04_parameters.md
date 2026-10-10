@@ -45,7 +45,7 @@ Pass either `com::SocketCanParams` or `com::UsbTingoParams` to
 
 | Field | Default | Description |
 |:------|:--------|:------------|
-| `name` | Empty | Interface identifier: for example, `can0` for SocketCAN or the USBtingo serial number. |
+| `name` | Empty | Interface identifier: for example, `can0` for SocketCAN or a USBtingo device index/serial number. |
 | `respond_with_brs` | `false` | Enables CAN FD bit-rate switching for the data phase of messages sent by sensor boards to the host. |
 | `data_bitrate` | `0` | CAN FD data-phase bitrate in bits per second, from `1,000,000` to `8,000,000`. Used when either BRS setting is enabled; `0` uses the arbitration bitrate (1 Mbps). |
 | `data_sample_point` | `0.0` | Optional data-phase sample point in `[0, 1]`; `0` uses the CAN controller default. |
