@@ -102,10 +102,10 @@ add_library(sensorring::sensorring ALIAS sensorring)
 - <b class="tab-title">**Quick Start Linux**</b><div class="darkmode_inverted_image">
 
   ```sh
-  git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+  git clone --recursive https://github.com/EduArt-Robotik/edu_lib_sensorring
   mkdir -p edu_lib_sensorring/build
   cd edu_lib_sensorring/build
-  cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+  cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON
   cmake --build . -j4
   sudo cmake --install
   ```
@@ -114,11 +114,11 @@ add_library(sensorring::sensorring ALIAS sensorring)
 - <b class="tab-title">**Quick Start Windows**</b><div class="darkmode_inverted_image">
 
   ```powershell
-  git clone https://github.com/EduArt-Robotik/edu_lib_sensorring
+  git clone --recursive https://github.com/EduArt-Robotik/edu_lib_sensorring
   mkdir edu_lib_sensorring/build
   cd edu_lib_sensorring/build
-  cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
-  cmake --build . --config=Release -- -j4
+  cmake .. -DCMAKE_BUILD_TYPE=Release -DSENSORRING_BUILD_EXAMPLES=ON
+  cmake --build . --config=Release --parallel
   cmake --install . --config=Release # Requires terminal with admin privileges
   ```
 </div>

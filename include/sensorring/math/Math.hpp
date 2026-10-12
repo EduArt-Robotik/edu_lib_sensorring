@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   Math.hpp
@@ -15,36 +15,57 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
+/// PI constant
+static constexpr double PI = 3.141592653589793238462643383279502884;
+
 /**
- * Calculate euler angles of a rotation from a rotation matrix (RPY-convention)
+ * @brief Convert degrees to radians.
+ * @param[in] degrees Angle in degrees.
+ * @return Equivalent angle in radians.
+ */
+SENSORRING_EXPORT double degreesToRadians(double degrees);
+
+/**
+ * @brief Convert radians to degrees.
+ * @param[in] radians Angle in radians.
+ * @return Equivalent angle in degrees.
+ */
+SENSORRING_EXPORT double radiansToDegrees(double radians);
+
+/**
+ * @brief Calculate euler angles of a rotation from a rotation matrix (RPY-convention).
  * @param[in] rot_m Rotation matrix to be converted to euler angles
  * @return Euler angles in degrees
  */
-SENSORRING_API const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m);
+SENSORRING_EXPORT const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m);
 
 /**
- * Calculate euler angles of a rotation from a rotation matrix (RPY-convention)
+ * @brief Calculate euler angles of a rotation from a rotation matrix (RPY-convention).
  * @param[in] rot_m Rotation matrix to be converted to euler angles
  * @return Euler angles in radians
  */
-SENSORRING_API const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m);
+SENSORRING_EXPORT const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m);
 
 /**
- * Calculate a rotation matrix from euler angles (RPY-convention)
+ * @brief Calculate a rotation matrix from euler angles (RPY-convention).
  * @param[in] rotation_deg Euler angles in degrees to be converted to a rotation matrix
  * @return Rotation matrix
  */
-SENSORRING_API const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotation_deg);
+SENSORRING_EXPORT const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotation_deg);
 
 /**
- * Calculate a rotation matrix from euler angles (RPY-convention)
- * @param[in] rotation_deg Euler angles in radians to be converted to a rotation matrix
+ * @brief Calculate a rotation matrix from euler angles (RPY-convention).
+ * @param[in] rotation_rad Euler angles in radians to be converted to a rotation matrix
  * @return Rotation matrix
  */
-SENSORRING_API const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad);
+SENSORRING_EXPORT const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad);
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

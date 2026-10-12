@@ -1,0 +1,103 @@
+#!/usr/bin/python3
+
+# Copyright (c) 2026 EduArt Robotik GmbH
+
+"""
+ @file   light_control.py
+ @author EduArt Robotik GmbH
+ @brief  This example demonstrates how to control WS2812b LEDs
+         with a smooth color cycling animation.
+ @date 2025-11-18
+"""
+
+import math
+import time
+import eduart.sensorring as sensorring
+
+
+# Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
+CAN_INTERFACE_NAME = "can0"
+
+# Default USBtingo interface (cross-platform, uses the first available USBtingo device)
+USBTINGO_INTERFACE_NAME = "0"
+
+# Parameters for smooth color cycling of the WS2812b lights.
+BRIGHTNESS = 0.2
+STEP = 0.15        # Speed of the color change
+OFFSET_G = 2.0943951  # 120 degrees phase shift
+OFFSET_B = 4.1887902  # 240 degrees phase shift
+
+
+def to_channel(value):
+  """Map a sine wave value to a [0, 255] color channel."""
+  v = 0.5 * (math.sin(value) + 1.0)
+  return max(0, min(255, int(v * 255.0 + 0.5)))
+
+
+def main():
+  print("================================")
+  print("Light control sensorring example")
+  print("================================")
+  print()
+
+  can_interface = sensorring.SocketCanParams()
+  can_interface.name = CAN_INTERFACE_NAME
+
+  usbtingo_interface = sensorring.UsbTingoParams()
+  usbtingo_interface.name = USBTINGO_INTERFACE_NAME
+
+  try:
+    # Subscribe to the log messages
+    log_sub = sensorring.Logger.getInstance().subscribe(
+      lambda verbosity, msg:
+        print(f"[{sensorring.LogVerbosityToString(verbosity)}] {msg}")
+        if verbosity > sensorring.LogVerbosity_Debug else None
+    )
+
+    # Create SensorRing via factory auto-discovery
+    factory = sensorring.SensorRingFactory()
+    factory.addInterface(can_interface)
+    factory.addInterface(usbtingo_interface)
+
+    # Build the sensor ring directly
+    ring = factory.build()
+
+    lights = []
+    for dev in ring.getDevices():
+      light = sensorring.asLight(dev)
+      if light is not None:
+        lights.append(light)
+
+    if not lights:
+      print("No lights found in the SensorRing. Exiting.")
+      return
+
+    print("\nSensorring successfully initialized.")
+    print("\nStart printing animation frames:")
+
+    phase = 0.0
+    counter = 0
+    last_print = time.time()
+    while True:
+      # Advance phase and compute smooth RGB values from three sine waves.
+      phase += STEP
+      red = int(to_channel(phase) * BRIGHTNESS)
+      green = int(to_channel(phase + OFFSET_G) * BRIGHTNESS)
+      blue = int(to_channel(phase + OFFSET_B) * BRIGHTNESS)
+
+      # Update the light color via the Light interface (applied in next state-machine cycle)
+      sensorring.Light.setAllLights(lights, sensorring.LightMode_FixedColor, red, green, blue)
+
+      now = time.time()
+      if now - last_print > 1.0:
+        print(f"Current frame: {counter}\r", end="", flush=True)
+        counter += 1
+        last_print = now
+      time.sleep(0.05)
+
+  except Exception as e:
+    print(f"Caught: {e}")
+
+
+if __name__ == "__main__":
+  main()

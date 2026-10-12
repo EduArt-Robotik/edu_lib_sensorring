@@ -191,7 +191,7 @@ These adapters are super easy to use:
 4. Optional: Create a UDEV rule that automatically starts the interface when the adapter is connected.
 
 ```sh
-sudo bash -c 'echo "ACTION==\"add\", SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1d50\", ATTR{idProduct}==\"606f\", TAG+=\"systemd\", ENV{SYSTEMD_WANTS}=\"candlelight-can0.service\"" > /etc/udev/rules.d/50-candlelight.rules'
+sudo bash -c 'echo "ACTION==\"add\", SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1d50\", ATTR{idProduct}==\"606f\", RUN+=\"/usr/local/bin/start_can0.sh\"" > /etc/udev/rules.d/50-candlelight.rules'
 sudo bash -c 'echo -e "#!/bin/bash\n\n# Wait for CAN interface to appear (up to 5 seconds)\nfor i in {1..10}; do\n    if ip link show can0 >/dev/null 2>&1; then\n        break\n    fi\n    sleep 0.5\ndone\n\n# Bring up CAN FD\n/usr/sbin/ip link set can0 up type can bitrate 1000000 dbitrate 5000000 fd on" > /usr/local/bin/start_can0.sh'
 sudo chmod +x /usr/local/bin/start_can0.sh
 sudo udevadm control --reload-rules

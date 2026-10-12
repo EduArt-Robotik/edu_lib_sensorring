@@ -11,13 +11,13 @@ endif()
 
 #########################################################
 # Project
-set(CMAKE_PROJECT_VERSION_MAJOR 3)
+set(CMAKE_PROJECT_VERSION_MAJOR 4)
 set(CMAKE_PROJECT_VERSION_MINOR 0)
-set(CMAKE_PROJECT_VERSION_PATCH 1)
+set(CMAKE_PROJECT_VERSION_PATCH 0)
 set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}")
 
 project(sensorring
-  LANGUAGES CXX
+  LANGUAGES C CXX
   VERSION ${CMAKE_PROJECT_VERSION}
   HOMEPAGE_URL "https://github.com/EduArt-Robotik/edu_lib_sensorring"
 )
@@ -49,6 +49,9 @@ include(ConfigurePlatform REQUIRED)
 # Configure Paths
 include(ConfigurePaths REQUIRED)
 
+# clangd compile database symlink
+include(ExportCompileCommands REQUIRED)
+
 # Build settings
 include(BuildSettings REQUIRED)
 
@@ -61,9 +64,24 @@ include(CollectDependencies REQUIRED)
 # Library
 add_subdirectory(src)
 
+if(SENSORRING_BUILD_FIRMWARE_UPDATE)
+  add_subdirectory(src/firmware)
+endif()
+
+# Tests
+if(SENSORRING_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
 # Examples
 if(SENSORRING_BUILD_EXAMPLES)
   add_subdirectory(apps/examples)
+endif()
+
+# Utilities
+if(SENSORRING_BUILD_UTILS)
+  add_subdirectory(apps/utils)
 endif()
 
 # Documentation
@@ -78,7 +96,7 @@ endif()
 
 # cpack packaging
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    include(PackageGeneration REQUIERD)    
+    include(PackageGeneration REQUIRED)    
 endif()
 
 # Build summary

@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   Vector3.hpp
@@ -16,13 +16,15 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 /**
  * @class Vector3
  * @brief Vector of length 3
  */
-struct SENSORRING_API Vector3 {
+struct SENSORRING_EXPORT Vector3 {
   /// Data structure of the Vector 3
   std::array<double, 3> data;
 
@@ -44,10 +46,10 @@ struct SENSORRING_API Vector3 {
   /// Third component of the vector
   const double& z() const;
 
-  /// Indexing the Matrix
+  /// Indexing the vector
   double& operator[](std::size_t idx);
 
-  /// Indexing the Matrix
+  /// Indexing the vector
   const double& operator[](std::size_t idx) const;
 
   /// Vector addition
@@ -79,5 +81,7 @@ struct SENSORRING_API Vector3 {
 };
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

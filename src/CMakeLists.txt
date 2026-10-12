@@ -1,5 +1,5 @@
 #########################################################
-# declare library
+# main sensor ring library
 if(SENSORRING_BUILD_SHARED_LIBS)
     add_library(sensorring SHARED)
 else()
@@ -8,46 +8,188 @@ endif()
 
 add_library(sensorring::sensorring ALIAS sensorring)
 
-target_sources(sensorring
-  PRIVATE
-  MeasurementManager.cpp
-  MeasurementClient.cpp
-  MeasurementManagerImpl.cpp
-  SensorRing.cpp
+set(SENSORRING_GENERATED_INCLUDE_DIR
+  ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
+
+set(SENSORRING_CORE_SOURCES
   SensorBus.cpp
-  SensorBoard.cpp
+  SensorRing.cpp
+  SensorRingFactory.cpp
+  factory/SensorRingFactoryImpl.cpp
+)
+
+set(SENSORRING_MANAGER_SOURCES
+  manager/ManagerState.cpp
+  manager/MeasurementManager.cpp
+  manager/MeasurementManagerImpl.cpp
+)
+
+set(SENSORRING_INTERFACE_SOURCES
+  interface/ComInterfaceID.cpp
   interface/ComInterface.cpp
   interface/ComManager.cpp
-  interface/ComObserver.cpp
-  interface/can/canprotocol.cpp
+  interface/ComEndpoint.cpp
+  interface/can/CanInterface.cpp
+)
+
+if(SENSORRING_USE_SOCKETCAN)
+  list(APPEND SENSORRING_INTERFACE_SOURCES
+    interface/can/socketcan/SocketCANFD.cpp
+  )
+endif()
+
+if(SENSORRING_USE_USBTINGO)
+  list(APPEND SENSORRING_INTERFACE_SOURCES
+    interface/can/usbtingo/USBtingo.cpp
+  )
+endif()
+
+set(SENSORRING_LOGGER_SOURCES
   logger/Logger.cpp
-  logger/LoggerClient.cpp
-  sensors/TofSensor.cpp
-  sensors/ThermalSensor.cpp
-  sensors/LedLight.cpp
-  sensors/BaseSensor.cpp
-  types/Image.cpp
-  types/PointCloud.cpp
-  types/EnumerationInformation.cpp
+  logger/LogVerbosity.cpp
+)
+
+set(SENSORRING_BOARD_SOURCES
+  board/SensorBoard.cpp
+  board/SensorBoardType.cpp
+  board/SensorBoardParams.cpp
+  board/SensorBoardManager.cpp
+  board/BoardEnumerator.cpp
+  board/EnumerationInformation.cpp
+)
+
+set(SENSORRING_DEVICE_SOURCES
+  device/Device.cpp
+  device/Sensor.cpp
+  device/DeviceType.cpp
+  device/types/DeviceState.cpp
+  device/depth/DepthSensor.cpp
+  device/thermal/ThermalSensor.cpp
+  device/depth/vl53l8cx/VL53L8CX_Device.cpp
+  device/depth/vl53l8cx/VL53L8CX_DeviceImpl.cpp
+  device/depth/tmf8829/TMF8829_Device.cpp
+  device/depth/tmf8829/TMF8829_Params.cpp
+  device/depth/tmf8829/TMF8829_DeviceImpl.cpp
+  device/depth/tmf8829/TMF8829_Measurement.cpp
+  device/depth/tmf8829/TMF8829_ResultFormat.cpp
+  device/thermal/htpa32/htpa32_eeprom.c
+  device/thermal/htpa32/HTPA32_Device.cpp
+  device/thermal/htpa32/HTPA32_DeviceImpl.cpp
+  device/light/Light.cpp
+  device/light/ws2812b/WS2812b_Device.cpp
+)
+
+set(SENSORRING_MEASUREMENT_SOURCES
+  measurement/Image.cpp
+  measurement/PointCloud.cpp
+  measurement/ThermalMeasurement.cpp
+)
+
+set(SENSORRING_UTILS_SOURCES
   utils/FileManager.cpp
+)
+
+set(SENSORRING_MATH_SOURCES
+  math/Pose.cpp  
   math/Math.cpp
   math/Vector3.cpp
   math/Matrix3.cpp
 )
 
-if(SENSORRING_USE_SOCKETCAN)
-  list(APPEND SOURCES
-    interface/can/SocketCANFD.cpp
-  )
-endif()
+add_library(sensorring_core OBJECT ${SENSORRING_CORE_SOURCES})
+add_library(sensorring_manager OBJECT ${SENSORRING_MANAGER_SOURCES})
+add_library(sensorring_interface OBJECT ${SENSORRING_INTERFACE_SOURCES})
+add_library(sensorring_logger OBJECT ${SENSORRING_LOGGER_SOURCES})
+add_library(sensorring_board OBJECT ${SENSORRING_BOARD_SOURCES})
+add_library(sensorring_device OBJECT ${SENSORRING_DEVICE_SOURCES})
+add_library(sensorring_measurement OBJECT ${SENSORRING_MEASUREMENT_SOURCES})
+add_library(sensorring_utils OBJECT ${SENSORRING_UTILS_SOURCES})
+add_library(sensorring_math OBJECT ${SENSORRING_MATH_SOURCES})
 
-if(SENSORRING_USE_USBTINGO)
-  list(APPEND SOURCES
-    interface/can/USBtingo.cpp
-  )
-endif()
+set(SENSORRING_OBJECT_LIBS
+  sensorring_core
+  sensorring_manager
+  sensorring_interface
+  sensorring_logger
+  sensorring_board
+  sensorring_device
+  sensorring_measurement
+  sensorring_utils
+  sensorring_math
+)
 
-target_sources(sensorring PRIVATE ${SOURCES})
+foreach(objlib IN LISTS SENSORRING_OBJECT_LIBS)
+  if(SENSORRING_BUILD_SHARED_LIBS)
+    set_target_properties(${objlib} PROPERTIES
+      POSITION_INDEPENDENT_CODE ON
+    )
+  endif()
+
+  target_include_directories(${objlib} PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${SENSORRING_GENERATED_INCLUDE_DIR}>
+  )
+
+  target_link_libraries(${objlib} PRIVATE
+    sensorring_transport::sensorring_transport
+  )
+
+  if(SENSORRING_USE_USBTINGO)
+    target_link_libraries(${objlib} PRIVATE
+      usbtingo::usbtingo
+    )
+  endif()
+
+  if(MSVC)
+    target_compile_definitions(${objlib} PRIVATE
+      USE_MATH_DEFINES
+    )
+  endif()
+
+  if(SENSORRING_USE_SOCKETCAN)
+    target_compile_definitions(${objlib} PRIVATE
+      USE_SOCKETCAN
+    )
+  endif()
+
+  if(SENSORRING_USE_USBTINGO)
+    target_compile_definitions(${objlib} PRIVATE
+      USE_USBTINGO
+    )
+  endif()
+endforeach()
+
+target_sources(sensorring PRIVATE
+  $<TARGET_OBJECTS:sensorring_core>
+  $<TARGET_OBJECTS:sensorring_manager>
+  $<TARGET_OBJECTS:sensorring_interface>
+  $<TARGET_OBJECTS:sensorring_logger>
+  $<TARGET_OBJECTS:sensorring_board>
+  $<TARGET_OBJECTS:sensorring_device>
+  $<TARGET_OBJECTS:sensorring_measurement>
+  $<TARGET_OBJECTS:sensorring_utils>
+  $<TARGET_OBJECTS:sensorring_math>
+)
+
+
+#########################################################
+# generate export header
+include(GenerateExportHeader)
+
+generate_export_header(sensorring
+  EXPORT_FILE_NAME ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
+)
+
+target_include_directories(sensorring PUBLIC
+  $<BUILD_INTERFACE:${SENSORRING_GENERATED_INCLUDE_DIR}>
+)
+
+install(FILES
+  ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
+  DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}/sensorring/platform
+)
 
 
 #########################################################
@@ -65,16 +207,10 @@ target_include_directories(sensorring PUBLIC
 
 #########################################################
 # build macros
-if(SENSORRING_BUILD_SHARED_LIBS)
-  target_compile_definitions(sensorring PUBLIC
-    SENSORRING_SHARED
-  )
-endif()
-
 if(MSVC)
   target_compile_definitions(sensorring PRIVATE
-  _USE_MATH_DEFINES
-  SENSORRING_DLL_EXPORT)
+    USE_MATH_DEFINES
+  )
 endif()
 
 if(SENSORRING_USE_SOCKETCAN)
@@ -83,6 +219,11 @@ if(SENSORRING_USE_SOCKETCAN)
   )
 endif()
 
+#########################################################
+# link transport module (always required)
+target_link_libraries(sensorring PUBLIC
+  sensorring_transport::sensorring_transport
+)
 
 #########################################################
 # link usbtingo
@@ -125,7 +266,7 @@ if(SENSORRING_INSTALL)
 
   #########################################################
   # install library
-  install(TARGETS sensorring
+  install(TARGETS sensorring sensorring_transport
     EXPORT sensorringTargets
     LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
@@ -142,6 +283,11 @@ if(SENSORRING_INSTALL)
   # install headers
   install(DIRECTORY
     ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
+  )
+
+  install(DIRECTORY
+    ${SENSORRING_TRANSPORT_SOURCE_DIR}/include/
     DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
   )
 

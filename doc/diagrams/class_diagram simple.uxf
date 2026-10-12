@@ -18,7 +18,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 bg=white
 fg=black
 transparency=0
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1095</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>ThermalSensor
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1095</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>HTPA32_Device
 --
 - params : ThermalParams
 
@@ -29,9 +29,9 @@ transparency=0
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>825</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>LedLight
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>825</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>WS2812b_Device
 --
-- params : LightParams
+- params : WS2812b_Params
 
 --
 
@@ -39,7 +39,7 @@ transparency=0</panel_attributes><additional_attributes></additional_attributes>
 
 bg=white
 fg=black
-transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1365</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>TofSensor
+transparency=0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1365</x><y>1365</y><w>240</w><h>150</h></coordinates><panel_attributes>VL53L8CX_Device
 --
 - params : TofParams
 

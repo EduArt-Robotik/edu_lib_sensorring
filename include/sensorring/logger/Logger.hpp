@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   Logger.hpp
@@ -9,15 +9,17 @@
 
 #pragma once
 
-#include <mutex>
-#include <set>
+#include <functional>
 #include <sstream>
 #include <string>
 
-#include "sensorring/logger/LoggerClient.hpp"
+#include "sensorring/logger/LogVerbosity.hpp"
 #include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/subscription/Publisher.hpp"
 
 namespace eduart {
+
+namespace sensorring {
 
 namespace logger {
 
@@ -25,28 +27,29 @@ namespace logger {
  * @class Logger
  * @brief Centralized class to collect all log messages and relay them to the registered observers. The Logger is implemented as a singleton.
  */
-class SENSORRING_API Logger {
+class SENSORRING_EXPORT Logger {
 public:
   /// Destructor
   ~Logger() = default;
 
   /**
-   * @brief Get a reference to the instance of the Logger singleton
+   * @brief Get a pointer to the instance of the Logger singleton
    * @return Pointer to the Logger instance
    */
   static Logger* getInstance() noexcept;
 
   /**
-   * @brief Register a new LoggerClient to be notified of future log messages
-   * @param[in] client LoggerClient that will be registered
+   * @brief Subscribe to log messages
+   * @param[in] callback Callback function to be called when a log message is received
+   * @return RAII Subscription that auto-cancels on destruction
    */
-  void registerClient(LoggerClient* client) noexcept;
+  subscription::Subscription subscribe(std::function<void(const LogVerbosity verbosity, const std::string& msg)> callback);
 
   /**
-   * @brief Unregister a new LoggerClient to no longer be notified of log messages
-   * @param[in] client LoggerClient that will be unregistered
+   * @brief Unsubscribe from log messages
+   * @param[in] token Token returned by subscribe
    */
-  void unregisterClient(LoggerClient* client) noexcept;
+  void unsubscribe(subscription::SubscriberToken token);
 
   /**
    * @brief Log a message that will be relayed to all registered observers
@@ -68,12 +71,11 @@ private:
   /// Private constructor. The Logger is a singleton.
   Logger() = default;
 
-  mutable std::recursive_mutex _client_mutex;
-  using LockGuard = std::lock_guard<std::recursive_mutex>;
-
-  std::set<logger::LoggerClient*> _clients;
+  subscription::Publisher<const LogVerbosity, const std::string&> _publisher;
 };
 
 } // namespace logger
+
+} // namespace sensorring
 
 } // namespace eduart

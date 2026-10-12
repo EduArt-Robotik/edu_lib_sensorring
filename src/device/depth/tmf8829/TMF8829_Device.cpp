@@ -1,0 +1,144 @@
+#include "sensorring/device/depth/tmf8829/TMF8829_Device.hpp"
+
+#include <sensorring_transport/Protocol.hpp>
+
+#include "device/depth/tmf8829/TMF8829_Constants.hpp"
+#include "device/depth/tmf8829/TMF8829_DeviceImpl.hpp"
+#include "interface/ComManager.hpp"
+
+using namespace eduart::sensorring::transport::protocol;
+using namespace eduart::sensorring::transport::protocol::tmf8829;
+
+namespace eduart {
+
+namespace sensorring {
+
+namespace device {
+
+static DepthSensorConfig getTMF8829Config(device::ResolutionMode mode) {
+  DepthSensorConfig c;
+  c.fov_x_deg                      = tmf8829::FOV_X_DEG;
+  c.fov_y_deg                      = tmf8829::FOV_Y_DEG;
+  c.res_x                          = getXResolution(mode);
+  c.res_y                          = getYResolution(mode);
+  c.invert_x_lut                   = true;
+  c.invert_y_lut                   = false;
+  c.reports_perpendicular_distance = false;
+  return c;
+};
+
+// clang-format off
+TMF8829_Device::TMF8829_Device(TMF8829_Params params, com::ComInterfaceID interface, unsigned int idx)
+  : DepthSensor( DeviceID({ DeviceType::TMF8829, idx }), com::ComManager::getInstance()->getInterface(interface), com::ComEndpoint{ com::Direction::Output, static_cast<std::uint8_t>(idx + 1), devbyte::TMF8829 }, getTMF8829Config(params.resolution_mode))
+    , _impl(std::make_unique<TMF8829_DeviceImpl>(*this, params, com::ComManager::getInstance()->getInterface(interface), idx)) {
+   //configure();
+}
+// clang-format on
+
+TMF8829_Device::~TMF8829_Device() {
+}
+
+const TMF8829_Params& TMF8829_Device::getParams() const {
+  return _impl->getParams();
+}
+
+bool TMF8829_Device::setResolutionMode(ResolutionMode mode) {
+  return _impl->setResolutionMode(mode);
+}
+
+bool TMF8829_Device::getResolutionMode(ResolutionMode& mode) {
+  return _impl->getResolutionMode(mode);
+}
+
+bool TMF8829_Device::setIterationsSetting(std::uint16_t k_iterations) {
+  return _impl->setIterationsSetting(k_iterations);
+}
+
+bool TMF8829_Device::getIterationsSetting(std::uint16_t& k_iterations) {
+  return _impl->getIterationsSetting(k_iterations);
+}
+
+bool TMF8829_Device::setResultFormat(TMF8829_ResultFormat format) {
+  return _impl->setResultFormat(format);
+}
+
+bool TMF8829_Device::getResultFormat(TMF8829_ResultFormat& format) {
+  return _impl->getResultFormat(format);
+}
+
+bool TMF8829_Device::setResultFullNoise(bool full_noise) {
+  return _impl->setResultFullNoise(full_noise);
+}
+
+bool TMF8829_Device::getResultFullNoise(bool& full_noise) {
+  return _impl->getResultFullNoise(full_noise);
+}
+
+bool TMF8829_Device::setResultXtalk(bool xtalk) {
+  return _impl->setResultXtalk(xtalk);
+}
+
+bool TMF8829_Device::getResultXtalk(bool& xtalk) {
+  return _impl->getResultXtalk(xtalk);
+}
+
+bool TMF8829_Device::setResultNoiseStrength(bool noise_strength) {
+  return _impl->setResultNoiseStrength(noise_strength);
+}
+
+bool TMF8829_Device::getResultNoiseStrength(bool& noise_strength) {
+  return _impl->getResultNoiseStrength(noise_strength);
+}
+
+bool TMF8829_Device::setResultSignalStrength(bool signal_strength) {
+  return _impl->setResultSignalStrength(signal_strength);
+}
+
+bool TMF8829_Device::getResultSignalStrength(bool& signal_strength) {
+  return _impl->getResultSignalStrength(signal_strength);
+}
+
+bool TMF8829_Device::setResultNrOfPeaks(std::uint8_t nr_of_peaks) {
+  return _impl->setResultNrOfPeaks(nr_of_peaks);
+}
+
+bool TMF8829_Device::getResultNrOfPeaks(std::uint8_t& nr_of_peaks) {
+  return _impl->getResultNrOfPeaks(nr_of_peaks);
+}
+
+bool TMF8829_Device::configure() {
+  if (!setResolutionMode(getParams().resolution_mode)) {
+    return false;
+  }
+
+  if (getParams().k_iterations != 0 && !setIterationsSetting(getParams().k_iterations)) {
+    return false;
+  }
+
+  if (!setResultFormat(getParams().result_format)) {
+    return false;
+  }
+
+  return true;
+}
+
+void TMF8829_Device::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {
+  if (!_impl) { // ToDo: add as general check in Device to avoid this in all devices
+    return;
+  }
+  _impl->comCallback(source, command, data);
+}
+
+bool TMF8829_Device::sendMeasurementRequest(std::uint8_t sequence_number) {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_REQUEST, { sequence_number });
+}
+
+bool TMF8829_Device::sendMeasurementTransmissionRequest() {
+  return _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::TMF8829 }, MEASUREMENT_TRANSMISSION_REQUEST, {});
+}
+
+} // namespace device
+
+} // namespace sensorring
+
+} // namespace eduart

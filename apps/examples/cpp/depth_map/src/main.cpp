@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   main.cpp
@@ -7,62 +7,124 @@
  * @date 2025-11-18
  */
 
-#include <chrono>
 #include <iostream>
-#include <sensorring/MeasurementManager.hpp>
+#include <sensorring/SensorRingFactory.hpp>
+#include <sensorring/device/depth/DepthSensor.hpp>
+#include <sensorring/interface/InterfaceParams.hpp>
+#include <sensorring/logger/Logger.hpp>
+#include <sensorring/manager/MeasurementManager.hpp>
 #include <thread>
 
-#include "MeasurementProxy.hpp"
+#include "sensorring/device/depth/tmf8829/TMF8829_Params.hpp"
+#include "sensorring/measurement/DepthMeasurement.hpp"
 
-using namespace eduart;
+using namespace eduart::sensorring;
 using namespace std::chrono_literals;
 
-static constexpr std::string_view INTERFACE_NAME   = "0";
-static constexpr com::InterfaceType INTERFACE_TYPE = com::InterfaceType::USBTINGO;
+// Default SocketCAN interface (Linux only, expects a SocketCAN interface named "can0")
+static constexpr std::string_view CAN_INTERFACE_NAME = "can0";
+
+// Default USBtingo interface (cross-platform, uses the first available USBtingo device)
+static constexpr std::string_view USBTINGO_INTERFACE_NAME = "0";
+
+// Distance range for color mapping (in meters)
+static constexpr double MIN_DIST = 0.0;
+static constexpr double MAX_DIST = 1.5;
+
+std::string depthToColor(double depth, double min, double max) {
+
+  if (depth > max || depth < 0) {
+    depth = max;
+  } else if (depth < min) {
+    depth = min;
+  }
+
+  auto d = (depth - min) / (max - min);
+
+  // Map t to a color gradient: red (near) → yellow → green → blue (far)
+  int r = static_cast<int>(255 * (1 - d));
+  int g = static_cast<int>(255 * (1 - std::abs(0.5f - d) * 2));
+  int b = static_cast<int>(255 * d);
+
+  return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
+}
+
+void printDepthMap(const measurement::DepthMeasurement& meas, bool reset_cursor) {
+
+  if (reset_cursor) {
+    std::cout << "\033[" << meas.resolution_y << "F";
+  }
+
+  for (unsigned int row = 0; row < meas.resolution_y; ++row) {
+    for (unsigned int col = 0; col < meas.resolution_x; ++col) {
+      int idx = row * meas.resolution_x + col;
+      std::cout << depthToColor(meas.point_cloud.data[idx].point.z(), MIN_DIST, MAX_DIST) << "██";
+    }
+    std::cout << "\033[0m\n";
+  }
+
+  std::cout.flush();
+  reset_cursor = true;
+}
 
 int main(int, char*[]) {
 
   std::cout << "\33c";
-  std::cout << "==========================" << std::endl;
-  std::cout << "Minimal sensorring example" << std::endl;
-  std::cout << "==========================" << std::endl;
+  std::cout << "============================" << std::endl;
+  std::cout << "Depth map sensorring example" << std::endl;
+  std::cout << "============================" << std::endl;
   std::cout << std::endl;
 
-  // Create the parameter structure that is used to instantiate the sensorring
+  std::atomic<bool> reset_cursor          = false;
+  std::atomic<bool> got_first_measurement = false;
+
   manager::ManagerParams params;
-  {
-    sensor::TofSensorParams tof;
-    tof.user_idx = 0;
-    tof.enable   = true;
 
-    sensor::SensorBoardParams board;
-    board.tof_params = tof;
-
-    bus::BusParams bus;
-    bus.interface_name = INTERFACE_NAME;
-    bus.type           = INTERFACE_TYPE;
-    bus.board_param_vec.push_back(board);
-
-    ring::RingParams ring;
-    ring.bus_param_vec.push_back(bus);
-
-    params.ring_params = ring;
-  }
-
-  // Instantiate a Measurement proxy
-  auto proxy = std::make_unique<MeasurementProxy>();
+  com::SocketCanParams can_interface{ std::string(CAN_INTERFACE_NAME) };
+  com::UsbTingoParams usbtingo_interface{ std::string(USBTINGO_INTERFACE_NAME) };
 
   try {
-    // Instantiate a MeasurementManager with the parameters from above
-    auto manager = std::make_unique<manager::MeasurementManager>(params);
+    // Subscribe to the log messages
+    auto log_sub = logger::Logger::getInstance()->subscribe([&reset_cursor](const logger::LogVerbosity verbosity, const std::string& msg) {
+      if (verbosity > logger::LogVerbosity::Debug) {
+        std::cout << "[" << verbosity << "] " << msg << std::endl;
+        reset_cursor = false;
+      }
+    });
 
-    // Register the proxy with the LogMeasurementManager to get the measurements
-    manager->registerClient(proxy.get());
+    // Create a SensorRing with one depth sensor board via auto-discovery
+    SensorRingFactory factory;
+
+    device::TMF8829_Params tmf_params;
+    tmf_params.resolution_mode = device::ResolutionMode::Res16x16;
+    factory.setDefaultDeviceParams(tmf_params);
+
+    factory.addInterface(can_interface);
+    factory.expectBoard({});
+    factory.expectDevice(device::DepthSensorParams{});
+    factory.addInterface(usbtingo_interface);
+    factory.expectBoard({});
+    factory.expectDevice(device::DepthSensorParams{});
+
+    // Create the MeasurementManager directly from the factory
+    auto manager = std::make_unique<manager::MeasurementManager>(params, factory);
+
+    // Subscribe to the state changes to get the measurements
+    auto state_sub = manager->subscribeToStateChanges([](const manager::ManagerState state) {
+      std::cout << "[State] State changed to: " << state << std::endl;
+    });
+
+    // Subscribe to the first depth sensor to get the measurements
+    auto depth_sub = manager->depthSensors().subscribe([&got_first_measurement, &reset_cursor](const measurement::DepthMeasurement& meas) {
+      got_first_measurement = true;
+      printDepthMap(meas, reset_cursor);
+      reset_cursor = true;
+    });
 
     // Start the measurements
     manager->startMeasuring();
 
-    while (!proxy->gotFirstMeasurement() && manager->isMeasuring()) {
+    while (!got_first_measurement && manager->isMeasuring()) {
     }
 
     if (manager->isMeasuring()) {
@@ -70,6 +132,11 @@ int main(int, char*[]) {
       while (manager->isMeasuring()) {
         std::this_thread::sleep_for(1s);
       }
+
+      // Cancel subscriptions before stopping (optional — destruction also cancels)
+      state_sub.cancel();
+      depth_sub.cancel();
+      log_sub.cancel();
 
       // Stop the measurements
       manager->stopMeasuring();

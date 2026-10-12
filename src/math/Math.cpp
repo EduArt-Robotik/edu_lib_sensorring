@@ -2,10 +2,20 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
+double degreesToRadians(double degrees) {
+  return degrees * PI / 180.0;
+}
+
+double radiansToDegrees(double radians) {
+  return radians * 180.0 / PI;
+}
+
 const Vector3 eulerDegreesFromRotationMatrix(const Matrix3& rot_m) {
-  return eulerRadiansFromRotationMatrix(rot_m) * 180.0F / M_PI;
+  return eulerRadiansFromRotationMatrix(rot_m) * 180.0F / PI;
 }
 
 const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m) {
@@ -17,7 +27,7 @@ const Vector3 eulerRadiansFromRotationMatrix(const Matrix3& rot_m) {
 }
 
 const Matrix3 rotMatrixFromEulerDegrees(const Vector3& rotation_deg) {
-  return rotMatrixFromEulerRadians(rotation_deg * M_PI / 180.0F);
+  return rotMatrixFromEulerRadians(rotation_deg * PI / 180.0F);
 }
 
 const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad) {
@@ -32,5 +42,7 @@ const Matrix3 rotMatrixFromEulerRadians(const Vector3& rotation_rad) {
 }
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

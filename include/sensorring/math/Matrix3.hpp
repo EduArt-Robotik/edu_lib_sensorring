@@ -1,4 +1,4 @@
-// Copyright (c) 2025 EduArt Robotik GmbH
+// Copyright (c) 2026 EduArt Robotik GmbH
 
 /**
  * @file   Matrix3.hpp
@@ -17,13 +17,15 @@
 
 namespace eduart {
 
+namespace sensorring {
+
 namespace math {
 
 /**
  * @class Matrix3
  * @brief Matrix of size 3 × 3
  */
-struct SENSORRING_API Matrix3 {
+struct SENSORRING_EXPORT Matrix3 {
   /// Data structure of the Matrix3
   std::array<Vector3, 3> data;
 
@@ -56,5 +58,7 @@ struct SENSORRING_API Matrix3 {
 };
 
 } // namespace math
+
+} // namespace sensorring
 
 } // namespace eduart

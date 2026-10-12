@@ -1,4 +1,9 @@
 .cache/
 .vscode/
+.github/prompts/
 build/
 release/
+__pycache__/
+
+# clangd compile database symlink (created by CMake)
+/compile_commands.json

@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
-
 namespace eduart {
+
+namespace sensorring {
 
 namespace filemanager {
 
@@ -49,5 +50,7 @@ public:
 };
 
 } // namespace filemanager
+
+} // namespace sensorring
 
 } // namespace eduart

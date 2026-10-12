@@ -1,0 +1,252 @@
+{
+  "version": 6,
+
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+
+        "SENSORRING_USE_SOCKETCAN": "ON",
+        "SENSORRING_USE_USBTINGO": "ON",
+
+        "SENSORRING_INSTALL": "ON",
+
+        "SENSORRING_BUILD_SHARED_LIBS": "OFF",
+        "SENSORRING_BUILD_EXAMPLES": "ON",
+        "SENSORRING_BUILD_UTILS": "ON",
+        "SENSORRING_BUILD_FIRMWARE_UPDATE": "ON",
+
+        "SENSORRING_BUILD_DOCUMENTATION": "OFF",
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "OFF",
+
+        "SENSORRING_BUILD_TESTS": "ON",
+        "SENSORRING_BUILD_HARDWARE_TESTS": "OFF"
+      }
+    },
+
+    {
+      "name": "Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "DebugHardwareTests",
+      "inherits": "Debug",
+      "cacheVariables": {
+        "SENSORRING_BUILD_HARDWARE_TESTS": "ON"
+      }
+    },
+
+    {
+      "name": "Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ReleaseHardwareTests",
+      "inherits": "Release",
+      "cacheVariables": {
+        "SENSORRING_BUILD_HARDWARE_TESTS": "ON"
+      }
+    },
+    {
+      "name": "ReleaseDocs",
+      "inherits": "Release",
+      "cacheVariables": {
+        "SENSORRING_BUILD_DOCUMENTATION": "ON"
+      }
+    },
+    {
+      "name": "ReleasePython",
+      "inherits": "Release",
+      "cacheVariables": {
+        "SENSORRING_BUILD_PYTHON_BINDINGS": "ON"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug"
+    },
+    {
+      "name": "DebugHardwareTests",
+      "configurePreset": "DebugHardwareTests"
+    },
+    {
+      "name": "Release",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "ReleaseHardwareTests",
+      "configurePreset": "ReleaseHardwareTests"
+    },
+    {
+      "name": "ReleaseDocs",
+      "configurePreset": "ReleaseDocs"
+    },
+    {
+      "name": "ReleasePython",
+      "configurePreset": "ReleasePython"
+    }
+  ],
+
+  "testPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "DebugHardwareTests",
+      "configurePreset": "DebugHardwareTests",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "Release",
+      "configurePreset": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ReleaseHardwareTests",
+      "configurePreset": "ReleaseHardwareTests",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ReleaseDocs",
+      "configurePreset": "ReleaseDocs",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ReleasePython",
+      "configurePreset": "ReleasePython",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+
+  "workflowPresets": [
+    {
+      "name": "Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
+        },
+        {
+          "type": "test",
+          "name": "Debug"
+        }
+      ]
+    },
+    {
+      "name": "DebugHardwareTests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "DebugHardwareTests"
+        },
+        {
+          "type": "build",
+          "name": "DebugHardwareTests"
+        },
+        {
+          "type": "test",
+          "name": "DebugHardwareTests"
+        }
+      ]
+    },
+    {
+      "name": "Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release"
+        },
+        {
+          "type": "build",
+          "name": "Release"
+        },
+        {
+          "type": "test",
+          "name": "Release"
+        }
+      ]
+    },
+    {
+      "name": "ReleaseHardwareTests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ReleaseHardwareTests"
+        },
+        {
+          "type": "build",
+          "name": "ReleaseHardwareTests"
+        },
+        {
+          "type": "test",
+          "name": "ReleaseHardwareTests"
+        }
+      ]
+    },
+    {
+      "name": "ReleaseDocs",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ReleaseDocs"
+        },
+        {
+          "type": "build",
+          "name": "ReleaseDocs"
+        },
+        {
+          "type": "test",
+          "name": "ReleaseDocs"
+        }
+      ]
+    },
+    {
+      "name": "ReleasePython",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ReleasePython"
+        },
+        {
+          "type": "build",
+          "name": "ReleasePython"
+        },
+        {
+          "type": "test",
+          "name": "ReleasePython"
+        }
+      ]
+    }
+  ]
+}
