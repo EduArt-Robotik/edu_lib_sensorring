@@ -91,6 +91,8 @@ public:
   static void cmdEnumerateBoards(com::ComInterfaceID interface);
 
 private:
+  friend struct SensorBoardTestAccess;
+
   using Mutex      = std::mutex;
   using UniqueLock = std::unique_lock<Mutex>;
 

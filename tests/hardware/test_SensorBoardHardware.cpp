@@ -1,17 +1,30 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-#define private public
 #include "sensorring/board/SensorBoard.hpp"
-#undef private
 
 #include "sensorring/SensorRingFactory.hpp"
 #include "sensorring/interface/InterfaceParams.hpp"
+
+namespace eduart::sensorring::board {
+
+struct SensorBoardTestAccess {
+  static bool setOrientation(SensorBoard& board, Orientation orientation) {
+    return board.setOrientation(orientation);
+  }
+
+  static bool getOrientation(SensorBoard& board, Orientation& orientation) {
+    return board.getOrientation(orientation);
+  }
+};
+
+} // namespace eduart::sensorring::board
 
 using eduart::sensorring::SensorRing;
 using eduart::sensorring::SensorRingFactory;
 using eduart::sensorring::board::Orientation;
 using eduart::sensorring::board::SensorBoard;
+using eduart::sensorring::board::SensorBoardTestAccess;
 using eduart::sensorring::com::InterfaceType;
 using eduart::sensorring::com::SocketCanParams;
 using eduart::sensorring::com::UsbTingoParams;
@@ -76,7 +89,7 @@ TEST_CASE("Sensor board orientation parameter get/set round-trip", "[SensorBoard
   SensorBoard& board = *ctx.board;
 
   Orientation original = Orientation::None;
-  REQUIRE(board.getOrientation(original));
+  REQUIRE(SensorBoardTestAccess::getOrientation(board, original));
 
   const Orientation values[] = {
     Orientation::None,
@@ -85,16 +98,16 @@ TEST_CASE("Sensor board orientation parameter get/set round-trip", "[SensorBoard
   };
 
   for (const auto value : values) {
-    REQUIRE(board.setOrientation(value));
+    REQUIRE(SensorBoardTestAccess::setOrientation(board, value));
 
     Orientation readback = original;
-    REQUIRE(board.getOrientation(readback));
+    REQUIRE(SensorBoardTestAccess::getOrientation(board, readback));
     REQUIRE(readback == value);
   }
 
-  REQUIRE(board.setOrientation(original));
+  REQUIRE(SensorBoardTestAccess::setOrientation(board, original));
 
   Orientation restored = Orientation::None;
-  REQUIRE(board.getOrientation(restored));
+  REQUIRE(SensorBoardTestAccess::getOrientation(board, restored));
   REQUIRE(restored == original);
 }
