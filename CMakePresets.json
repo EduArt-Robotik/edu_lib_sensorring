@@ -61,7 +61,17 @@
       "name": "ReleaseDocs",
       "inherits": "Release",
       "cacheVariables": {
-        "SENSORRING_BUILD_DOCUMENTATION": "ON"
+        "SENSORRING_USE_USBTINGO": "OFF",
+
+        "SENSORRING_INSTALL": "OFF",
+
+        "SENSORRING_BUILD_EXAMPLES": "OFF",
+        "SENSORRING_BUILD_UTILS": "OFF",
+        "SENSORRING_BUILD_FIRMWARE_UPDATE": "OFF",
+
+        "SENSORRING_BUILD_DOCUMENTATION": "ON",
+
+        "SENSORRING_BUILD_TESTS": "OFF"
       }
     },
     {
@@ -92,7 +102,8 @@
     },
     {
       "name": "ReleaseDocs",
-      "configurePreset": "ReleaseDocs"
+      "configurePreset": "ReleaseDocs",
+      "targets": ["doc"]
     },
     {
       "name": "ReleasePython",
@@ -125,13 +136,6 @@
     {
       "name": "ReleaseHardwareTests",
       "configurePreset": "ReleaseHardwareTests",
-      "output": {
-        "outputOnFailure": true
-      }
-    },
-    {
-      "name": "ReleaseDocs",
-      "configurePreset": "ReleaseDocs",
       "output": {
         "outputOnFailure": true
       }
@@ -223,10 +227,6 @@
         },
         {
           "type": "build",
-          "name": "ReleaseDocs"
-        },
-        {
-          "type": "test",
           "name": "ReleaseDocs"
         }
       ]

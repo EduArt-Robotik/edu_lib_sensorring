@@ -31,7 +31,11 @@ jobs:
       - name: Install Doxygen 1.15
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget graphviz
+          sudo apt-get install -y \
+            wget \
+            graphviz \
+            ninja-build \
+            build-essential
           wget https://www.doxygen.nl/files/doxygen-1.15.0.linux.bin.tar.gz
           tar -xzf doxygen-1.15.0.linux.bin.tar.gz
           sudo mv doxygen-1.15.0/bin/doxygen /usr/local/bin/doxygen
@@ -39,18 +43,16 @@ jobs:
 
       - name: Configure (CMake)
         run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DSENSORRING_BUILD_DOCUMENTATION=ON
+          cmake --preset ReleaseDocs
 
       - name: Build (CMake)
         run: |
-          cmake --build build --parallel
+          cmake --build --preset ReleaseDocs --parallel
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/doc/html
+          path: build/ReleaseDocs/doc/html
 
   deploy:
     needs: build
