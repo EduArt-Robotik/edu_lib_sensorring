@@ -70,6 +70,11 @@ Pass `board::SensorBoardParams` to `SensorRingFactory::expectBoard()`:
 uses them as-is. `Orientation::None` leaves orientation-specific behavior at its
 default.
 
+For HTPA32 thermal measurements, `Orientation::Left` rotates the reconstructed
+temperature image by 180 degrees (both axes), while `Orientation::Right` and
+`Orientation::None` leave it unrotated. This applies to temperature values and
+their grayscale and false-color visualizations, not just displayed images.
+
 ## Device Parameters
 
 All device parameter structures inherit `device::DeviceParams`:
@@ -132,6 +137,16 @@ parameter combination.
 
 When enabling either cache option, the process must have read and write access
 to the configured directory.
+
+HTPA32 measurements are published in reconstructed 32x32 row-major image order,
+not the sensor's section readout order. The library reverses the four rows within
+each bottom-half section, then applies the board mounting orientation. Generic
+temperature-to-image conversions preserve this corrected layout; applications
+must not repeat either correction.
+
+EEPROM compensation and calibration accumulation/subtraction still use the
+original sensor order, before image reconstruction and rotation. Existing EEPROM
+and calibration cache files remain compatible and do not need regeneration.
 
 #### WS2812b Distance Map
 

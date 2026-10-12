@@ -9,7 +9,6 @@
 #include "sensorring/device/thermal/htpa32/HTPA32_Device.hpp"
 #include "sensorring/logger/Logger.hpp"
 #include "utils/FileManager.hpp"
-#include "utils/Iron.hpp"
 
 #include "HTPA32_Eeprom.hpp"
 
@@ -161,6 +160,9 @@ void HTPA32_DeviceImpl::comCallback([[maybe_unused]] const com::ComEndpoint sour
           _parent._latest_measurement.temperatures += _calibration_average;
         }
 
+        // EEPROM compensation and calibration use sensor order, not image order.
+        normalizeTemperatureImage(_parent._latest_measurement.temperatures);
+
         _has_ready_measurement = true;
         _parent.setMeasurementReady(true);
 
@@ -266,46 +268,24 @@ std::pair<measurement::ThermalMeasurement, DeviceState> HTPA32_DeviceImpl::proce
   return { result, DeviceState::Ok };
 }
 
-measurement::GrayscaleImage HTPA32_DeviceImpl::convertToGrayscaleImage(const measurement::TemperatureImage& temperatures, double t_min_deg_c, double t_max_deg_c) const {
-  measurement::GrayscaleImage result;
+void HTPA32_DeviceImpl::normalizeTemperatureImage(measurement::TemperatureImage& temperatures) const {
+  measurement::TemperatureImage result = temperatures;
 
-  double delta_t = (t_max_deg_c - t_min_deg_c);
-  if (delta_t != 0) {
-    for (unsigned int i = 0; i < 512; i++) {
-      double norm_val = ((temperatures.data[i] - t_min_deg_c) / delta_t) * 255;
-      result.data[i]  = static_cast<uint8_t>(std::clamp(std::round(norm_val), 0.0, 255.0));
-    }
-
-    for (unsigned int i = 512; i < 1024; i += 128) {
-      for (unsigned int j = 0; j < 128; j += 32) {
-        for (unsigned int k = 0; k < 32; k++) {
-          double norm_val        = (temperatures.data[i + (96 - j) + k] - t_min_deg_c) / delta_t * 255;
-          result.data[i + j + k] = static_cast<uint8_t>(std::clamp(std::round(norm_val), 0.0, 255.0));
-        }
-      }
+  // Bottom sections arrive with their four rows reversed; columns stay unchanged.
+  for (std::size_t block = NUMBER_OF_PIXEL / 2; block < NUMBER_OF_PIXEL; block += PIXEL_PER_BLOCK) {
+    for (std::size_t row = 0; row < ROW_PER_BLOCK; ++row) {
+      const auto source = block + (ROW_PER_BLOCK - 1 - row) * PIXEL_PER_ROW;
+      const auto target = block + row * PIXEL_PER_ROW;
+      std::copy_n(temperatures.data.begin() + source, PIXEL_PER_ROW, result.data.begin() + target);
     }
   }
 
-  return result;
-}
-
-measurement::FalseColorImage HTPA32_DeviceImpl::convertToFalseColorImage(const measurement::GrayscaleImage& image) const {
-  measurement::FalseColorImage color_image;
-
-  for (size_t i = 0; i < NUMBER_OF_PIXEL; i++) {
-    color_image.data[i][0] = ThermalPalette::Iron[image.data[i]][0];
-    color_image.data[i][1] = ThermalPalette::Iron[image.data[i]][1];
-    color_image.data[i][2] = ThermalPalette::Iron[image.data[i]][2];
-  }
-
-  return color_image;
-}
-
-void HTPA32_DeviceImpl::rotateLeftImage(measurement::GrayscaleImage& image) const {
   const auto* board_params = _parent.getBoardContext();
   if (board_params && board_params->orientation == board::Orientation::Left) {
-    std::reverse(image.data.begin(), image.data.end());
+    std::reverse(result.data.begin(), result.data.end());
   }
+
+  temperatures = result;
 }
 
 } // namespace device

@@ -16,6 +16,7 @@ add_executable(sensorring_unit_tests
     unit/test_Subscription.cpp
     unit/test_Publisher.cpp
     unit/test_HTPA32_Eeprom.cpp
+    unit/test_HTPA32_Device.cpp
     unit/test_TMF8829_Params.cpp
     unit/test_LightParams.cpp
     unit/test_SensorRingFactory.cpp

@@ -31,6 +31,10 @@ class HTPA32_DeviceImpl;
 /**
  * @class HTPA32_Device
  * @brief  Device wrapper for an HTPA32 thermal sensor on the sensorring bus.
+ *
+ * Measurements contain a reconstructed row-major temperature image. A board
+ * orientation of Left rotates the image by 180 degrees; Right and None leave
+ * its mounting orientation unchanged. Calibration remains in sensor order.
  */
 class SENSORRING_EXPORT HTPA32_Device : public ThermalSensor {
 public:
@@ -82,6 +86,9 @@ protected:
   bool sendMeasurementTransmissionRequest() override;
 
 private:
+  struct InterfaceTag {};
+  HTPA32_Device(HTPA32_Params params, com::ComInterface* interface, unsigned int idx, InterfaceTag);
+
   /**
    * @brief Communication callback invoked by the bus interface.
    * @param[in] source Endpoint that delivered the data.
@@ -92,6 +99,7 @@ private:
   void onClearDataFlag() override;
 
   friend class HTPA32_DeviceImpl;
+  friend class HTPA32_DeviceTestAccess;
   std::unique_ptr<HTPA32_DeviceImpl> _impl;
 };
 
