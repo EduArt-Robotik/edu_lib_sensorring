@@ -43,7 +43,7 @@ bool WS2812b_Device::configure() {
   if (!setDistanceMapRange(_params.distance_map_lower_m, _params.distance_map_upper_m)) {
     return false;
   }
-  if (!setDistanceMapMaxBrightness(_params.distance_map_max_brightness)) {
+  if (!setDistanceMapMaxBrightness(_params.max_brightness)) {
     return false;
   }
   setLight(_last_setting.mode, _last_setting.red, _last_setting.green, _last_setting.blue);
@@ -103,8 +103,8 @@ bool WS2812b_Device::getDistanceMapRange(double& lower_m, double& upper_m) {
 bool WS2812b_Device::setDistanceMapMaxBrightness(std::int64_t brightness) {
   std::lock_guard<std::mutex> lock(_parameter_mutex);
 
-  WS2812b_Params proposed              = _params;
-  proposed.distance_map_max_brightness = brightness;
+  WS2812b_Params proposed = _params;
+  proposed.max_brightness = brightness;
   try {
     proposed.validateDistanceMapBrightness();
   } catch (const std::invalid_argument& e) {
@@ -112,18 +112,18 @@ bool WS2812b_Device::setDistanceMapMaxBrightness(std::int64_t brightness) {
     return false;
   }
 
-  bool success = _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::WS2812B }, PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS, { static_cast<std::uint8_t>(brightness) });
+  bool success = _interface->send(com::ComEndpoint{ com::Direction::Input, static_cast<std::uint8_t>(_hw_idx + 1), devbyte::WS2812B }, PARAMETER_SET_MAX_BRIGHTNESS, { static_cast<std::uint8_t>(brightness) });
 
   std::vector<uint8_t> data;
   if (success) {
-    success = requestParameter(PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS, data);
+    success = requestParameter(PARAMETER_GET_MAX_BRIGHTNESS, data);
   }
   if (success) {
     success = (data[0] == brightness);
   }
 
   if (success) {
-    _params.distance_map_max_brightness = brightness;
+    _params.max_brightness = brightness;
     logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "Set WS2812b distance map brightness on board " + std::to_string(getDeviceID().index) + " to " + std::to_string(brightness));
   } else {
     logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Failed to set WS2812b distance map brightness on board " + std::to_string(getDeviceID().index) + " to " + std::to_string(brightness));
@@ -135,7 +135,7 @@ bool WS2812b_Device::setDistanceMapMaxBrightness(std::int64_t brightness) {
 bool WS2812b_Device::getDistanceMapMaxBrightness(std::int64_t& brightness) {
   std::lock_guard<std::mutex> lock(_parameter_mutex);
   std::vector<uint8_t> data;
-  if (!requestParameter(PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS, data)) {
+  if (!requestParameter(PARAMETER_GET_MAX_BRIGHTNESS, data)) {
     return false;
   }
 
@@ -216,9 +216,9 @@ void WS2812b_Device::comCallback([[maybe_unused]] const com::ComEndpoint source,
     break;
   }
 
-  case PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS:
+  case PARAMETER_GET_MAX_BRIGHTNESS:
     if (data.size() != 1) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid WS2812b distance map brightness response on board " + std::to_string(getDeviceID().index) + ": expected 1 byte.");
+      logger::Logger::getInstance()->log(logger::LogVerbosity::Error, "Invalid WS2812b max brightness response on board " + std::to_string(getDeviceID().index) + ": expected 1 byte.");
       return;
     }
     break;

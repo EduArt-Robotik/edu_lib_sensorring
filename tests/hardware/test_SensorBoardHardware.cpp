@@ -1,21 +1,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-#include "sensorring/board/SensorBoard.hpp"
-
 #include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/board/SensorBoard.hpp"
 #include "sensorring/interface/InterfaceParams.hpp"
 
 namespace eduart::sensorring::board {
 
 struct SensorBoardTestAccess {
-  static bool setOrientation(SensorBoard& board, Orientation orientation) {
-    return board.setOrientation(orientation);
-  }
+  static bool setOrientation(SensorBoard& board, Orientation orientation) { return board.setOrientation(orientation); }
 
-  static bool getOrientation(SensorBoard& board, Orientation& orientation) {
-    return board.getOrientation(orientation);
-  }
+  static bool getOrientation(SensorBoard& board, Orientation& orientation) { return board.getOrientation(orientation); }
 };
 
 } // namespace eduart::sensorring::board

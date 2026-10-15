@@ -24,7 +24,7 @@ expected light devices without explicit parameters:
 device::LightParams light_params;
 light_params.distance_map_lower_m = 0.25;
 light_params.distance_map_upper_m = 1.5;
-light_params.distance_map_max_brightness = 50;
+light_params.max_brightness = 50;
 factory.setDefaultDeviceParams(light_params);
 ```
 
@@ -95,7 +95,7 @@ Category-level structures add the following fields:
 | `ThermalSensorParams` | `auto_min_max` | `true` | Automatically scales each image using its coldest and hottest temperatures. |
 | `LightParams` | `distance_map_lower_m` | `0.1` | Lower distance-map saturation threshold in meters; distances at or below it map to red. |
 | `LightParams` | `distance_map_upper_m` | `0.5` | Upper distance-map saturation threshold in meters; distances at or above it map to green, with interpolation between the thresholds. |
-| `LightParams` | `distance_map_max_brightness` | `50` | Peak LED channel value in `[0, 255]`; `0` disables the distance indicator. |
+| `LightParams` | `max_brightness` | `50` | Peak LED channel value in `[0, 255]`; `0` disables the distance indicator. |
 
 ### Concrete Device Parameters
 
@@ -172,9 +172,9 @@ are logged and return `false`.
 
 Range verification reads the two float32 meter values (lower, upper) using
 `PARAMETER_GET_DISTANCE_MAP_RANGE` (`0x90`); brightness verification reads one
-byte using `PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS` (`0x91`). Both get
+byte using `PARAMETER_GET_MAX_BRIGHTNESS` (`0x91`). Both get
 requests have an empty payload. The brightness value is sent as one unsigned
-byte with `PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS` (`0x11`).
+byte with `PARAMETER_SET_MAX_BRIGHTNESS` (`0x11`).
 
 Successful setters update the desired parameters returned by `getParams()`,
 preserving the requested range for later resets. Getters query live board values
