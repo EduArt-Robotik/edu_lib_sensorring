@@ -249,8 +249,12 @@ if(SENSORRING_INSTALL)
 
   include(CMakePackageConfigHelpers)
 
+  set(FIND_DEPENDENCIES "")
+  if(_SENSORRING_TRANSPORT_IMPORTED)
+    string(APPEND FIND_DEPENDENCIES "find_dependency(sensorring_transport CONFIG REQUIRED)\n")
+  endif()
   if(SENSORRING_USE_USBTINGO)
-      set(FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
+    string(APPEND FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
   endif()
 
   configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
@@ -266,7 +270,11 @@ if(SENSORRING_INSTALL)
 
   #########################################################
   # install library
-  install(TARGETS sensorring sensorring_transport
+  set(_SENSORRING_INSTALL_TARGETS sensorring)
+  if(NOT _SENSORRING_TRANSPORT_IMPORTED)
+    list(APPEND _SENSORRING_INSTALL_TARGETS sensorring_transport)
+  endif()
+  install(TARGETS ${_SENSORRING_INSTALL_TARGETS}
     EXPORT sensorringTargets
     LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
@@ -286,10 +294,12 @@ if(SENSORRING_INSTALL)
     DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
   )
 
-  install(DIRECTORY
-    ${SENSORRING_TRANSPORT_SOURCE_DIR}/include/
-    DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
-  )
+  if(NOT _SENSORRING_TRANSPORT_IMPORTED)
+    install(DIRECTORY
+      ${SENSORRING_TRANSPORT_SOURCE_DIR}/include/
+      DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
+    )
+  endif()
 
   install(FILES
     "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"

@@ -69,13 +69,33 @@ int main(int, char*[]) {
 }
 ```
 
+## Dependency Resolution
+
+The transport dependency, the bootloader dependency (when
+`SENSORRING_BUILD_FIRMWARE_UPDATE=ON`), libusbtingo (when
+`SENSORRING_USE_USBTINGO=ON`), and Catch2 (when `SENSORRING_BUILD_TESTS=ON`)
+are automatically resolved by CMake in this order:
+
+1. Use the local checkout/submodule in `external/`.
+2. Try an installed CMake config package.
+3. Fetch the dependency from GitHub.
+
+| Dependency | Local checkout | CMake config package | GitHub fallback |
+|:--|:--|:--|:--|
+| Transport | `external/edu_sensorring_transport` | `sensorring_transport` | `master` branch |
+| Bootloader | `external/frankly_bootloader` | `frankly_bootloader` or `frankly-bootloader` | `master` branch |
+| libusbtingo | `external/libusbtingo` | `usbtingo` | `v1.1.4` |
+| Catch2 | `external/Catch2` | `Catch2` (version 3) | `v3.5.2` |
+
 ## 2 Building the Library from Source
 
 ### 2.1 Building the library
 
 The library is built with a standard CMake workflow which is almost identical for Windows and Linux.
 
-> ℹ️ This repository uses a **git submodule** for the transport module. Use `--recursive` when cloning. If you already cloned without it, run `git submodule update --init --recursive`. Alternatively, if you don't intend to modify the transport layer CMake will automatically fetch the module via FetchContent if the submodule is missing.
+> ℹ️ Use `--recursive` when cloning to include the dependencies as submodules.
+> If you already cloned without it, run `git submodule update --init --recursive`.
+> Missing submodules are handled automatically as described in [Dependency Resolution](#dependency-resolution).
 
 Use the following commands to build the library.
 
