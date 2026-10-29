@@ -73,6 +73,7 @@ bool parseInterfaceType(const std::string& input, com::InterfaceType& type) {
 } // namespace
 
 int main(int argc, char* argv[]) {
+  std::cout << std::unitbuf;
   try {
     std::string mode_str;
     std::string interface_type_str;
