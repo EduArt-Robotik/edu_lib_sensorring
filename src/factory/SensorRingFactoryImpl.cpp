@@ -1,10 +1,10 @@
 #include "factory/SensorRingFactoryImpl.hpp"
 
 #include <algorithm>
-#include <sstream>
 
 #include "board/SensorBoardManager.hpp"
 #include "interface/ComManager.hpp"
+#include "sensorring/board/BoardDiscovery.hpp"
 #include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/logger/Logger.hpp"
 
@@ -450,30 +450,17 @@ bool SensorRingFactoryImpl::createBoardFromExpectation(
 SensorRingFactoryImpl::EnumerationMap SensorRingFactoryImpl::enumerate() {
   logger::Logger::getInstance()->log(logger::LogVerbosity::Debug, "SensorRingFactory::enumerate() - scanning interfaces.");
 
-  EnumerationMap result;
-
+  board::BoardDiscovery discovery;
   for (const auto& iface_cfg : _interfaces) {
-    try {
-      auto* iface = openInterface(*iface_cfg.params);
-      if (!iface) {
-        continue;
-      }
-      auto id         = iface->getID();
-      auto enum_infos = SensorBus::queryConnectedDevices(id);
-
-      for (auto& ei : enum_infos) {
-        ei.state        = board::ConnectionState::Connected;
-        ei.config_state = board::ConfigurationState::Undefined;
-      }
-
-      result[id] = std::move(enum_infos);
-    } catch (const std::exception&) {
-      logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Error while enumerating interface " + iface_cfg.params->name + " - skipping.");
+    if (const auto* params = dynamic_cast<const com::SocketCanParams*>(iface_cfg.params.get())) {
+      discovery.addInterface(*params);
+    } else if (const auto* params = dynamic_cast<const com::UsbTingoParams*>(iface_cfg.params.get())) {
+      discovery.addInterface(*params);
     }
   }
 
-  _enumeration_results = result;
-  return result;
+  _enumeration_results = discovery.enumerate();
+  return _enumeration_results;
 }
 
 const SensorRingFactoryImpl::EnumerationMap& SensorRingFactoryImpl::getLatestEnumerationResult() const {
@@ -485,22 +472,7 @@ void SensorRingFactoryImpl::setEnumerationResultsForTest(EnumerationMap results)
 }
 
 std::string SensorRingFactoryImpl::printTopology() const {
-  std::stringstream ss;
-
-  for (const auto& [iface_id, boards] : _enumeration_results) {
-    ss << std::endl << std::endl;
-    ss << "=================================================" << std::endl;
-    ss << "Topology of the sensors on " << iface_id.name << ":" << std::endl;
-    ss << std::endl;
-
-    for (const auto& board : boards) {
-      ss << board.toString() << std::endl;
-    }
-
-    ss << "=================================================" << std::endl;
-  }
-
-  return ss.str();
+  return board::BoardDiscovery::printTopology(_enumeration_results);
 }
 
 device::DeviceParamsMap SensorRingFactoryImpl::buildDefaultParamsMap(const std::vector<device::DeviceType>& devices) const {

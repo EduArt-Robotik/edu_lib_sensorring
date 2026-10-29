@@ -1,11 +1,8 @@
 #include "sensorring/SensorBus.hpp"
 
-#include <chrono>
-#include <thread>
-
-#include "board/BoardEnumerator.hpp"
 #include "interface/ComInterface.hpp"
 #include "interface/ComManager.hpp"
+#include "sensorring/board/BoardDiscovery.hpp"
 #include "sensorring/logger/Logger.hpp"
 
 namespace eduart {
@@ -39,15 +36,7 @@ unsigned int SensorBus::getSensorCount() const {
 }
 
 std::vector<board::EnumerationInformation> SensorBus::queryConnectedDevices(com::ComInterfaceID interface, unsigned int timeout_ms) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (!iface) {
-    return {};
-  }
-
-  board::BoardEnumerator enumerator(iface);
-  enumerator.startEnumeration();
-  std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
-  return enumerator.getResult();
+  return board::BoardDiscovery::queryConnectedDevices(interface, timeout_ms);
 }
 
 } // namespace sensorring

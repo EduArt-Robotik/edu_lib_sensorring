@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -23,7 +23,7 @@ namespace com {
  * @struct InterfaceParams
  * @brief Base class for interface configuration parameters.
  */
-struct SENSORRING_EXPORT InterfaceParams {
+struct SENSORRING_BASE_EXPORT InterfaceParams {
   virtual ~InterfaceParams() = default;
 
   /// Interface identifier (e.g. "can0" for SocketCAN, serial number for USBtingo).
@@ -39,7 +39,7 @@ protected:
  * @struct CanParams
  * @brief Shared parameters for a CAN interfaces.
  */
-struct SENSORRING_EXPORT CanParams : InterfaceParams {
+struct SENSORRING_BASE_EXPORT CanParams : InterfaceParams {
 
   /// Enable CAN FD bit rate switching for the data phase when the sensor boards send messages to the host.
   bool respond_with_brs = false;
@@ -83,7 +83,7 @@ private:
  * @struct SocketCanParams
  * @brief Configuration parameters for a Linux SocketCAN interface.
  */
-struct SENSORRING_EXPORT SocketCanParams : CanParams {
+struct SENSORRING_BASE_EXPORT SocketCanParams : CanParams {
 
   SocketCanParams() = default;
   SocketCanParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)
@@ -94,7 +94,7 @@ struct SENSORRING_EXPORT SocketCanParams : CanParams {
  * @struct UsbTingoParams
  * @brief Configuration parameters for a USBtingo CAN adapter.
  */
-struct SENSORRING_EXPORT UsbTingoParams : CanParams {
+struct SENSORRING_BASE_EXPORT UsbTingoParams : CanParams {
 
   UsbTingoParams() = default;
   UsbTingoParams(std::string interface_name, bool respond_with_brs = false, unsigned int data_bitrate = 0, float data_sample_point = 0.0f)

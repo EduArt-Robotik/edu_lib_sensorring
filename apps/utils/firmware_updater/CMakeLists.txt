@@ -4,6 +4,9 @@ add_executable(firmware_updater
 
 target_link_libraries(firmware_updater
     PRIVATE
-      sensorring::sensorring
       sensorring::firmware_update
 )
+
+if(SENSORRING_INSTALL)
+  install(TARGETS firmware_updater RUNTIME DESTINATION ${SENSORRING_INSTALL_RUNTIME_DIR})
+endif()

@@ -62,10 +62,16 @@ include(BuildOptions REQUIRED)
 include(CollectDependencies REQUIRED)
 
 # Library
+include(GenerateExportHeader)
+set(SENSORRING_GENERATED_INCLUDE_DIR ${PROJECT_BINARY_DIR}/src/generated)
 add_subdirectory(src)
 
 if(SENSORRING_BUILD_FIRMWARE_UPDATE)
   add_subdirectory(src/firmware)
+endif()
+
+if(SENSORRING_INSTALL)
+  include(InstallTargets REQUIRED)
 endif()
 
 # Tests

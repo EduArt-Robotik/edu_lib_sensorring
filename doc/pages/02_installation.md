@@ -117,7 +117,8 @@ Use the following commands to build the library.
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
       <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
       <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_LIB</td><td>ON</td><td>Build the main sensor ring library</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs (requires firmware update module)</td></tr>
       <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
       <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
       <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
@@ -145,7 +146,8 @@ Use the following commands to build the library.
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
       <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
       <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_LIB</td><td>ON</td><td>Build the main sensor ring library</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs (requires firmware update module)</td></tr>
       <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
       <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
       <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
@@ -157,6 +159,40 @@ Use the following commands to build the library.
 </div>
 </div>
 
+
+### Building only the utilities
+
+The discovery tool and firmware updater can be built without the main sensor
+library or sensor drivers:
+
+```sh
+cmake -S . -B build/utils -DCMAKE_BUILD_TYPE=Release \
+  -DSENSORRING_BUILD_LIB=OFF \
+  -DSENSORRING_BUILD_UTILS=ON \
+  -DSENSORRING_BUILD_FIRMWARE_UPDATE=ON
+cmake --build build/utils --parallel
+cmake --install build/utils
+```
+
+Alternatively, use `cmake --preset ReleaseUtils`, `cmake --build --preset ReleaseUtils`
+and `ctest --preset ReleaseUtils` to also build and run the base-layer unit tests.
+USBtingo support can be disabled with `-DSENSORRING_USE_USBTINGO=OFF` on Linux.
+
+`SENSORRING_BUILD_LIB` defaults to `ON`. When it is `OFF`, examples, Python
+bindings and hardware tests must also be `OFF`; `SENSORRING_BUILD_TESTS=ON`
+builds only the base-layer tests. The firmware module may also be built
+independently, without the utilities or main library.
+
+The shared communication/discovery target is `sensorring::base`; firmware
+updating uses `sensorring::firmware_update`. The main library target,
+`sensorring::sensorring`, is only available when `SENSORRING_BUILD_LIB=ON`.
+Existing library discovery/reset APIs delegate to the shared base layer.
+Discovery itself never constructs or configures sensor devices.
+
+With `SENSORRING_INSTALL=ON`, installation includes the enabled libraries,
+their public headers, CMake targets and utility executables. With it `OFF`,
+these installation rules are omitted. Shared builds require the base and
+firmware shared libraries at runtime as well as any enabled USBtingo dependency.
 
 ### 2.2 Installing the Library
 

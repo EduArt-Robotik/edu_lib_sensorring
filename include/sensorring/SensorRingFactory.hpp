@@ -11,11 +11,10 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "sensorring/SensorRing.hpp"
-#include "sensorring/board/EnumerationInformation.hpp"
+#include "sensorring/board/BoardDiscovery.hpp"
 #include "sensorring/board/SensorBoardParams.hpp"
 #include "sensorring/device/DeviceParams.hpp"
 #include "sensorring/device/DeviceType.hpp"
@@ -76,7 +75,7 @@ enum class ValidationMode {
 class SENSORRING_EXPORT SensorRingFactory {
 public:
   /// Per-interface enumeration results, keyed by interface ID.
-  using EnumerationMap = std::unordered_map<com::ComInterfaceID, std::vector<board::EnumerationInformation> >;
+  using EnumerationMap = board::BoardDiscovery::EnumerationMap;
 
   /// Minimum sensor board firmware version required by this library version.
   static constexpr Version MIN_FIRMWARE_VERSION = { 0, 9, 0 };

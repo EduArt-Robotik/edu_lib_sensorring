@@ -14,7 +14,7 @@
 #include <string>
 
 #include "sensorring/logger/LogVerbosity.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 #include "sensorring/subscription/Publisher.hpp"
 
 namespace eduart {
@@ -27,7 +27,7 @@ namespace logger {
  * @class Logger
  * @brief Centralized class to collect all log messages and relay them to the registered observers. The Logger is implemented as a singleton.
  */
-class SENSORRING_EXPORT Logger {
+class SENSORRING_BASE_EXPORT Logger {
 public:
   /// Destructor
   ~Logger() = default;

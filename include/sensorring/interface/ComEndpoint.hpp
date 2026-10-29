@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -34,7 +34,7 @@ enum class Direction : std::uint8_t {
  * @struct ComEndpoint
  * @brief Uniquely identifies a communication endpoint as a (Direction, BoardAddress, DeviceId) tuple.
  */
-struct SENSORRING_EXPORT ComEndpoint {
+struct SENSORRING_BASE_EXPORT ComEndpoint {
   Direction direction;       ///< Host->Board (Input) or Board->Host (Output)
   std::uint8_t boardAddress; ///< 0 = broadcast, 1-126 = individual board (board_index + 1)
   std::uint8_t deviceId;     ///< 0x00 = board, 0x01 = ToF, 0x02 = Thermal, 0x03 = WS2812b

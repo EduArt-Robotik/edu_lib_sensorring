@@ -24,7 +24,7 @@ namespace com {
 using subscription::SubscriberToken;
 using subscription::Subscription;
 
-class ComInterface {
+class SENSORRING_BASE_EXPORT ComInterface {
 
 public:
   /// Callback type for communication subscriptions.

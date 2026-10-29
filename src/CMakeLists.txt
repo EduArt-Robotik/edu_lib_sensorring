@@ -1,4 +1,12 @@
 #########################################################
+# shared base for the library and utilities
+add_subdirectory(base)
+
+if(NOT SENSORRING_BUILD_LIB)
+  return()
+endif()
+
+#########################################################
 # main sensor ring library
 if(SENSORRING_BUILD_SHARED_LIBS)
     add_library(sensorring SHARED)
@@ -7,10 +15,6 @@ else()
 endif()
 
 add_library(sensorring::sensorring ALIAS sensorring)
-
-set(SENSORRING_GENERATED_INCLUDE_DIR
-  ${CMAKE_CURRENT_BINARY_DIR}/generated
-)
 
 set(SENSORRING_CORE_SOURCES
   SensorBus.cpp
@@ -25,44 +29,15 @@ set(SENSORRING_MANAGER_SOURCES
   manager/MeasurementManagerImpl.cpp
 )
 
-set(SENSORRING_INTERFACE_SOURCES
-  interface/ComInterfaceID.cpp
-  interface/ComInterface.cpp
-  interface/ComManager.cpp
-  interface/ComEndpoint.cpp
-  interface/can/CanInterface.cpp
-)
-
-if(SENSORRING_USE_SOCKETCAN)
-  list(APPEND SENSORRING_INTERFACE_SOURCES
-    interface/can/socketcan/SocketCANFD.cpp
-  )
-endif()
-
-if(SENSORRING_USE_USBTINGO)
-  list(APPEND SENSORRING_INTERFACE_SOURCES
-    interface/can/usbtingo/USBtingo.cpp
-  )
-endif()
-
-set(SENSORRING_LOGGER_SOURCES
-  logger/Logger.cpp
-  logger/LogVerbosity.cpp
-)
-
 set(SENSORRING_BOARD_SOURCES
   board/SensorBoard.cpp
-  board/SensorBoardType.cpp
   board/SensorBoardParams.cpp
   board/SensorBoardManager.cpp
-  board/BoardEnumerator.cpp
-  board/EnumerationInformation.cpp
 )
 
 set(SENSORRING_DEVICE_SOURCES
   device/Device.cpp
   device/Sensor.cpp
-  device/DeviceType.cpp
   device/types/DeviceState.cpp
   device/depth/DepthSensor.cpp
   device/thermal/ThermalSensor.cpp
@@ -99,8 +74,6 @@ set(SENSORRING_MATH_SOURCES
 
 add_library(sensorring_core OBJECT ${SENSORRING_CORE_SOURCES})
 add_library(sensorring_manager OBJECT ${SENSORRING_MANAGER_SOURCES})
-add_library(sensorring_interface OBJECT ${SENSORRING_INTERFACE_SOURCES})
-add_library(sensorring_logger OBJECT ${SENSORRING_LOGGER_SOURCES})
 add_library(sensorring_board OBJECT ${SENSORRING_BOARD_SOURCES})
 add_library(sensorring_device OBJECT ${SENSORRING_DEVICE_SOURCES})
 add_library(sensorring_measurement OBJECT ${SENSORRING_MEASUREMENT_SOURCES})
@@ -110,8 +83,6 @@ add_library(sensorring_math OBJECT ${SENSORRING_MATH_SOURCES})
 set(SENSORRING_OBJECT_LIBS
   sensorring_core
   sensorring_manager
-  sensorring_interface
-  sensorring_logger
   sensorring_board
   sensorring_device
   sensorring_measurement
@@ -133,13 +104,11 @@ foreach(objlib IN LISTS SENSORRING_OBJECT_LIBS)
   )
 
   target_link_libraries(${objlib} PRIVATE
-    sensorring_transport::sensorring_transport
+    sensorring::base
   )
 
-  if(SENSORRING_USE_USBTINGO)
-    target_link_libraries(${objlib} PRIVATE
-      usbtingo::usbtingo
-    )
+  if(SENSORRING_BUILD_SHARED_LIBS)
+    target_compile_definitions(${objlib} PRIVATE sensorring_EXPORTS)
   endif()
 
   if(MSVC)
@@ -164,8 +133,6 @@ endforeach()
 target_sources(sensorring PRIVATE
   $<TARGET_OBJECTS:sensorring_core>
   $<TARGET_OBJECTS:sensorring_manager>
-  $<TARGET_OBJECTS:sensorring_interface>
-  $<TARGET_OBJECTS:sensorring_logger>
   $<TARGET_OBJECTS:sensorring_board>
   $<TARGET_OBJECTS:sensorring_device>
   $<TARGET_OBJECTS:sensorring_measurement>
@@ -176,19 +143,12 @@ target_sources(sensorring PRIVATE
 
 #########################################################
 # generate export header
-include(GenerateExportHeader)
-
 generate_export_header(sensorring
   EXPORT_FILE_NAME ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
 )
 
 target_include_directories(sensorring PUBLIC
   $<BUILD_INTERFACE:${SENSORRING_GENERATED_INCLUDE_DIR}>
-)
-
-install(FILES
-  ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringExport.hpp
-  DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}/sensorring/platform
 )
 
 
@@ -220,90 +180,7 @@ if(SENSORRING_USE_SOCKETCAN)
 endif()
 
 #########################################################
-# link transport module (always required)
+# link shared base
 target_link_libraries(sensorring PUBLIC
-  sensorring_transport::sensorring_transport
+  sensorring::base
 )
-
-#########################################################
-# link usbtingo
-if(SENSORRING_USE_USBTINGO)
-  target_compile_definitions(sensorring PRIVATE USE_USBTINGO)
-  if(SENSORRING_BUILD_SHARED_LIBS)
-    target_link_libraries(sensorring PRIVATE
-      usbtingo::usbtingo
-      Threads::Threads
-    )
-  else()
-    target_link_libraries(sensorring PUBLIC
-      usbtingo::usbtingo
-      Threads::Threads
-    )
-  endif()
-endif()
-
-
-#########################################################
-# cmake package configuration
-if(SENSORRING_INSTALL)
-
-  include(CMakePackageConfigHelpers)
-
-  set(FIND_DEPENDENCIES "")
-  if(_SENSORRING_TRANSPORT_IMPORTED)
-    string(APPEND FIND_DEPENDENCIES "find_dependency(sensorring_transport CONFIG REQUIRED)\n")
-  endif()
-  if(SENSORRING_USE_USBTINGO)
-    string(APPEND FIND_DEPENDENCIES "find_dependency(usbtingo REQUIRED)\nfind_dependency(Threads REQUIRED)")
-  endif()
-
-  configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
-    "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
-    INSTALL_DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-  )
-
-  write_basic_package_version_file(
-    "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
-    VERSION "${sensorringVERSION}"
-    COMPATIBILITY SameMajorVersion
-  )
-
-  #########################################################
-  # install library
-  set(_SENSORRING_INSTALL_TARGETS sensorring)
-  if(NOT _SENSORRING_TRANSPORT_IMPORTED)
-    list(APPEND _SENSORRING_INSTALL_TARGETS sensorring_transport)
-  endif()
-  install(TARGETS ${_SENSORRING_INSTALL_TARGETS}
-    EXPORT sensorringTargets
-    LIBRARY DESTINATION ${SENSORRING_INSTALL_LIBRARY_DIR}
-    ARCHIVE DESTINATION ${SENSORRING_INSTALL_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${SENSORRING_INSTALL_RUNTIME_DIR}
-  )
-
-  # install cmake files
-  install(EXPORT sensorringTargets
-    FILE sensorringTargets.cmake
-    NAMESPACE sensorring::
-    DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-  )
-
-  # install headers
-  install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/include/
-    DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
-  )
-
-  if(NOT _SENSORRING_TRANSPORT_IMPORTED)
-    install(DIRECTORY
-      ${SENSORRING_TRANSPORT_SOURCE_DIR}/include/
-      DESTINATION ${SENSORRING_INSTALL_INCLUDE_DIR}
-    )
-  endif()
-
-  install(FILES
-    "${CMAKE_BINARY_DIR}/sensorringConfig.cmake"
-    "${CMAKE_BINARY_DIR}/sensorringConfigVersion.cmake"
-    DESTINATION ${SENSORRING_INSTALL_CMAKE_DIR}
-  )
-endif()

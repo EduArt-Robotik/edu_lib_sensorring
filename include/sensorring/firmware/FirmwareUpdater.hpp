@@ -17,7 +17,7 @@
 #include <string>
 
 #include "sensorring/interface/ComInterfaceID.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringFirmwareUpdateExport.hpp"
 
 namespace eduart {
 namespace sensorring {
@@ -27,7 +27,7 @@ namespace firmware_update {
  * @struct UpdateConfig
  * @brief  Timing and retry parameters that control the firmware-update procedure.
  */
-struct SENSORRING_EXPORT UpdateConfig {
+struct SENSORRING_FIRMWARE_UPDATE_EXPORT UpdateConfig {
   std::chrono::milliseconds can_timeout{ 500 };                   ///< Maximum time to wait for a CAN response before declaring a timeout.
   std::chrono::milliseconds bootloader_start_ack_timeout{ 1000 }; ///< Maximum time to wait for the bootloader-start acknowledgement after a reset.
   std::chrono::milliseconds settle_delay_after_flash{ 2000 };     ///< Delay inserted after the last flash packet to let the board settle before verification.
@@ -48,7 +48,7 @@ using LogCallback = std::function<void(const std::string&)>;
  * operations are synchronous and blocking; call them from a dedicated thread
  * if you need to keep the rest of the application responsive.
  */
-class SENSORRING_EXPORT FirmwareUpdater {
+class SENSORRING_FIRMWARE_UPDATE_EXPORT FirmwareUpdater {
 public:
   /**
    * @brief Constructs a FirmwareUpdater with the given timing/retry configuration.

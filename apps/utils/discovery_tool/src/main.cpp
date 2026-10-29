@@ -1,11 +1,12 @@
+#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <optional>
-#include <sensorring/SensorRingFactory.hpp>
-#include <sensorring/firmware/FirmwareUpdater.hpp>
+#include <sensorring/board/BoardDiscovery.hpp>
 #include <sensorring/interface/InterfaceParams.hpp>
 #include <string>
+#include <string_view>
 #include <thread>
 
 using namespace eduart::sensorring;
@@ -88,8 +89,7 @@ int main(int argc, char* argv[]) {
       return EXIT_FAILURE;
     }
 
-    // Create the SensorRing via auto-discovery
-    SensorRingFactory factory;
+    board::BoardDiscovery discovery;
 
     com::InterfaceType interface_type;
     if (interface_type_str.has_value()) {
@@ -101,10 +101,10 @@ int main(int argc, char* argv[]) {
 
       switch (interface_type) {
       case com::InterfaceType::SocketCan:
-        factory.addInterface(com::SocketCanParams{ std::string(interface_name.value()) });
+        discovery.addInterface(com::SocketCanParams{ std::string(interface_name.value()) });
         break;
       case com::InterfaceType::UsbTingo:
-        factory.addInterface(com::UsbTingoParams{ std::string(interface_name.value()) });
+        discovery.addInterface(com::UsbTingoParams{ std::string(interface_name.value()) });
         break;
       default:
         std::cerr << "Unsupported interface type: " << interface_type_str.value() << '\n';
@@ -113,24 +113,27 @@ int main(int argc, char* argv[]) {
     } else {
       for (const auto& name : KNOWN_SOCKETCAN_INTERFACES) {
         com::SocketCanParams can_interface{ std::string(name) };
-        factory.addInterface(can_interface);
+        discovery.addInterface(can_interface);
       }
 
       for (const auto& name : KNOWN_USBTINGO_INTERFACES) {
         com::UsbTingoParams usbtingo_interface{ std::string(name) };
-        factory.addInterface(usbtingo_interface);
+        discovery.addInterface(usbtingo_interface);
       }
     }
 
     if (reset_devices) {
       std::cout << "Resetting devices..." << std::endl;
-      factory.enumerate(); // Have to enumerate first to ensure the interfaces are initialized before sending reset commands
-      board::SensorBoard::resetBoards();
+      discovery.enumerate(); // Open the interfaces before sending reset commands.
+      if (!board::BoardDiscovery::resetBoards()) {
+        std::cerr << "Failed to reset devices.\n";
+        return EXIT_FAILURE;
+      }
       std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
-    factory.enumerate();
-    std::cout << factory.printTopology() << std::endl;
+    discovery.enumerate();
+    std::cout << discovery.printTopology() << std::endl;
 
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;

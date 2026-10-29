@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
-#include <sensorring/SensorRingFactory.hpp>
 #include <sensorring/firmware/FirmwareUpdater.hpp>
 #include <sensorring/interface/InterfaceParams.hpp>
 #include <string>

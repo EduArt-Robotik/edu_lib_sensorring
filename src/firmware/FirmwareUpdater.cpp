@@ -10,7 +10,7 @@
 #include "firmware/internal/BootloaderDevice.hpp"
 #include "firmware/internal/BootloaderProtocol.hpp"
 #include "interface/ComManager.hpp"
-#include "sensorring/SensorRingFactory.hpp"
+#include "sensorring/board/BoardDiscovery.hpp"
 #include "sensorring/interface/InterfaceParams.hpp"
 
 namespace eduart {
@@ -38,7 +38,7 @@ bool isResultOk(ResultType result) {
 }
 
 std::size_t countBoards(const com::ComInterfaceID& interface) {
-  return SensorBus::queryConnectedDevices(interface).size();
+  return board::BoardDiscovery::queryConnectedDevices(interface).size();
 }
 
 } // namespace
@@ -52,7 +52,7 @@ bool FirmwareUpdater::flashSingleBoard(const com::ComInterfaceID& interface, std
 }
 
 bool FirmwareUpdater::enterSingleBoardBootloader(const com::ComInterfaceID& interface, std::size_t board_index, LogCallback log_callback) const {
-  const auto boards = SensorBus::queryConnectedDevices(interface);
+  const auto boards = board::BoardDiscovery::queryConnectedDevices(interface);
   if (boards.empty()) {
     logMessage(log_callback, "No board found to enter bootloader.");
     return false;

@@ -8,6 +8,11 @@ else()
 endif()
 
 add_library(sensorring::firmware_update ALIAS sensorring_firmware_update)
+set_target_properties(sensorring_firmware_update PROPERTIES EXPORT_NAME firmware_update)
+
+generate_export_header(sensorring_firmware_update
+  EXPORT_FILE_NAME ${SENSORRING_GENERATED_INCLUDE_DIR}/sensorring/platform/SensorringFirmwareUpdateExport.hpp
+)
 
 set(SENSORRING_FIRMWARE_UPDATE_SOURCES
   FirmwareUpdater.cpp
@@ -44,5 +49,5 @@ target_include_directories(sensorring_firmware_update
 )
 
 target_link_libraries(sensorring_firmware_update
-  PUBLIC sensorring::sensorring
+  PUBLIC sensorring::base
 )
