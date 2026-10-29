@@ -13,7 +13,7 @@ endif()
 # Project
 set(CMAKE_PROJECT_VERSION_MAJOR 4)
 set(CMAKE_PROJECT_VERSION_MINOR 0)
-set(CMAKE_PROJECT_VERSION_PATCH 0)
+set(CMAKE_PROJECT_VERSION_PATCH 1)
 set(CMAKE_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}")
 
 project(sensorring
@@ -62,10 +62,16 @@ include(BuildOptions REQUIRED)
 include(CollectDependencies REQUIRED)
 
 # Library
+include(GenerateExportHeader)
+set(SENSORRING_GENERATED_INCLUDE_DIR ${PROJECT_BINARY_DIR}/src/generated)
 add_subdirectory(src)
 
 if(SENSORRING_BUILD_FIRMWARE_UPDATE)
   add_subdirectory(src/firmware)
+endif()
+
+if(SENSORRING_INSTALL)
+  include(InstallTargets REQUIRED)
 endif()
 
 # Tests

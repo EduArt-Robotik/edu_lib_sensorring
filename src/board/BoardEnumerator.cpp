@@ -2,7 +2,7 @@
 
 #include <sensorring_transport/Protocol.hpp>
 
-#include "sensorring/board/SensorBoard.hpp"
+#include "sensorring/logger/Logger.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 
@@ -27,7 +27,13 @@ BoardEnumerator::~BoardEnumerator() {
 }
 
 void BoardEnumerator::startEnumeration() {
-  SensorBoard::cmdEnumerateBoards(_interface->getID());
+  sendEnumerationRequest(*_interface);
+}
+
+void BoardEnumerator::sendEnumerationRequest(com::ComInterface& interface) {
+  if (!interface.send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {})) {
+    logger::Logger::getInstance()->log(logger::LogVerbosity::Exception, "Failed to send enumeration request on interface " + interface.getID().name + ".");
+  }
 }
 
 std::vector<EnumerationInformation> BoardEnumerator::getResult() {

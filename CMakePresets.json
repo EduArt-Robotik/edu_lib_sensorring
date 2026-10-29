@@ -15,6 +15,7 @@
 
         "SENSORRING_INSTALL": "ON",
 
+        "SENSORRING_BUILD_LIB": "ON",
         "SENSORRING_BUILD_SHARED_LIBS": "OFF",
         "SENSORRING_BUILD_EXAMPLES": "ON",
         "SENSORRING_BUILD_UTILS": "ON",
@@ -58,6 +59,14 @@
       }
     },
     {
+      "name": "ReleaseUtils",
+      "inherits": "Release",
+      "cacheVariables": {
+        "SENSORRING_BUILD_LIB": "OFF",
+        "SENSORRING_BUILD_EXAMPLES": "OFF"
+      }
+    },
+    {
       "name": "ReleaseDocs",
       "inherits": "Release",
       "cacheVariables": {
@@ -84,6 +93,10 @@
   ],
 
   "buildPresets": [
+    {
+      "name": "ReleaseUtils",
+      "configurePreset": "ReleaseUtils"
+    },
     {
       "name": "Debug",
       "configurePreset": "Debug"
@@ -112,6 +125,13 @@
   ],
 
   "testPresets": [
+    {
+      "name": "ReleaseUtils",
+      "configurePreset": "ReleaseUtils",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
     {
       "name": "Debug",
       "configurePreset": "Debug",
@@ -150,6 +170,23 @@
   ],
 
   "workflowPresets": [
+    {
+      "name": "ReleaseUtils",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ReleaseUtils"
+        },
+        {
+          "type": "build",
+          "name": "ReleaseUtils"
+        },
+        {
+          "type": "test",
+          "name": "ReleaseUtils"
+        }
+      ]
+    },
     {
       "name": "Debug",
       "steps": [

@@ -16,7 +16,7 @@
 
 #include "sensorring/board/SensorBoardType.hpp"
 #include "sensorring/device/DeviceType.hpp"
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -26,7 +26,7 @@ namespace sensorring {
  * @struct Version
  * @brief Semantic version (major, minor, patch) for firmware or board.
  */
-struct SENSORRING_EXPORT Version {
+struct SENSORRING_BASE_EXPORT Version {
   /// Major version number.
   unsigned int major = 0;
   /// Minor version number.
@@ -46,7 +46,7 @@ struct SENSORRING_EXPORT Version {
    * @param[in] v Version to print.
    * @return Reference to os.
    */
-  friend std::ostream& operator<<(std::ostream& os, const Version& v) noexcept;
+  friend SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const Version& v) noexcept;
 
   /**
    * @brief Compare two versions for equality.
@@ -67,7 +67,7 @@ struct SENSORRING_EXPORT Version {
  * @struct CommitHash
  * @brief 32-bit commit hash (e.g. from firmware) with byte-wise construction and string output.
  */
-struct SENSORRING_EXPORT CommitHash {
+struct SENSORRING_BASE_EXPORT CommitHash {
   /// 32-bit hash value.
   std::uint32_t hash = 0;
 
@@ -83,7 +83,7 @@ struct SENSORRING_EXPORT CommitHash {
    * @param[in] ch CommitHash to print.
    * @return Reference to os.
    */
-  friend std::ostream& operator<<(std::ostream& os, const CommitHash& ch) noexcept;
+  friend SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const CommitHash& ch) noexcept;
 
   /**
    * @brief Compare two commit hashes for equality.
@@ -133,30 +133,30 @@ enum class ConfigurationState {
  * @param[in] state Connection state.
  * @return String representation of state.
  */
-SENSORRING_EXPORT std::string toString(ConnectionState state);
+SENSORRING_BASE_EXPORT std::string toString(ConnectionState state);
 
 /**
  * @brief Convert configuration state to a human-readable string.
  * @param[in] state Configuration state.
  * @return String representation of state.
  */
-SENSORRING_EXPORT std::string toString(ConfigurationState state);
+SENSORRING_BASE_EXPORT std::string toString(ConfigurationState state);
 
 /**
  * @brief Stream connection state as string.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept;
+SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const ConnectionState state) noexcept;
 
 /**
  * @brief Stream configuration state as string.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const ConfigurationState state) noexcept;
+SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const ConfigurationState state) noexcept;
 
 /**
  * @struct EnumerationInformation
  * @brief Information reported by a board during enumeration: index, version, commit hash, board type, and state.
  */
-struct SENSORRING_EXPORT EnumerationInformation {
+struct SENSORRING_BASE_EXPORT EnumerationInformation {
   /// Board index.
   unsigned int idx = 0;
 

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include <thread>
 #include <unistd.h>
 
 #include "sensorring/interface/ComEndpoint.hpp"
@@ -30,7 +31,8 @@ namespace com {
 namespace {
 // Bound how long one send operation may wait under TX queue pressure.
 constexpr int TX_BACKPRESSURE_POLL_TIMEOUT_MS = 50;
-constexpr int TX_BACKPRESSURE_MAX_RETRIES     = 20;
+constexpr auto TX_BACKPRESSURE_TIMEOUT        = std::chrono::milliseconds(1000);
+constexpr auto TX_ENOBUFS_BACKOFF             = std::chrono::microseconds(200);
 } // namespace
 
 SocketCANFD::SocketCANFD(std::string interface_name)
@@ -140,29 +142,30 @@ bool SocketCANFD::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>&
   // queues are full. In that case, wait for POLLOUT and retry a bounded number
   // of times instead of throttling every frame with a fixed delay.
   auto writeWithBackpressure = [this](const void* frame, std::size_t frame_size) -> bool {
-    for (int attempt = 0; attempt < TX_BACKPRESSURE_MAX_RETRIES; ++attempt) {
-      const int retval = write(_soc, frame, frame_size);
-      if (retval == static_cast<int>(frame_size)) {
+    const auto deadline = std::chrono::steady_clock::now() + TX_BACKPRESSURE_TIMEOUT;
+    while (true) {
+      const ssize_t retval = write(_soc, frame, frame_size);
+      if (retval == static_cast<ssize_t>(frame_size)) {
         return true;
       }
+      const int err = errno;
+      if (retval >= 0 || (err != EAGAIN && err != ENOBUFS)) {
+        return false;
+      }
+      if (std::chrono::steady_clock::now() >= deadline) {
+        return false;
+      }
 
-      if (retval < 0 && (errno == EAGAIN || errno == ENOBUFS)) {
+      if (err == ENOBUFS) {
+        // Device qdisc is full; POLLOUT only reflects the socket buffer and would return immediately.
+        std::this_thread::sleep_for(TX_ENOBUFS_BACKOFF);
+      } else {
         pollfd pfd{};
         pfd.fd     = _soc;
         pfd.events = POLLOUT;
-
-        // Wait until the socket becomes writable again.
-        const int poll_result = poll(&pfd, 1, TX_BACKPRESSURE_POLL_TIMEOUT_MS);
-        if (poll_result > 0 && (pfd.revents & POLLOUT) != 0) {
-          continue;
-        }
-        if (poll_result == 0 || (poll_result > 0 && (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) != 0)) {
-          continue;
-        }
+        poll(&pfd, 1, TX_BACKPRESSURE_POLL_TIMEOUT_MS);
       }
-      break;
     }
-    return false;
   };
 
   {

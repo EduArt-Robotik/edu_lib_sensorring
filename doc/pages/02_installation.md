@@ -69,13 +69,33 @@ int main(int, char*[]) {
 }
 ```
 
+## Dependency Resolution
+
+The transport dependency, the bootloader dependency (when
+`SENSORRING_BUILD_FIRMWARE_UPDATE=ON`), libusbtingo (when
+`SENSORRING_USE_USBTINGO=ON`), and Catch2 (when `SENSORRING_BUILD_TESTS=ON`)
+are automatically resolved by CMake in this order:
+
+1. Use the local checkout/submodule in `external/`.
+2. Try an installed CMake config package.
+3. Fetch the dependency from GitHub.
+
+| Dependency | Local checkout | CMake config package | GitHub fallback |
+|:--|:--|:--|:--|
+| Transport | `external/edu_sensorring_transport` | `sensorring_transport` | `master` branch |
+| Bootloader | `external/frankly_bootloader` | `frankly_bootloader` or `frankly-bootloader` | `master` branch |
+| libusbtingo | `external/libusbtingo` | `usbtingo` | `v1.1.4` |
+| Catch2 | `external/Catch2` | `Catch2` (version 3) | `v3.5.2` |
+
 ## 2 Building the Library from Source
 
 ### 2.1 Building the library
 
 The library is built with a standard CMake workflow which is almost identical for Windows and Linux.
 
-> ℹ️ This repository uses a **git submodule** for the transport module. Use `--recursive` when cloning. If you already cloned without it, run `git submodule update --init --recursive`. Alternatively, if you don't intend to modify the transport layer CMake will automatically fetch the module via FetchContent if the submodule is missing.
+> ℹ️ Use `--recursive` when cloning to include the dependencies as submodules.
+> If you already cloned without it, run `git submodule update --init --recursive`.
+> Missing submodules are handled automatically as described in [Dependency Resolution](#dependency-resolution).
 
 Use the following commands to build the library.
 
@@ -97,7 +117,8 @@ Use the following commands to build the library.
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
       <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
       <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_LIB</td><td>ON</td><td>Build the main sensor ring library</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs (requires firmware update module)</td></tr>
       <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
       <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
       <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
@@ -125,7 +146,8 @@ Use the following commands to build the library.
       <tr><th>Build Option</th><th>Default Value</th><th>Description</th></tr>
       <tr><td>SENSORRING_BUILD_DOCUMENTATION</td><td>OFF</td><td>Build the documentation</td></tr>
       <tr><td>SENSORRING_BUILD_EXAMPLES</td><td>OFF</td><td>Build the example programs</td></tr>
-      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs</td></tr>
+      <tr><td>SENSORRING_BUILD_LIB</td><td>ON</td><td>Build the main sensor ring library</td></tr>
+      <tr><td>SENSORRING_BUILD_UTILS</td><td>OFF</td><td>Build utility command line programs (requires firmware update module)</td></tr>
       <tr><td>SENSORRING_BUILD_FIRMWARE_UPDATE</td><td>OFF</td><td>Build the firmware update module</td></tr>
       <tr><td>SENSORRING_BUILD_PYTHON_BINDINGS</td><td>OFF</td><td>Build Python bindings</td></tr>
       <tr><td>SENSORRING_BUILD_SHARED_LIBS</td><td>OFF</td><td>Build as a shared library; OFF builds a static library</td></tr>
@@ -137,6 +159,40 @@ Use the following commands to build the library.
 </div>
 </div>
 
+
+### Building only the utilities
+
+The discovery tool and firmware updater can be built without the main sensor
+library or sensor drivers:
+
+```sh
+cmake -S . -B build/utils -DCMAKE_BUILD_TYPE=Release \
+  -DSENSORRING_BUILD_LIB=OFF \
+  -DSENSORRING_BUILD_UTILS=ON \
+  -DSENSORRING_BUILD_FIRMWARE_UPDATE=ON
+cmake --build build/utils --parallel
+cmake --install build/utils
+```
+
+Alternatively, use `cmake --preset ReleaseUtils`, `cmake --build --preset ReleaseUtils`
+and `ctest --preset ReleaseUtils` to also build and run the base-layer unit tests.
+USBtingo support can be disabled with `-DSENSORRING_USE_USBTINGO=OFF` on Linux.
+
+`SENSORRING_BUILD_LIB` defaults to `ON`. When it is `OFF`, examples, Python
+bindings and hardware tests must also be `OFF`; `SENSORRING_BUILD_TESTS=ON`
+builds only the base-layer tests. The firmware module may also be built
+independently, without the utilities or main library.
+
+The shared communication/discovery target is `sensorring::base`; firmware
+updating uses `sensorring::firmware_update`. The main library target,
+`sensorring::sensorring`, is only available when `SENSORRING_BUILD_LIB=ON`.
+Existing library discovery/reset APIs delegate to the shared base layer.
+Discovery itself never constructs or configures sensor devices.
+
+With `SENSORRING_INSTALL=ON`, installation includes the enabled libraries,
+their public headers, CMake targets and utility executables. With it `OFF`,
+these installation rules are omitted. Shared builds require the base and
+firmware shared libraries at runtime as well as any enabled USBtingo dependency.
 
 ### 2.2 Installing the Library
 

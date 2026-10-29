@@ -26,13 +26,15 @@ class ComInterface;
 
 namespace board {
 
-class BoardEnumerator {
+class SENSORRING_BASE_EXPORT BoardEnumerator {
 public:
   BoardEnumerator(com::ComInterface* interface);
 
   ~BoardEnumerator();
 
   void startEnumeration();
+
+  static void sendEnumerationRequest(com::ComInterface& interface);
 
   std::vector<EnumerationInformation> getResult();
 

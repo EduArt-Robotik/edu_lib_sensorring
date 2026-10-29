@@ -12,7 +12,7 @@
 #include <ostream>
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -34,7 +34,7 @@ enum class InterfaceType {
  * @brief Format interface type as string.
  * @return Interface type string.
  */
-SENSORRING_EXPORT std::string toString(InterfaceType type) noexcept;
+SENSORRING_BASE_EXPORT std::string toString(InterfaceType type) noexcept;
 
 /**
  * @brief Stream interface type as string.
@@ -42,7 +42,7 @@ SENSORRING_EXPORT std::string toString(InterfaceType type) noexcept;
  * @param[in] type Interface type to print.
  * @return Reference to os.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const InterfaceType type) noexcept;
+SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const InterfaceType type) noexcept;
 
 /**
  * @struct ComInterfaceID

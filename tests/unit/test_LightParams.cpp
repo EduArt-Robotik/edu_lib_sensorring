@@ -54,10 +54,10 @@ public:
       lower_m = transport::ByteOperations::readFloat(payload, 0);
       upper_m = transport::ByteOperations::readFloat(payload, 4);
     }
-    if (command == ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS && apply_settings) {
+    if (command == ws2812b::PARAMETER_SET_MAX_BRIGHTNESS && apply_settings) {
       brightness = payload[0];
     }
-    if (reply_enabled && (command == ws2812b::PARAMETER_GET_DISTANCE_MAP_RANGE || command == ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS)) {
+    if (reply_enabled && (command == ws2812b::PARAMETER_GET_DISTANCE_MAP_RANGE || command == ws2812b::PARAMETER_GET_MAX_BRIGHTNESS)) {
       if (on_parameter_request) {
         on_parameter_request(target, command);
       } else {
@@ -86,7 +86,7 @@ TEST_CASE("Light distance map defaults preserve the original range", "[Light][Pa
   device::LightParams params;
   REQUIRE(params.distance_map_lower_m == 0.1);
   REQUIRE(params.distance_map_upper_m == 0.5);
-  REQUIRE(params.distance_map_max_brightness == 50);
+  REQUIRE(params.max_brightness == 50);
   REQUIRE_NOTHROW(params.validateDistanceMapBrightness());
   REQUIRE_NOTHROW(params.validateDistanceMapRange());
 }
@@ -140,9 +140,9 @@ TEST_CASE("Light distance map accepts zero and custom ranges in meters", "[Light
 TEST_CASE("Light configuration sends both thresholds before mode and reapplies after reset", "[Light][Configure]") {
   RecordingInterface interface;
   device::WS2812b_Params params;
-  params.distance_map_lower_m        = 0.25;
-  params.distance_map_upper_m        = 1.5;
-  params.distance_map_max_brightness = 123;
+  params.distance_map_lower_m = 0.25;
+  params.distance_map_upper_m = 1.5;
+  params.max_brightness       = 123;
   TestLight light(params, interface);
   light.setDeviceIndex(17);
   light.setLight(device::LightMode::MapDistance, 1, 2, 3);
@@ -160,10 +160,10 @@ TEST_CASE("Light configuration sends both thresholds before mode and reapplies a
     REQUIRE(interface.messages[1].target == range.target);
     REQUIRE(interface.messages[1].command == ws2812b::PARAMETER_GET_DISTANCE_MAP_RANGE);
     REQUIRE(interface.messages[1].payload.empty());
-    REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS);
+    REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_MAX_BRIGHTNESS);
     REQUIRE(interface.messages[2].payload == std::vector<std::uint8_t>{ 123 });
     REQUIRE(interface.messages[3].target == range.target);
-    REQUIRE(interface.messages[3].command == ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS);
+    REQUIRE(interface.messages[3].command == ws2812b::PARAMETER_GET_MAX_BRIGHTNESS);
     REQUIRE(interface.messages[3].payload.empty());
     REQUIRE(interface.messages[4].command == ws2812b::SET_LED_MODE);
     REQUIRE(interface.messages[4].payload == std::vector<std::uint8_t>{ static_cast<std::uint8_t>(device::LightMode::MapDistance), 1, 2, 3 });
@@ -195,12 +195,12 @@ TEST_CASE("Light distance map brightness accepts exact endpoints without truncat
   const auto brightness = GENERATE(0, 50, 255);
   RecordingInterface interface;
   device::WS2812b_Params params;
-  params.distance_map_max_brightness = brightness;
+  params.max_brightness = brightness;
   REQUIRE_NOTHROW(params.validateDistanceMapBrightness());
   TestLight light(params, interface);
   REQUIRE(light.configure());
   REQUIRE(interface.messages.size() == 5);
-  REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS);
+  REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_MAX_BRIGHTNESS);
   REQUIRE(interface.messages[2].payload == std::vector<std::uint8_t>{ static_cast<std::uint8_t>(brightness) });
 }
 
@@ -208,7 +208,7 @@ TEST_CASE("Light distance map brightness rejects out-of-range values", "[Light][
   const auto brightness = GENERATE(-1LL, 256LL, std::numeric_limits<long long>::max());
   RecordingInterface interface;
   device::WS2812b_Params params;
-  params.distance_map_max_brightness = brightness;
+  params.max_brightness = brightness;
   REQUIRE_THROWS_AS(params.validateDistanceMapBrightness(), std::invalid_argument);
   REQUIRE_THROWS_AS(TestLight(params, interface), std::invalid_argument);
   REQUIRE(interface.messages.empty());
@@ -216,11 +216,11 @@ TEST_CASE("Light distance map brightness rejects out-of-range values", "[Light][
 
 TEST_CASE("Light configuration reports failed brightness transmission before mode restoration", "[Light][Configure]") {
   RecordingInterface interface;
-  interface.failed_command = ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS;
+  interface.failed_command = ws2812b::PARAMETER_SET_MAX_BRIGHTNESS;
   TestLight light(device::WS2812b_Params{}, interface);
   REQUIRE_FALSE(light.configure());
   REQUIRE(interface.messages.size() == 3);
-  REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS);
+  REQUIRE(interface.messages[2].command == ws2812b::PARAMETER_SET_MAX_BRIGHTNESS);
 }
 
 TEST_CASE("Light getters read live board parameters in SI units", "[Light][Getters]") {
@@ -239,7 +239,7 @@ TEST_CASE("Light getters read live board parameters in SI units", "[Light][Gette
   REQUIRE(brightness == 200);
   REQUIRE(interface.messages.size() == 2);
   REQUIRE(interface.messages[0].command == (ws2812b::PARAMETER_SET_DISTANCE_MAP_RANGE | transport::protocol::PARAMETER_GETTER_BYTE));
-  REQUIRE(interface.messages[1].command == (ws2812b::PARAMETER_SET_DISTANCE_MAP_MAX_BRIGHTNESS | transport::protocol::PARAMETER_GETTER_BYTE));
+  REQUIRE(interface.messages[1].command == (ws2812b::PARAMETER_SET_MAX_BRIGHTNESS | transport::protocol::PARAMETER_GETTER_BYTE));
 }
 
 TEST_CASE("Light setters accept float32 rounding but reject incorrect readback", "[Light][Configure]") {
@@ -281,10 +281,10 @@ TEST_CASE("Light brightness verification requires an exact match", "[Light][Conf
   interface.apply_settings = false;
   TestLight light(device::WS2812b_Params{}, interface);
   REQUIRE_FALSE(light.setDistanceMapMaxBrightness(51));
-  REQUIRE(light.getParams().distance_map_max_brightness == 50);
+  REQUIRE(light.getParams().max_brightness == 50);
   interface.apply_settings = true;
   REQUIRE(light.setDistanceMapMaxBrightness(51));
-  REQUIRE(light.getParams().distance_map_max_brightness == 51);
+  REQUIRE(light.getParams().max_brightness == 51);
 }
 
 TEST_CASE("Light configuration fails when firmware ignores parameter setters", "[Light][Configure]") {
@@ -295,7 +295,7 @@ TEST_CASE("Light configuration fails when firmware ignores parameter setters", "
     params.distance_map_lower_m = 0.25;
   }
   SECTION("brightness mismatch") {
-    params.distance_map_max_brightness = 123;
+    params.max_brightness = 123;
   }
   TestLight light(params, interface);
   REQUIRE_FALSE(light.configure());
@@ -311,7 +311,7 @@ TEST_CASE("Light getters preserve output values on timeout and failed transmissi
     interface.failed_command = ws2812b::PARAMETER_GET_DISTANCE_MAP_RANGE;
   }
   SECTION("failed brightness getter send") {
-    interface.failed_command = ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS;
+    interface.failed_command = ws2812b::PARAMETER_GET_MAX_BRIGHTNESS;
   }
   TestLight light(device::WS2812b_Params{}, interface);
   double lower_m          = 7.0;
@@ -322,7 +322,7 @@ TEST_CASE("Light getters preserve output values on timeout and failed transmissi
     REQUIRE(lower_m == 7.0);
     REQUIRE(upper_m == 8.0);
   }
-  if (!interface.reply_enabled || interface.failed_command == ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS) {
+  if (!interface.reply_enabled || interface.failed_command == ws2812b::PARAMETER_GET_MAX_BRIGHTNESS) {
     REQUIRE_FALSE(light.getDistanceMapMaxBrightness(brightness));
     REQUIRE(brightness == 999);
   }
@@ -337,7 +337,7 @@ TEST_CASE("Light configuration fails when getter verification cannot complete", 
     interface.failed_command = ws2812b::PARAMETER_GET_DISTANCE_MAP_RANGE;
   }
   SECTION("failed brightness getter send") {
-    interface.failed_command = ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS;
+    interface.failed_command = ws2812b::PARAMETER_GET_MAX_BRIGHTNESS;
   }
   TestLight light(device::WS2812b_Params{}, interface);
   REQUIRE_FALSE(light.configure());
@@ -394,7 +394,7 @@ TEST_CASE("Light getters reject malformed brightness replies", "[Light][Getters]
 TEST_CASE("Light getters wait for the matching command and board response", "[Light][Getters]") {
   RecordingInterface interface;
   interface.on_parameter_request = [&](com::ComEndpoint target, std::uint8_t command) {
-    interface.reply(target, ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS, { 200 });
+    interface.reply(target, ws2812b::PARAMETER_GET_MAX_BRIGHTNESS, { 200 });
     auto other_board         = target;
     other_board.boardAddress = 4;
     interface.lower_m        = 0.2F;
@@ -431,7 +431,7 @@ TEST_CASE("Light getters time out when only unrelated replies arrive", "[Light][
   }
   interface.on_parameter_request = [&](com::ComEndpoint target, std::uint8_t command) {
     if (wrong_command) {
-      command = ws2812b::PARAMETER_GET_DISTANCE_MAP_MAX_BRIGHTNESS;
+      command = ws2812b::PARAMETER_GET_MAX_BRIGHTNESS;
     }
     if (wrong_board) {
       target.boardAddress = 4;

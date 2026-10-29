@@ -3,6 +3,7 @@
 #include <sensorring_transport/Protocol.hpp>
 
 #include "interface/ComManager.hpp"
+#include "sensorring/board/BoardDiscovery.hpp"
 #include "sensorring/interface/ComEndpoint.hpp"
 #include "sensorring/logger/Logger.hpp"
 
@@ -116,18 +117,11 @@ bool SensorBoard::getOrientation(Orientation& orientation) {
 }
 
 bool SensorBoard::resetBoards() {
-  bool success = true;
-  for (auto& iface : com::ComManager::getInstance()->getInterfaces()) {
-    success &= iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::RESET, {});
-  }
-  return success;
+  return BoardDiscovery::resetBoards();
 }
 
 void SensorBoard::cmdEnumerateBoards(com::ComInterfaceID interface) {
-  auto* iface = com::ComManager::getInstance()->getInterface(interface);
-  if (iface) {
-    iface->send(com::ComEndpoint{ com::Direction::Broadcast, com::ComEndpoint::BROADCAST, devbyte::BOARD }, sensor_board::ACTIVE_DEVICE_REQUEST, {});
-  }
+  BoardDiscovery::cmdEnumerateBoards(interface);
 }
 
 void SensorBoard::comCallback([[maybe_unused]] const com::ComEndpoint source, std::uint8_t command, const std::vector<uint8_t>& data) {

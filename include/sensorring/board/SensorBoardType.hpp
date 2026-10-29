@@ -11,7 +11,7 @@
 #include <ostream>
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -37,7 +37,7 @@ enum class SensorBoardType {
  * @brief Format sensor board type as string.
  * @return Sensor board type string.
  */
-SENSORRING_EXPORT std::string toString(SensorBoardType type) noexcept;
+SENSORRING_BASE_EXPORT std::string toString(SensorBoardType type) noexcept;
 
 /**
  * @brief Stream sensor board type as string.
@@ -45,7 +45,7 @@ SENSORRING_EXPORT std::string toString(SensorBoardType type) noexcept;
  * @param[in] type Sensor board type to print.
  * @return Reference to os.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const SensorBoardType type) noexcept;
+SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const SensorBoardType type) noexcept;
 
 } // namespace board
 

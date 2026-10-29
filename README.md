@@ -97,6 +97,8 @@ add_library(sensorring::sensorring ALIAS sensorring)
 
 ### Quick Start - Build and install the library from source
 
+> ℹ️ Dependencies are automatically resolved by CMake. See [Dependency Resolution](doc/pages/02_installation.md#dependency-resolution) in the installation guide for details.
+
 <div class="tabbed">
 
 - <b class="tab-title">**Quick Start Linux**</b><div class="darkmode_inverted_image">

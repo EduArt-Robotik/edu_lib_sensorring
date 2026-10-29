@@ -155,7 +155,7 @@ TEST_CASE("Light category defaults propagate to discovered and expected LEDs", "
   dt::LightParams defaults;
   defaults.distance_map_lower_m = 0.25;
   defaults.distance_map_upper_m = 1.5;
-  defaults.distance_map_max_brightness = 123;
+  defaults.max_brightness       = 123;
   factory.setDefaultDeviceParams(defaults);
 
   auto map = Access::buildDefaultParamsMap(factory, { dt::DeviceType::WS2812b });
@@ -165,13 +165,14 @@ TEST_CASE("Light category defaults propagate to discovered and expected LEDs", "
   SECTION("explicit concrete device") {
     map = Access::resolveDeviceExpectations(factory, { Access::makeExactExpectation(dt::DeviceType::WS2812b) }, { dt::DeviceType::WS2812b }).params_map;
   }
-  SECTION("auto-discovered light") {}
+  SECTION("auto-discovered light") {
+  }
   const auto params = std::dynamic_pointer_cast<dt::LightParams>(map.at(dt::DeviceType::WS2812b));
   REQUIRE(params != nullptr);
   const dt::WS2812b_Params concrete(*params);
   REQUIRE(concrete.distance_map_lower_m == 0.25);
   REQUIRE(concrete.distance_map_upper_m == 1.5);
-  REQUIRE(concrete.distance_map_max_brightness == 123);
+  REQUIRE(concrete.max_brightness == 123);
 }
 
 TEST_CASE("buildDefaultParamsMap - multiple device types in one call", "[SensorRingFactory][buildDefaultParamsMap]") {

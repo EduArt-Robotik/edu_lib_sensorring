@@ -35,12 +35,12 @@ struct SENSORRING_EXPORT LightParams : public DeviceParams {
   double distance_map_upper_m = 0.5;
 
   /// DistanceMap peak channel brightness on the LED's 0-255 scale (0 disables it).
-  std::int64_t distance_map_max_brightness = 50;
+  std::int64_t max_brightness = 50;
 
   /// Validates the distance map parameters.
   void validateDistanceMapBrightness() const {
-    if (distance_map_max_brightness < 0 || distance_map_max_brightness > 255) {
-      throw std::invalid_argument("LED distance_map_max_brightness must be an integer in [0, 255].");
+    if (max_brightness < 0 || max_brightness > 255) {
+      throw std::invalid_argument("LED max_brightness must be an integer in [0, 255].");
     }
   }
 

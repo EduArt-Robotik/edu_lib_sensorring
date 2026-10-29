@@ -15,7 +15,7 @@ namespace sensorring {
 
 namespace com {
 
-class ComManager {
+class SENSORRING_BASE_EXPORT ComManager {
 public:
   ComManager(const ComManager&)            = delete;
   ComManager& operator=(const ComManager&) = delete;

@@ -12,7 +12,7 @@
 #include <ostream>
 #include <string>
 
-#include "sensorring/platform/SensorringExport.hpp"
+#include "sensorring/platform/SensorringBaseExport.hpp"
 
 namespace eduart {
 
@@ -49,18 +49,18 @@ enum class DeviceType {
  * @brief Format device type as string.
  * @return Device type string.
  */
-SENSORRING_EXPORT std::string toString(DeviceType type) noexcept;
+SENSORRING_BASE_EXPORT std::string toString(DeviceType type) noexcept;
 
 /**
  * @brief Returns true if type is a category wildcard (AnyDepth, AnyThermal, AnyLight).
  */
-SENSORRING_EXPORT bool isCategory(DeviceType type) noexcept;
+SENSORRING_BASE_EXPORT bool isCategory(DeviceType type) noexcept;
 
 /**
  * @brief Returns true if actual matches expected exactly, or if expected is a category
  *        wildcard and actual belongs to that category.
  */
-SENSORRING_EXPORT bool deviceMatchesExpected(DeviceType actual, DeviceType expected) noexcept;
+SENSORRING_BASE_EXPORT bool deviceMatchesExpected(DeviceType actual, DeviceType expected) noexcept;
 
 /**
  * @brief Stream device type as string.
@@ -68,7 +68,7 @@ SENSORRING_EXPORT bool deviceMatchesExpected(DeviceType actual, DeviceType expec
  * @param[in] type Device type to print.
  * @return Reference to os.
  */
-SENSORRING_EXPORT std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept;
+SENSORRING_BASE_EXPORT std::ostream& operator<<(std::ostream& os, const DeviceType type) noexcept;
 
 } // namespace device
 

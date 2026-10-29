@@ -1,6 +1,24 @@
 include(CTest)
 include(Catch)
 
+add_executable(sensorring_base_tests
+  unit/test_BoardDiscovery.cpp
+  unit/test_ComEndpoint.cpp
+  unit/test_SubscriberToken.cpp
+  unit/test_Subscription.cpp
+  unit/test_Publisher.cpp
+)
+target_include_directories(sensorring_base_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(sensorring_base_tests PRIVATE
+  sensorring::base
+  Catch2::Catch2WithMain
+)
+catch_discover_tests(sensorring_base_tests PROPERTIES LABELS "unit")
+
+if(NOT SENSORRING_BUILD_LIB)
+  return()
+endif()
+
 add_executable(sensorring_unit_tests
     unit/test_Vector3.cpp
     unit/test_Matrix3.cpp
@@ -10,11 +28,7 @@ add_executable(sensorring_unit_tests
     unit/test_DepthMeasurement.cpp
     unit/test_TMF8829_Measurement.cpp
     unit/test_ThermalMeasurement.cpp
-    unit/test_ComEndpoint.cpp
     unit/test_DeviceID.cpp
-    unit/test_SubscriberToken.cpp
-    unit/test_Subscription.cpp
-    unit/test_Publisher.cpp
     unit/test_HTPA32_Eeprom.cpp
     unit/test_HTPA32_Device.cpp
     unit/test_TMF8829_Params.cpp

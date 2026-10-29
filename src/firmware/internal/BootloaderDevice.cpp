@@ -71,7 +71,7 @@ void BootloaderDevice::flashHex(const std::string& hex_path, const LogCallback& 
       for (; word_idx < batch_end; ++word_idx) {
         const std::size_t byte_idx = word_idx * 4U;
         const std::uint32_t word   = static_cast<std::uint32_t>(page_bytes[byte_idx]) | (static_cast<std::uint32_t>(page_bytes[byte_idx + 1U]) << 8U) | (static_cast<std::uint32_t>(page_bytes[byte_idx + 2U]) << 16U)
-                                   | (static_cast<std::uint32_t>(page_bytes[byte_idx + 3U]) << 24U);
+                                     | (static_cast<std::uint32_t>(page_bytes[byte_idx + 3U]) << 24U);
         Msg req(RequestType::REQ_PAGE_BUFFER_WRITE_WORD, ResultType::RES_NONE, static_cast<std::uint8_t>(word_idx % 256U));
         franklyboot::msg::convertU32ToMsgData(word, req.data);
         write_batch.push_back(req);
