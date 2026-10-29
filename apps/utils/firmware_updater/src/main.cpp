@@ -19,7 +19,7 @@ enum class Mode {
 };
 
 void printUsage(const char* executable) {
-  std::cerr << "Usage: " << executable << " -m <enter|flash|enter-flash|auto-all> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
+  std::cerr << "Usage: " << executable << " -m <enter|flash|enter-flash|auto> -t <socketcan|usbtingo> -i <interface-name> [-n <board-index>] [-f <firmware.hex>]\n"
             << "Modes:\n"
             << "  enter        : switch one board to bootloader mode (requires -n)\n"
             << "  flash        : detect one board already in bootloader mode and flash it (requires -f)\n"

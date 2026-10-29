@@ -51,7 +51,7 @@ The `-m` argument selects one of four modes. Each mode operates on a single, exp
 | `enter` | Send one specific board into bootloader mode | `-n` |
 | `flash` | Flash a board that is already in bootloader mode | `-f` |
 | `enter-flash` | Send one specific board into bootloader mode and flash it in one step | `-n` and `-f` |
-| `auto-all` | Walk the full ring on one interface and flash every board sequentially | `-f` |
+| `auto` | Walk the full ring on one interface and flash every board sequentially | `-f` |
 
 ### 2.3 Usage Examples
 
@@ -76,7 +76,7 @@ firmware_updater -m enter-flash -t socketcan -i can0 -n 1 -f ./firmware.hex
 **Update every board on the interface automatically:**
 
 ```sh
-firmware_updater -m auto-all -t socketcan -i can0 -f ./firmware.hex
+firmware_updater -m auto -t socketcan -i can0 -f ./firmware.hex
 ```
 
 ## 3. Recommended Workflow
@@ -84,7 +84,7 @@ firmware_updater -m auto-all -t socketcan -i can0 -f ./firmware.hex
 The typical update flow on a healthy ring looks like this:
 
 1. Bring up the communication interface as described in [Hardware - Supported Communication Interfaces](01_hardware.md#autotoc_md_3-supported-communication-interfaces).
-2. Run `firmware_updater -m auto-all ...` to update the whole ring in one go.
+2. Run `firmware_updater -m auto ...` to update the whole ring in one go.
 3. Use the single-board modes (`enter`, `flash`, `enter-flash`) when targeting an individual board or when recovering from a failed run.
 4. After the tool reports success, power-cycle the ring and verify that every board comes back up in application mode.
 
