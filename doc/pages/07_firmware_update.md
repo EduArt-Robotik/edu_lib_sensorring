@@ -37,10 +37,10 @@ firmware_updater -m <mode> -t <socketcan|usbtingo> -i <interface-name> [-n <boar
 | `-m` | Update mode, see [Section 2.2](#sec_update_modes) |
 | `-t` | Communication interface type (`socketcan` or `usbtingo`) |
 | `-i` | Interface name (e.g. `can0` for SocketCAN or `0` for USBtingo) |
-| `-n` | Zero-based index of the target board on the ring |
+| `-n` | Zero-based index of the target board on the ring, used by `enter` and `enter-flash` only |
 | `-f` | Path to the firmware image in Intel HEX format |
 
-> ℹ️ Flashing requires a SocketCAN interface. The `usbtingo` transport can be used to send a board into bootloader mode but the actual flashing step is currently SocketCAN only.
+All modes support both SocketCAN and USBtingo. `auto` updates the entire interface and does not use `-n`.
 
 ### 2.2 Update Modes{#sec_update_modes}
 
@@ -66,6 +66,8 @@ firmware_updater -m enter -t socketcan -i can0 -n 0
 ```sh
 firmware_updater -m flash -t socketcan -i can0 -f ./firmware.hex
 ```
+
+For USBtingo, use `-t usbtingo -i 0` instead; `0` selects the first available adapter.
 
 **Send board 1 into bootloader mode and flash it right away:**
 
