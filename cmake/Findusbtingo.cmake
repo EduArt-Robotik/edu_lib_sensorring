@@ -40,7 +40,7 @@ if(NOT TARGET usbtingo::usbtingo AND NOT TARGET usbtingo)
   include(FetchContentCompat)
   fetchcontent_declare_compat(
     usbtingo
-    URL https://github.com/hannesduske/libusbtingo/archive/v1.1.4.zip
+    URL https://github.com/hannesduske/libusbtingo/archive/v1.2.1.zip
   )
   FetchContent_MakeAvailable(usbtingo)
 endif()
