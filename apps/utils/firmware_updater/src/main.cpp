@@ -25,6 +25,12 @@ void printUsage(const char* executable) {
             << "  flash        : detect one board already in bootloader mode and flash it (requires -f)\n"
             << "  enter-flash  : switch one board to bootloader mode and flash it directly (requires -n and -f)\n"
             << "  auto         : automatically update all boards on one interface (requires -f)\n"
+            << "Arguments:\n"
+            << "  -m : update mode (see above)\n"
+            << "  -t : interface type (socketcan or usbtingo)\n"
+            << "  -i : interface name (e.g. can0 or USBtingo serial number; 0 selects any USBtingo)\n"
+            << "  -n : zero-based board index for enter and enter-flash; auto updates all boards\n"
+            << "  -f : firmware image in Intel HEX format\n"
             << "Examples:\n"
             << "  " << executable << " -m enter -t socketcan -i can0 -n 0\n"
             << "  " << executable << " -m flash -t socketcan -i can0 -f ./firmware.hex\n"
@@ -156,11 +162,6 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
       }
 
-      if (interface.type != com::InterfaceType::SocketCan) {
-        std::cerr << "Mode 'flash' currently supports only socketcan interfaces.\n";
-        return EXIT_FAILURE;
-      }
-
       const auto node_id = updater.detectBootloaderNodeWithRetries(interface);
       if (!node_id.has_value()) {
         std::cerr << "No board detected in bootloader mode on " << interface.type << " " << interface.name << ".\n";
@@ -175,11 +176,6 @@ int main(int argc, char* argv[]) {
       if (!board_index.has_value() || firmware_path.empty()) {
         std::cerr << "Mode 'enter-flash' requires both -n <board-index> and -f <firmware.hex>.\n";
         printUsage(argv[0]);
-        return EXIT_FAILURE;
-      }
-
-      if (interface.type != com::InterfaceType::SocketCan) {
-        std::cerr << "Mode 'enter-flash' currently supports only socketcan interfaces.\n";
         return EXIT_FAILURE;
       }
 

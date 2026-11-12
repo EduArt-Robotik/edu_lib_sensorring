@@ -7,11 +7,12 @@
 #include <sensorring_transport/Protocol.hpp>
 #include <sensorring_transport/can/CanCodec.hpp>
 #include <string>
-#include <usbtingo/basic_bus/Message.hpp>
 #include <usbtingo/can/Dlc.hpp>
 #include <usbtingo/device/DeviceFactory.hpp>
 
 #include "sensorring/logger/Logger.hpp"
+
+#include "USBtingoFrame.hpp"
 
 using namespace eduart::sensorring::transport::protocol;
 
@@ -113,9 +114,7 @@ bool USBtingo::send(ComEndpoint target, std::uint8_t command, const std::vector<
 
 bool USBtingo::sendCanFrame(std::uint32_t can_id, const std::vector<uint8_t>& data, bool fd) {
   (void)fd;
-  usbtingo::bus::Message msg(can_id, data);
-  auto tx_frame = msg.to_CanTxFrame(true);
-  tx_frame.brs  = _params.send_with_brs() ? 1 : 0;
+  auto tx_frame = makeUsbTingoCanTxFrame(can_id, data, _params.send_with_brs());
   if (!_dev->send_can(tx_frame)) {
     _communication_error = true;
     throw std::runtime_error("Unable to send message on interface " + _id.name);

@@ -4,3 +4,6 @@
 [submodule "external/frankly_bootloader"]
 	path = external/frankly_bootloader
 	url = https://github.com/EduArt-Robotik/frankly_bootloader.git
+[submodule "external/libusbtingo"]
+	path = external/libusbtingo
+	url = https://github.com/hannesduske/libusbtingo.git
