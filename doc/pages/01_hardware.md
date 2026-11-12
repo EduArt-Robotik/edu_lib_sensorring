@@ -3,77 +3,78 @@
 ## 1 EduArt Sensor Boards
 
 The table below shows the current versions of the EduArt sensor boards that can be used with the EduArt Sensor Ring library.
+The TMF8829 is currently available only on the Edu Minipanel, as an alternative to the VL53L8CX.
 
 <div align="center">
 <table>
 	<tr>
-		<th style="text-align:center"><p>Sensor Board Type</p></th>
-		<th style="text-align:center"><p>Description</p></th>
+		<th scope="col">Feature</th>
+		<th scope="col">Edu Headlight</th>
+		<th scope="col">Edu Taillight</th>
+		<th scope="col">Edu Sidepanel</th>
+		<th scope="col">Edu Minipanel (VL53L8CX)</th>
+		<th scope="col">Edu Minipanel (TMF8829)</th>
 	</tr>
 	<tr>
-		<td style="text-align:center">
-			<p><b>Edu Headlight</b></p>
-			<p><img src="../images/EDU_Headlight.webp" width="200" onerror="this.onerror=null; this.src='EDU_Headlight.webp';"></p>
-		</td>
-		<td style="text-align:left">
-			- Headlight of the Raspberry Pi based EduBot <br>
-			- ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-			- Optional Heimann HTPA32x32d thermal sensor <br>
-			- 11 Addressable RGB Leds <br>
-			- CAN FD Interface <br>
-			- Input voltage range 6 V - 65 V DC
-		</td>
+		<th scope="row">Board</th>
+		<td style="text-align:center"><img src="../images/EDU_Headlight.webp" alt="Edu Headlight" width="140" onerror="this.onerror=null; this.src='EDU_Headlight.webp';"></td>
+		<td style="text-align:center"><img src="../images/EDU_Taillight.webp" alt="Edu Taillight" width="140" onerror="this.onerror=null; this.src='EDU_Taillight.webp';"></td>
+		<td style="text-align:center"><img src="../images/EDU_Sidepanel.webp" alt="Edu Sidepanel" width="140" onerror="this.onerror=null; this.src='EDU_Sidepanel.webp';"></td>
+		<td style="text-align:center"><img src="../images/EDU_Minipanel.webp" alt="Edu Minipanel" width="140" onerror="this.onerror=null; this.src='EDU_Minipanel.webp';"></td>
+		<td style="text-align:center"><img src="../images/EDU_Minipanel.webp" alt="Edu Minipanel (representative image for the TMF8829 variant)" width="140" onerror="this.onerror=null; this.src='EDU_Minipanel.webp';"></td>
 	</tr>
 	<tr>
-		<td style="text-align:center">
-			<p><b>Edu Taillight</b></p>
-			<p><img src="../images/EDU_Taillight.webp" width="200" onerror="this.onerror=null; this.src='EDU_Taillight.webp';"></p>
-		</td>
-		<td style="text-align:left">
-			- Taillight of the Raspberry Pi based EduBot <br>
-			- ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-			- 2 Addressable RGB Leds <br>
-			- CAN FD Interface<br>
-			- Input voltage range 6 V - 65 V DC
-		</td>
+		<th scope="row">Application</th>
+		<td>EduBot headlight</td>
+		<td>EduBot taillight</td>
+		<td colspan="3">General purpose sensor board</td>
 	</tr>
 	<tr>
-		<td style="text-align:center">
-			<p><b>Edu Sidepanel</b></p>
-			<p><img src="../images/EDU_Sidepanel.webp" width="200" onerror="this.onerror=null; this.src='EDU_Sidepanel.webp';"></p>
-		</td>
-		<td style="text-align:left">
-			- General purpose sensor board <br>
-			- ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-			- 2 Addressable RGB Leds <br>
-			- 38 × 28 mm <br>
-			- CAN FD Interface<br>
-			- Input voltage range 6 V - 65 V DC
-		</td>
+		<th scope="row">Time-of-Flight sensor</th>
+		<td colspan="4">ST VL53L8CX (8 × 8)</td>
+		<td>ams OSRAM TMF8829 (8 × 8 up to 48 × 32)</td>
 	</tr>
 	<tr>
-		<td style="text-align:center">
-			<p><b>Edu Minipanel</b></p>
-			<p><img src="../images/EDU_Minipanel.webp" width="200" onerror="this.onerror=null; this.src='EDU_Minipanel.webp';"></p>
-		</td>
-		<td style="text-align:left">
-			- General purpose sensor board <br>
-			- ST VL53L8CX 8 × 8 Time-of-Flight sensor <br>
-			- 28 × 24 mm  <br>
-			- CAN FD Interface<br>
-			- Input voltage range 6 V - 65 V DC
-		</td>
+		<th scope="row">Thermal sensor</th>
+		<td>Optional Heimann HTPA32x32d</td>
+		<td colspan="4">None</td>
+	</tr>
+	<tr>
+		<th scope="row">Addressable RGB LEDs</th>
+		<td>11</td>
+		<td>2</td>
+		<td>2</td>
+		<td>None</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<th scope="row">Board dimensions</th>
+		<td>61 × 55 mm</td>
+		<td>48 × 48 mm</td>
+		<td>38 × 28 mm</td>
+		<td colspan="2">28 × 24 mm</td>
+	</tr>
+	<tr>
+		<th scope="row">Interface</th>
+		<td colspan="5">CAN FD</td>
+	</tr>
+	<tr>
+		<th scope="row">Input voltage</th>
+		<td colspan="5">6 V - 65 V DC</td>
 	</tr>
 </table>
 </div>
+
+Both Minipanel variants use the same representative board image because their appearance is almost identical.
 
 
 ## 2 Main Components of the Sensor Boards
 
 ### 2.1 ST VL53L8CX Time of Flight sensor
 
-All of the Edu Sensor Boards come with a ST VL53L8CX is a 3D multi zone Time of Flight sensor that returns a grid of 8 × 8 individual 3D distance values per measurement.
-The measurements from all Time-of-Flight sensors in the EduArt Sensor Ring are combined in a single large point cloud whose resolution solely depends on the number of connected Time-of-Flight sensors.
+The ST VL53L8CX is a 3D multi-zone Time-of-Flight sensor available on all Edu Sensor Board types. It returns a grid of 8 × 8 individual distance values per measurement.
+The Edu Minipanel is also available with the TMF8829 instead of the VL53L8CX.
+The measurements from all Time-of-Flight sensors in the EduArt Sensor Ring are combined in a single large point cloud whose resolution depends on the number of connected sensors and their configured measurement resolutions.
 <a href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l8cx.html">[Product Website]</a>
 
 The key features of the sensor according to the manufacturers [datasheet](https://www.st.com/resource/en/datasheet/vl53l8cx.pdf) are:
@@ -88,7 +89,7 @@ The key features of the sensor according to the manufacturers [datasheet](https:
 	<tr>
 		<td style="text-align:center">
 			<img src="../images/vl53l8cx.webp" height=300 onerror="this.onerror=null; this.src='vl53l8cx.webp';"><br>
-			The ST VL53L8CXTime-of-Flight sensor
+			The ST VL53L8CX Time-of-Flight sensor
 		</td>
 		<td style="text-align:center">
 			<img src="../images/example_ros3.webp" height=300 onerror="this.onerror=null; this.src='example_ros3.webp';"><br>
@@ -98,7 +99,28 @@ The key features of the sensor according to the manufacturers [datasheet](https:
 </table>
 </div>
 
-### 2.2 Heimann HTPA32x32d Thermophile Array
+### 2.2 ams OSRAM TMF8829 Time of Flight sensor
+
+The ams OSRAM TMF8829 is a 3D multi-zone direct Time-of-Flight sensor offered as an alternative to the VL53L8CX on the Edu Minipanel.
+It returns a grid of distance values with configurable resolution from 8 × 8 up to 48 × 32 pixels.
+Like the VL53L8CX, its measurements are included in the Sensor Ring point cloud.
+<a href="https://ams-osram.com/products/sensor-solutions/direct-time-of-flight-sensors-dtof/ams-tmf8829-48x32-multi-zone-time-of-flight-sensor">[Product Website]</a>
+
+The key features of the sensor according to the manufacturer are:
+
+- Ranging up to 1100 cm, depending on the measurement mode and conditions
+- Configurable 8 × 8, 16 × 16, 32 × 32, and 48 × 32 measurement resolutions
+- Field-of-View with 80° diagonal opening angle (approximately 68° horizontal and 53° vertical)
+- Multiple target detection within each measurement zone
+
+The library defaults to 8 × 8 resolution. See [TMF8829 device parameters](04_parameters.md#tmf8829) for resolution modes, measurement settings, and result frame size limits.
+
+<div style="text-align:center">
+<img src="../images/tmf8829.avif" alt="ams OSRAM TMF8829 Time-of-Flight sensor" height=300 onerror="this.onerror=null; this.src='tmf8829.avif';"><br>
+The ams OSRAM TMF8829 Time-of-Flight sensor
+</div>
+
+### 2.3 Heimann HTPA32x32d Thermophile Array
 
 The Edu Headlight sensors boards can be delivered with an optional Heimann HTPA32x32d is an all-in-one integrated thermal imaging sensor.
 It returns a thermal image with temperature values for each pixel.
@@ -128,7 +150,7 @@ The key features of the sensor according to the manufacturers [datasheet](https:
 </div>
 
 
-### 2.3 Individually Addressable RGB LEDs
+### 2.4 Individually Addressable RGB LEDs
 
 Some Sensor Boards come with individually addressable RGB LEDs.
 The LEDs can either be set to predefined color animations or can be set individually through the library.
