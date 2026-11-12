@@ -15,6 +15,17 @@ target_link_libraries(sensorring_base_tests PRIVATE
 )
 catch_discover_tests(sensorring_base_tests PROPERTIES LABELS "unit")
 
+if(SENSORRING_USE_USBTINGO)
+  add_executable(sensorring_usbtingo_frame_tests unit/test_USBtingoFrame.cpp)
+  target_include_directories(sensorring_usbtingo_frame_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+  target_link_libraries(sensorring_usbtingo_frame_tests PRIVATE
+    sensorring::base
+    usbtingo::usbtingo
+    Catch2::Catch2WithMain
+  )
+  catch_discover_tests(sensorring_usbtingo_frame_tests PROPERTIES LABELS "unit")
+endif()
+
 if(NOT SENSORRING_BUILD_LIB)
   return()
 endif()
