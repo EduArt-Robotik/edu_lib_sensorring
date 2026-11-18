@@ -61,6 +61,8 @@ The following examples show how to use the Sensor Ring library in your own Pytho
 
 ### Measurement Rate Examples
 
+In Python, use `MeasurementManager` to drive measurement and data fetching. The low-level C++ methods `Sensor::measure()` and `Sensor::fetch()` return `std::future<bool>` and are not exposed in Python.
+
 The first two examples are **functionally identical** — they all use the `SensorRingFactory` for auto-discovery and display the current ToF and thermal measurement rate on the command line. They differ only in the programming pattern used to receive measurements:
 
 - [Using Lambdas](https://github.com/EduArt-Robotik/edu_lib_sensorring/blob/master/apps/examples/python/minimal/using_lambdas.py) (**function-based**): Subscribes to typed device sensors and state changes using Python callbacks directly on the `MeasurementManager`

@@ -181,6 +181,7 @@ typedef ::int64_t int64_t;
  */
 
 %import "sensorring/platform/SensorringExport.hpp"
+%import "sensorring/platform/SensorringBaseExport.hpp"
 
 %ignore eduart::sensorring::math::Vector3::operator[];
 %extend eduart::sensorring::math::Vector3 {
@@ -335,6 +336,9 @@ typedef ::int64_t int64_t;
 %include "sensorring/device/action/ActionDispatcher.hpp"
 %include "sensorring/device/Device.hpp"
 
+// These methods return move-only std::future<bool>, which the bindings do not wrap.
+%ignore eduart::sensorring::device::Sensor::measure;
+%ignore eduart::sensorring::device::Sensor::fetch;
 %ignore eduart::sensorring::device::Sensor::beginMeasurementWait;
 %ignore eduart::sensorring::device::Sensor::beginDataAvailableWait;
 %include "sensorring/device/Sensor.hpp"
@@ -524,10 +528,6 @@ SensorRingFactory.enumerate = _SensorRingFactory_enumerate
 %ignore eduart::sensorring::manager::MeasurementManager::devices;
 %ignore eduart::sensorring::manager::MeasurementManager::subscribeToStateChanges;
 %include "sensorring/manager/MeasurementManager.hpp"
-
-
-%rename (LogVerbosityToString) toString(LogVerbosity);
-%include "sensorring/logger/LogVerbosity.hpp"
 
 
 %catches(std::runtime_error) eduart::sensorring::logger::Logger::log(const LogVerbosity verbosity, const std::string& msg) const;
