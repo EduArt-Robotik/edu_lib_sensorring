@@ -11,6 +11,7 @@
  @date 2025-11-18
 """
 
+import math
 import time
 import eduart.sensorring as sensorring
 
@@ -27,8 +28,8 @@ MAX_DIST = 1.0
 
 
 def depth_to_color(depth, min_d, max_d):
-  """Map a depth value to an ANSI true-color escape sequence."""
-  if depth > max_d or depth < 0:
+  """Map depth to an ANSI color, treating invalid values as maximum distance."""
+  if math.isnan(depth) or depth > max_d or depth < 0:
     depth = max_d
   elif depth < min_d:
     depth = min_d
