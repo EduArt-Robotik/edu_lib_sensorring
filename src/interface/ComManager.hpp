@@ -50,6 +50,13 @@ public:
   ComInterface* getInterface(const com::UsbTingoParams& params);
 
   /**
+   * Create or retrieve an Ethernet-gateway CAN interface with the given parameters.
+   * @param[in] params Ethernet CAN configuration parameters.
+   * @return Raw pointer to the ComInterface, or nullptr on failure.
+   */
+  ComInterface* getInterface(const com::Ethernet2CanParams& params);
+
+  /**
    * Get all communication interfaces
    * @return Vector of all communication interfaces
    */

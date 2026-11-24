@@ -14,6 +14,8 @@ std::string toString(InterfaceType type) noexcept {
     return "SocketCAN";
   case InterfaceType::UsbTingo:
     return "USBtingo";
+  case InterfaceType::Ethernet2Can:
+    return "Ethernet -> CAN";
   default:
     return "Unknown";
   }

@@ -108,6 +108,12 @@ public:
    */
   void addInterface(com::UsbTingoParams params);
 
+  /**
+   * @brief Add one CAN bus routed through an Ethernet gateway.
+   * @param[in] params Ethernet gateway address, UDP ports, and CAN bus index.
+   */
+  void addInterface(com::Ethernet2CanParams params);
+
   // ── Board expectations ──
 
   /**

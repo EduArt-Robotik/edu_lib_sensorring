@@ -8,6 +8,7 @@ endif()
 
 add_library(sensorring::base ALIAS sensorring_base)
 set_target_properties(sensorring_base PROPERTIES EXPORT_NAME base)
+target_compile_definitions(sensorring_base PRIVATE USE_ETHERNET2CAN)
 
 target_sources(sensorring_base PRIVATE
   ../interface/ComInterfaceID.cpp
@@ -15,6 +16,7 @@ target_sources(sensorring_base PRIVATE
   ../interface/ComManager.cpp
   ../interface/ComEndpoint.cpp
   ../interface/can/CanInterface.cpp
+  ../interface/can/ethernet/Ethernet2Can.cpp
   ../logger/Logger.cpp
   ../logger/LogVerbosity.cpp
   ../board/BoardDiscovery.cpp
@@ -23,6 +25,10 @@ target_sources(sensorring_base PRIVATE
   ../board/SensorBoardType.cpp
   ../device/DeviceType.cpp
 )
+
+if(WIN32)
+  target_link_libraries(sensorring_base PRIVATE ws2_32)
+endif()
 
 if(SENSORRING_USE_SOCKETCAN)
   target_sources(sensorring_base PRIVATE ../interface/can/socketcan/SocketCANFD.cpp)

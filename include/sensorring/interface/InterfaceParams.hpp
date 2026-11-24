@@ -101,6 +101,40 @@ struct SENSORRING_BASE_EXPORT UsbTingoParams : CanParams {
       : CanParams(std::move(interface_name), respond_with_brs, data_bitrate, data_sample_point) {}
 };
 
+/**
+ * @struct Ethernet2CanParams
+ * @brief Configuration for one CAN bus routed through an Ethernet gateway.
+ *
+ * Each CAN bus uses a separate UDP interface and bus index. Replies are sent
+ * to the local UDP port from which the request originated.
+ */
+struct SENSORRING_BASE_EXPORT Ethernet2CanParams : CanParams {
+  /// IPv4 address or hostname of the Ethernet gateway.
+  std::string host;
+
+  /// UDP port on the gateway.
+  unsigned short port = 5000;
+
+  /// Local UDP port; zero lets the operating system choose an ephemeral port.
+  unsigned short local_port = 0;
+
+  /// CAN bus index understood by the gateway.
+  unsigned char can_bus_index = 0;
+
+  Ethernet2CanParams() = default;
+  Ethernet2CanParams(std::string gateway_host, unsigned short gateway_port, unsigned char bus_index, unsigned short host_port = 0)
+      : CanParams(gateway_host)
+      , host(std::move(gateway_host))
+      , port(gateway_port)
+      , local_port(host_port)
+      , can_bus_index(bus_index) {}
+
+  /// Stable identifier distinguishing CAN buses on the same gateway.
+  std::string interfaceName() const {
+    return host + ":" + std::to_string(port) + "/" + std::to_string(can_bus_index) + ":" + std::to_string(local_port);
+  }
+};
+
 } // namespace com
 
 } // namespace sensorring

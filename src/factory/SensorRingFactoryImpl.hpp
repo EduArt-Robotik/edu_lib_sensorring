@@ -61,6 +61,7 @@ public:
 
   void addInterface(com::SocketCanParams params);
   void addInterface(com::UsbTingoParams params);
+  void addInterface(com::Ethernet2CanParams params);
 
   void expectBoard(board::SensorBoardParams params = {});
   void expectDevice(device::VL53L8CX_Params params);

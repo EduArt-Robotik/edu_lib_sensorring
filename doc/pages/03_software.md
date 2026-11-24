@@ -59,6 +59,24 @@ factory.addInterface(interface);
 auto sensor_ring = factory.build();
 ```
 
+An Ethernet gateway exposes each of its CAN buses as a separate interface. Add
+one `Ethernet2CanParams` per bus, using the same gateway address and UDP port but
+the corresponding `can_bus_index`:
+
+```cpp
+com::Ethernet2CanParams front_bus{ "192.168.2.20", 1234, 0  };
+com::Ethernet2CanParams rear_bus{ "192.168.2.20", 1234, 1 };
+factory.addInterface(front_bus);
+factory.addInterface(rear_bus);
+```
+
+Each UDP datagram contains the CAN bus index (1 byte), CAN identifier (4 bytes,
+big-endian), then the CAN FD frame data. The sensor-ring transport payload is
+encoded in that CAN data using the same codec as SocketCAN and USBtingo. Replies
+are received on the local UDP port used for the outgoing datagram; configure
+`local_port` when a fixed host port is required (it defaults to an OS-assigned
+ephemeral port).
+
 The returned `SensorRing` is passed to the `MeasurementManager` as before:
 
 ```cpp

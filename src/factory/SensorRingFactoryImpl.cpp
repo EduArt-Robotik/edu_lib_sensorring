@@ -19,6 +19,9 @@ com::ComInterface* openInterface(const com::InterfaceParams& params) {
   if (auto* p = dynamic_cast<const com::UsbTingoParams*>(&params)) {
     return com::ComManager::getInstance()->getInterface(*p);
   }
+  if (auto* p = dynamic_cast<const com::Ethernet2CanParams*>(&params)) {
+    return com::ComManager::getInstance()->getInterface(*p);
+  }
   return nullptr;
 }
 } // namespace
@@ -33,6 +36,10 @@ void SensorRingFactoryImpl::addInterface(com::SocketCanParams params) {
 
 void SensorRingFactoryImpl::addInterface(com::UsbTingoParams params) {
   _interfaces.push_back(InterfaceConfig{ std::make_unique<com::UsbTingoParams>(std::move(params)), {}, false });
+}
+
+void SensorRingFactoryImpl::addInterface(com::Ethernet2CanParams params) {
+  _interfaces.push_back(InterfaceConfig{ std::make_unique<com::Ethernet2CanParams>(std::move(params)), {}, false });
 }
 
 void SensorRingFactoryImpl::expectBoard(board::SensorBoardParams params) {

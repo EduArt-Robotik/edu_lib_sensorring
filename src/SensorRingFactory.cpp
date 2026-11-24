@@ -19,6 +19,10 @@ void SensorRingFactory::addInterface(com::UsbTingoParams params) {
   _impl->addInterface(std::move(params));
 }
 
+void SensorRingFactory::addInterface(com::Ethernet2CanParams params) {
+  _impl->addInterface(std::move(params));
+}
+
 void SensorRingFactory::expectBoard(board::SensorBoardParams params) {
   _impl->expectBoard(std::move(params));
 }

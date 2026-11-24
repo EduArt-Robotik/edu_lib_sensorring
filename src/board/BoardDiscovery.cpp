@@ -23,6 +23,10 @@ void BoardDiscovery::addInterface(com::UsbTingoParams params) {
   _interfaces.push_back(std::make_unique<com::UsbTingoParams>(std::move(params)));
 }
 
+void BoardDiscovery::addInterface(com::Ethernet2CanParams params) {
+  _interfaces.push_back(std::make_unique<com::Ethernet2CanParams>(std::move(params)));
+}
+
 BoardDiscovery::EnumerationMap BoardDiscovery::enumerate() {
   EnumerationMap result;
   for (const auto& params : _interfaces) {
@@ -32,6 +36,8 @@ BoardDiscovery::EnumerationMap BoardDiscovery::enumerate() {
         iface = com::ComManager::getInstance()->getInterface(*socketcan);
       } else if (const auto* usbtingo = dynamic_cast<const com::UsbTingoParams*>(params.get())) {
         iface = com::ComManager::getInstance()->getInterface(*usbtingo);
+      } else if (const auto* ethernet_can = dynamic_cast<const com::Ethernet2CanParams*>(params.get())) {
+        iface = com::ComManager::getInstance()->getInterface(*ethernet_can);
       }
       if (!iface) {
         logger::Logger::getInstance()->log(logger::LogVerbosity::Warning, "Could not open interface " + params->name + " - skipping.");

@@ -28,6 +28,7 @@ public:
 
   void addInterface(com::SocketCanParams params);
   void addInterface(com::UsbTingoParams params);
+  void addInterface(com::Ethernet2CanParams params);
 
   EnumerationMap enumerate();
   const EnumerationMap& getLatestEnumerationResult() const;

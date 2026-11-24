@@ -4,6 +4,7 @@ include(Catch)
 add_executable(sensorring_base_tests
   unit/test_BoardDiscovery.cpp
   unit/test_ComEndpoint.cpp
+  unit/test_Ethernet2CanFrame.cpp
   unit/test_SubscriberToken.cpp
   unit/test_Subscription.cpp
   unit/test_Publisher.cpp

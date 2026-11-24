@@ -27,7 +27,8 @@ namespace com {
 enum class InterfaceType {
   Undefined, ///< Type not yet assigned.
   SocketCan, ///< Linux SocketCAN interface (e.g. can0).
-  UsbTingo   ///< USBtingo CAN adapter.
+  UsbTingo,  ///< USBtingo CAN adapter.
+  Ethernet2Can ///< CAN bus routed through an Ethernet gateway.
 };
 
 /**
